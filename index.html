@@ -169,7 +169,7 @@ const ADMIN_PASSWORD='@DAYRONYT';
 // Configuración pública de Supabase. Rellena ambos valores para activar OTP real por WhatsApp.
 // Usa únicamente la Project URL y la clave publishable/anon; NUNCA pongas service_role aquí.
 const SUPABASE_URL='https://czdexeyexztvtuxxxbje.supabase.co';
-const SUPABASE_ANON_KEY=''; // Pega aquí la publishable key pública de ESTE proyecto para que funcione también en otros dispositivos.
+const SUPABASE_ANON_KEY='sb_publishable_5L57zNeKw-oHZlueEpdCgg_ojRMMbtu'; // Pega aquí la publishable key pública de ESTE proyecto para que funcione también en otros dispositivos.
 let supabaseClient=null;
 try{if(window.supabase?.createClient && /^https:\/\//i.test(SUPABASE_URL) && SUPABASE_ANON_KEY.length>20){supabaseClient=window.supabase.createClient(SUPABASE_URL,SUPABASE_ANON_KEY,{auth:{persistSession:true,autoRefreshToken:true,detectSessionInUrl:true}})}}catch(e){console.warn('Supabase no está configurado',e)}
 let pendingRegistration=null;let pendingLoginPhone='';
