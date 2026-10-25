@@ -1428,11 +1428,12 @@ modal(`<div class="rs-checkout">
   </form>
 </div>`);
 const c=document.getElementById('buyCoupon');
+if(resellerPlanActive()&&c){const section=c.closest('.rs-checkout-section');if(section)section.style.display='none'}
 if(c)c.addEventListener('input',()=>updateBuyPreview(o));
 updateBuyPreview(o);
 }function updateBuyPreview(o){
 const code=document.getElementById('buyCoupon')?.value||'';
-const coupon=couponFor(code);
+const coupon=code&&!resellerPlanActive()?couponFor(code):null;
 const discount=coupon?Number(coupon.percent)||0:0;
 const total=Number((offerDisplayPrice(o)*(1-discount/100)).toFixed(2));
 const totalEl=document.getElementById('buyTotal');
@@ -1499,7 +1500,8 @@ const g=gameById(o.gameId);
 if(!g)return toast('No encontramos el juego de esta oferta');
 const deliveryType=o.deliveryType||'player_id';
 const code=document.getElementById('buyCoupon')?.value.trim()||'';
-const coupon=code?couponFor(code):null;
+const coupon=code&&!resellerPlanActive()?couponFor(code):null;
+if(code&&resellerPlanActive())return toast('Los cupones no se aplican a los precios de revendedor.');
 if(code&&!coupon)return toast('El cupón no es válido o está inactivo');
 const basePrice=offerDisplayPrice(o);
 const amount=Number((basePrice*(1-(coupon?Number(coupon.percent)||0:0)/100)).toFixed(2));
