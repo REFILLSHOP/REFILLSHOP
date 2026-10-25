@@ -110,6 +110,47 @@
 @media(max-width:620px){.wa-otp-box{padding:16px}.margin-preview .margin-number strong{font-size:22px}}
 
 @media(max-width:560px){.offer-price-steps,.offer-profit-proof{grid-template-columns:repeat(2,minmax(0,1fr))}.offer-price-step{padding:9px}.offer-profit-proof-item{padding:9px}.offer-profit-proof-item strong{font-size:15px}.offer-profit-proof-item.is-profit strong{font-size:19px}.formula-price-row{align-items:flex-start}}
+
+/* Ajuste final solicitado: navegación solo en panel lateral y anchura móvil equilibrada */
+@media(max-width:950px){
+  .mobile-bottom{display:none!important}
+  .main{margin-left:0!important;width:100%;}
+  .page{width:100%;max-width:760px;margin-inline:auto;padding-left:18px;padding-right:18px;padding-bottom:30px}
+  .topbar{padding-left:14px;padding-right:14px}
+  .top-actions{gap:6px}
+}
+@media(max-width:640px){
+  .mobile-bottom{display:none!important}
+  .page{max-width:560px;padding:18px 16px 28px}
+  .topbar{height:70px;gap:9px}
+  .crumb small{font-size:8px;letter-spacing:.8px}
+  .crumb strong{font-size:13px}
+  .top-actions>.icon-btn{display:none}
+  .guest-auth-actions{gap:5px;display:flex}
+  .auth-top-label{display:none}
+  .top-actions .btn-small{min-height:36px;padding:8px 10px}
+  .profile-pill{padding:4px 7px 4px 4px;gap:6px;max-width:120px}
+  .profile-pill b,.profile-pill small{max-width:70px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+  .hero{grid-template-columns:minmax(0,1fr);border-radius:18px}
+  .hero-copy{padding:22px 18px}
+  .hero-art{min-height:180px;max-height:220px}
+  .hero h1{font-size:clamp(29px,7.8vw,37px);letter-spacing:-.8px}
+  .metrics{grid-template-columns:repeat(2,minmax(0,1fr));gap:8px}
+  .metric{padding:12px;gap:8px;border-radius:13px}
+  .metric-icon{width:32px;height:32px;flex:0 0 32px;font-size:15px}
+  .game-grid,.products-grid{grid-template-columns:repeat(2,minmax(0,1fr));gap:10px}
+  .game-cover{height:112px}
+  .account-layout,.account-success,.loyalty-grid{grid-template-columns:minmax(0,1fr)}
+  .form-grid,.rs-form-grid{grid-template-columns:minmax(0,1fr)}
+  .rewards-hero{grid-template-columns:minmax(0,1fr);padding:20px}
+  .coin-big{min-width:0;width:100%;padding:13px}
+  .section-head{gap:10px;margin-top:24px}
+  .section-head h2{font-size:18px}
+  .panel,.account-form-card,.account-card,.reward-card{padding:15px;border-radius:15px}
+  .modal{width:calc(100vw - 28px);max-width:500px}
+  .mobile-drawer{width:min(310px,84vw)}
+}
+@media(min-width:951px){.mobile-bottom{display:none!important}}
 </style>
 <style>
 .lio-json{white-space:pre-wrap;overflow:auto;max-height:420px;max-width:100%;background:#06111f;border:1px solid #203c59;border-radius:12px;padding:14px;color:#b8d5f6;font-size:11px;line-height:1.55;overflow-wrap:anywhere}
@@ -1223,7 +1264,7 @@ async function hydrateSupabaseAccount(authUser,{silent=true}={}){
 async function restoreSupabaseAccountSession(){if(!supabaseClient)return;try{const {data,error}=await supabaseClient.auth.getSession();if(error){console.warn('No se pudo recuperar la sesión de Supabase:',error);return}const authUser=data?.session?.user;if(authUser)await hydrateSupabaseAccount(authUser,{silent:true})}catch(err){console.warn('Restauración de sesión remota no disponible:',err)}}
 async function verifyLoginOtp(e){e.preventDefault();if(!supabaseClient||!pendingLoginPhone)return toast('No hay una solicitud de acceso activa');const token=document.getElementById('whatsappOtpCode')?.value.trim()||'';const {data,error}=await supabaseClient.auth.verifyOtp({phone:pendingLoginPhone,token,type:'sms'});if(error){toast('Código inválido o caducado: '+error.message);return}const authUser=data?.user;if(!authUser)return toast('No se pudo validar la sesión');const ok=await hydrateSupabaseAccount(authUser,{silent:false});if(!ok)return;pendingLoginPhone='';closeModal();toast('Sesión verificada. Tu perfil remoto se cargó correctamente.');}
 
-async function loginAccount(e){e.preventDefault();const rawPhone=document.getElementById('loginPhone')?.value||'',phoneE164=canonicalPhone(rawPhone),phone=normalizePhone(rawPhone),pin=document.getElementById('loginPin')?.value.trim()||'';if(!/^\+[1-9][0-9]{7,14}$/.test(phoneE164)||!/^\d{6}$/.test(pin))return toast('Escribe el teléfono con prefijo internacional y el PIN de 6 dígitos.');if(supabaseClient&&!db.users.some(x=>normalizePhone(x.phone)===phone&&!x.authUserId)){try{const {data,error}=await supabaseClient.auth.signInWithPassword({phone:phoneE164,password:pin});if(!error&&data?.user){const ok=await hydrateSupabaseAccount(data.user,{silent:false});if(ok){toast('✓ Sesión iniciada. Cuenta y Wallet cargadas desde Supabase.');return}try{await supabaseClient.auth.signOut({scope:'local'})}catch{}return}}catch(err){console.warn('Inicio de sesión remoto no disponible:',err)}}const local=db.users.find(x=>normalizePhone(x.phone)===phone);if(!local)return toast('No hay ninguna cuenta con ese número en este navegador. Si te registraste en otro teléfono, navegador o enlace, esa cuenta no está aquí: crea una nueva o pide ayuda a soporte.');if(local.active===false)return toast('Esta cuenta está desactivada. Contacta con soporte.');if(local.authUserId||!local.pinHash)return toast('Esta cuenta es de la versión anterior. Pide al administrador que restablezca tu PIN.');try{const cands=await pinHashCandidates(pin);if(!cands.includes(local.pinHash))return toast('PIN incorrecto. Si lo olvidaste, pide al administrador que lo restablezca.');activateAccount(local);persist();render();toast('Sesión iniciada.');navigate('inicio')}catch{toast('No se pudo comprobar el PIN. Inténtalo de nuevo.')}}
+async function loginAccount(e){e.preventDefault();const rawPhone=document.getElementById('loginPhone')?.value||'',phoneE164=canonicalPhone(rawPhone),phone=normalizePhone(rawPhone),pin=document.getElementById('loginPin')?.value.trim()||'';if(!/^\+[1-9][0-9]{7,14}$/.test(phoneE164)||!/^\d{6}$/.test(pin))return toast('Escribe el teléfono con prefijo internacional y el PIN de 6 dígitos.');if(supabaseClient){try{const {data,error}=await supabaseClient.auth.signInWithPassword({phone:phoneE164,password:pin});if(!error&&data?.user){const ok=await hydrateSupabaseAccount(data.user,{silent:false});if(ok){toast('✓ Sesión iniciada. Cuenta y Wallet cargadas desde Supabase.');return}try{await supabaseClient.auth.signOut({scope:'local'})}catch{}return}}catch(err){console.warn('Inicio de sesión remoto no disponible:',err)}}const local=db.users.find(x=>normalizePhone(x.phone)===phone);if(!local)return toast('No hay ninguna cuenta con ese número en este navegador. Si te registraste en otro teléfono, navegador o enlace, esa cuenta no está aquí: crea una nueva o pide ayuda a soporte.');if(local.active===false)return toast('Esta cuenta está desactivada. Contacta con soporte.');if(local.authUserId||!local.pinHash)return toast('Esta cuenta es de la versión anterior. Pide al administrador que restablezca tu PIN.');try{const cands=await pinHashCandidates(pin);if(!cands.includes(local.pinHash))return toast('PIN incorrecto. Si lo olvidaste, pide al administrador que lo restablezca.');activateAccount(local);persist();render();toast('Sesión iniciada.');navigate('inicio')}catch{toast('No se pudo comprobar el PIN. Inténtalo de nuevo.')}}
 async function logoutAccount(){if(supabaseClient){try{await supabaseClient.auth.signOut({scope:'local'})}catch(err){console.warn('No se pudo cerrar la sesión remota local:',err)}}try{sessionStorage.removeItem('REFILLS_CUSTOMER_SESSION')}catch{};persist();db.sessionUserId=null;db.profile={id:'guest',name:'Invitado',phone:''};db.balance=0;db.orders=[];db.deposits=[];db.ledger=[];db.coins=0;db.coinLedger=[];db.eligibleSpend=0;db.referralRewardPaid=false;db.rouletteHistory=[];persist();updateHeader();render();toast('Sesión cerrada. Tu cuenta sigue guardada para volver a entrar.')}
 async function saveWhatsappNotifications(e){e.preventDefault();const u=currentUser();if(!u)return toast('Inicia sesión');const enabled=Boolean(document.getElementById('accountWhatsappNotifications')?.checked);u.whatsappNotifications=enabled;persist();if(supabaseClient&&u.authUserId){const {error}=await supabaseClient.from('profiles').update({whatsapp_notifications:enabled,whatsapp_notifications_updated_at:new Date().toISOString()}).eq('user_id',u.authUserId);if(error){toast('Preferencia guardada localmente; no se pudo sincronizar con Supabase: '+error.message);return}}render();toast(enabled?'Avisos de WhatsApp activados':'Avisos de WhatsApp desactivados')}
 
