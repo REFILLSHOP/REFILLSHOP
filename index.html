@@ -151,6 +151,17 @@
   .mobile-drawer{width:min(310px,84vw)}
 }
 @media(min-width:951px){.mobile-bottom{display:none!important}}
+
+/* V5 MOBILE CLEANUP: use the drawer only; remove the duplicate bottom navigation. */
+@media (max-width: 950px) {
+  nav.mobile-bottom, .mobile-bottom { display: none !important; visibility: hidden !important; pointer-events: none !important; height: 0 !important; min-height: 0 !important; padding: 0 !important; border: 0 !important; }
+  .page { padding-bottom: 34px !important; }
+  .footer { padding-bottom: 20px !important; }
+  .toast { bottom: 22px !important; }
+}
+/* Keep the mobile drawer's icon treatment consistent with the desktop sidebar; no emoji decoration. */
+.mobile-drawer-nav button > span:first-child { font-family: inherit !important; font-emoji: text; font-size: 17px !important; font-weight: 500 !important; }
+
 </style>
 <style>
 .lio-json{white-space:pre-wrap;overflow:auto;max-height:420px;max-width:100%;background:#06111f;border:1px solid #203c59;border-radius:12px;padding:14px;color:#b8d5f6;font-size:11px;line-height:1.55;overflow-wrap:anywhere}
@@ -1052,14 +1063,6 @@ button,input,select,textarea{max-width:100%;min-width:0}
     <button data-route="ayuda" onclick="toggleMobileMenu(false)"><span>ⓘ</span>Centro de ayuda</button>
   </nav>
 </aside>
-<nav class="mobile-bottom" aria-label="Navegación móvil">
-  <button data-route="inicio" class="active"><span>⌂</span><span>Inicio</span></button>
-  <button data-route="juegos"><span>▦</span><span>Catálogo</span></button>
-  <button data-route="ofertas"><span>✦</span><span>Ofertas</span></button>
-  <button data-route="wallet"><span>◈</span><span>Wallet</span></button>
-  <button data-route="planes"><span>♜</span><span>Planes</span></button>
-  <button data-route="cuenta"><span>♙</span><span>Cuenta</span></button>
-</nav>
 <div id="modalHost"></div><div id="toast" class="toast" role="status"></div>
 <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2/dist/umd/supabase.js" crossorigin="anonymous"></script>
 <script>
