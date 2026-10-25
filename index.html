@@ -110,58 +110,6 @@
 @media(max-width:620px){.wa-otp-box{padding:16px}.margin-preview .margin-number strong{font-size:22px}}
 
 @media(max-width:560px){.offer-price-steps,.offer-profit-proof{grid-template-columns:repeat(2,minmax(0,1fr))}.offer-price-step{padding:9px}.offer-profit-proof-item{padding:9px}.offer-profit-proof-item strong{font-size:15px}.offer-profit-proof-item.is-profit strong{font-size:19px}.formula-price-row{align-items:flex-start}}
-
-/* Ajuste final solicitado: navegación solo en panel lateral y anchura móvil equilibrada */
-@media(max-width:950px){
-  .mobile-bottom{display:none!important}
-  .main{margin-left:0!important;width:100%;}
-  .page{width:100%;max-width:760px;margin-inline:auto;padding-left:18px;padding-right:18px;padding-bottom:30px}
-  .topbar{padding-left:14px;padding-right:14px}
-  .top-actions{gap:6px}
-}
-@media(max-width:640px){
-  .mobile-bottom{display:none!important}
-  .page{max-width:560px;padding:18px 16px 28px}
-  .topbar{height:70px;gap:9px}
-  .crumb small{font-size:8px;letter-spacing:.8px}
-  .crumb strong{font-size:13px}
-  .top-actions>.icon-btn{display:none}
-  .guest-auth-actions{gap:5px;display:flex}
-  .auth-top-label{display:none}
-  .top-actions .btn-small{min-height:36px;padding:8px 10px}
-  .profile-pill{padding:4px 7px 4px 4px;gap:6px;max-width:120px}
-  .profile-pill b,.profile-pill small{max-width:70px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
-  .hero{grid-template-columns:minmax(0,1fr);border-radius:18px}
-  .hero-copy{padding:22px 18px}
-  .hero-art{min-height:180px;max-height:220px}
-  .hero h1{font-size:clamp(29px,7.8vw,37px);letter-spacing:-.8px}
-  .metrics{grid-template-columns:repeat(2,minmax(0,1fr));gap:8px}
-  .metric{padding:12px;gap:8px;border-radius:13px}
-  .metric-icon{width:32px;height:32px;flex:0 0 32px;font-size:15px}
-  .game-grid,.products-grid{grid-template-columns:repeat(2,minmax(0,1fr));gap:10px}
-  .game-cover{height:112px}
-  .account-layout,.account-success,.loyalty-grid{grid-template-columns:minmax(0,1fr)}
-  .form-grid,.rs-form-grid{grid-template-columns:minmax(0,1fr)}
-  .rewards-hero{grid-template-columns:minmax(0,1fr);padding:20px}
-  .coin-big{min-width:0;width:100%;padding:13px}
-  .section-head{gap:10px;margin-top:24px}
-  .section-head h2{font-size:18px}
-  .panel,.account-form-card,.account-card,.reward-card{padding:15px;border-radius:15px}
-  .modal{width:calc(100vw - 28px);max-width:500px}
-  .mobile-drawer{width:min(310px,84vw)}
-}
-@media(min-width:951px){.mobile-bottom{display:none!important}}
-
-/* V5 MOBILE CLEANUP: use the drawer only; remove the duplicate bottom navigation. */
-@media (max-width: 950px) {
-  nav.mobile-bottom, .mobile-bottom { display: none !important; visibility: hidden !important; pointer-events: none !important; height: 0 !important; min-height: 0 !important; padding: 0 !important; border: 0 !important; }
-  .page { padding-bottom: 34px !important; }
-  .footer { padding-bottom: 20px !important; }
-  .toast { bottom: 22px !important; }
-}
-/* Keep the mobile drawer's icon treatment consistent with the desktop sidebar; no emoji decoration. */
-.mobile-drawer-nav button > span:first-child { font-family: inherit !important; font-emoji: text; font-size: 17px !important; font-weight: 500 !important; }
-
 </style>
 <style>
 .lio-json{white-space:pre-wrap;overflow:auto;max-height:420px;max-width:100%;background:#06111f;border:1px solid #203c59;border-radius:12px;padding:14px;color:#b8d5f6;font-size:11px;line-height:1.55;overflow-wrap:anywhere}
@@ -910,92 +858,150 @@ button:disabled{opacity:.45}
 .referral-invited{margin-top:12px}
 @media(max-width:900px){.community-grid{grid-template-columns:1fr}}
 @media(prefers-reduced-motion:reduce){*{animation:none!important;transition:none!important;scroll-behavior:auto!important}}
-</style>
 
-<style id="refills-mobile-structural-fix">
-/* Corrección estructural móvil: evita desbordamientos y prioriza el formulario */
-html{width:100%;max-width:100%;overflow-x:clip}
-body{width:100%;max-width:100%;overflow-x:clip}
-img,svg,video,canvas{max-width:100%;height:auto}
-button,input,select,textarea{max-width:100%;min-width:0}
-#view,.page,.app-shell,.topbar,.footer{min-width:0;max-width:100%}
-@media screen and (max-width:760px){
-  .sidebar{display:none!important}
-  .app-shell{margin:0!important;width:100%!important;max-width:100%!important;min-width:0!important}
-  .topbar{position:relative!important;top:auto!important;height:auto!important;min-height:62px!important;padding:10px 12px!important;gap:10px!important;align-items:center!important;flex-wrap:wrap!important}
-  .crumb{min-width:0!important;flex:1 1 125px!important}
-  .crumb small{font-size:8px!important;letter-spacing:.7px!important;white-space:normal!important}
-  .crumb strong{font-size:14px!important;overflow-wrap:anywhere}
-  .top-actions{display:flex!important;align-items:center!important;justify-content:flex-end!important;gap:6px!important;flex:0 1 auto!important;min-width:0!important;flex-wrap:wrap!important}
-  .top-actions .icon-btn{width:34px!important;height:34px!important;flex:0 0 34px!important}
-  .guest-auth-actions{display:flex!important;gap:5px!important;flex-wrap:wrap!important;justify-content:flex-end!important}
-  .guest-auth-actions .btn{font-size:11px!important;padding:8px 9px!important;white-space:normal!important}
-  .page,#view.page{padding:17px 12px 88px!important;width:100%!important;max-width:100%!important;margin:0 auto!important;overflow:visible!important}
-  .page-title{font-size:clamp(23px,7vw,32px)!important;line-height:1.12!important;overflow-wrap:anywhere}
-  .page-desc{font-size:13px!important;overflow-wrap:anywhere}
-  .page-head-row{display:flex!important;flex-direction:column!important;align-items:stretch!important;gap:12px!important}
-  .page-head-row>*{min-width:0!important;width:100%!important}
-  .panel,.card,.subsection,.account-form-card{min-width:0!important;max-width:100%!important}
-  .metrics,.home-summary,.products-grid,.game-grid,.plan-cards-grid,.community-grid,.loyalty-grid,.raffle-grid,.reseller-shortcut-grid,.admin-content-grid,.admin-form-actions,.form-grid,.rs-form-grid,.rates-global-grid,.rates-preview-grid,.offer-admin-grid,.offer-admin-controls-grid,.auth-rate-grid,.exchange-grid{grid-template-columns:minmax(0,1fr)!important;width:100%!important;min-width:0!important}
-  .metrics.home-summary{grid-template-columns:repeat(2,minmax(0,1fr))!important;gap:9px!important}
-  .metrics.home-summary .metric:last-child{grid-column:1/-1!important}
-  .grid,.grid-2,.grid-3,.grid-4{grid-template-columns:minmax(0,1fr)!important}
-  .auth-page{display:flex!important;flex-direction:column!important;gap:14px!important;width:100%!important;max-width:520px!important;margin:0 auto!important;min-width:0!important;align-items:stretch!important}
-  /* Formulario primero; panel informativo debajo en login y registro */
-  .auth-page>.auth-form-card,.auth-page>.account-form-card{order:1!important;width:100%!important;min-width:0!important;max-width:100%!important;margin:0!important;padding:20px 16px!important;border-radius:18px!important}
-  .auth-page>.auth-story{order:2!important;width:100%!important;min-width:0!important;max-width:100%!important;min-height:0!important;height:auto!important;padding:20px 16px!important;gap:18px!important;border-radius:18px!important}
-  .auth-story-main h1{font-size:clamp(25px,7vw,34px)!important;line-height:1.12!important;overflow-wrap:anywhere}
-  .auth-story-main p{font-size:13px!important}
-  .auth-benefits{grid-template-columns:minmax(0,1fr)!important;gap:10px!important}
-  .auth-benefits>div{align-items:center!important}
-  .auth-live-rates{width:100%!important;min-width:0!important}
-  .auth-form-title{font-size:27px!important;line-height:1.15!important}
-  .auth-form-subtitle{font-size:13px!important}
-  .field{width:100%!important;min-width:0!important}
-  .field input,.field select,.field textarea,input,select,textarea{width:100%;min-width:0}
-  .auth-submit{width:100%!important}
-  .footer{display:flex!important;flex-direction:column!important;gap:6px!important;padding:18px 14px 88px!important;font-size:10px!important;overflow-wrap:anywhere}
-  .mobile-bottom{position:fixed!important;z-index:999!important;left:0!important;right:0!important;bottom:0!important;width:100%!important;max-width:100%!important;padding:6px 4px calc(6px + env(safe-area-inset-bottom))!important;display:flex!important;justify-content:space-around!important;gap:2px!important;overflow-x:auto!important}
-  .mobile-bottom button{flex:1 1 0!important;min-width:0!important;padding:6px 2px!important;font-size:10px!important;white-space:normal!important}
-  .mobile-bottom button span{max-width:100%;overflow-wrap:anywhere}
-  table{display:block!important;width:100%!important;max-width:100%!important;overflow-x:auto!important;-webkit-overflow-scrolling:touch!important}
-  .table-wrap,.table-responsive,.list-table-wrap{max-width:100%!important;overflow-x:auto!important}
-  .list-table{min-width:620px!important}
-  .modal,.modal-card,.modal-content,.dialog{width:calc(100vw - 24px)!important;max-width:calc(100vw - 24px)!important;min-width:0!important;max-height:calc(100dvh - 28px)!important;overflow-y:auto!important;box-sizing:border-box!important}
-  .modal-backdrop{padding:12px!important;align-items:center!important}
-  .hero,.game-hero,.rewards-hero,.reseller-hero{display:flex!important;flex-direction:column!important;gap:16px!important;min-width:0!important;width:100%!important}
-  .hero-buttons,.reseller-hero-actions{display:flex!important;flex-wrap:wrap!important;gap:8px!important}
-  .hero-buttons .btn,.reseller-hero-actions .btn{flex:1 1 140px!important}
-  .wallet-layout,.account-layout{display:flex!important;flex-direction:column!important;gap:14px!important}
-  .wallet-layout>* ,.account-layout>*{width:100%!important;min-width:0!important}
-  .filter-row{display:flex!important;flex-wrap:wrap!important;gap:7px!important}
-  .filter-row>*{max-width:100%!important}
-  .admin-content-grid>* ,.form-grid>* ,.rs-form-grid>*{min-width:0!important;width:100%!important}
+
+/* REFILLS SHOP — mobile-first layout refinement (presentation only) */
+@media(max-width:900px){
+  html{overflow-x:hidden;scroll-padding-top:76px}
+  body{overflow-x:hidden;-webkit-text-size-adjust:100%}
+  .app-shell,.main,#view,.page{width:100%;min-width:0;max-width:100%}
+  .main{margin:0!important}
+  .topbar{position:sticky;top:0;height:68px;padding:0 16px;gap:10px;z-index:40}
+  .crumb{min-width:0;flex:1}
+  .crumb small{font-size:8px;letter-spacing:1.1px;white-space:nowrap}
+  .crumb strong{font-size:14px;line-height:1.2;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;max-width:55vw}
+  .top-actions{min-width:0;gap:7px;flex-shrink:0}
+  .profile-pill{max-width:45vw;min-width:0}
+  .page{padding:22px 18px calc(108px + env(safe-area-inset-bottom));}
+  .page-head-row{gap:12px}
+  .page-title{overflow-wrap:anywhere}
+  .page-desc{line-height:1.65}
+  .section-head{gap:10px;margin:27px 0 15px}
+  .hero,.reseller-hero,.offers-intro,.rewards-hero,.game-hero,.support-card{border-radius:20px}
+  .hero{grid-template-columns:minmax(0,1fr);min-height:0}
+  .hero-copy{padding:28px 24px}
+  .hero h1{font-size:clamp(34px,7vw,46px);line-height:1.02;overflow-wrap:anywhere}
+  .hero-copy p{font-size:13px;line-height:1.7}
+  .hero-art{min-width:0}
+  .hero-buttons{gap:9px}
+  .hero-buttons .btn{flex:1 1 150px;min-height:44px}
+  .metrics{grid-template-columns:repeat(2,minmax(0,1fr));gap:10px}
+  .metric{min-width:0;padding:13px 12px;gap:9px}
+  .metric>div:last-child{min-width:0}
+  .metric strong{white-space:normal;overflow-wrap:anywhere;line-height:1.25}
+  .reseller-shortcut-grid{grid-template-columns:repeat(2,minmax(0,1fr))}
+  .game-grid,.products-grid{grid-template-columns:repeat(2,minmax(0,1fr));gap:12px}
+  .game-card,.product-card,.plan-card,.loyalty-item,.panel,.account-card,.account-form-card,.reward-card{min-width:0}
+  .game-info p,.product-card p{overflow-wrap:anywhere}
+  .product-card-body{padding:14px}
+  .product-art{height:118px}
+  .product-card h3{overflow-wrap:anywhere}
+  .product-price-row{flex-wrap:wrap;gap:5px}
+  .price-alt>div{justify-content:flex-start}
+  .wallet-layout,.account-layout,.account-success,.admin-content-grid,.community-grid{grid-template-columns:minmax(0,1fr)}
+  .admin-shell{grid-template-columns:minmax(0,1fr);gap:12px}
+  .admin-nav{position:static;display:flex;gap:6px;overflow-x:auto;overscroll-behavior-x:contain;padding:8px;scrollbar-width:thin}
+  .admin-nav button{flex:0 0 auto;white-space:nowrap;width:auto;margin:0;padding:10px 12px}
+  .admin-content{min-width:0;width:100%}
+  .admin-stats{grid-template-columns:repeat(2,minmax(0,1fr))}
+  .form-grid{grid-template-columns:repeat(2,minmax(0,1fr));gap:10px}
+  .field input,.field select,.field textarea{font-size:16px;min-height:44px}
+  .btn,button.filter-chip,.filter-chip{min-height:40px}
+  .table-scroll{max-width:100%;overflow-x:auto;-webkit-overflow-scrolling:touch}
+  .list-table{min-width:570px}
+  .modal-backdrop{align-items:end;padding:10px}
+  .modal{width:100%;max-width:560px;max-height:min(88dvh,850px);border-radius:22px 22px 16px 16px;padding:23px 19px calc(20px + env(safe-area-inset-bottom))}
+  .footer{padding:18px;gap:8px}
+  .mobile-bottom{grid-template-columns:repeat(5,minmax(0,1fr));gap:4px;padding:7px 8px calc(7px + env(safe-area-inset-bottom));background:rgba(4,10,22,.96);border-top:1px solid #25416b;box-shadow:0 -8px 28px #0004;backdrop-filter:blur(22px)}
+  .mobile-bottom button{min-width:0;min-height:48px;gap:4px;border-radius:12px;font-size:9px;line-height:1.1;white-space:normal}
+  .mobile-bottom button span:first-child{display:grid;place-items:center;width:29px;height:25px;border-radius:9px;font-size:18px}
+  .mobile-bottom button.active span:first-child{background:#0b2a55}
+  .mobile-bottom button span:last-child{max-width:100%;overflow:hidden;text-overflow:ellipsis}
 }
-@media screen and (max-width:390px){
-  .page,#view.page{padding-left:9px!important;padding-right:9px!important}
-  .topbar{padding-left:9px!important;padding-right:9px!important}
-  .guest-auth-actions .btn{padding:7px 6px!important;font-size:10px!important}
-  .metrics.home-summary{grid-template-columns:minmax(0,1fr)!important}
-  .metrics.home-summary .metric:last-child{grid-column:auto!important}
-  .auth-page>.auth-form-card,.auth-page>.account-form-card{padding:17px 13px!important}
+@media(max-width:560px){
+  .topbar{height:64px;padding:0 12px}
+  .crumb strong{max-width:48vw;font-size:13px}
+  .page{padding:18px 13px calc(104px + env(safe-area-inset-bottom))}
+  .page-title{font-size:clamp(25px,7vw,31px);letter-spacing:-.7px}
+  .page-desc{font-size:12px}
+  .eyebrow{letter-spacing:1.4px}
+  .hero{min-height:0;border-radius:19px}
+  .hero-copy{padding:24px 19px}
+  .hero h1{font-size:clamp(32px,9vw,41px);letter-spacing:-1.4px;margin:18px 0 12px}
+  .hero-kicker{font-size:8px;letter-spacing:.7px;max-width:100%;flex-wrap:wrap}
+  .hero-copy p{font-size:12px}
+  .hero-art{left:10%;opacity:.28}
+  .hero-buttons .btn{flex:1 1 100%;width:100%}
+  .metrics{gap:8px}
+  .metric{padding:11px 9px;border-radius:13px;align-items:flex-start}
+  .metric-icon{width:30px;height:30px;flex-basis:30px;border-radius:9px;font-size:14px}
+  .metric-label{font-size:8px;line-height:1.35}
+  .metric strong{font-size:12px}
+  .metric small{font-size:9px;line-height:1.3}
+  .section-head h2{font-size:18px}
+  .game-grid,.products-grid{gap:9px}
+  .game-cover{height:105px}
+  .game-info{padding:10px}
+  .game-info p{min-height:0;margin-bottom:10px}
+  .game-foot{gap:6px}
+  .game-foot button{min-width:0}
+  .product-art{height:94px}
+  .product-card-body{padding:11px}
+  .product-meta{font-size:7px;letter-spacing:.2px;flex-wrap:wrap}
+  .product-watermark{font-size:15px;overflow-wrap:anywhere}
+  .product-game-pill{left:8px;bottom:8px;max-width:80%;font-size:8px}
+  .product-card h3{font-size:12px;line-height:1.35}
+  .product-card p{font-size:10px;min-height:0;max-height:none;margin-bottom:10px}
+  .product-price-row .price-usd{font-size:20px!important}
+  .usd-pill{font-size:8px}
+  .price-alt{font-size:9px;margin-top:8px;padding:8px}
+  .price-alt>span{font-size:7px}
+  .price-alt b{font-size:8px;padding:4px 5px}
+  .product-card .btn{font-size:9px;padding:9px 8px;min-height:39px;gap:5px}
+  .offers-intro{padding:19px}
+  .offers-intro .page-title{font-size:29px}
+  .offers-intro-stat{min-width:0;width:100%;padding:13px 15px}
+  .offers-intro-stat strong{font-size:31px}
+  .reseller-hero{padding:21px 16px}
+  .reseller-hero h1{font-size:clamp(29px,8vw,35px)}
+  .reseller-shortcut-grid{grid-template-columns:repeat(2,minmax(0,1fr));gap:8px}
+  .reseller-shortcut-grid button{min-width:0}
+  .form-grid{grid-template-columns:minmax(0,1fr);gap:0}
+  .panel,.account-form-card,.account-card,.reward-card{padding:15px}
+  .wallet-total{padding:19px}
+  .wallet-total strong{font-size:34px}
+  .wallet-visual-card{padding:17px!important}
+  .wallet-card-number{font-size:clamp(14px,4.2vw,18px);letter-spacing:.8px}
+  .wallet-card-owner-row{gap:8px}
+  .wallet-card-owner-row>div:first-child b{font-size:11px}
+  .wallet-card-balance strong{font-size:23px}
+  .plan-cards-grid{grid-template-columns:minmax(0,1fr);gap:12px}
+  .plan-card{padding:20px}
+  .loyalty-grid{grid-template-columns:minmax(0,1fr)}
+  .admin-stats{gap:8px}
+  .admin-stat{padding:11px}
+  .admin-stat strong{font-size:19px;overflow-wrap:anywhere}
+  .admin-nav button{font-size:10px;padding:9px 10px}
+  .admin-action-row .btn{flex:1 1 auto}
+  .support-card{padding:19px}
+  .support-card h2{font-size:21px}
+  .rate-mini{grid-template-columns:repeat(3,minmax(0,1fr))}
+  .rate-mini div{min-width:0;padding:8px 6px}
+  .rate-mini b{font-size:9px;overflow-wrap:anywhere}
+  .footer{padding:15px 13px;font-size:9px}
+}
+@media(max-width:360px){
+  .page{padding-left:10px;padding-right:10px}
+  .topbar{padding:0 9px}
+  .crumb strong{max-width:44vw}
+  .game-grid,.products-grid{gap:7px}
+  .game-info,.product-card-body{padding:9px}
+  .product-price-row .price-usd{font-size:18px!important}
+  .mobile-bottom{padding-left:5px;padding-right:5px}
+  .mobile-bottom button{font-size:8px}
 }
 
-/* Mobile layout refinement: full-width canvas and real slide-out navigation */
-.mobile-menu-trigger{display:none;flex:0 0 42px;width:42px;height:42px;border:1px solid var(--line);border-radius:12px;background:#0b2039;color:#e4f2ff;font-size:22px;align-items:center;justify-content:center}
-.mobile-menu-backdrop{display:none;position:fixed;inset:0;background:rgba(0,7,18,.68);backdrop-filter:blur(3px);z-index:80}
-.mobile-drawer{display:none;position:fixed;z-index:81;inset:0 auto 0 0;width:min(340px,88vw);padding:18px 15px calc(22px + env(safe-area-inset-bottom));overflow-y:auto;background:#07182d;border-right:1px solid #254363;box-shadow:18px 0 60px #0007;transform:translateX(-105%);transition:transform .22s ease}
-.mobile-drawer.open{transform:translateX(0)}.mobile-menu-backdrop.open{display:block}
-.mobile-drawer-head{display:flex;align-items:center;justify-content:space-between;padding:4px 3px 22px;border-bottom:1px solid #ffffff13;margin-bottom:8px}
-.mobile-drawer-brand{display:flex;align-items:center;gap:11px}.mobile-drawer-brand b{display:block;font-size:13px;letter-spacing:.8px}.mobile-drawer-brand small{display:block;color:#86a3c8;font-size:10px;margin-top:3px}
-.mobile-drawer-close{width:38px;height:38px;border-radius:11px;background:#ffffff0a;border:1px solid #ffffff1a;color:#dbeaff;font-size:27px;line-height:1}
-.mobile-drawer-label{padding:16px 10px 7px;color:#7190b6;font-size:10px;font-weight:900;letter-spacing:1.4px}
-.mobile-drawer-nav{display:grid;gap:5px}.mobile-drawer-nav button{display:flex;align-items:center;gap:12px;width:100%;min-height:45px;padding:10px 12px;border:1px solid transparent;border-radius:12px;background:transparent;color:#c0d5f0;text-align:left;font-size:13px;font-weight:650}.mobile-drawer-nav button span{display:inline-grid;place-items:center;width:25px;font-size:18px;color:#7fc1ff}.mobile-drawer-nav button:active,.mobile-drawer-nav button:hover{background:#1377e51e;border-color:#348eff30}
-@media(max-width:950px){.mobile-menu-trigger{display:flex}.mobile-drawer{display:block}.topbar{justify-content:flex-start;gap:10px;padding-left:12px;padding-right:12px}.crumb{min-width:0;flex:1}.crumb small{white-space:nowrap;overflow:hidden;text-overflow:ellipsis}.top-actions{flex:0 0 auto}.page{width:100%;max-width:none;padding-left:clamp(14px,3.2vw,24px);padding-right:clamp(14px,3.2vw,24px)}.app-shell,.main{width:100%;max-width:100%;overflow-x:clip}.page>*{min-width:0;max-width:100%}}
-@media(max-width:640px){.topbar{gap:8px}.mobile-menu-trigger{width:44px;height:44px;flex-basis:44px;font-size:23px}.page{padding-left:14px;padding-right:14px}.hero{grid-template-columns:minmax(0,1fr);border-radius:20px}.hero-copy{padding:25px 20px}.hero h1{font-size:clamp(31px,8vw,42px);letter-spacing:-1.2px;overflow-wrap:anywhere}.hero-copy p{max-width:none}.metrics{grid-template-columns:repeat(2,minmax(0,1fr))}.metric{min-width:0}.metric strong{white-space:normal;overflow-wrap:anywhere}.game-grid,.products-grid{grid-template-columns:repeat(2,minmax(0,1fr));gap:10px}.game-card,.product-card{min-width:0}.section-head,.page-head-row{align-items:flex-start;flex-wrap:wrap}.form-grid{grid-template-columns:minmax(0,1fr)}.login-card{width:100%;max-width:none;margin:22px auto;padding:22px 18px}.mobile-bottom{grid-template-columns:repeat(5,minmax(0,1fr));padding-left:5px;padding-right:5px}.mobile-bottom button{min-width:0}.mobile-bottom button span:last-child{font-size:9px}.footer{display:grid;grid-template-columns:minmax(0,1fr);overflow-wrap:anywhere}}
-@media(min-width:951px){.mobile-menu-trigger,.mobile-drawer,.mobile-menu-backdrop{display:none!important}}
 </style>
-
 </head>
 <body>
 <div class="app-shell">
@@ -1025,7 +1031,6 @@ button,input,select,textarea{max-width:100%;min-width:0}
   </aside>
   <div class="main">
     <header class="topbar">
-      <button class="mobile-menu-trigger" type="button" aria-label="Abrir menú" aria-expanded="false" onclick="toggleMobileMenu()">☰</button>
       <div class="crumb"><small>REFILLS SHOP / DIGITAL STORE</small><strong id="pageCrumb">Inicio</strong></div>
       <div class="top-actions">
         <button class="icon-btn" title="Buscar juegos" onclick="navigate('juegos')">⌕</button>
@@ -1041,28 +1046,14 @@ button,input,select,textarea{max-width:100%;min-width:0}
     <footer class="footer"><span>© 2026 REFILLS SHOP · Plataforma de recargas digitales</span><span>Compras de recargas con Wallet · Tasas administradas por REFILLS SHOP</span></footer>
   </div>
 </div>
-<div class="mobile-menu-backdrop" id="mobileMenuBackdrop" onclick="toggleMobileMenu(false)" aria-hidden="true"></div>
-<aside class="mobile-drawer" id="mobileDrawer" aria-label="Menú principal" aria-hidden="true">
-  <div class="mobile-drawer-head"><div class="mobile-drawer-brand"><span class="brand-mark">R</span><span><b>REFILLS SHOP</b><small>Tienda digital</small></span></div><button type="button" class="mobile-drawer-close" onclick="toggleMobileMenu(false)" aria-label="Cerrar menú">×</button></div>
-  <div class="mobile-drawer-label">TIENDA REFILLS</div>
-  <nav class="mobile-drawer-nav">
-    <button data-route="inicio" onclick="toggleMobileMenu(false)"><span>⌂</span>Panel principal</button>
-    <button data-route="juegos" onclick="toggleMobileMenu(false)"><span>▦</span>Catálogo de recargas</button>
-    <button data-route="ofertas" onclick="toggleMobileMenu(false)"><span>✦</span>Recargas y precios</button>
-    <button data-route="planes" onclick="toggleMobileMenu(false)"><span>♜</span>Planes cliente / revendedor</button>
-    <button data-route="sorteos" onclick="toggleMobileMenu(false)"><span>✧</span>Sorteos</button>
-    <button data-route="wallet" onclick="toggleMobileMenu(false)"><span>◈</span>Wallet USD</button>
-    <button data-route="pedidos" onclick="toggleMobileMenu(false)"><span>▤</span>Historial de recargas</button>
-    <button data-route="cuenta" onclick="toggleMobileMenu(false)"><span>♙</span>Mi perfil / iniciar sesión</button>
-  </nav>
-  <div class="mobile-drawer-label">TU OPERACIÓN</div>
-  <nav class="mobile-drawer-nav">
-    <button data-route="movimientos" onclick="toggleMobileMenu(false)"><span>↕</span>Movimientos Wallet</button>
-    <button data-route="refillcoins" onclick="toggleMobileMenu(false)"><span>◆</span>RefillCoins</button>
-    <button data-route="ruleta" onclick="toggleMobileMenu(false)"><span>◎</span>Ruleta de premios</button>
-    <button data-route="ayuda" onclick="toggleMobileMenu(false)"><span>ⓘ</span>Centro de ayuda</button>
-  </nav>
-</aside>
+<nav class="mobile-bottom" aria-label="Navegación móvil">
+  <button data-route="inicio" class="active"><span>⌂</span><span>Inicio</span></button>
+  <button data-route="juegos"><span>▦</span><span>Catálogo</span></button>
+  <button data-route="ofertas"><span>✦</span><span>Ofertas</span></button>
+  <button data-route="wallet"><span>◈</span><span>Wallet</span></button>
+  <button data-route="planes"><span>♜</span><span>Planes</span></button>
+  <button data-route="cuenta"><span>♙</span><span>Cuenta</span></button>
+</nav>
 <div id="modalHost"></div><div id="toast" class="toast" role="status"></div>
 <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2/dist/umd/supabase.js" crossorigin="anonymous"></script>
 <script>
@@ -1223,19 +1214,52 @@ function canonicalPhone(v){const raw=String(v||'').trim(),digits=raw.replace(/[^
 function normalizePhone(v){return canonicalPhone(v).replace(/[^0-9]/g,'')}
 function newReferralCode(){let code;do{code='REF'+Math.random().toString(36).slice(2,8).toUpperCase()}while(db.users.some(u=>u.referralCode===code));return code}
 function syncCurrentAccount(){const u=currentUser();if(!u)return;u.name=db.profile.name||u.name;u.balance=Number(db.balance||0);u.orders=structuredClone(db.orders||[]);u.deposits=structuredClone(db.deposits||[]);u.ledger=structuredClone(db.ledger||[]);u.coins=Number(db.coins||0);u.coinLedger=structuredClone(db.coinLedger||[]);u.eligibleSpend=Number(db.eligibleSpend||0);u.referralRewardPaid=Boolean(db.referralRewardPaid);u.rouletteHistory=structuredClone(db.rouletteHistory||[]);u.whatsappNotifications=Boolean(u.whatsappNotifications);u.phoneVerified=Boolean(u.phoneVerified)}
-function activateAccount(u){if(!u.planType)u.planType='customer';if(!u.walletId)u.walletId=walletCardNumber(u);db.sessionUserId=u.id;try{sessionStorage.setItem('REFILLS_CUSTOMER_SESSION',String(u.id))}catch{}db.profile={id:u.id,name:u.name,phone:u.phone};db.balance=Number(u.balance||0);db.orders=structuredClone(u.orders||[]);db.deposits=structuredClone(u.deposits||[]);db.ledger=structuredClone(u.ledger||[]);db.coins=Number(u.coins||0);db.coinLedger=structuredClone(u.coinLedger||[]);db.eligibleSpend=Number(u.eligibleSpend||0);db.referralRewardPaid=Boolean(u.referralRewardPaid);db.rouletteHistory=structuredClone(u.rouletteHistory||[]);u.whatsappNotifications=Boolean(u.whatsappNotifications);u.phoneVerified=Boolean(u.phoneVerified)}
-function restoreSession(){db.rouletteSpinning=false;let tabSession=null;try{tabSession=sessionStorage.getItem('REFILLS_CUSTOMER_SESSION')}catch{};db.sessionUserId=tabSession||null;const u=currentUser();if(u&&u.active!==false)activateAccount(u);else{db.sessionUserId=null;try{sessionStorage.removeItem('REFILLS_CUSTOMER_SESSION')}catch{};db.profile={id:'guest',name:'Invitado',phone:''};db.balance=0;db.orders=[];db.deposits=[];db.ledger=[];db.coins=0;db.coinLedger=[];db.eligibleSpend=0;db.referralRewardPaid=false;db.rouletteHistory=[]}}
+function activateAccount(u){if(!u.planType)u.planType='customer';if(!u.walletId)u.walletId=walletCardNumber(u);db.sessionUserId=u.id;db.profile={id:u.id,name:u.name,phone:u.phone};db.balance=Number(u.balance||0);db.orders=structuredClone(u.orders||[]);db.deposits=structuredClone(u.deposits||[]);db.ledger=structuredClone(u.ledger||[]);db.coins=Number(u.coins||0);db.coinLedger=structuredClone(u.coinLedger||[]);db.eligibleSpend=Number(u.eligibleSpend||0);db.referralRewardPaid=Boolean(u.referralRewardPaid);db.rouletteHistory=structuredClone(u.rouletteHistory||[]);u.whatsappNotifications=Boolean(u.whatsappNotifications);u.phoneVerified=Boolean(u.phoneVerified)}
+function restoreSession(){db.rouletteSpinning=false;const u=currentUser();if(u&&u.active!==false)activateAccount(u);else{db.sessionUserId=null;db.profile={id:'guest',name:'Invitado',phone:''};db.balance=0;db.orders=[];db.deposits=[];db.ledger=[];db.coins=0;db.coinLedger=[];db.eligibleSpend=0;db.referralRewardPaid=false;db.rouletteHistory=[]}}
 function userPinDigest(pin){return globalThis.crypto?.subtle?globalThis.crypto.subtle.digest('SHA-256',new TextEncoder().encode('REFILLS-DEMO-PIN:'+pin)).then(buf=>Array.from(new Uint8Array(buf)).map(x=>x.toString(16).padStart(2,'0')).join('')):Promise.resolve('demo-'+Array.from(pin).reduce((a,c)=>((a<<5)-a+c.charCodeAt(0))|0,0).toString(16))}
 function requireAccount(message='Para continuar, crea una cuenta o inicia sesión.'){if(currentUser())return true;toast(message);navigate('cuenta');return false}
 function authStory(mode){const isRegister=mode==='registro';return `<section class="auth-story"><div class="auth-brand-line"><span class="auth-brand-mark">R</span><span><b>REFILLS SHOP</b><small>CUENTA DIGITAL · CUBA</small></span></div><div class="auth-story-main"><span class="auth-story-label"><i></i> ${isRegister?'EMPIEZA EN REFILLS':'ACCESO A TU ESPACIO'}</span><h1>${isRegister?'Tu cuenta, tus recargas.':'Todo tu mundo gaming, bajo control.'}</h1><p>${isRegister?'Crea tu perfil para consultar ofertas, gestionar tus pedidos y disfrutar de una experiencia más organizada.':'Entra para consultar tu Wallet, revisar pedidos y acceder a tus beneficios de REFILLS SHOP.'}</p><div class="auth-benefits"><div><span>✓</span><div><b>Precios claros</b><small>USD, CUP y saldo móvil</small></div></div><div><span>◈</span><div><b>Tu espacio personal</b><small>Pedidos y beneficios</small></div></div><div><span>⌁</span><div><b>Diseñado para Cuba</b><small>Experiencia adaptable</small></div></div></div></div><div class="auth-live-rates"><div class="auth-rate-title"><span>TASAS CONFIGURADAS</span><span class="auth-rate-dot">●</span></div><div class="auth-rate-grid"><div><small>MONEDA BASE</small><b>1 USD</b></div><div><small>CAMBIO CUP</small><b>${offerWhole(db.rates.cup)} <em>CUP</em></b></div><div><small>SALDO MÓVIL</small><b>${offerWhole(db.rates.sm)} <em>SM</em></b></div></div><p>Las equivalencias de la tienda se calculan con las tasas establecidas por administración.</p></div></section>`}
 function accountView(mode='login'){const u=currentUser();if(!u){mode=mode==='registro'?'registro':'login';const otpReady=Boolean(supabaseClient);if(mode==='registro'){return `<div class="auth-page">${authStory(mode)}<section class="account-form-card auth-form-card"><button class="auth-back-link" type="button" onclick="navigate('inicio')">← Volver a REFILLS SHOP</button><span class="eyebrow">CREAR PERFIL</span><h1 class="auth-form-title">Crear cuenta</h1><p class="auth-form-subtitle">Solo necesitas tres datos para registrarte.</p><form onsubmit="requestRegistrationOtp(event)"><label class="field"><span>Nombre</span><input id="regName" maxlength="60" autocomplete="name" required placeholder="Tu nombre"></label><label class="field"><span>Número de teléfono / WhatsApp</span><input id="regPhone" type="tel" inputmode="tel" autocomplete="tel" maxlength="24" required placeholder="+53 5XXXXXXX"><small>Incluye el prefijo del país, por ejemplo +53.</small></label><label class="field"><span>Tu código personal de 6 dígitos</span><input id="regPin" type="password" inputmode="numeric" pattern="[0-9]{6}" minlength="6" maxlength="6" required autocomplete="new-password" placeholder="••••••"><small>Será tu PIN para iniciar sesión. Guárdalo bien.</small></label><label class="field"><span>Código de invitación (opcional)</span><input id="regRef" maxlength="16" autocomplete="off" autocapitalize="characters" placeholder="Ej. REFABC123" value="${esc(pendingRefCode())}"><small>Si un amigo te invitó, escribe su código aquí.</small></label><button class="btn btn-primary auth-submit" type="submit">✓ Registrarme</button></form><p class="security-note">Solo nombre, teléfono y PIN: sin códigos ni verificaciones. Tu cuenta se guarda en este navegador.</p><div class="auth-switch"><span>¿Ya tienes cuenta?</span><button type="button" onclick="navigate('cuenta/login')">Iniciar sesión →</button></div></section></div>`}return `<div class="auth-page">${authStory(mode)}<section class="account-form-card auth-form-card"><button class="auth-back-link" type="button" onclick="navigate('inicio')">← Volver a REFILLS SHOP</button><span class="eyebrow">BIENVENIDO DE NUEVO</span><h1 class="auth-form-title">Iniciar sesión</h1><p class="auth-form-subtitle">Entra con tu número y tu código personal de seis dígitos.</p><form onsubmit="loginAccount(event)"><label class="field"><span>Número de teléfono</span><input id="loginPhone" type="tel" inputmode="tel" autocomplete="tel" maxlength="24" required placeholder="+53 5XXXXXXX"></label><label class="field"><span>Código personal (6 dígitos)</span><input id="loginPin" type="password" inputmode="numeric" pattern="[0-9]{6}" minlength="6" maxlength="6" autocomplete="current-password" required placeholder="••••••"></label><button class="btn btn-primary auth-submit" type="submit">↪ Iniciar sesión</button></form><p class="security-note">Entra con el teléfono y el PIN que elegiste al registrarte.</p><div class="auth-switch"><span>¿No tienes cuenta?</span><button type="button" onclick="navigate('cuenta/registro')">＋ Registrarse →</button></div></section></div>`}const invites=db.users.filter(x=>x.invitedBy===u.id);const wa='';return `<div class="page-head-row"><div><span class="eyebrow">TU PERFIL</span><h1 class="page-title">Hola, ${esc(u.name)}.</h1><p class="page-desc">Tu cuenta y tus recompensas, en un solo lugar.</p>${wa}</div><button class="btn btn-secondary btn-small" onclick="logoutAccount()">Cerrar sesión ↗</button></div><div class="account-success"><section class="account-balance"><small>CUENTA · ${esc(userPlanLabel(u).toUpperCase())}</small><strong>${cash(db.balance)} <span style="font-size:12px">USD</span></strong><p>${esc(u.phone)} · Wallet ${esc(walletCardNumber(u))} · Cuenta creada ${esc(u.createdAt||'')}</p><div class="filter-row"><button class="filter-chip" onclick="navigate('planes')">Gestionar plan ↗</button></div><div class="admin-form-actions"><button class="btn btn-primary btn-small" onclick="navigate('wallet')">Recargar Wallet</button><button class="btn btn-secondary btn-small" onclick="navigate('pedidos')">Ver pedidos</button></div></section><section class="account-card"><span class="eyebrow">INVITA A TUS AMIGOS</span><h2>Tu código personal</h2><p>Tu amigo se registra con este código. Cuando complete al menos ${cash(db.loyalty.referralMinSpend)} USD en compras completadas, ambos reciben la recompensa configurada.</p><div class="referral-code"><b>${esc(u.referralCode)}</b><button onclick="copyReferralCode()">Copiar código</button></div><button class="btn btn-secondary btn-small" onclick="copyReferralLink()">Copiar enlace de invitación ↗</button><div class="metrics" style="grid-template-columns:repeat(2,1fr);margin-top:15px"><div class="metric"><span class="metric-icon">♙</span><div><span class="metric-label">AMIGOS INVITADOS</span><strong>${invites.length}</strong></div></div><div class="metric"><span class="metric-icon">◆</span><div><span class="metric-label">REFILLCOINS</span><strong>${db.coins}</strong></div></div></div>${invitedListHTML(u)}</section></div><section class="panel subsection"><h3>Notificaciones por WhatsApp</h3><p class="muted">Elige si deseas recibir avisos importantes de REFILLS SHOP en el chat asociado a tu número. Este ajuste no controla los códigos de acceso.</p><form onsubmit="saveWhatsappNotifications(event)"><label class="wa-consent"><input id="accountWhatsappNotifications" type="checkbox" ${u.whatsappNotifications?'checked':''}><span><b>${u.whatsappNotifications?'Tienes activados los avisos':'Activar avisos de WhatsApp'}</b><br>Cambios de tasas, mantenimiento y actualizaciones importantes del servicio. Podrás cambiar esta preferencia en cualquier momento.</span></label><button class="btn btn-primary btn-small" type="submit">Guardar preferencia</button></form><p class="security-note">La preferencia se guarda en esta demo. Para que los avisos se envíen de verdad se necesita configurar WhatsApp Business/Twilio y un proceso de notificaciones en el backend.</p></section><section class="panel subsection"><h3>Datos de cuenta</h3><div class="coin-ledger-row"><span>Nombre</span><b>${esc(u.name)}</b></div><div class="coin-ledger-row"><span>Teléfono</span><b>${esc(u.phone)}</b></div><div class="coin-ledger-row"><span>Avisos por WhatsApp</span><b>${u.whatsappNotifications?'Aceptados':'Desactivados'}</b></div><div class="coin-ledger-row"><span>Compras completadas acumuladas</span><b>${cash(db.eligibleSpend)}</b></div><div class="coin-ledger-row"><span>Código usado al registrarte</span><b>${u.invitedBy?esc(db.users.find(x=>x.id===u.invitedBy)?.referralCode||'Invitación registrada'):'Sin invitación'}</b></div><button class="btn btn-secondary btn-small" style="margin-top:12px" onclick="navigate('refillcoins')">Gestionar mis RefillCoins ↗</button></section>`}
 function getRegistrationDraft(){const name=document.getElementById('regName')?.value.trim()||'',phoneRaw=document.getElementById('regPhone')?.value.trim()||'',phoneE164=canonicalPhone(phoneRaw),pin=document.getElementById('regPin')?.value.trim()||'';if(name.length<2){toast('Escribe tu nombre (al menos 2 caracteres).');return null}if(!/^\+[1-9][0-9]{7,14}$/.test(phoneE164)){toast('Revisa el teléfono e incluye el prefijo internacional, por ejemplo +53.');return null}if(db.users.some(x=>normalizePhone(x.phone)===normalizePhone(phoneE164))){const old=db.users.find(x=>normalizePhone(x.phone)===normalizePhone(phoneE164));if(!old?.authUserId){toast('Ese número ya está guardado en este navegador. Inicia sesión.');return null}}if(!/^\d{6}$/.test(pin)){toast('El código personal debe tener exactamente 6 dígitos.');return null}const refCode=(document.getElementById('regRef')?.value||'').trim().toUpperCase().replace(/\s+/g,'');let inviter=null;if(refCode){inviter=db.users.find(x=>String(x.referralCode||'').toUpperCase()===refCode&&x.active!==false)||null;if(!inviter){toast('No encontramos ese código de invitación. Revísalo o déjalo vacío.');return null}}return {name,phoneRaw,phoneE164,pin,whatsappNotifications:false,ref:refCode,inviter,invitedByCode:refCode}}
-async function requestRegistrationOtp(e){e.preventDefault();const draft=getRegistrationDraft();if(!draft)return;try{draft.pinHash=await userPinDigest(draft.pin)}catch{return toast('No se pudo crear la cuenta. Inténtalo de nuevo.')}await finishRegistration(draft,false,null)}
+async function requestRegistrationOtp(e){
+ e.preventDefault();
+ const draft=getRegistrationDraft();if(!draft)return;
+ if(!supabaseClient){toast('Supabase no está configurado. No se creará una cuenta compartida. Configura la conexión o usa “Crear cuenta de prueba” para modo local.');return}
+ const local=db.users.find(x=>normalizePhone(x.phone)===normalizePhone(draft.phoneE164));
+ if(local&&!local.authUserId){toast('Ese teléfono ya tiene una cuenta local de prueba en este navegador. Inicia sesión en ella o elimina esa cuenta de prueba antes de registrar una cuenta compartida.');return}
+ pendingRegistration=draft;
+ try{
+  const {error}=await supabaseClient.auth.signInWithOtp({
+   phone:draft.phoneE164,
+   options:{channel:'whatsapp',shouldCreateUser:true,data:{full_name:draft.name,phone_e164:draft.phoneE164}}
+  });
+  if(error){pendingRegistration=null;toast('No se pudo solicitar el código de registro: '+error.message);return}
+  showRegistrationOtpModal(false);
+  toast('Código de registro solicitado. La cuenta se guardará en Supabase al verificarlo.');
+ }catch(err){pendingRegistration=null;toast('No se pudo contactar con Supabase: '+(err?.message||String(err)))}
+}
 function createAccount(e){return requestRegistrationOtp(e)}
 function showRegistrationOtpModal(isLogin){const phone=isLogin?pendingLoginPhone:pendingRegistration?.phoneE164;if(!phone)return;modal(`<span class="eyebrow">CÓDIGO DE VERIFICACIÓN</span><h2>Revisa tu WhatsApp</h2><p class="modal-sub">Hemos solicitado un código para <b>${esc(phone)}</b>. Introduce los seis dígitos recibidos. El código no es tu PIN de acceso.</p><form onsubmit="${isLogin?'verifyLoginOtp(event)':'verifyRegistrationOtp(event)'}"><label class="field"><span>Código de 6 dígitos</span><input id="whatsappOtpCode" inputmode="numeric" autocomplete="one-time-code" pattern="[0-9]{6}" minlength="6" maxlength="6" required placeholder="123456"></label><button class="btn btn-primary" type="submit">Verificar código</button></form><button class="btn btn-secondary" style="width:100%;margin-top:9px" onclick="resendWhatsappOtp(${isLogin?'true':'false'})">Solicitar otro código</button><p class="security-note">No compartas este código con nadie. Supabase/Twilio puede aplicar límites de frecuencia y caducidad.</p>`)}
-async function verifyRegistrationOtp(e){e.preventDefault();if(!supabaseClient||!pendingRegistration)return toast('La verificación no está configurada');const token=document.getElementById('whatsappOtpCode')?.value.trim()||'';if(!/^\d{6}$/.test(token))return toast('Introduce el código de seis dígitos');const {data,error}=await supabaseClient.auth.verifyOtp({phone:pendingRegistration.phoneE164,token,type:'sms'});if(error){toast('Código inválido o caducado: '+(error.message||''));return}const authUser=data?.user;if(!authUser)return toast('No se pudo confirmar el usuario');pendingRegistration.pinHash=await userPinDigest(pendingRegistration.pin);const finished=await finishRegistration(pendingRegistration,true,authUser);if(finished===false)return;pendingRegistration=null;closeModal()}
+async function verifyRegistrationOtp(e){
+ e.preventDefault();if(!supabaseClient||!pendingRegistration)return toast('La verificación no está configurada');
+ const token=document.getElementById('whatsappOtpCode')?.value.trim()||'';
+ if(!/^\d{6}$/.test(token))return toast('Introduce el código de seis dígitos');
+ const draft=pendingRegistration;
+ try{
+  const {data,error}=await supabaseClient.auth.verifyOtp({phone:draft.phoneE164,token,type:'sms'});
+  if(error){toast('Código inválido o caducado: '+(error.message||''));return}
+  const authUser=data?.user;if(!authUser)return toast('Supabase no devolvió el usuario verificado.');
+  // El inicio de sesión posterior usa teléfono + PIN como contraseña de Supabase.
+  const {error:passwordError}=await supabaseClient.auth.updateUser({password:draft.pin});
+  if(passwordError){toast('El teléfono quedó verificado, pero no se pudo guardar el PIN en Supabase: '+passwordError.message+'. Solicita un nuevo acceso antes de volver a registrar.');return}
+  draft.pinHash=await userPinDigest(draft.pin);
+  const finished=await finishRegistration(draft,true,authUser);
+  if(finished===false)return;
+  pendingRegistration=null;closeModal();
+ }catch(err){toast('No se pudo completar el registro remoto: '+(err?.message||String(err)))}
+}
 async function finishRegistration(draft,phoneVerified,authUser=null){let remoteProfile=null,remoteWallet=null;if(phoneVerified&&supabaseClient&&authUser){const profileResult=await supabaseClient.from('profiles').select('user_id,full_name,phone_e164,referral_code,referred_by,is_active,whatsapp_notifications,phone_verified_at').eq('user_id',authUser.id).maybeSingle();if(profileResult.error||!profileResult.data){toast('El código fue verificado, pero falta aplicar la migración SQL V6 o revisar las políticas de Supabase. No se creó una cuenta local duplicada.');return false}remoteProfile=profileResult.data;if(!remoteProfile.phone_verified_at){toast('El servidor todavía no confirma el teléfono. Revisa el código de WhatsApp y la configuración de Auth.');return false}const walletResult=await supabaseClient.from('wallets').select('balance_usd,refillcoins_balance,eligible_completed_spend').eq('user_id',authUser.id).maybeSingle();if(!walletResult.error)remoteWallet=walletResult.data}
-const referralLocal=draft.inviter?.id||db.users.find(x=>String(x.referralCode||'').toUpperCase()===draft.ref)?.id||remoteProfile?.referred_by||null;const u={id:authUser?.id||'USR-'+Date.now().toString(36)+'-'+Math.random().toString(36).slice(2,5),authUserId:authUser?.id||null,name:remoteProfile?.full_name||draft.name,phone:remoteProfile?.phone_e164||draft.phoneE164,phoneDigits:normalizePhone(remoteProfile?.phone_e164||draft.phoneE164),phoneE164:remoteProfile?.phone_e164||draft.phoneE164,phoneVerified:remoteProfile?Boolean(remoteProfile.phone_verified_at):Boolean(phoneVerified),whatsappNotifications:typeof remoteProfile?.whatsapp_notifications==='boolean'?remoteProfile.whatsapp_notifications:draft.whatsappNotifications,verifiedAt:remoteProfile?.phone_verified_at||(phoneVerified&&!authUser?new Date().toISOString():null),referralCode:remoteProfile?.referral_code||newReferralCode(),invitedBy:referralLocal,invitedByCode:draft.ref||draft.invitedByCode||'',createdAt:new Date().toLocaleDateString('es-ES'),active:remoteProfile?.is_active!==false,balance:Number(remoteWallet?.balance_usd||0),orders:[],deposits:[],ledger:[],coins:Number(remoteWallet?.refillcoins_balance||0),coinLedger:[],eligibleSpend:Number(remoteWallet?.eligible_completed_spend||0),referralRewardPaid:false,rouletteHistory:[],pinHash:draft.pinHash||''};const existing=db.users.find(x=>normalizePhone(x.phone)===normalizePhone(u.phone));if(existing){toast('Este número ya está guardado en este navegador. Inicia sesión con tu cuenta existente.');return false}db.users.push(u);activateAccount(u);persist();render();try{localStorage.removeItem('REFILLS_PENDING_REF')}catch{}toast(u.invitedBy?'Cuenta creada con código de invitación. ¡Bienvenido!':'Cuenta creada. ¡Bienvenido!');navigate('inicio');return true}
+const referralLocal=draft.inviter?.id||db.users.find(x=>String(x.referralCode||'').toUpperCase()===draft.ref)?.id||remoteProfile?.referred_by||null;const u={id:authUser?.id||'USR-'+Date.now().toString(36)+'-'+Math.random().toString(36).slice(2,5),authUserId:authUser?.id||null,name:remoteProfile?.full_name||draft.name,phone:remoteProfile?.phone_e164||draft.phoneE164,phoneDigits:normalizePhone(remoteProfile?.phone_e164||draft.phoneE164),phoneE164:remoteProfile?.phone_e164||draft.phoneE164,phoneVerified:remoteProfile?Boolean(remoteProfile.phone_verified_at):Boolean(phoneVerified),whatsappNotifications:typeof remoteProfile?.whatsapp_notifications==='boolean'?remoteProfile.whatsapp_notifications:draft.whatsappNotifications,verifiedAt:remoteProfile?.phone_verified_at||(phoneVerified&&!authUser?new Date().toISOString():null),referralCode:remoteProfile?.referral_code||newReferralCode(),invitedBy:referralLocal,invitedByCode:draft.ref||draft.invitedByCode||'',createdAt:new Date().toLocaleDateString('es-ES'),active:remoteProfile?.is_active!==false,balance:Number(remoteWallet?.balance_usd||0),orders:[],deposits:[],ledger:[],coins:Number(remoteWallet?.refillcoins_balance||0),coinLedger:[],eligibleSpend:Number(remoteWallet?.eligible_completed_spend||0),referralRewardPaid:false,rouletteHistory:[],pinHash:draft.pinHash||''};const existing=db.users.find(x=>normalizePhone(x.phone)===normalizePhone(u.phone));if(existing?.authUserId&&existing.authUserId!==u.authUserId){toast('Este teléfono está vinculado a otra cuenta autenticada. No se reemplazó por seguridad.');return false}if(existing&&!existing.authUserId){db.users=db.users.filter(x=>x!==existing)}else if(existing){db.users=db.users.filter(x=>x!==existing)}db.users.push(u);activateAccount(u);persist();render();try{localStorage.removeItem('REFILLS_PENDING_REF')}catch{}toast(u.invitedBy?'Cuenta creada con código de invitación. ¡Bienvenido!':'Cuenta creada. ¡Bienvenido!');navigate('inicio');return true}
 function createDemoAccount(){const draft=getRegistrationDraft();if(!draft)return;pendingRegistration=draft;modal(`<span class="eyebrow">MODO DEMOSTRACIÓN</span><h2>Crear cuenta de prueba</h2><p class="modal-sub">No se enviará un código de WhatsApp. El teléfono quedará como <b>no verificado</b> y los datos permanecerán en este navegador.</p><button class="btn btn-primary" style="width:100%" onclick="createDemoAccountFromDraft()">Crear cuenta de prueba</button><button class="btn btn-secondary" style="width:100%;margin-top:8px" onclick="closeModal()">Cancelar</button>`)}
 async function createDemoAccountFromDraft(){if(!pendingRegistration)return;const draft=pendingRegistration;pendingRegistration=null;closeModal();await userPinDigest(draft.pin).then(async pinHash=>{draft.pinHash=pinHash;await finishRegistration(draft,false,null);const u=currentUser();if(u&&!u.pinHash){u.pinHash=pinHash;persist()}}).catch(()=>toast('No se pudo crear la cuenta de demostración'))}
 async function resendWhatsappOtp(isLogin){if(!supabaseClient)return toast('WhatsApp no está configurado');const phone=isLogin?pendingLoginPhone:pendingRegistration?.phoneE164;if(!phone)return toast('No hay una solicitud de código activa');const options={channel:'whatsapp',shouldCreateUser:!isLogin};const result=await supabaseClient.auth.signInWithOtp({phone,options});if(result.error)toast('No se pudo reenviar: '+result.error.message);else toast('Se solicitó un nuevo código. Respeta los límites del proveedor.')}
@@ -1267,8 +1291,8 @@ async function hydrateSupabaseAccount(authUser,{silent=true}={}){
 async function restoreSupabaseAccountSession(){if(!supabaseClient)return;try{const {data,error}=await supabaseClient.auth.getSession();if(error){console.warn('No se pudo recuperar la sesión de Supabase:',error);return}const authUser=data?.session?.user;if(authUser)await hydrateSupabaseAccount(authUser,{silent:true})}catch(err){console.warn('Restauración de sesión remota no disponible:',err)}}
 async function verifyLoginOtp(e){e.preventDefault();if(!supabaseClient||!pendingLoginPhone)return toast('No hay una solicitud de acceso activa');const token=document.getElementById('whatsappOtpCode')?.value.trim()||'';const {data,error}=await supabaseClient.auth.verifyOtp({phone:pendingLoginPhone,token,type:'sms'});if(error){toast('Código inválido o caducado: '+error.message);return}const authUser=data?.user;if(!authUser)return toast('No se pudo validar la sesión');const ok=await hydrateSupabaseAccount(authUser,{silent:false});if(!ok)return;pendingLoginPhone='';closeModal();toast('Sesión verificada. Tu perfil remoto se cargó correctamente.');}
 
-async function loginAccount(e){e.preventDefault();const rawPhone=document.getElementById('loginPhone')?.value||'',phoneE164=canonicalPhone(rawPhone),phone=normalizePhone(rawPhone),pin=document.getElementById('loginPin')?.value.trim()||'';if(!/^\+[1-9][0-9]{7,14}$/.test(phoneE164)||!/^\d{6}$/.test(pin))return toast('Escribe el teléfono con prefijo internacional y el PIN de 6 dígitos.');if(supabaseClient){try{const {data,error}=await supabaseClient.auth.signInWithPassword({phone:phoneE164,password:pin});if(!error&&data?.user){const ok=await hydrateSupabaseAccount(data.user,{silent:false});if(ok){toast('✓ Sesión iniciada. Cuenta y Wallet cargadas desde Supabase.');return}try{await supabaseClient.auth.signOut({scope:'local'})}catch{}return}}catch(err){console.warn('Inicio de sesión remoto no disponible:',err)}}const local=db.users.find(x=>normalizePhone(x.phone)===phone);if(!local)return toast('No hay ninguna cuenta con ese número en este navegador. Si te registraste en otro teléfono, navegador o enlace, esa cuenta no está aquí: crea una nueva o pide ayuda a soporte.');if(local.active===false)return toast('Esta cuenta está desactivada. Contacta con soporte.');if(local.authUserId||!local.pinHash)return toast('Esta cuenta es de la versión anterior. Pide al administrador que restablezca tu PIN.');try{const cands=await pinHashCandidates(pin);if(!cands.includes(local.pinHash))return toast('PIN incorrecto. Si lo olvidaste, pide al administrador que lo restablezca.');activateAccount(local);persist();render();toast('Sesión iniciada.');navigate('inicio')}catch{toast('No se pudo comprobar el PIN. Inténtalo de nuevo.')}}
-async function logoutAccount(){if(supabaseClient){try{await supabaseClient.auth.signOut({scope:'local'})}catch(err){console.warn('No se pudo cerrar la sesión remota local:',err)}}try{sessionStorage.removeItem('REFILLS_CUSTOMER_SESSION')}catch{};persist();db.sessionUserId=null;db.profile={id:'guest',name:'Invitado',phone:''};db.balance=0;db.orders=[];db.deposits=[];db.ledger=[];db.coins=0;db.coinLedger=[];db.eligibleSpend=0;db.referralRewardPaid=false;db.rouletteHistory=[];persist();updateHeader();render();toast('Sesión cerrada. Tu cuenta sigue guardada para volver a entrar.')}
+async function loginAccount(e){e.preventDefault();const rawPhone=document.getElementById('loginPhone')?.value||'',phoneE164=canonicalPhone(rawPhone),phone=normalizePhone(rawPhone),pin=document.getElementById('loginPin')?.value.trim()||'';if(!/^\+[1-9][0-9]{7,14}$/.test(phoneE164)||!/^\d{6}$/.test(pin))return toast('Escribe el teléfono con prefijo internacional y el PIN de 6 dígitos.');if(supabaseClient&&!db.users.some(x=>normalizePhone(x.phone)===phone&&!x.authUserId)){try{const {data,error}=await supabaseClient.auth.signInWithPassword({phone:phoneE164,password:pin});if(!error&&data?.user){const ok=await hydrateSupabaseAccount(data.user,{silent:false});if(ok){toast('✓ Sesión iniciada. Cuenta y Wallet cargadas desde Supabase.');return}try{await supabaseClient.auth.signOut({scope:'local'})}catch{}return}}catch(err){console.warn('Inicio de sesión remoto no disponible:',err)}}const local=db.users.find(x=>normalizePhone(x.phone)===phone);if(!local)return toast('No hay ninguna cuenta con ese número en este navegador. Si te registraste en otro teléfono, navegador o enlace, esa cuenta no está aquí: crea una nueva o pide ayuda a soporte.');if(local.active===false)return toast('Esta cuenta está desactivada. Contacta con soporte.');if(local.authUserId||!local.pinHash)return toast('Esta cuenta es de la versión anterior. Pide al administrador que restablezca tu PIN.');try{const cands=await pinHashCandidates(pin);if(!cands.includes(local.pinHash))return toast('PIN incorrecto. Si lo olvidaste, pide al administrador que lo restablezca.');activateAccount(local);persist();render();toast('Sesión iniciada.');navigate('inicio')}catch{toast('No se pudo comprobar el PIN. Inténtalo de nuevo.')}}
+async function logoutAccount(){if(supabaseClient){try{await supabaseClient.auth.signOut({scope:'local'})}catch(err){console.warn('No se pudo cerrar la sesión remota local:',err)}}persist();db.sessionUserId=null;db.profile={id:'guest',name:'Invitado',phone:''};db.balance=0;db.orders=[];db.deposits=[];db.ledger=[];db.coins=0;db.coinLedger=[];db.eligibleSpend=0;db.referralRewardPaid=false;db.rouletteHistory=[];persist();updateHeader();render();toast('Sesión cerrada. Tu cuenta sigue guardada para volver a entrar.')}
 async function saveWhatsappNotifications(e){e.preventDefault();const u=currentUser();if(!u)return toast('Inicia sesión');const enabled=Boolean(document.getElementById('accountWhatsappNotifications')?.checked);u.whatsappNotifications=enabled;persist();if(supabaseClient&&u.authUserId){const {error}=await supabaseClient.from('profiles').update({whatsapp_notifications:enabled,whatsapp_notifications_updated_at:new Date().toISOString()}).eq('user_id',u.authUserId);if(error){toast('Preferencia guardada localmente; no se pudo sincronizar con Supabase: '+error.message);return}}render();toast(enabled?'Avisos de WhatsApp activados':'Avisos de WhatsApp desactivados')}
 
 function copyText(text){if(navigator.clipboard&&navigator.clipboard.writeText){navigator.clipboard.writeText(text).then(()=>toast('Copiado al portapapeles')).catch(()=>fallbackCopy(text))}else fallbackCopy(text)}
@@ -1973,8 +1997,8 @@ async function applyAdminPin(e,id){e.preventDefault();const u=db.users.find(x=>x
 function adminDeleteUser(id){const u=db.users.find(x=>x.id===id);if(!u)return;showAdminConfirm('Eliminar cuenta',`Se eliminará la cuenta de «${u.name}» (${u.phone}) con su saldo, pedidos y RefillCoins${id===db.sessionUserId?'. Es la cuenta con la que tienes la sesión abierta; se cerrará':''}. Esta acción no se puede deshacer.`,'Eliminar cuenta',`confirmDeleteUser(${JSON.stringify(String(id))})`)}
 function confirmDeleteUser(id){const u=db.users.find(x=>x.id===id);if(!u){closeModal();return toast('Esa cuenta ya no existe')}if(id===db.sessionUserId){db.sessionUserId=null;db.profile={id:'guest',name:'Invitado',phone:''};db.balance=0;db.orders=[];db.deposits=[];db.ledger=[];db.coins=0;db.coinLedger=[];db.eligibleSpend=0;db.referralRewardPaid=false;db.rouletteHistory=[]}db.users=db.users.filter(x=>x.id!==id);db.users.forEach(x=>{if(x.invitedBy===id)x.invitedBy=null});closeModal();persist();updateHeader();render();toast('Cuenta eliminada')}
 function globalEvents(){document.querySelectorAll('[data-route]').forEach(b=>b.addEventListener('click',()=>navigate(b.dataset.route)));window.addEventListener('hashchange',()=>{render();window.scrollTo(0,0)});window.addEventListener('keydown',e=>{if(e.altKey&&e.shiftKey&&e.key.toLowerCase()==='a'){e.preventDefault();navigate('admin')}if(e.key==='Escape')closeModal()});}
-captureRefFromUrl();globalEvents();restoreSession();updateHeader();render();remoteConfigPromise=bootstrapRemoteConfig(false);window.addEventListener('focus',()=>{if(!adminAuthed)remoteConfigPromise=bootstrapRemoteConfig(false)});document.addEventListener('visibilitychange',()=>{if(document.visibilityState==='visible'&&!adminAuthed)remoteConfigPromise=bootstrapRemoteConfig(false)});setInterval(()=>{if(!adminAuthed&&document.visibilityState==='visible')remoteConfigPromise=bootstrapRemoteConfig(false)},60000);
-window.toggleMobileMenu=function(force){const drawer=document.getElementById('mobileDrawer'),backdrop=document.getElementById('mobileMenuBackdrop'),trigger=document.querySelector('.mobile-menu-trigger');if(!drawer||!backdrop)return;const open=typeof force==='boolean'?force:!drawer.classList.contains('open');drawer.classList.toggle('open',open);backdrop.classList.toggle('open',open);drawer.setAttribute('aria-hidden',String(!open));backdrop.setAttribute('aria-hidden',String(!open));if(trigger)trigger.setAttribute('aria-expanded',String(open));document.body.style.overflow=open?'hidden':''};window.navigate=navigate;window.adminAdjustUSD=adminAdjustUSD;window.applyAdminUSD=applyAdminUSD;window.adminResetPin=adminResetPin;window.applyAdminPin=applyAdminPin;window.adminDeleteUser=adminDeleteUser;window.confirmDeleteUser=confirmDeleteUser;window.addRoulettePrize=addRoulettePrize;window.removeRoulettePrize=removeRoulettePrize;window.saveRoulettePrizes=saveRoulettePrizes;window.render=render;window.copyText=copyText;window.setAdminOfferSearch=setAdminOfferSearch;window.syncOfferPriceFromCost=syncOfferPriceFromCost;window.setAdminOfferFilter=setAdminOfferFilter;window.resetAdminOfferFilters=resetAdminOfferFilters;window.duplicateOffer=duplicateOffer;window.createAccount=createAccount;window.requestRegistrationOtp=requestRegistrationOtp;window.verifyRegistrationOtp=verifyRegistrationOtp;window.createDemoAccount=createDemoAccount;window.createDemoAccountFromDraft=createDemoAccountFromDraft;window.requestLoginOtp=requestLoginOtp;window.verifyLoginOtp=verifyLoginOtp;window.resendWhatsappOtp=resendWhatsappOtp;window.saveWhatsappNotifications=saveWhatsappNotifications;window.updateOfferMarginPreview=updateOfferMarginPreview;window.loginAccount=loginAccount;window.logoutAccount=logoutAccount;window.copyReferralCode=copyReferralCode;window.copyReferralLink=copyReferralLink;window.spinRoulette=spinRoulette;window.redeemSpecialOffer=redeemSpecialOffer;window.saveLoyaltySettings=saveLoyaltySettings;window.editSpecialOffer=editSpecialOffer;window.saveSpecialOffer=saveSpecialOffer;window.toggleSpecialOffer=toggleSpecialOffer;window.deleteSpecialOffer=deleteSpecialOffer;window.adminAdjustCoins=adminAdjustCoins;window.adminToggleUser=adminToggleUser;Object.defineProperty(window,'gameFilter',{get:()=>gameFilter,set:v=>{gameFilter=v}});Object.defineProperty(window,'searchText',{get:()=>searchText,set:v=>{searchText=v}});Object.defineProperty(window,'adminTab',{get:()=>adminTab,set:v=>{adminTab=v}});window.adminLogin=adminLogin;window.adminLogout=adminLogout;window.syncSharedConfigNow=syncSharedConfigNow;window.exportLocalSyncBackup=exportLocalSyncBackup;window.loadRemoteAdminDeposits=loadRemoteAdminDeposits;window.openBuy=openBuy;window.confirmBuy=confirmBuy;window.showOrderReceipt=showOrderReceipt;window.openDeposit=openDeposit;window.submitDeposit=submitDeposit;window.updateDepositPreview=updateDepositPreview;window.closeModal=closeModal;window.decideDeposit=decideDeposit;window.setOrderStatus=setOrderStatus;window.saveRates=saveRates;window.editOffer=editOffer;window.saveOffer=saveOffer;window.moveGame=moveGame;window.moveOffer=moveOffer;window.updateDeliveryFormHint=updateDeliveryFormHint;window.updateOfferSaleMode=updateOfferSaleMode;window.syncOfferSaleFromUSD=syncOfferSaleFromUSD;window.syncOfferSaleFromSM=syncOfferSaleFromSM;window.updateOfferCostMode=updateOfferCostMode;window.toggleOffer=toggleOffer;window.deleteOffer=deleteOffer;window.confirmDeleteOffer=confirmDeleteOffer;window.confirmDeleteGame=confirmDeleteGame;window.confirmDeleteCoupon=confirmDeleteCoupon;window.confirmDeleteSpecialOffer=confirmDeleteSpecialOffer;window.editGame=editGame;window.saveGame=saveGame;window.toggleGame=toggleGame;window.deleteGame=deleteGame;window.toggleMethod=toggleMethod;window.saveMethod=saveMethod;window.addMethod=addMethod;window.saveNewMethod=saveNewMethod;window.editCoupon=editCoupon;window.saveCoupon=saveCoupon;window.toggleCoupon=toggleCoupon;window.deleteCoupon=deleteCoupon;window.saveSettings=saveSettings;window.exportOrders=exportOrders;window.exportData=exportData;window.resetDemo=resetDemo;window.showNotifications=showNotifications;window.adminLioGames=adminLioGames;window.saveLioPublicConfig=saveLioPublicConfig;window.lioTestConnection=lioTestConnection;window.lioLoadProducts=lioLoadProducts;window.lioFilterProducts=lioFilterProducts;window.lioLoadVariations=lioLoadVariations;window.lioSaveMapping=lioSaveMapping;window.lioLoadSchema=lioLoadSchema;window.lioLoadPriceMatrix=lioLoadPriceMatrix;window.openResellerPlanRequest=openResellerPlanRequest;window.updatePlanPaymentPreview=updatePlanPaymentPreview;window.submitResellerPlanRequest=submitResellerPlanRequest;window.savePlanSettings=savePlanSettings;window.reviewPlanRequest=reviewPlanRequest;window.joinRaffle=joinRaffle;window.createRaffle=createRaffle;window.toggleRaffle=toggleRaffle;window.deleteRaffle=deleteRaffle;window.drawRaffleWinner=drawRaffleWinner;Object.defineProperty(window,'offerGameFilter',{get:()=>offerGameFilter,set:v=>{offerGameFilter=v}});Object.defineProperty(window,'offerSearchText',{get:()=>offerSearchText,set:v=>{offerSearchText=v}});
+captureRefFromUrl();globalEvents();restoreSession();updateHeader();render();remoteConfigPromise=bootstrapRemoteConfig(false);restoreSupabaseAccountSession();window.addEventListener('focus',()=>{if(!adminAuthed)remoteConfigPromise=bootstrapRemoteConfig(false)});document.addEventListener('visibilitychange',()=>{if(document.visibilityState==='visible'&&!adminAuthed)remoteConfigPromise=bootstrapRemoteConfig(false)});setInterval(()=>{if(!adminAuthed&&document.visibilityState==='visible')remoteConfigPromise=bootstrapRemoteConfig(false)},60000);
+window.navigate=navigate;window.adminAdjustUSD=adminAdjustUSD;window.applyAdminUSD=applyAdminUSD;window.adminResetPin=adminResetPin;window.applyAdminPin=applyAdminPin;window.adminDeleteUser=adminDeleteUser;window.confirmDeleteUser=confirmDeleteUser;window.addRoulettePrize=addRoulettePrize;window.removeRoulettePrize=removeRoulettePrize;window.saveRoulettePrizes=saveRoulettePrizes;window.render=render;window.copyText=copyText;window.setAdminOfferSearch=setAdminOfferSearch;window.syncOfferPriceFromCost=syncOfferPriceFromCost;window.setAdminOfferFilter=setAdminOfferFilter;window.resetAdminOfferFilters=resetAdminOfferFilters;window.duplicateOffer=duplicateOffer;window.createAccount=createAccount;window.requestRegistrationOtp=requestRegistrationOtp;window.verifyRegistrationOtp=verifyRegistrationOtp;window.createDemoAccount=createDemoAccount;window.createDemoAccountFromDraft=createDemoAccountFromDraft;window.requestLoginOtp=requestLoginOtp;window.verifyLoginOtp=verifyLoginOtp;window.resendWhatsappOtp=resendWhatsappOtp;window.saveWhatsappNotifications=saveWhatsappNotifications;window.updateOfferMarginPreview=updateOfferMarginPreview;window.loginAccount=loginAccount;window.logoutAccount=logoutAccount;window.copyReferralCode=copyReferralCode;window.copyReferralLink=copyReferralLink;window.spinRoulette=spinRoulette;window.redeemSpecialOffer=redeemSpecialOffer;window.saveLoyaltySettings=saveLoyaltySettings;window.editSpecialOffer=editSpecialOffer;window.saveSpecialOffer=saveSpecialOffer;window.toggleSpecialOffer=toggleSpecialOffer;window.deleteSpecialOffer=deleteSpecialOffer;window.adminAdjustCoins=adminAdjustCoins;window.adminToggleUser=adminToggleUser;Object.defineProperty(window,'gameFilter',{get:()=>gameFilter,set:v=>{gameFilter=v}});Object.defineProperty(window,'searchText',{get:()=>searchText,set:v=>{searchText=v}});Object.defineProperty(window,'adminTab',{get:()=>adminTab,set:v=>{adminTab=v}});window.adminLogin=adminLogin;window.adminLogout=adminLogout;window.syncSharedConfigNow=syncSharedConfigNow;window.exportLocalSyncBackup=exportLocalSyncBackup;window.loadRemoteAdminDeposits=loadRemoteAdminDeposits;window.openBuy=openBuy;window.confirmBuy=confirmBuy;window.showOrderReceipt=showOrderReceipt;window.openDeposit=openDeposit;window.submitDeposit=submitDeposit;window.updateDepositPreview=updateDepositPreview;window.closeModal=closeModal;window.decideDeposit=decideDeposit;window.setOrderStatus=setOrderStatus;window.saveRates=saveRates;window.editOffer=editOffer;window.saveOffer=saveOffer;window.moveGame=moveGame;window.moveOffer=moveOffer;window.updateDeliveryFormHint=updateDeliveryFormHint;window.updateOfferSaleMode=updateOfferSaleMode;window.syncOfferSaleFromUSD=syncOfferSaleFromUSD;window.syncOfferSaleFromSM=syncOfferSaleFromSM;window.updateOfferCostMode=updateOfferCostMode;window.toggleOffer=toggleOffer;window.deleteOffer=deleteOffer;window.confirmDeleteOffer=confirmDeleteOffer;window.confirmDeleteGame=confirmDeleteGame;window.confirmDeleteCoupon=confirmDeleteCoupon;window.confirmDeleteSpecialOffer=confirmDeleteSpecialOffer;window.editGame=editGame;window.saveGame=saveGame;window.toggleGame=toggleGame;window.deleteGame=deleteGame;window.toggleMethod=toggleMethod;window.saveMethod=saveMethod;window.addMethod=addMethod;window.saveNewMethod=saveNewMethod;window.editCoupon=editCoupon;window.saveCoupon=saveCoupon;window.toggleCoupon=toggleCoupon;window.deleteCoupon=deleteCoupon;window.saveSettings=saveSettings;window.exportOrders=exportOrders;window.exportData=exportData;window.resetDemo=resetDemo;window.showNotifications=showNotifications;window.adminLioGames=adminLioGames;window.saveLioPublicConfig=saveLioPublicConfig;window.lioTestConnection=lioTestConnection;window.lioLoadProducts=lioLoadProducts;window.lioFilterProducts=lioFilterProducts;window.lioLoadVariations=lioLoadVariations;window.lioSaveMapping=lioSaveMapping;window.lioLoadSchema=lioLoadSchema;window.lioLoadPriceMatrix=lioLoadPriceMatrix;window.openResellerPlanRequest=openResellerPlanRequest;window.updatePlanPaymentPreview=updatePlanPaymentPreview;window.submitResellerPlanRequest=submitResellerPlanRequest;window.savePlanSettings=savePlanSettings;window.reviewPlanRequest=reviewPlanRequest;window.joinRaffle=joinRaffle;window.createRaffle=createRaffle;window.toggleRaffle=toggleRaffle;window.deleteRaffle=deleteRaffle;window.drawRaffleWinner=drawRaffleWinner;Object.defineProperty(window,'offerGameFilter',{get:()=>offerGameFilter,set:v=>{offerGameFilter=v}});Object.defineProperty(window,'offerSearchText',{get:()=>offerSearchText,set:v=>{offerSearchText=v}});
 })();
 </script>
 </body>
