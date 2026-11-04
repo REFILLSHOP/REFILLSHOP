@@ -3097,6 +3097,252 @@ html body main#view.page .product-card .rs-product-cta span:first-child::after{c
 .rs-swipe-hint.is-done span{opacity:.55}
 @media(hover:none){.rs-swipe-hint div{display:none}}
 </style>
+
+<style id="refills-shop-v63-mobile-repair">
+/* Mobile refinement: desktop visual language, no horizontal page spill */
+html,body{width:100%;max-width:100%;overflow-x:hidden}
+*,*::before,*::after{box-sizing:border-box}
+#app,.app,.main,#view,.content,.page,.container{min-width:0;max-width:100%}
+@media(max-width:760px){
+ body{font-size:14px}
+ .main,#view,.content,.page,.container{width:100%!important;max-width:100%!important}
+ #view{padding-left:clamp(12px,3.5vw,18px)!important;padding-right:clamp(12px,3.5vw,18px)!important}
+ #view>*{min-width:0;max-width:100%}
+ .topbar{padding-left:14px!important;padding-right:14px!important}
+ .panel,.account-card,.account-form-card,.login-card,.support-card,.wallet-layout,.wallet-visual-card{min-width:0;max-width:100%}
+ .wallet-layout,.wallet-grid,.account-success,.rh-hero,.admin-content-grid{grid-template-columns:minmax(0,1fr)!important}
+ .wallet-visual-card{width:100%!important}
+ .products-grid,.rs-game-products-grid{display:grid!important;grid-template-columns:minmax(0,1fr)!important;grid-auto-flow:row!important;width:100%!important;max-width:100%!important;overflow:visible!important}
+ .products-grid>.product-card,.rs-game-products-grid>.product-card{width:100%!important;min-width:0!important;max-width:100%!important;grid-template-columns:minmax(0,1fr)!important}
+ .product-card,.product-card *{min-width:0}
+ .product-card img,.product-art img{max-width:100%;object-fit:contain}
+ .product-art{min-height:0!important;height:clamp(150px,48vw,230px)!important}
+ .product-card h3,.product-card p,.price-usd{overflow-wrap:anywhere}
+ .product-card .btn,.product-card button{width:100%;max-width:100%}
+ .rs-page-assist,.rs-game-checklist,.rs-swipe-hint{display:none!important}
+ .help-card,.help-banner,.help-message,.help-tip,.help-box,.support-hint,.inline-help,.page-help,.rs-help,.rs-page-assist{display:none!important}
+ .section-title,.section-header{gap:10px;flex-wrap:wrap}
+ input,select,textarea{max-width:100%;min-width:0}
+}
+@media(max-width:420px){
+ #view{padding-left:12px!important;padding-right:12px!important}
+ .product-card{padding:13px!important;border-radius:15px!important}
+ .product-art{height:155px!important}
+ .product-card h3{font-size:14px!important}
+ .price-usd{font-size:21px!important}
+}
+</style>
+
+<style id="refills-v64-layout-balance">
+/* V64 — tarjetas más anchas, inicio limpio y catálogo unificado */
+html body main#view.page .rh-hero .rh-card-wrap{display:none!important}
+html body main#view.page .rh-hero{
+  grid-template-columns:minmax(0,1fr)!important;
+  min-height:0!important;
+  padding:clamp(20px,3vw,34px)!important;
+}
+html body main#view.page .rh-hero-main{max-width:900px!important}
+html body main#view.page .products-grid,
+html body main#view.page .rs-game-products-grid{
+  gap:18px!important;
+  padding:6px 4px 18px!important;
+  align-items:stretch!important;
+}
+html body main#view.page .products-grid>.product-card,
+html body main#view.page .rs-game-products-grid>.product-card{
+  flex:0 0 clamp(285px,29vw,340px)!important;
+  width:clamp(285px,29vw,340px)!important;
+  max-width:340px!important;
+  min-width:0!important;
+}
+html body main#view.page .product-card{
+  min-height:100%!important;
+  border-radius:20px!important;
+}
+html body main#view.page .product-card .product-art{
+  aspect-ratio:16/9!important;
+}
+html body main#view.page .product-card .product-card-body{
+  display:flex!important;
+  flex:1 1 auto!important;
+  flex-direction:column!important;
+  gap:9px!important;
+  padding:16px 17px 18px!important;
+}
+html body main#view.page .product-card .product-card-body h3{
+  font-size:clamp(15px,1.25vw,18px)!important;
+  line-height:1.25!important;
+  min-height:2.45em!important;
+  margin:0!important;
+}
+html body main#view.page .product-card .product-card-body>p{
+  font-size:12px!important;
+  line-height:1.5!important;
+  min-height:2.8em!important;
+}
+html body main#view.page .product-card .product-price-row{margin-top:auto!important;align-items:center!important}
+html body main#view.page .product-card .price-usd{font-size:clamp(23px,2vw,28px)!important;font-weight:900!important}
+html body main#view.page .product-card .price-alt{padding:10px 11px!important;border-radius:12px!important}
+html body main#view.page .product-card .price-alt>div{display:flex!important;justify-content:space-between!important;gap:7px!important;flex-wrap:wrap!important}
+html body main#view.page .product-card .price-alt b{font-size:11px!important;white-space:nowrap!important}
+html body main#view.page .product-card .btn{width:100%!important;min-height:42px!important}
+
+/* La sección Juegos usa el mismo lenguaje visual que las tarjetas de Inicio */
+html body main#view.page .game-grid{
+  display:grid!important;
+  grid-template-columns:repeat(auto-fill,minmax(min(100%,260px),1fr))!important;
+  gap:17px!important;
+  align-items:stretch!important;
+}
+html body main#view.page .game-grid .game-card{
+  position:relative!important;
+  display:flex!important;
+  flex-direction:column!important;
+  min-width:0!important;
+  min-height:300px!important;
+  overflow:hidden!important;
+  border:1px solid #1e4e82!important;
+  border-radius:21px!important;
+  background:#061327!important;
+  color:#fff!important;
+  box-shadow:0 14px 34px #0005!important;
+}
+html body main#view.page .game-grid .game-cover{
+  position:absolute!important;
+  inset:0!important;
+  height:auto!important;
+  min-height:0!important;
+  background:linear-gradient(145deg,#102b4c,#050c1c)!important;
+}
+html body main#view.page .game-grid .game-cover>img,
+html body main#view.page .game-grid .game-cover img{
+  position:absolute!important;
+  inset:0!important;
+  width:100%!important;
+  height:100%!important;
+  object-fit:cover!important;
+  opacity:.78!important;
+}
+html body main#view.page .game-grid .game-cover-shade{
+  position:absolute!important;
+  inset:0!important;
+  background:linear-gradient(180deg,#02081730 0%,#02081705 30%,#020817ed 100%)!important;
+}
+html body main#view.page .game-grid .game-tag{
+  position:absolute!important;top:13px!important;left:13px!important;z-index:4!important;
+  border:1px solid #9fdcff70!important;border-radius:999px!important;
+  background:#061b35d9!important;color:#c9eaff!important;
+}
+html body main#view.page .game-grid .game-icon{display:none!important}
+html body main#view.page .game-grid .cover-title{
+  position:absolute!important;left:16px!important;right:16px!important;bottom:104px!important;
+  z-index:4!important;color:#fff!important;font-size:23px!important;font-weight:950!important;
+  text-shadow:0 2px 12px #000!important;
+}
+html body main#view.page .game-grid .game-cover-foot{
+  position:absolute!important;left:16px!important;right:16px!important;bottom:15px!important;
+  z-index:4!important;display:flex!important;justify-content:space-between!important;
+}
+html body main#view.page .game-grid .game-info{
+  position:relative!important;z-index:5!important;
+  display:flex!important;flex-direction:column!important;gap:8px!important;
+  margin-top:auto!important;padding:0 16px 16px!important;
+  background:linear-gradient(180deg,transparent,#061327 18%)!important;
+}
+html body main#view.page .game-grid .game-title-row,
+html body main#view.page .game-grid .game-info>p{display:none!important}
+html body main#view.page .game-grid .game-price-box{
+  display:flex!important;align-items:center!important;justify-content:space-between!important;
+  padding:10px 12px!important;border:1px solid #ffffff20!important;border-radius:12px!important;
+  background:#061b35d9!important;color:#fff!important;
+}
+html body main#view.page .game-grid .game-price-box small{color:#9dbbd9!important}
+html body main#view.page .game-grid .game-price-box strong{color:#fff!important;font-size:20px!important}
+html body main#view.page .game-grid .game-open-cta{width:100%!important;min-height:42px!important}
+html body main#view.page .game-grid .game-card:hover{transform:translateY(-3px)!important;border-color:#4aa8ff!important}
+
+/* Simetría, adaptación y menor trabajo visual durante el desplazamiento */
+html body main#view.page .rh-featured-grid{grid-template-columns:repeat(auto-fill,minmax(min(100%,245px),1fr))!important;gap:16px!important}
+html body main#view.page .rh-game-feature{min-height:260px!important}
+html body main#view.page .page-head,
+html body main#view.page .section-head{gap:16px!important;align-items:center!important}
+html body main#view.page img{max-width:100%}
+@media(max-width:700px){
+  html body main#view.page .products-grid>.product-card,
+  html body main#view.page .rs-game-products-grid>.product-card{
+    flex-basis:min(84vw,330px)!important;width:min(84vw,330px)!important;
+  }
+  html body main#view.page .game-grid{grid-template-columns:repeat(2,minmax(0,1fr))!important;gap:11px!important}
+  html body main#view.page .game-grid .game-card{min-height:255px!important;border-radius:17px!important}
+  html body main#view.page .game-grid .cover-title{font-size:17px!important;bottom:95px!important;left:12px!important}
+  html body main#view.page .game-grid .game-cover-foot{left:12px!important;right:12px!important;bottom:12px!important;font-size:9px!important}
+  html body main#view.page .game-grid .game-info{padding:0 11px 11px!important;gap:7px!important}
+  html body main#view.page .game-grid .game-price-box{padding:8px!important;gap:5px!important}
+  html body main#view.page .game-grid .game-price-box strong{font-size:15px!important}
+  html body main#view.page .game-grid .game-open-cta{min-height:38px!important;font-size:11px!important}
+}
+@media(max-width:380px){
+  html body main#view.page .game-grid{grid-template-columns:1fr!important}
+}
+@media(prefers-reduced-motion:reduce){
+  html body main#view.page *,
+  html body main#view.page *:before,
+  html body main#view.page *:after{scroll-behavior:auto!important;animation-duration:.01ms!important;transition-duration:.01ms!important}
+}
+</style>
+
+
+<style id="rs-v65-final-games-and-remember-fix">
+/* Games: same visual tile design as the Home featured games. */
+html body #view .game-grid.rs-games-featured-grid{
+ display:grid!important;grid-template-columns:repeat(2,minmax(0,1fr))!important;
+ align-items:stretch!important;justify-content:start!important;gap:16px!important;
+ width:100%!important;max-width:680px!important;margin:12px 0 24px!important;
+}
+html body #view .game-grid.rs-games-featured-grid>.rs-catalog-game-feature{
+ display:block!important;position:relative!important;width:100%!important;min-width:0!important;
+ height:260px!important;min-height:260px!important;padding:0!important;
+ border:1px solid #1e4e82!important;border-radius:20px!important;overflow:hidden!important;
+ text-align:left!important;color:#fff!important;background:#061327!important;box-shadow:0 14px 34px #0008!important;
+}
+html body #view .rs-catalog-game-feature .rh-game-feature-info{left:15px!important;right:48px!important;bottom:14px!important;gap:8px!important}
+html body #view .rs-catalog-game-feature .rh-game-feature-copy>b{font-size:clamp(15px,1.6vw,20px)!important}
+html body #view .rs-catalog-game-feature .rh-game-feature-copy>small{font-size:10px!important;line-height:1.3!important}
+html body #view .rs-catalog-game-feature .rh-game-feature-tag{top:12px!important;left:12px!important;padding:5px 8px!important;font-size:8px!important}
+html body #view .rs-catalog-game-feature .rh-game-feature-go{right:12px!important;bottom:14px!important;width:28px!important;height:28px!important;font-size:18px!important;line-height:1!important}
+html body #view .rs-catalog-game-feature:hover{transform:translateY(-3px)!important;border-color:var(--game-accent,#4aa8ff)!important}
+@media(max-width:560px){
+ html body #view .game-grid.rs-games-featured-grid{grid-template-columns:repeat(2,minmax(0,1fr))!important;gap:10px!important;max-width:100%!important}
+ html body #view .game-grid.rs-games-featured-grid>.rs-catalog-game-feature{height:220px!important;min-height:220px!important;border-radius:16px!important}
+ html body #view .rs-catalog-game-feature .rh-game-feature-info{left:10px!important;right:36px!important;bottom:10px!important;display:grid!important;gap:5px!important}
+ html body #view .rs-catalog-game-feature .rh-game-feature-copy>b{font-size:clamp(12px,3.4vw,16px)!important}
+ html body #view .rs-catalog-game-feature .rh-game-feature-copy>small{font-size:9px!important}
+ html body #view .rs-catalog-game-feature .rh-game-feature-price{text-align:left!important;display:flex!important;align-items:baseline!important;gap:5px!important}
+ html body #view .rs-catalog-game-feature .rh-game-feature-price>small{font-size:7px!important}
+ html body #view .rs-catalog-game-feature .rh-game-feature-price>b{font-size:12px!important}
+ html body #view .rs-catalog-game-feature .rh-game-feature-go{right:8px!important;bottom:9px!important;width:23px!important;height:23px!important}
+}
+@media(max-width:380px){
+ html body #view .game-grid.rs-games-featured-grid{grid-template-columns:1fr!important}
+ html body #view .game-grid.rs-games-featured-grid>.rs-catalog-game-feature{height:235px!important;min-height:235px!important}
+}
+/* Remember-me checkbox: a small dark chip matching the REFILLS SHOP texture. */
+html body .rs-remember-login{
+ display:inline-flex!important;align-items:center!important;gap:8px!important;
+ width:max-content!important;max-width:100%!important;margin:5px 0 13px!important;padding:7px 10px!important;
+ border:1px solid #244b72!important;border-radius:9px!important;
+ background:radial-gradient(ellipse at 0 0,#12345a66,transparent 70%),linear-gradient(145deg,#0b2038,#071525)!important;
+ box-shadow:inset 0 1px 0 #ffffff0a,0 5px 14px #0002!important;color:#c5dcf5!important;cursor:pointer!important;
+}
+html body .rs-remember-login input{
+ appearance:auto!important;-webkit-appearance:auto!important;width:14px!important;height:14px!important;
+ flex:0 0 14px!important;margin:0!important;accent-color:#278cff!important;cursor:pointer!important;
+}
+html body .rs-remember-login span{display:block!important;min-width:0!important}
+html body .rs-remember-login b{display:block!important;font-size:10px!important;line-height:1.3!important;font-weight:750!important;color:#c8e2ff!important}
+html body .rs-remember-login small{display:none!important}
+@media(max-width:420px){html body .rs-remember-login{padding:6px 9px!important;margin:4px 0 11px!important}html body .rs-remember-login b{font-size:9px!important}}
+</style>
 </head>
 <body>
 <div id="rsSplash" role="status" aria-live="polite" aria-label="Cargando REFILLS SHOP">
@@ -3445,7 +3691,7 @@ function accountView(mode='login'){
  if(!u){
   mode=mode==='registro'?'registro':'login';
   if(mode==='registro')return `<div class="auth-page">${authStory(mode)}<section class="account-form-card auth-form-card"><div class="auth-card-brand"><img class="brand-logo-image auth-brand-logo" src="${REFILLS_BRAND_IMAGE_SRC || REFILLS_BRAND_FALLBACK_SRC}" alt="Logo de REFILLS SHOP" width="320" height="320" onerror="window.refillsBrandFallback&&window.refillsBrandFallback(this)"><span><b>REFILLS SHOP</b><small>Recargas digitales</small></span></div><span class="eyebrow">CREAR PERFIL</span><h1 class="auth-form-title">Crear cuenta</h1><p class="auth-form-subtitle">Regístrate con tu teléfono y una contraseña, sin código de verificación.</p><form onsubmit="registerAccountNoPhoneVerification(event)"><label class="field"><span>Nombre</span><input id="regName" maxlength="60" autocomplete="name" required placeholder="Tu nombre"></label><label class="field"><span>Número de teléfono / WhatsApp</span><input id="regPhone" type="tel" inputmode="tel" autocomplete="tel" maxlength="24" required placeholder="+53 5XXXXXXX"><small>Incluye el prefijo del país, por ejemplo +53.</small></label><label class="field"><span>Tu contraseña (la que quieras, mínimo 4 caracteres)</span><input id="regPin" type="password" minlength="4" maxlength="40" required autocomplete="new-password" placeholder="••••••"><small>Será tu contraseña para iniciar sesión. Si ya tenías un código de 6 dígitos, puedes seguir usándolo igual.</small></label><label class="field"><span>Código de invitación (opcional)</span><input id="regRef" maxlength="16" autocomplete="off" autocapitalize="characters" placeholder="Ej. REFABC123" value="${esc(pendingRefCode())}"><small>Si un amigo te invitó, escribe su código aquí.</small></label><button class="btn btn-primary auth-submit" type="submit"> Registrarme</button></form><p class="security-note">Tu cuenta usa teléfono + PIN, sin código SMS/WhatsApp. Guarda bien tu PIN: lo necesitarás cada vez que inicies sesión.</p><div class="auth-switch"><span>¿Ya tienes cuenta?</span><button type="button" onclick="navigate('cuenta/login')">Iniciar sesión </button></div></section></div>`;
-  return `<div class="auth-page">${authStory(mode)}<section class="account-form-card auth-form-card"><div class="auth-card-brand"><img class="brand-logo-image auth-brand-logo" src="${REFILLS_BRAND_IMAGE_SRC || REFILLS_BRAND_FALLBACK_SRC}" alt="Logo de REFILLS SHOP" width="320" height="320" onerror="window.refillsBrandFallback&&window.refillsBrandFallback(this)"><span><b>REFILLS SHOP</b><small>Recargas digitales</small></span></div><span class="eyebrow">BIENVENIDO DE NUEVO</span><h1 class="auth-form-title">Iniciar sesión</h1><p class="auth-form-subtitle">Entra con tu número y tu contraseña.</p><form onsubmit="loginAccount(event)"><label class="field"><span>Número de teléfono</span><input id="loginPhone" type="tel" inputmode="tel" autocomplete="tel" maxlength="24" required placeholder="+53 5XXXXXXX"></label><label class="field"><span>Contraseña</span><input id="loginPin" type="password" minlength="4" maxlength="40" autocomplete="current-password" required placeholder="••••••"></label><button class="btn btn-primary auth-submit" type="submit"> Iniciar sesión</button></form><p class="security-note">Entra con el teléfono y el PIN que elegiste al registrarte.</p><div class="auth-switch"><span>¿No tienes cuenta?</span><button type="button" onclick="navigate('cuenta/registro')">＋ Registrarse </button></div></section></div>`;
+  return `<div class="auth-page">${authStory(mode)}<section class="account-form-card auth-form-card"><div class="auth-card-brand"><img class="brand-logo-image auth-brand-logo" src="${REFILLS_BRAND_IMAGE_SRC || REFILLS_BRAND_FALLBACK_SRC}" alt="Logo de REFILLS SHOP" width="320" height="320" onerror="window.refillsBrandFallback&&window.refillsBrandFallback(this)"><span><b>REFILLS SHOP</b><small>Recargas digitales</small></span></div><span class="eyebrow">BIENVENIDO DE NUEVO</span><h1 class="auth-form-title">Iniciar sesión</h1><p class="auth-form-subtitle">Entra con tu número y tu contraseña.</p><form onsubmit="loginAccount(event)"><label class="field"><span>Número de teléfono</span><input id="loginPhone" type="tel" inputmode="tel" autocomplete="tel" maxlength="24" required placeholder="+53 5XXXXXXX" value="${(localStorage.getItem('rs_remember_phone')||'').replace(/&/g,'&amp;').replace(/"/g,'&quot;')}"></label><label class="field"><span>Contraseña</span><input id="loginPin" type="password" minlength="4" maxlength="40" autocomplete="current-password" required placeholder="••••••"></label><label class="rs-remember-login"><input id="rememberLoginDevice" type="checkbox" ${localStorage.getItem('rs_remember_device')==='1'?'checked':''}><b>Recordarme</b></label><button class="btn btn-primary auth-submit" type="submit"> Iniciar sesión</button></form><p class="security-note">Entra con el teléfono y el PIN que elegiste al registrarte.</p><div class="auth-switch"><span>¿No tienes cuenta?</span><button type="button" onclick="navigate('cuenta/registro')">＋ Registrarse </button></div></section></div>`;
  }
  return accountPassView(u,mode);
 }
@@ -3585,6 +3831,11 @@ async function registerAccountNoPhoneVerification(e){
  const authUser=data?.user;
  if(!authUser){toast('No se pudo crear la cuenta. Inténtalo de nuevo.');return}
  if(!data?.session){toast('No se pudo completar el registro. Contacta con soporte.');return}
+ try{
+  const remember=document.getElementById('rememberLoginDevice')?.checked;
+  if(remember){localStorage.setItem('rs_remember_device','1');localStorage.setItem('rs_remember_phone',phoneE164);}
+  else{localStorage.removeItem('rs_remember_device');localStorage.removeItem('rs_remember_phone');}
+ }catch{}
  try{localStorage.removeItem(CUSTOMER_LOGOUT_KEY)}catch{}
  // The existing Auth trigger creates profiles + wallets. Wait briefly for that database trigger to finish.
  let ready=false;
@@ -4140,7 +4391,21 @@ const __rhOrders=ordersView,__rhRaffles=rafflesView,__rhHelp=helpView;
 ordersView=function(){const r=__rhOrders.apply(this,arguments);return typeof r==='string'&&currentUser()?rhRecentOrdersHTML()+r:r};
 rafflesView=function(){const r=__rhRaffles.apply(this,arguments);return typeof r==='string'?r+rhTopClientsHTML():r};
 helpView=function(){const r=__rhHelp.apply(this,arguments);return typeof r==='string'?r+rhTrustHTML():r};
-function gamesView(){const cats=['Todos',...new Set(db.games.filter(g=>g.active).map(g=>g.category))];let list=db.games.filter(g=>g.active&&((gameFilter==='Todos')||g.category===gameFilter)&&(`${g.name} ${g.category} ${g.description}`.toLowerCase().includes(searchText.toLowerCase())));return `<div class="page-head-row"><div><span class="eyebrow">BIBLIOTECA GAMING</span><h1 class="page-title">Todos los juegos</h1><p class="page-desc">Elige un juego para consultar sus packs, equivalencias y precio final.</p></div><div class="search-wrap"><input value="${esc(searchText)}" placeholder="Buscar un juego..." oninput="const v=this.value;const p=this.selectionStart;searchText=v;render();const i=document.querySelector('.search-wrap input');if(i){i.focus();i.setSelectionRange(p,p)}"></div></div><div class="filter-row">${cats.map(c=>`<button class="filter-chip ${gameFilter===c?'active':''}" onclick="gameFilter='${esc(c)}';render()">${esc(c)}</button>`).join('')}</div><div class="game-grid">${list.map(gameCard).join('')||'<div class="empty"><span>⌕</span>No encontramos juegos con esa búsqueda.</div>'}</div>`}
+function gameFeatureCard(g){
+ const packs=activeOffers(g.id);
+ const min=packs.length?Math.min(...packs.map(o=>offerDisplayPrice(o))):null;
+ const countText=`${packs.length} ${packs.length===1?'recarga disponible':'recargas disponibles'}`;
+ return `<button type="button" class="rh-game-feature rs-catalog-game-feature" style="--game-accent:${esc(g.color||'#2d8cff')}" onclick="navigate('game/${esc(g.id)}')">
+  <span class="rh-game-feature-art"><b class="rh-game-feature-fallback">${esc(g.icon||'▣')}</b>${imageHTML(g.id,'rh-game-feature-image')}<span class="rh-game-feature-tag">DISPONIBLE</span><span class="rh-game-feature-shade"></span></span>
+  <span class="rh-game-feature-info"><span class="rh-game-feature-copy"><b>${esc(g.name)}</b><small>${countText}</small></span><span class="rh-game-feature-price"><small>${min!==null?'DESDE':'PRÓXIMAMENTE'}</small><b>${min!==null?cash(min):'—'}</b></span></span>
+  <span class="rh-game-feature-go" aria-hidden="true">→</span>
+ </button>`;
+}
+function gamesView(){
+ const cats=['Todos',...new Set(db.games.filter(g=>g.active).map(g=>g.category))];
+ let list=db.games.filter(g=>g.active&&((gameFilter==='Todos')||g.category===gameFilter)&&(`${g.name} ${g.category} ${g.description}`.toLowerCase().includes(searchText.toLowerCase())));
+ return `<div class="page-head-row"><div><span class="eyebrow">BIBLIOTECA GAMING</span><h1 class="page-title">Todos los juegos</h1><p class="page-desc">Elige un juego para consultar sus packs, equivalencias y precio final.</p></div><div class="search-wrap"><input value="${esc(searchText)}" placeholder="Buscar un juego..." oninput="const v=this.value;const p=this.selectionStart;searchText=v;render();const i=document.querySelector('.search-wrap input');if(i){i.focus();i.setSelectionRange(p,p)}"></div></div><div class="filter-row">${cats.map(c=>`<button class="filter-chip ${gameFilter===c?'active':''}" onclick="gameFilter='${esc(c)}';render()">${esc(c)}</button>`).join('')}</div><div class="game-grid rh-featured-grid rs-games-featured-grid">${list.map(gameFeatureCard).join('')||'<div class="empty"><span>⌕</span>No encontramos juegos con esa búsqueda.</div>'}</div>`;
+}
 function productCard(o){
  const g=gameById(o.gameId)||{id:'',icon:'▣',name:'Juego',color:'#2d8cff'};
  const price=offerDisplayPrice(o),eq=productDisplayEquiv(price);
@@ -4923,8 +5188,8 @@ function communityHTML(){
 
 // ===== V3.1b:// ===== V3.1b: PIN, saldo USD y borrado de cuentas desde administración =====
 async function pinHashCandidates(pin){const out=[];try{if(globalThis.crypto?.subtle){const buf=await globalThis.crypto.subtle.digest('SHA-256',new TextEncoder().encode('REFILLS-DEMO-PIN:'+pin));out.push(Array.from(new Uint8Array(buf)).map(x=>x.toString(16).padStart(2,'0')).join(''))}}catch{}out.push('demo-'+Array.from(pin).reduce((a,c)=>((a<<5)-a+c.charCodeAt(0))|0,0).toString(16));return out}
-function adminAdjustUSD(id){const u=db.users.find(x=>x.id===id);if(!u)return;const bal=id===db.sessionUserId?Number(db.balance||0):Number(u.balance||0);modal(`<span class="eyebrow">SALDO WALLET</span><h2>Ajustar USD de ${esc(u.name)}</h2><p class="modal-sub">Saldo actual: <b>${cash(bal)} USD</b>. Escribe la cantidad que quieres añadir. Usa un número negativo para restar.</p><form onsubmit="applyAdminUSD(event,'${esc(id)}')"><label class="field"><span>Cantidad en USD (ej. 5, 2.50 o -1)</span><input id="admUsdAmount" type="number" step="0.01" required placeholder="0.00"></label><label class="field"><span>Nota (opcional)</span><input id="admUsdNote" maxlength="80" placeholder="Ej. Bonificación"></label><button class="btn btn-primary" type="submit">Aplicar ajuste</button></form>`)}
-function applyAdminUSD(e,id){e.preventDefault();const u=db.users.find(x=>x.id===id);if(!u)return;const amount=Math.round(Number(document.getElementById('admUsdAmount')?.value)*100)/100;const note=(document.getElementById('admUsdNote')?.value||'').trim();if(!Number.isFinite(amount)||amount===0)return toast('Introduce una cantidad distinta de cero');if(Math.abs(amount)>1000000)return toast('La cantidad es demasiado grande');const cur=id===db.sessionUserId;const bal=cur?Number(db.balance||0):Number(u.balance||0);const after=Math.round((bal+amount)*100)/100;if(after<0)return toast('El saldo no puede quedar negativo');const row={ts:Date.now(),date:new Date().toLocaleString('es-ES'),description:'Ajuste administrativo'+(note?' · '+note:''),type:amount>0?'Crédito':'Débito',amount,balanceAfter:after};if(cur){db.balance=after;db.ledger=db.ledger||[];db.ledger.unshift(row)}else{u.balance=after;u.ledger=u.ledger||[];u.ledger.unshift(row)}closeModal();persist();render();toast((amount>0?'Añadidos ':'Restados ')+cash(Math.abs(amount))+' USD · saldo: '+cash(after))}
+function adminAdjustUSD(id){const u=db.users.find(x=>x.id===id);if(!u)return;const bal=id===db.sessionUserId?Number(db.balance||0):Number(u.balance||0);modal(`<span class="eyebrow">SALDO WALLET</span><h2>Ajustar USD de ${esc(u.name)}</h2><p class="modal-sub">Saldo actual: <b>${cash(bal)} USD</b>. Indica la cantidad y elige si deseas añadir o quitar saldo. No se permitirá dejar la Wallet en negativo.</p><form onsubmit="applyAdminUSD(event,'${esc(id)}')"><label class="field"><span>Cantidad en USD</span><input id="admUsdAmount" type="number" min="0.01" step="0.01" required placeholder="0.00"></label><label class="field"><span>Nota (opcional)</span><input id="admUsdNote" maxlength="80" placeholder="Ej. Ajuste administrativo"></label><div class="rs-admin-balance-actions"><button class="btn btn-primary" type="submit" name="balanceAction" value="add">＋ Añadir saldo</button><button class="btn btn-secondary" type="submit" name="balanceAction" value="remove">− Quitar saldo</button></div></form>`)}
+function applyAdminUSD(e,id){e.preventDefault();const u=db.users.find(x=>x.id===id);if(!u)return;const rawAmount=Math.round(Number(document.getElementById('admUsdAmount')?.value)*100)/100;const direction=(e.submitter?.value||document.querySelector('#modalHost form [name="balanceAction"]')?.value||'add');const amount=direction==='remove'?-Math.abs(rawAmount):Math.abs(rawAmount);const note=(document.getElementById('admUsdNote')?.value||'').trim();if(!Number.isFinite(amount)||amount===0)return toast('Introduce una cantidad distinta de cero');if(Math.abs(amount)>1000000)return toast('La cantidad es demasiado grande');const cur=id===db.sessionUserId;const bal=cur?Number(db.balance||0):Number(u.balance||0);const after=Math.round((bal+amount)*100)/100;if(after<0)return toast('El saldo no puede quedar negativo');const row={ts:Date.now(),date:new Date().toLocaleString('es-ES'),description:'Ajuste administrativo'+(note?' · '+note:''),type:amount>0?'Crédito':'Débito',amount,balanceAfter:after};if(cur){db.balance=after;db.ledger=db.ledger||[];db.ledger.unshift(row)}else{u.balance=after;u.ledger=u.ledger||[];u.ledger.unshift(row)}closeModal();persist();render();toast((amount>0?'Añadidos ':'Restados ')+cash(Math.abs(amount))+' USD · saldo: '+cash(after))}
 function adminResetPin(id){const u=db.users.find(x=>x.id===id);if(!u)return;modal(`<span class="eyebrow">ACCESO</span><h2>Nuevo PIN para ${esc(u.name)}</h2><p class="modal-sub">Teléfono: <b>${esc(u.phone)}</b>. Escribe un PIN de 6 dígitos y entrégaselo al usuario.</p><form onsubmit="applyAdminPin(event,'${esc(id)}')"><label class="field"><span>Nueva contraseña (mín. 4 caracteres)</span><input id="admNewPin" minlength="4" maxlength="40" required placeholder="123456"></label><button class="btn btn-primary" type="submit">Guardar PIN</button></form>`)}
 async function applyAdminPin(e,id){e.preventDefault();const u=db.users.find(x=>x.id===id);if(!u)return;const pin=(document.getElementById('admNewPin')?.value||'').trim();if(String(pin).length<4)return toast('La contraseña debe tener al menos 4 caracteres');if(u.remoteWalletId){try{const token=sessionStorage.getItem(REFILLS_WALLET_ADMIN_KEY)||'';if(!token)throw new Error('Vuelve a iniciar sesión en el panel.');const keys=await refillsWalletKeys(u.phone,pin);await refillsWalletApi('admin-reset-pin',{admin_access_token:token,phone_key:keys.phoneKey,wallet_key:keys.walletKey});u.remotePhoneKey=keys.phoneKey}catch(err){return toast('No se cambió el PIN remoto: '+(err?.message||String(err)))}}u.pinHash=await userPinDigest(pin);u.authUserId=null;u.active=u.active===false?false:true;closeModal();persist();render();toast('PIN actualizado. Ya puede entrar con su teléfono y el nuevo PIN.')}
 function adminDeleteUser(id){const u=db.users.find(x=>x.id===id);if(!u)return;const bal=Number(id===db.sessionUserId?db.balance:u.balance)||0;showAdminConfirm('Eliminar cuenta',`Se eliminará la cuenta de «${u.name}» (${u.phone})${u.remoteWalletId?' y su Wallet en el servidor, con su saldo ('+cash(bal)+' USD)':' con su saldo, pedidos y RefillCoins'}${id===db.sessionUserId?'. Es la cuenta con la que tienes la sesión abierta; se cerrará':''}. Esta acción no se puede deshacer. Si solo quieres bloquear el acceso, usa «Desactivar».`,'Eliminar cuenta',`confirmDeleteUser(${JSON.stringify(String(id))})`)}
@@ -5072,7 +5337,13 @@ END $$;`;
 }
 function refillsSetWalletSession(result,user,keys){
  activeWalletAccessToken=result.access_token||'';activeWalletPhoneKey=keys.phoneKey;activeWalletPhone=user.phone||'';
- try{sessionStorage.setItem(REFILLS_WALLET_SESSION_KEY,activeWalletAccessToken);sessionStorage.setItem(REFILLS_WALLET_META_KEY,JSON.stringify({userId:user.id,phone:user.phone,phoneKey:keys.phoneKey,name:user.name}));sessionStorage.removeItem(CUSTOMER_LOGOUT_KEY)}catch{}
+ try{
+  const meta=JSON.stringify({userId:user.id,phone:user.phone,phoneKey:keys.phoneKey,name:user.name});
+  sessionStorage.setItem(REFILLS_WALLET_SESSION_KEY,activeWalletAccessToken);sessionStorage.setItem(REFILLS_WALLET_META_KEY,meta);sessionStorage.removeItem(CUSTOMER_LOGOUT_KEY);
+  if(localStorage.getItem('rs_remember_device')==='1'){
+   localStorage.setItem(REFILLS_WALLET_SESSION_KEY,activeWalletAccessToken);localStorage.setItem(REFILLS_WALLET_META_KEY,meta);
+  }else{localStorage.removeItem(REFILLS_WALLET_SESSION_KEY);localStorage.removeItem(REFILLS_WALLET_META_KEY)}
+ }catch{}
  user.balance=Number(result.balance_usd||0);user.walletKeyId=keys.phoneKey;user.authUserId=null;
  user.remoteWalletId=String(result.wallet_id||user.remoteWalletId||'');user.remotePhoneKey=keys.phoneKey;user.remoteAccountSynced=Boolean(result.wallet_id||result.ok);user.phoneE164=String(result.phone_e164||user.phone||'');
  if(result.display_name&&result.display_name!=='Cliente'&&result.display_name!=='Cliente REFILLS')user.name=String(result.display_name);
@@ -5106,10 +5377,15 @@ function restoreSession(){db.rouletteSpinning=false;db.sessionUserId=null;try{se
 async function restoreSupabaseAccountSession(){return false}
 async function hydrateSupabaseAccount(){return false}
 async function restoreWalletSession(){
- let token='',meta=null;try{token=sessionStorage.getItem(REFILLS_WALLET_SESSION_KEY)||'';meta=JSON.parse(sessionStorage.getItem(REFILLS_WALLET_META_KEY)||'null')}catch{}
+ let token='',meta=null;try{
+  token=sessionStorage.getItem(REFILLS_WALLET_SESSION_KEY)||localStorage.getItem(REFILLS_WALLET_SESSION_KEY)||'';
+  const rawMeta=sessionStorage.getItem(REFILLS_WALLET_META_KEY)||localStorage.getItem(REFILLS_WALLET_META_KEY)||'null';
+  meta=JSON.parse(rawMeta);
+  if(token&&meta){sessionStorage.setItem(REFILLS_WALLET_SESSION_KEY,token);sessionStorage.setItem(REFILLS_WALLET_META_KEY,rawMeta)}
+ }catch{}
  if(!token||!meta)return false;
  try{const remote=await refillsWalletApi('me',{access_token:token});let u=db.users.find(x=>x.id===meta.userId)||db.users.find(x=>normalizePhone(x.phone)===normalizePhone(meta.phone));u=refillsCreateLocalUser({phone:meta.phone,name:meta.name||u?.name||'Cliente REFILLS',pinHash:u?.pinHash||'',balance:Number(remote.balance_usd||0),existing:u});u.balance=Number(remote.balance_usd||0);activeWalletAccessToken=token;activeWalletPhoneKey=meta.phoneKey;activeWalletPhone=meta.phone;activateAccount(u);persist();render();await refreshMyOrdersRemote(true,{renderAfter:false});return true}
- catch(err){console.warn('Sesión Wallet caducada o no válida:',err);try{sessionStorage.removeItem(REFILLS_WALLET_SESSION_KEY);sessionStorage.removeItem(REFILLS_WALLET_META_KEY);sessionStorage.removeItem('REFILLS_CUSTOMER_SESSION')}catch{}activeWalletAccessToken='';activeWalletPhoneKey='';activeWalletPhone='';return false}
+ catch(err){console.warn('Sesión Wallet caducada o no válida:',err);try{sessionStorage.removeItem(REFILLS_WALLET_SESSION_KEY);sessionStorage.removeItem(REFILLS_WALLET_META_KEY);sessionStorage.removeItem('REFILLS_CUSTOMER_SESSION');localStorage.removeItem(REFILLS_WALLET_SESSION_KEY);localStorage.removeItem(REFILLS_WALLET_META_KEY)}catch{}activeWalletAccessToken='';activeWalletPhoneKey='';activeWalletPhone='';return false}
 }
 async function refreshWalletRemote(){if(!activeWalletAccessToken||walletRefreshPromise)return walletRefreshPromise;walletRefreshPromise=(async()=>{try{const r=await refillsWalletApi('me',{access_token:activeWalletAccessToken});const u=currentUser();if(u){const v=Math.round(Number(r.balance_usd||0)*100)/100;u.balance=v;db.balance=v;persist();updateHeader()}return r}catch(err){console.warn('No se pudo actualizar el saldo remoto:',err);return null}finally{walletRefreshPromise=null}})();return walletRefreshPromise}
 function getRegistrationDraft(){
@@ -5153,11 +5429,14 @@ async function loginAccount(e){
  const remoteCents=Math.round(Number(remote.balance_usd||0)*100);const localCents=local?Math.round(Number(local.balance||0)*100):0;
  if(local&&localCents>0&&remoteCents===0){refillsSetPendingImport(keys,refillsCreateLocalUser({phone:phoneE164,name:local.name,pinHash:local.pinHash||await userPinDigest(pin),balance:local.balance,existing:local}),Number(local.balance));return}
  if(local&&localCents>0&&remoteCents>0&&localCents!==remoteCents){backupLocalStateBeforeRemoteApply();const dig=local?.pinHash||await userPinDigest(pin);window.__refillsBalanceConflict={phoneE164,keys,remote,local,dig,localCents,remoteCents};showBalanceConflictModal();return}
- const u=refillsCreateLocalUser({phone:phoneE164,name:local?.name||remote.display_name||'Cliente REFILLS',pinHash:local?.pinHash||await userPinDigest(pin),balance:remoteCents/100,existing:local});u.referralCode=u.referralCode||remote.referral_code||newReferralCode();if(!u.invitedByCode&&remote.invited_by_code)u.invitedByCode=remote.invited_by_code;u.remoteAccountSynced=true;refillsSetWalletSession(remote,u,keys);try{localStorage.removeItem(BALANCE_MIGRATION_KEY)}catch{}toast('✓ Sesión iniciada. Saldo: '+cash(remoteCents/100));navigate('inicio');
+ const u=refillsCreateLocalUser({phone:phoneE164,name:local?.name||remote.display_name||'Cliente REFILLS',pinHash:local?.pinHash||await userPinDigest(pin),balance:remoteCents/100,existing:local});u.referralCode=u.referralCode||remote.referral_code||newReferralCode();if(!u.invitedByCode&&remote.invited_by_code)u.invitedByCode=remote.invited_by_code;u.remoteAccountSynced=true;
+ const rememberDevice=!!document.getElementById('rememberLoginDevice')?.checked;
+ try{if(rememberDevice){localStorage.setItem('rs_remember_device','1');localStorage.setItem('rs_remember_phone',phoneE164)}else{localStorage.removeItem('rs_remember_device');localStorage.removeItem('rs_remember_phone');localStorage.removeItem(REFILLS_WALLET_SESSION_KEY);localStorage.removeItem(REFILLS_WALLET_META_KEY)}}catch{}
+ refillsSetWalletSession(remote,u,keys);try{localStorage.removeItem(BALANCE_MIGRATION_KEY)}catch{}toast('✓ Sesión iniciada. Saldo: '+cash(remoteCents/100));navigate('inicio');
 }
 async function logoutAccount(){
  try{if(currentUser())syncCurrentAccount();localStorage.setItem(STORE_KEY,JSON.stringify(db))}catch{}
- try{sessionStorage.removeItem(REFILLS_WALLET_SESSION_KEY);sessionStorage.removeItem(REFILLS_WALLET_META_KEY);sessionStorage.removeItem('REFILLS_CUSTOMER_SESSION');localStorage.removeItem(CUSTOMER_LOGOUT_KEY)}catch{}
+ try{sessionStorage.removeItem(REFILLS_WALLET_SESSION_KEY);sessionStorage.removeItem(REFILLS_WALLET_META_KEY);sessionStorage.removeItem('REFILLS_CUSTOMER_SESSION');localStorage.removeItem(REFILLS_WALLET_SESSION_KEY);localStorage.removeItem(REFILLS_WALLET_META_KEY);localStorage.removeItem(CUSTOMER_LOGOUT_KEY)}catch{}
  activeWalletAccessToken='';activeWalletPhoneKey='';activeWalletPhone='';db.sessionUserId=null;db.profile={id:'guest',name:'Invitado',phone:''};db.balance=0;db.orders=[];db.deposits=[];db.ledger=[];db.coins=0;db.coinLedger=[];db.eligibleSpend=0;db.referralRewardPaid=false;db.rouletteHistory=[];updateHeader();render();toast('Sesión cerrada. El saldo remoto permanece guardado.');
 }
 async function walletAdminAdjust(phone,delta,description,requestKey){
@@ -5166,7 +5445,7 @@ async function walletAdminAdjust(phone,delta,description,requestKey){
  return await refillsWalletApi('admin-adjust',{admin_access_token:token,phone_key:phoneKey,delta_usd:Number(delta),description:String(description||'Ajuste administrativo').slice(0,140),request_key:requestKey||('admin-'+Date.now()+'-'+Math.random().toString(36).slice(2,8))});
 }
 async function applyAdminUSD(e,id){
- e.preventDefault();const u=db.users.find(x=>x.id===id);if(!u)return;const amount=Math.round(Number(document.getElementById('admUsdAmount')?.value)*100)/100;const note=(document.getElementById('admUsdNote')?.value||'').trim();if(!Number.isFinite(amount)||amount===0)return toast('Introduce una cantidad distinta de cero');if(Math.abs(amount)>1000000)return toast('La cantidad es demasiado grande');
+ e.preventDefault();const u=db.users.find(x=>x.id===id);if(!u)return;const rawAmount=Math.round(Number(document.getElementById('admUsdAmount')?.value)*100)/100;const direction=(e.submitter?.value||document.querySelector('#modalHost form [name="balanceAction"]')?.value||'add');const amount=direction==='remove'?-Math.abs(rawAmount):Math.abs(rawAmount);const availableBalance=id===db.sessionUserId?Number(db.balance||0):Number(u.balance||0);if(amount<0&&Math.abs(amount)>availableBalance+0.000001)return toast('No puedes quitar más saldo del disponible.');const note=(document.getElementById('admUsdNote')?.value||'').trim();if(!Number.isFinite(amount)||amount===0)return toast('Introduce una cantidad distinta de cero');if(Math.abs(amount)>1000000)return toast('La cantidad es demasiado grande');
  try{const remote=await walletAdminAdjust(u.phone,amount,'Ajuste administrativo'+(note?' · '+note:''),'admin-adjust-'+Date.now()+'-'+Math.random().toString(36).slice(2,7));const after=Math.round(Number(remote.balance_usd)*100)/100;const cur=id===db.sessionUserId;const row={ts:Date.now(),date:new Date().toLocaleString('es-ES'),description:'Ajuste administrativo'+(note?' · '+note:''),type:amount>0?'Crédito':'Débito',amount,balanceAfter:after};if(cur){db.balance=after;db.ledger=db.ledger||[];db.ledger.unshift(row)}else{u.balance=after;u.ledger=u.ledger||[];u.ledger.unshift(row)}closeModal();persist();render();toast('Ajuste guardado en Supabase. Nuevo saldo: '+cash(after))}
  catch(err){toast('No cambié el saldo local porque falló el ajuste remoto: '+(err?.message||String(err)))}
 }
@@ -8063,7 +8342,7 @@ giftcards:["Tarjetas digitales","Encuentra tarjetas y códigos digitales disponi
 manuales:["Servicios y recargas manuales","Encuentra servicios alternativos y revisa los pasos antes de solicitar.","Consultar solicitudes","solicitudes"],
 solicitudes:["Seguimiento de solicitudes","Consulta tus solicitudes y revisa su estado sin perder los detalles.","Centro de ayuda","ayuda"],
 planes:["Elige cómo quieres comprar","Consulta las opciones y beneficios disponibles en REFILLS SHOP.","Ver ofertas","ofertas"],
-precios-usd:["Precios transparentes","Consulta equivalencias y referencias de precios antes de comprar.","Explorar catálogo","juegos"],
+'precios-usd':["Precios transparentes","Consulta equivalencias y referencias de precios antes de comprar.","Explorar catálogo","juegos"],
 ayuda:["Estamos para ayudarte","Encuentra respuestas rápidas y orientación para Wallet, recargas y pedidos.","Ver mis pedidos","pedidos"],
 refillcoins:["Tus recompensas","Consulta tus puntos y las opciones disponibles para aprovecharlos.","Ver ofertas especiales","especiales"],
 ruleta:["Una experiencia extra","Revisa las condiciones y opciones disponibles antes de participar.","Ver recompensas","refillcoins"],
@@ -8076,7 +8355,7 @@ function decorate(){
 const view=document.getElementById('view');if(!view||view.dataset.rsDecorated===location.hash)return;
 view.dataset.rsDecorated=location.hash;
 const route=(location.hash.slice(1).split('/')[0]||'inicio');
-if(!routeInfo[route]||route==='cuenta'&&location.hash.includes('login'))return;
+if(!routeInfo[route]||route==='inicio'||route==='cuenta'&&location.hash.includes('login'))return;
 const [headline,sub,cta,target]=routeInfo[route];
 if(view.querySelector('.rs-route-hero'))return;
 const hero=document.createElement('section');hero.className='rs-route-hero';
@@ -8128,16 +8407,7 @@ var tc=q('meta[name=theme-color]');if(tc)tc.content='#000000';
 addEventListener('keydown',function(e){if(e.key==='/'&&!/INPUT|TEXTAREA|SELECT/.test((d.activeElement||{}).tagName||'')&&typeof openCmd==='function'){e.preventDefault();openCmd()}});
 }catch(e){console.warn('REFILLS V5.5 mejoras:',e)}})();
 </script>
-<script>(function(){try{var v=document.getElementById('view');if(!v||!window.MutationObserver)return;var touch=matchMedia('(hover:none)').matches;
-function wire(g){var p=g.previousElementSibling;if(p&&p.classList&&p.classList.contains('rs-swipe-hint'))return;
-var h=document.createElement('div');h.className='rs-swipe-hint';h.innerHTML='<span>'+(touch?'👆 Desliza hacia los lados para ver más ofertas':'Usa las flechas o arrastra para ver más ofertas')+'</span><div><button type="button" aria-label="Anterior">‹</button><button type="button" aria-label="Siguiente">›</button></div>';
-g.parentNode.insertBefore(h,g);var b=h.querySelectorAll('button');
-b[0].onclick=function(){g.scrollBy({left:-g.clientWidth*.8,behavior:'smooth'})};b[1].onclick=function(){g.scrollBy({left:g.clientWidth*.8,behavior:'smooth'})};
-g.addEventListener('scroll',function(){h.classList.add('is-done')},{passive:true,once:true});
-function chk(){h.style.display=g.scrollWidth>g.clientWidth+8?'flex':'none'}chk();addEventListener('resize',chk);setTimeout(chk,400);
-if(!touch){var d=0,x=0,s=0;g.addEventListener('mousedown',function(e){if(e.target.closest('button'))return;d=1;x=e.pageX;s=g.scrollLeft;g.style.scrollSnapType='none'});addEventListener('mouseup',function(){if(d){d=0;g.style.scrollSnapType=''}});g.addEventListener('mousemove',function(e){if(d){g.scrollLeft=s-(e.pageX-x)}})}}
-function scan(){v.querySelectorAll('.products-grid,.rs-game-products-grid').forEach(wire)}
-new MutationObserver(scan).observe(v,{childList:true,subtree:true});scan()}catch(e){console.warn(e)}})();</script>
+
 </body>
 </html>
 
@@ -8249,4 +8519,420 @@ new MutationObserver(scan).observe(v,{childList:true,subtree:true});scan()}catch
 }
 </style>
 
+<style id="refills-v65-real-layout-fix">
+/* V65: cambios finales con prioridad sobre las hojas anteriores */
+/* OFERTAS: dos columnas amplias en escritorio y una tarjeta ancha en móvil */
+html body #view .products-grid,
+html body #view .rs-game-products-grid{
+  display:grid!important;
+  grid-template-columns:repeat(2,minmax(0,1fr))!important;
+  gap:22px!important;
+  align-items:stretch!important;
+}
+html body #view .product-card{
+  width:100%!important;min-width:0!important;max-width:none!important;
+  min-height:100%!important;border-radius:22px!important;
+}
+html body #view .product-card .product-art{height:205px!important}
+html body #view .product-card .product-card-body{padding:22px!important}
+html body #view .product-card h3{font-size:18px!important}
+html body #view .product-card p{font-size:12px!important;min-height:38px!important}
+html body #view .product-card .product-price-row .price-usd{font-size:30px!important}
+html body #view .product-card .price-alt{padding:13px!important}
+html body #view .product-card .price-alt>div b{font-size:11px!important;padding:7px 9px!important}
+html body #view .product-card .btn{min-height:46px!important;font-size:12px!important}
+/* JUEGOS: imagen completa como las tarjetas destacadas de Inicio */
+html body #view .game-grid{
+  grid-template-columns:repeat(3,minmax(0,1fr))!important;
+  gap:18px!important;align-items:stretch!important;
+}
+html body #view .game-grid .game-card{
+  position:relative!important;display:block!important;
+  height:285px!important;min-height:285px!important;overflow:hidden!important;
+  border:1px solid #1e4e82!important;border-radius:21px!important;
+  background:#061327!important;color:#fff!important;
+  box-shadow:0 14px 34px #0008!important;isolation:isolate!important;
+}
+html body #view .game-grid .game-card .game-cover{
+  position:absolute!important;inset:0!important;width:100%!important;height:100%!important;
+  border:0!important;overflow:hidden!important;
+  background:radial-gradient(circle at 70% 20%,color-mix(in srgb,var(--game-accent,#2d8cff) 44%,transparent),transparent 52%),linear-gradient(145deg,#102b4c,#050c1c)!important;
+}
+html body #view .game-grid .game-card .game-cover img{
+  position:absolute!important;inset:0!important;width:100%!important;height:100%!important;
+  object-fit:cover!important;opacity:.82!important;mix-blend-mode:normal!important;
+}
+html body #view .game-grid .game-card .game-cover:after{
+  content:""!important;position:absolute!important;inset:0!important;z-index:1!important;
+  background:linear-gradient(180deg,#02081730 0%,#02081705 32%,#020817ed 100%),linear-gradient(100deg,#02081780,transparent 82%)!important;
+}
+html body #view .game-grid .game-card .game-cover-shade{display:none!important}
+html body #view .game-grid .game-card .game-tag{
+  position:absolute!important;z-index:4!important;top:13px!important;left:13px!important;right:auto!important;
+  padding:6px 9px!important;border:1px solid #9fdcff70!important;border-radius:999px!important;
+  background:#061b35c9!important;color:#c9eaff!important;font-size:9px!important;
+}
+html body #view .game-grid .game-card .game-icon{display:none!important}
+html body #view .game-grid .game-card .cover-title{
+  position:absolute!important;z-index:4!important;left:16px!important;right:16px!important;
+  top:auto!important;bottom:76px!important;inset-inline:auto!important;
+  display:block!important;padding:0!important;text-align:left!important;
+  font-size:clamp(20px,2vw,29px)!important;line-height:1.05!important;
+  font-weight:1000!important;letter-spacing:-.5px!important;color:#fff!important;
+  opacity:1!important;text-shadow:0 4px 18px #000!important;
+}
+html body #view .game-grid .game-card .game-cover-foot{display:none!important}
+html body #view .game-grid .game-card .game-info{
+  position:absolute!important;z-index:5!important;inset:0!important;
+  display:block!important;padding:0!important;background:transparent!important;
+  pointer-events:none!important;
+}
+html body #view .game-grid .game-card .game-title-row,
+html body #view .game-grid .game-card .game-info>p,
+html body #view .game-grid .game-card .game-small-icon,
+html body #view .game-grid .game-card .game-category{display:none!important}
+html body #view .game-grid .game-card .game-price-box{
+  position:absolute!important;left:16px!important;right:112px!important;bottom:16px!important;
+  display:block!important;margin:0!important;padding:0!important;border:0!important;
+  border-radius:0!important;background:transparent!important;
+}
+html body #view .game-grid .game-card .game-price-box small{
+  color:#a9c8e8!important;font-size:9px!important;letter-spacing:1px!important;
+}
+html body #view .game-grid .game-card .game-price-box strong{
+  color:#fff!important;font-size:19px!important;
+}
+html body #view .game-grid .game-card .game-offer-count{display:none!important}
+html body #view .game-grid .game-card .game-open-cta{
+  position:absolute!important;right:14px!important;bottom:14px!important;width:auto!important;
+  min-width:100px!important;min-height:39px!important;margin:0!important;
+  padding:9px 12px!important;pointer-events:auto!important;
+  border-radius:11px!important;font-size:10px!important;
+}
+html body #view .game-grid .game-card:hover{transform:translateY(-5px)!important;border-color:var(--game-accent,#4aa8ff)!important}
+@media(max-width:1100px){
+ html body #view .game-grid{grid-template-columns:repeat(2,minmax(0,1fr))!important}
+}
+@media(max-width:700px){
+ html body #view .products-grid,
+ html body #view .rs-game-products-grid{grid-template-columns:1fr!important;gap:15px!important}
+ html body #view .product-card .product-art{height:185px!important}
+ html body #view .product-card .product-card-body{padding:18px!important}
+ html body #view .game-grid{grid-template-columns:repeat(2,minmax(0,1fr))!important;gap:11px!important}
+ html body #view .game-grid .game-card{height:235px!important;min-height:235px!important;border-radius:16px!important}
+ html body #view .game-grid .game-card .game-tag{top:9px!important;left:9px!important;padding:5px 7px!important;font-size:7px!important}
+ html body #view .game-grid .game-card .cover-title{left:11px!important;right:11px!important;bottom:69px!important;font-size:clamp(14px,4vw,19px)!important}
+ html body #view .game-grid .game-card .game-price-box{left:11px!important;right:11px!important;bottom:11px!important}
+ html body #view .game-grid .game-card .game-price-box small{font-size:7px!important}
+ html body #view .game-grid .game-card .game-price-box strong{font-size:15px!important}
+ html body #view .game-grid .game-card .game-open-cta{right:9px!important;bottom:9px!important;min-width:0!important;min-height:32px!important;padding:7px 9px!important;font-size:8px!important}
+}
+@media(max-width:380px){
+ html body #view .game-grid{grid-template-columns:1fr!important}
+ html body #view .game-grid .game-card{height:255px!important;min-height:255px!important}
+}
+@media(prefers-reduced-motion:reduce){
+ html body #view .game-card,html body #view .product-card{transition:none!important}
+}
+
+/* AJUSTE SOLICITADO: catálogo de Juegos estilo tarjetas visuales y ofertas más anchas */
+@media (min-width:951px){
+  html body #view .game-grid{grid-template-columns:repeat(2,minmax(0,1fr))!important;gap:18px!important;}
+  html body #view .game-grid .game-card{min-height:260px!important;height:100%!important;border-radius:22px!important;}
+  html body #view .game-grid .game-card .game-cover{height:clamp(190px,20vw,270px)!important;}
+  html body #view .game-grid .game-card .game-info{padding:17px!important;}
+  html body #view .game-grid .game-card .game-info h3{font-size:clamp(16px,1.3vw,21px)!important;}
+  html body #view .game-grid .game-card .game-price-box{padding:13px 15px!important;}
+  html body #view .offer-grid{grid-template-columns:repeat(2,minmax(0,1fr))!important;gap:20px!important;}
+  html body #view .offer-grid .offer-card{width:100%!important;min-width:0!important;}
+}
+/* Cards de juegos: imagen protagonista, etiqueta y contenido legible */
+html body #view .game-grid .game-card.game-offer-style{border:1px solid #2363a0!important;background:linear-gradient(155deg,#0b1e34,#050d18)!important;box-shadow:0 12px 30px #0005!important;}
+html body #view .game-grid .game-card.game-offer-style .game-cover{position:relative!important;overflow:hidden!important;}
+html body #view .game-grid .game-card.game-offer-style .game-cover img{object-fit:cover!important;opacity:.92!important;}
+html body #view .game-grid .game-card.game-offer-style .game-info{padding:16px 18px!important;}
+html body #view .game-grid .game-card.game-offer-style .game-price-box{border-color:#23558b!important;background:linear-gradient(135deg,#0d2b4c,#07172a)!important;}
+/* Ofertas: tarjeta y elementos internos más amplios */
+html body #view .offer-grid{gap:18px!important;}
+html body #view .offer-grid .offer-card{padding:clamp(16px,2vw,26px)!important;border-radius:20px!important;}
+html body #view .offer-grid .offer-card img{object-fit:cover!important;}
+html body #view .offer-grid .offer-card h3,
+html body #view .offer-grid .offer-card .offer-title{font-size:clamp(16px,1.4vw,22px)!important;line-height:1.25!important;}
+html body #view .offer-grid .offer-card p{font-size:clamp(12px,1vw,14px)!important;line-height:1.6!important;}
+html body #view .offer-grid .offer-card .btn,
+html body #view .offer-grid .offer-card button{min-height:44px!important;padding:12px 16px!important;}
+@media(max-width:950px){
+  html body #view .game-grid{grid-template-columns:repeat(2,minmax(0,1fr))!important;gap:12px!important;}
+  html body #view .game-grid .game-card{min-height:245px!important;height:100%!important;}
+  html body #view .game-grid .game-card .game-cover{height:clamp(145px,28vw,205px)!important;}
+  html body #view .offer-grid{grid-template-columns:repeat(2,minmax(0,1fr))!important;gap:12px!important;}
+  html body #view .offer-grid .offer-card{padding:14px!important;}
+}
+@media(max-width:560px){
+  html body #view .game-grid{grid-template-columns:1fr!important;gap:14px!important;}
+  html body #view .game-grid .game-card{min-height:250px!important;}
+  html body #view .game-grid .game-card .game-cover{height:190px!important;}
+  html body #view .offer-grid{grid-template-columns:1fr!important;gap:14px!important;}
+  html body #view .offer-grid .offer-card{padding:16px!important;}
+}
+
+/* REFILLS SHOP - ajustes efectivos para catálogo Juegos y Ofertas */
+html body main#view.page .game-grid{
+ display:grid!important;
+ grid-template-columns:repeat(2,minmax(0,1fr))!important;
+ gap:18px!important;
+ width:100%!important;
+}
+html body main#view.page .game-grid>.game-card{
+ width:100%!important;max-width:none!important;min-width:0!important;
+ min-height:320px!important;height:320px!important;
+}
+html body main#view.page .game-grid .game-cover{height:100%!important;min-height:100%!important}
+html body main#view.page .game-grid .game-card .game-info{padding:0 18px 18px!important}
+html body main#view.page .game-grid .cover-title{font-size:clamp(20px,2vw,27px)!important;bottom:112px!important}
+html body #view .offer-grid{
+ display:grid!important;grid-template-columns:repeat(2,minmax(0,1fr))!important;
+ gap:20px!important;width:100%!important;
+}
+html body #view .offer-grid>.offer-card{
+ width:100%!important;max-width:none!important;min-width:0!important;
+ padding:clamp(20px,2.4vw,30px)!important;
+}
+html body #view .offer-grid .offer-card img{width:100%!important;max-width:100%!important;object-fit:cover}
+html body #view .offer-grid .offer-card h2,
+html body #view .offer-grid .offer-card h3{font-size:clamp(20px,2vw,27px)!important}
+html body #view .offer-grid .offer-card p{font-size:15px!important;line-height:1.65!important}
+html body #view .offer-grid .offer-card .btn,
+html body #view .offer-grid .offer-card button{width:100%!important;min-height:48px!important}
+.rs-remember-login{display:flex!important;align-items:flex-start!important;gap:11px!important;margin:16px 0 20px!important;padding:13px 14px!important;border:1px solid #cbdcf0!important;border-radius:12px!important;background:#f5f9ff!important;cursor:pointer!important}
+.rs-remember-login input{width:18px!important;height:18px!important;flex:0 0 18px!important;margin:2px 0 0!important;accent-color:#1877f2!important}
+.rs-remember-login span{display:flex!important;flex-direction:column!important;gap:4px!important}
+.rs-remember-login b{font-size:13px!important;color:#17365d!important}
+.rs-remember-login small{font-size:11px!important;line-height:1.45!important;color:#617894!important}
+@media(max-width:700px){
+ html body main#view.page .game-grid{grid-template-columns:repeat(2,minmax(0,1fr))!important;gap:12px!important}
+ html body main#view.page .game-grid>.game-card{height:270px!important;min-height:270px!important}
+ html body #view .offer-grid{grid-template-columns:1fr!important;gap:15px!important}
+}
+@media(max-width:420px){
+ html body main#view.page .game-grid{grid-template-columns:1fr!important}
+ html body main#view.page .game-grid>.game-card{height:280px!important;min-height:280px!important}
+}
+</style>
+
+<style id="refills-v66-final-layout">
+/* Catálogo: usar una cuadrícula real y detener el desbordamiento horizontal que corta la primera tarjeta. */
+html body #view,
+html body #view .offers-results,
+html body #view .products-grid,
+html body #view .rs-game-products-grid{
+  box-sizing:border-box!important;
+  width:100%!important;
+  max-width:100%!important;
+  min-width:0!important;
+}
+html body #view .products-grid,
+html body #view .rs-game-products-grid{
+  display:grid!important;
+  grid-template-columns:repeat(2,minmax(0,1fr))!important;
+  grid-auto-flow:row!important;
+  grid-auto-columns:auto!important;
+  justify-content:stretch!important;
+  align-items:stretch!important;
+  gap:20px!important;
+  margin:0 0 24px!important;
+  padding:0!important;
+  overflow:visible!important;
+  scroll-snap-type:none!important;
+}
+html body #view .products-grid>.product-card,
+html body #view .rs-game-products-grid>.product-card{
+  display:flex!important;
+  flex-direction:column!important;
+  flex:initial!important;
+  width:100%!important;
+  max-width:none!important;
+  min-width:0!important;
+  margin:0!important;
+  box-sizing:border-box!important;
+  overflow:hidden!important;
+}
+html body #view .rs-game-products-grid>.product-card{
+  display:grid!important;
+  grid-template-columns:minmax(0,.9fr) minmax(0,1.1fr)!important;
+  align-items:stretch!important;
+}
+html body #view .product-card .product-art{
+  width:100%!important;
+  max-width:100%!important;
+  min-width:0!important;
+  overflow:hidden!important;
+}
+html body #view .product-card .product-card-body{
+  display:flex!important;
+  flex-direction:column!important;
+  min-width:0!important;
+  max-width:100%!important;
+  box-sizing:border-box!important;
+}
+html body #view .product-card h3,
+html body #view .product-card p,
+html body #view .product-card .product-wallet-note,
+html body #view .product-card .rs-product-assurance{
+  min-width:0!important;
+  max-width:100%!important;
+  overflow-wrap:anywhere!important;
+  word-break:normal!important;
+}
+html body #view .product-card .product-price-row{
+  display:flex!important;
+  align-items:center!important;
+  justify-content:space-between!important;
+  gap:8px!important;
+  min-width:0!important;
+  max-width:100%!important;
+  overflow:hidden!important;
+}
+html body #view .product-card .product-price-row .price-usd{
+  display:block!important;
+  flex:1 1 auto!important;
+  min-width:0!important;
+  max-width:100%!important;
+  white-space:nowrap!important;
+  overflow:hidden!important;
+  text-overflow:clip!important;
+  font-size:clamp(20px,2.25vw,32px)!important;
+  line-height:1.1!important;
+  letter-spacing:-.045em!important;
+  font-variant-numeric:tabular-nums!important;
+}
+html body #view .product-card .price-alt{
+  min-width:0!important;
+  max-width:100%!important;
+  overflow:hidden!important;
+}
+html body #view .product-card .price-alt>div{
+  display:grid!important;
+  grid-template-columns:repeat(3,minmax(0,1fr))!important;
+  align-items:center!important;
+  gap:5px!important;
+  width:100%!important;
+  min-width:0!important;
+}
+html body #view .product-card .price-alt>div b{
+  display:block!important;
+  min-width:0!important;
+  max-width:100%!important;
+  padding:6px 3px!important;
+  text-align:center!important;
+  white-space:normal!important;
+  overflow-wrap:anywhere!important;
+  font-size:clamp(8px,.85vw,11px)!important;
+  line-height:1.25!important;
+  letter-spacing:-.025em!important;
+  font-variant-numeric:tabular-nums!important;
+}
+html body #view .product-card .rs-product-cta,
+html body #view .product-card .btn{
+  width:100%!important;
+  min-width:0!important;
+  max-width:100%!important;
+  box-sizing:border-box!important;
+  white-space:normal!important;
+  justify-content:center!important;
+  overflow-wrap:anywhere!important;
+}
+/* En Inicio se conserva el hero propio de la página; no se añade el banner repetido "Tu tienda gamer". */
+/* Recordarme: solo casilla pequeña y nombre, sin panel ni fondo añadido. */
+html body .rs-remember-login{
+  display:inline-flex!important;
+  width:max-content!important;
+  max-width:100%!important;
+  align-items:center!important;
+  justify-content:flex-start!important;
+  gap:8px!important;
+  margin:9px 0 14px!important;
+  padding:0!important;
+  border:0!important;
+  border-radius:0!important;
+  background:transparent!important;
+  box-shadow:none!important;
+  color:#b9d6f4!important;
+  cursor:pointer!important;
+}
+html body .rs-remember-login input{
+  appearance:auto!important;
+  -webkit-appearance:auto!important;
+  width:13px!important;
+  height:13px!important;
+  flex:0 0 13px!important;
+  margin:0!important;
+  accent-color:#2d8cff!important;
+}
+html body .rs-remember-login b{
+  display:inline!important;
+  margin:0!important;
+  color:#b9d6f4!important;
+  font-size:11px!important;
+  line-height:1.25!important;
+  font-weight:650!important;
+}
+html body .rs-remember-login small,
+html body .rs-remember-login span{display:none!important}
+/* Dos acciones claras en el ajuste de saldo del administrador. */
+.rs-admin-balance-actions{
+  display:grid!important;
+  grid-template-columns:repeat(2,minmax(0,1fr))!important;
+  gap:10px!important;
+  margin-top:8px!important;
+}
+.rs-admin-balance-actions button{
+  width:100%!important;
+  min-width:0!important;
+  min-height:42px!important;
+  padding:10px 12px!important;
+  white-space:normal!important;
+}
+@media(max-width:760px){
+  html body #view .products-grid,
+  html body #view .rs-game-products-grid{
+    grid-template-columns:minmax(0,1fr)!important;
+    gap:15px!important;
+  }
+  html body #view .rs-game-products-grid>.product-card{
+    grid-template-columns:minmax(0,1fr)!important;
+  }
+  html body #view .rs-game-products-grid .product-art{
+    height:clamp(190px,48vw,250px)!important;
+    min-height:0!important;
+    border-right:0!important;
+    border-bottom:1px solid rgba(255,255,255,.1)!important;
+  }
+  html body #view .product-card .product-card-body{padding:18px!important}
+  html body #view .product-card .price-alt>div b{font-size:10px!important}
+}
+@media(max-width:380px){
+  .rs-admin-balance-actions{grid-template-columns:minmax(0,1fr)!important}
+}
+</style>
+<script id="refills-v66-scroll-reset">
+(function(){
+  function resetCatalogScroll(){
+    try{
+      var view=document.getElementById('view');
+      if(view)view.scrollLeft=0;
+      document.querySelectorAll('#view .products-grid,#view .rs-game-products-grid').forEach(function(el){el.scrollLeft=0});
+      document.documentElement.scrollLeft=0;
+      document.body.scrollLeft=0;
+    }catch(e){}
+  }
+  if(document.readyState==='loading')document.addEventListener('DOMContentLoaded',resetCatalogScroll);
+  else resetCatalogScroll();
+  window.addEventListener('hashchange',function(){setTimeout(resetCatalogScroll,80)});
+  var view=document.getElementById('view');
+  if(view&&window.MutationObserver){
+    new MutationObserver(function(){resetCatalogScroll()}).observe(view,{childList:true,subtree:false});
+  }
+})();
+</script>
 
