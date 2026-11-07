@@ -1,0 +1,37 @@
+<!doctype html>
+<html lang="es">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<meta name="robots" content="noindex">
+<title>Abriendo REFILLS SHOP…</title>
+<style>
+  :root{color-scheme:dark}
+  *{box-sizing:border-box}
+  body{margin:0;min-height:100dvh;display:grid;place-items:center;background:#061326;color:#e7f3ff;font:16px/1.6 system-ui,sans-serif;padding:20px}
+  main{width:min(100%,440px);padding:30px;border:1px solid #244b75;border-radius:22px;background:#0b2038;text-align:center}
+  h1{font-size:23px;margin:0 0 8px}
+  p{color:#a1bbd8;margin:0 0 18px}
+  a{color:white;background:#1168d6;border-radius:10px;padding:12px 18px;display:inline-block;text-decoration:none}
+</style>
+</head>
+<body>
+<main>
+  <h1>REFILLS SHOP</h1>
+  <p>Abriendo la sección solicitada…</p>
+  <a id="go" href="/">Volver a la tienda</a>
+</main>
+<script>
+(function(){
+  "use strict";
+  var path=location.pathname.replace(/\/+/g,"/");
+  var base=path.toLowerCase().startsWith("/refillshop/")?"/REFILLSHOP/":"/";
+  var route=path.slice(base.length).replace(/^\/+|\/+$/g,"");
+  if(route==="404.html"||route==="index.html")route="";
+  var target=base+(route?"#"+encodeURI(decodeURIComponent(route)):"");
+  document.getElementById("go").href=target;
+  location.replace(target);
+})();
+</script>
+</body>
+</html>
