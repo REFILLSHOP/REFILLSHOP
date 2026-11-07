@@ -12436,7 +12436,7 @@ html body.admin-full .afs-main button,html body.admin-full .afs-main input,html 
 <script id="rs-v32-routing-and-runtime">
 (function(){
  'use strict';
- var pathMode=location.protocol!=='file:'&&!!(history&&history.pushState);
+ var pathMode=false; /* GitHub Pages: rutas internas mediante hash */
  function cleanRoute(){
   if(!pathMode)return decodeURIComponent((location.hash||'#inicio').slice(1)||'inicio').split('/').filter(Boolean);
   var raw=decodeURIComponent(location.pathname.replace(/^\/+|\/+$/g,''));
@@ -13892,7 +13892,7 @@ html body #view .rs-offers-toolbar .search-wrap{
     else location.hash='ofertas';
   };
   // En GitHub Pages o despliegues SPA, elimina hashes viejos que impiden abrir bien las vistas.
-  function pathMode(){ return location.protocol!=='file:' && !!(history && history.pushState); }
+  function pathMode(){ return false; /* GitHub Pages: evita rutas físicas inexistentes */ }
   function sanitizeUrl(){
     try{
       if(!pathMode()) return;
