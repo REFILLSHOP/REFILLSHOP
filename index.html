@@ -4,7 +4,7 @@
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
 <meta name="theme-color" content="#050914">
-<meta name="color-scheme" content="dark light">
+<meta name="color-scheme" content="dark">
 <meta name="application-name" content="REFILLS SHOP">
 <meta property="og:type" content="website">
 <meta property="og:site_name" content="REFILLS SHOP">
@@ -15080,6 +15080,30 @@ html body #view .rs-remember-login input:focus:not(:focus-visible){outline:none!
 <style id="rs-mobile-bottom-gap">
 @media screen and (max-width:800px){
   html body:not(.admin-full):not(.rs-auth-guest) main#view.page.page{padding-bottom:18px!important}
+}
+</style>
+
+
+<style id="refills-final-detail-polish-20261108">
+/* Ajustes finales de consistencia, teclado y pantallas pequeñas. No altera la lógica de compra ni la conexión de datos. */
+:root{color-scheme:dark}
+html,body{max-width:100%}
+body{font-synthesis:none;-webkit-font-smoothing:antialiased;text-rendering:optimizeLegibility}
+img,svg,video,canvas{max-width:100%}
+.app-shell,.main,.page,#view,#modalHost{min-width:0}
+#view :where(input,select,textarea){box-sizing:border-box;max-width:100%;min-width:0}
+html body :where(a,button,input,select,textarea,summary,[role="button"],[tabindex]):focus-visible{
+  outline:2px solid #82c8ff!important;
+  outline-offset:3px!important;
+}
+@media(prefers-reduced-motion:reduce){
+  html{scroll-behavior:auto!important}
+  html body *,html body *::before,html body *::after{
+    animation-duration:.01ms!important;
+    animation-iteration-count:1!important;
+    transition-duration:.01ms!important;
+    scroll-behavior:auto!important;
+  }
 }
 </style>
 
