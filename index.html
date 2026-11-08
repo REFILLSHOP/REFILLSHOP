@@ -3508,7 +3508,7 @@ html body.admin-full .afs-top .btn { min-height:40px!important; white-space:norm
 html body #view > .rs-route-hero { display:none!important; }
 
 
-/* Carrusel real de juegos: deslizable con dedo, rueda o controles de flecha. */
+/* Carrusel de juegos: desplazamiento lateral táctil y por teclado. */
 html body .rh-featured-section .rs-home-games-carousel{
  display:flex!important;flex-flow:row nowrap!important;align-items:stretch!important;
  gap:14px!important;width:100%!important;max-width:100%!important;min-width:0!important;
@@ -3530,28 +3530,14 @@ html body .rh-featured-section .rs-home-games-carousel:focus-visible{
 html body .rh-featured-section .rs-home-games-carousel::-webkit-scrollbar{height:5px}
 html body .rh-featured-section .rs-home-games-carousel::-webkit-scrollbar-track{background:#0b1a2c;border-radius:9px}
 html body .rh-featured-section .rs-home-games-carousel::-webkit-scrollbar-thumb{background:#328cff;border-radius:9px}
-html body .rh-featured-tools{display:flex;align-items:center;justify-content:flex-end;gap:12px;min-width:0}
-html body .rh-featured-tools>small{max-width:48ch;text-align:right;line-height:1.5}
-html body .rh-carousel-controls{display:flex;align-items:center;gap:7px;flex:0 0 auto}
-html body .rh-carousel-arrow{
- display:grid;place-items:center;width:38px;height:38px;padding:0;
- border:1px solid #315b86;border-radius:12px;background:#0c2542;color:#cde8ff;
- cursor:pointer;transition:background .18s,border-color .18s,transform .18s;
-}
-html body .rh-carousel-arrow:hover{background:#14518a;border-color:#58aaff;transform:translateY(-1px)}
-html body .rh-carousel-arrow:focus-visible{outline:2px solid #83c8ff;outline-offset:3px}
 @media(max-width:650px){
  html body .rh-featured-section .rs-home-games-carousel{gap:12px!important;padding-bottom:13px!important}
  html body .rh-featured-section .rs-home-games-carousel>.rh-game-feature{
   flex-basis:min(84vw,340px)!important;width:min(84vw,340px)!important;max-width:84vw!important;
  }
- html body .rh-featured-tools{width:100%;justify-content:space-between;gap:8px}
- html body .rh-featured-tools>small{text-align:left;max-width:calc(100% - 92px);font-size:10px}
- html body .rh-carousel-arrow{width:35px;height:35px}
 }
 @media(prefers-reduced-motion:reduce){
  html body .rh-featured-section .rs-home-games-carousel{scroll-behavior:auto!important}
- html body .rh-carousel-arrow{transition:none}
 }
 
 
@@ -4888,32 +4874,17 @@ function homeView(){
  const revs=(rsPublicReviews&&rsPublicReviews.length?rsPublicReviews:(db.reviews||[])).slice(0,4);
  const ic=(p,s=22)=>`<svg class="ui-icon" viewBox="0 0 24 24" width="${s}" height="${s}" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">${p}</svg>`;
  const tile=x=>{const g=x.game,packs=activeOffers(g.id),min=packs.length?Math.min(...packs.map(o=>offerDisplayPrice(o))):null;return `<button class="rh-game-feature" style="--game-accent:${esc(g.color||'#2d8cff')}" onclick="openGameOffers('${esc(g.id)}')"><span class="rh-game-feature-art"><b class="rh-game-feature-fallback">${esc(g.icon||'▣')}</b>${imageHTML(g.id,'rh-game-feature-image')}<span class="rh-game-feature-tag">${x.ranked?'TOP '+x.position:'DISPONIBLE'}</span><span class="rh-game-feature-shade"></span></span><span class="rh-game-feature-info"><span class="rh-game-feature-copy"><b>${esc(g.name)}</b><small>${x.ranked?`${x.count} recargas · ${cash(x.total)} en 30 días`:`${packs.length} ${packs.length===1?'recarga disponible':'recargas disponibles'}`}</small></span><span class="rh-game-feature-price"><small>${min!==null?'DESDE':'PRÓXIMAMENTE'}</small><b>${min!==null?cash(min):'—'}</b></span></span><span class="rh-game-feature-go">${ic('<path d="M5 12h14M13 6l6 6-6 6"/>',19)}</span></button>`};
- const card=premiumWalletCardMarkup(u,{home:true});
- return `<section class="rh-hero"><div class="rh-hero-main"><span class="rh-kicker"><i></i> ${today?`${today} RECARGA${today===1?'':'S'} HOY`:'TIENDA ABIERTA · PAGA CON WALLET'}</span><h1>${u?`Hola${u.name?`, ${esc(u.name.split(' ')[0])}`:''}.`:'Recarga tus juegos.'}<em>${u?'¿Qué recargamos hoy?':'Rápido y seguro.'}</em></h1><div class="rh-cta"><button class="btn btn-primary rh-all-games" onclick="navigate('juegos')">Ver todos los juegos</button>${u?'':`<button class="btn btn-secondary" onclick="navigate('cuenta/registro')">Crear cuenta</button>`}</div></div><div class="rh-card-wrap">${card}</div></section>
+ return `<section class="rh-hero"><div class="rh-hero-main"><h1>${u?`Hola${u.name?`, ${esc(u.name.split(' ')[0])}`:''}.`:'Recarga tus juegos.'}<em>${u?'¿Qué recargamos hoy?':'Rápido y seguro.'}</em></h1><div class="rh-cta"><button class="btn btn-primary rh-all-games" onclick="navigate('juegos')">Ver juegos</button>${u?'':`<button class="btn btn-secondary" onclick="navigate('cuenta/registro')">Crear cuenta</button>`}</div></div></section>
   <section class="rh-featured-section">
    <div class="rh-head">
-    <div><span class="eyebrow">${hasRanking?'RANKING REAL · ÚLTIMOS 30 DÍAS':'CATÁLOGO DISPONIBLE'}</span><h2>${hasRanking?'Juegos populares y disponibles':'Explora nuestros juegos'}</h2></div>
-    <div class="rh-featured-tools">
-     <small class="muted">${hasRanking?'Primero los más recargados; después otros juegos disponibles':'Los juegos y packs activos de la tienda'}</small>
-     ${cards.length>1?`<div class="rh-carousel-controls" role="group" aria-label="Controles del carrusel de juegos"><button type="button" class="rh-carousel-arrow" onclick="rhScrollHomeGames(-1)" aria-label="Ver juegos anteriores"><svg viewBox="0 0 24 24" width="18" height="18" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="m14 18-6-6 6-6"/></svg></button><button type="button" class="rh-carousel-arrow" onclick="rhScrollHomeGames(1)" aria-label="Ver más juegos"><svg viewBox="0 0 24 24" width="18" height="18" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="m10 18 6-6-6-6"/></svg></button></div>`:''}
-    </div>
+    <div><span class="eyebrow">${'JUEGOS'}</span><h2>${hasRanking?'Juegos populares y disponibles':'Explora nuestros juegos'}</h2></div>
    </div>
    <div id="rsHomeGamesCarousel" class="rh-games rh-featured-grid rs-home-games-carousel" role="region" aria-label="Juegos populares y disponibles. Desliza horizontalmente para ver más juegos." tabindex="0">${cards.map(tile).join('')||empty('▣','Todavía no hay juegos activos.')}</div>
   </section>
- <section class="rh-block"><div class="rh-head"><div><span class="eyebrow">ACTIVIDAD CONFIRMADA</span><h2>Recargas de hoy en la tienda</h2><p class="muted">Solo aparecen pedidos que figuran como completados en el feed de actividad.</p></div><span class="coupon-badge">${today} HOY</span></div><div class="rh-feed">${todayRows.slice(0,5).map(r=>`<div class="rh-feed-row rh-today-recharge"><span class="rh-today-avatar">${rhActivityAvatar(r.user)}</span><div class="rh-today-copy"><b>${esc(r.order.offerName)}</b><small>${esc(r.order.gameName)} · ${esc(rhShort(r.user.name))}</small></div><span class="rh-ago">${rhAgo(r.ms)}</span></div>`).join('')||'<div class="rh-empty">Todavía no hay recargas completadas hoy. En cuanto se confirmen, mostraremos aquí las 5 más recientes con la foto de perfil de cada cliente cuando esté disponible.</div>'}</div></section>
+ <section class="rh-block"><div class="rh-head"><div><span class="eyebrow">ACTIVIDAD CONFIRMADA</span><h2>Recargas de hoy en la tienda</h2></div><span class="coupon-badge">${today} HOY</span></div><div class="rh-feed">${todayRows.slice(0,5).map(r=>`<div class="rh-feed-row rh-today-recharge"><span class="rh-today-avatar">${rhActivityAvatar(r.user)}</span><div class="rh-today-copy"><b>${esc(r.order.offerName)}</b><small>${esc(r.order.gameName)} · ${esc(rhShort(r.user.name))}</small></div><span class="rh-ago">${rhAgo(r.ms)}</span></div>`).join('')||'<div class="rh-empty">Aún no hay recargas completadas hoy.</div>'}</div></section>
  <section class="rh-block"><div class="rh-head"><div><span class="eyebrow">RESEÑAS</span><h2>Lo que dicen los clientes</h2></div></div><div class="rh-revs">${revs.map(r=>`<article class="rh-rev"><div class="rh-rev-top"><b>${esc(r.userName)}</b><span>${rhStars(r.rating)}</span></div><p>${esc(r.text||'Recarga completada sin problemas.')}</p><small>${esc(r.offerName)} · ${esc(r.gameName)} · ${rhAgo(r.ts)}</small></article>`).join('')||'<div class="rh-empty">Las opiniones verificadas aparecerán aquí cuando los clientes envíen una reseña después de su recarga.</div>'}</div></section>${rhTrustHTML().replace('style="margin-top:22px"','')}`;
 }
 
-/* ===== Bloques que se movieron fuera de Inicio (V18) ===== */
-function rhScrollHomeGames(direction){
- const rail=document.getElementById('rsHomeGamesCarousel');
- if(!rail)return;
- const card=rail.querySelector('.rh-game-feature');
- const gap=parseFloat(getComputedStyle(rail).gap)||14;
- const step=(card?.getBoundingClientRect().width||300)+gap;
- rail.scrollBy({left:step*(Number(direction)||1),behavior:'smooth'});
-}
-window.rhScrollHomeGames=rhScrollHomeGames;
 function rhRatesStripHTML(){return `<section class="rh-rates" style="margin:0 0 18px"><div><small>1 USD</small><b>${offerWhole(db.rates.sm)} SM</b></div><div><small>1 USD</small><b>${offerWhole(db.rates.cup)} CUP</b></div><div><small>1 USD</small><b>${num(db.rates.usdt)} USDT</b></div></section>`}
 function rhRecentOrdersHTML(){const u=currentUser();if(!u)return '';const list=(db.orders||[]).slice(0,3);if(!list.length)return '';return `<section class="rh-block" style="margin:0 0 22px"><div class="rh-head"><div><span class="eyebrow">TU ACTIVIDAD</span><h2>Pedidos recientes</h2></div></div><div class="rh-orders">${list.map(o=>{const rev=(db.reviews||[]).some(r=>r.orderId===o.id);return `<article class="rh-order ${o.status==='Completado'?'ok':o.status==='Fallido'?'bad':''}"><div><span class="rh-ord-id">PEDIDO #${esc(o.id)}</span><h3>${esc(o.offerName)}</h3><p>${esc(o.gameName)} · ${esc(o.date||'')}</p></div><div class="rh-ord-side"><span class="rh-ord-st">${esc(o.status)}</span><b>${cash(o.amount)}</b>${o.status==='Completado'?(rev?'<small class="rh-done">Reseña enviada</small>':`<button class="btn btn-secondary btn-small" onclick="rhOpenReview('${esc(o.id)}')">Dejar reseña</button>`):''}</div></article>`}).join('')}</div></section>`}
 function rhTopClientsHTML(){const rank=weeklyRanking().slice(0,3);return `<section class="rh-block" style="margin:22px 0 0"><div class="rh-head"><div><span class="eyebrow">SEMANA</span><h2>Top clientes</h2></div></div><div class="rh-feed">${rank.map((e,i)=>`<div class="rh-feed-row rh-ranking-row"><span class="rh-medal">${i+1}</span><span class="rh-ranking-avatar">${rankingAvatarMarkup(e.user)}</span><div><b>${esc(rhShort(e.user.name))}</b><small>${e.count} recarga${e.count===1?'':'s'}</small></div><span class="rh-ago">${cash(e.total)}</span></div>`).join('')||'<div class="rh-empty">El ranking aparecerá con las primeras recargas.</div>'}</div></section>`}
