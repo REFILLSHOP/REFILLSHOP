@@ -14977,5 +14977,144 @@ html body :where(a,button,input,select,textarea,summary,[role="button"],[tabinde
 
 
 
+<style id="rs-flow-page-css">
+/* REFILLS SHOP - Flujos de compra y Wallet como pantallas completas. */
+html.rs-flow-locked,body.rs-flow-locked{overflow:hidden!important;overscroll-behavior:none!important}
+html body #modalHost.rs-flow-page-host{position:fixed!important;inset:0!important;width:100%!important;height:100dvh!important;max-width:none!important;max-height:none!important;z-index:2147482000!important;isolation:isolate!important;overflow:hidden!important}
+html body #modalHost.rs-flow-page-host>.modal-backdrop{position:absolute!important;inset:0!important;width:100%!important;height:100dvh!important;max-width:none!important;max-height:none!important;display:block!important;padding:0!important;margin:0!important;overflow:hidden!important;background:#050d1c!important;backdrop-filter:none!important}
+html body #modalHost.rs-flow-page-host>.modal-backdrop>.modal{position:relative!important;inset:auto!important;box-sizing:border-box!important;display:flex!important;flex-direction:column!important;align-items:stretch!important;gap:0!important;transform:none!important;margin:0!important;padding:0!important;max-width:none!important;width:100%!important;min-width:0!important;min-height:100dvh!important;height:100dvh!important;max-height:100dvh!important;border:0!important;border-radius:0!important;background:radial-gradient(ellipse 60% 30% at 50% 0,#15385b42,transparent 95%),linear-gradient(180deg,#071426 0%,#091629 46%,#06111f 100%)!important;box-shadow:none!important;overflow-x:hidden!important;overflow-y:auto!important;scrollbar-gutter:stable!important;overscroll-behavior-y:contain!important;-webkit-overflow-scrolling:touch!important}
+html body #modalHost.rs-flow-page-host>.modal-backdrop>.modal>.modal-close{display:none!important}
+html body #modalHost.rs-flow-page-host>.modal-backdrop>.modal>.rs-flow-nav{position:sticky!important;top:0;z-index:20;box-sizing:border-box;width:100%;min-height:72px;display:flex;align-items:center;justify-content:space-between;gap:16px;padding:calc(11px + env(safe-area-inset-top)) clamp(16px,3vw,44px) 11px;border-bottom:1px solid #27466780;background:#08172ced;backdrop-filter:blur(18px);-webkit-backdrop-filter:blur(18px)}
+html body #modalHost.rs-flow-page-host .rs-flow-go-back{display:inline-flex;align-items:center;gap:9px;flex:0 0 auto;border:1px solid #335574;border-radius:11px;background:#112b43;color:#e8f5ff;min-height:42px;padding:9px 13px;font-size:12px;font-weight:800;cursor:pointer}
+html body #modalHost.rs-flow-page-host .rs-flow-go-back svg{width:17px;height:17px;flex-shrink:0}
+html body #modalHost.rs-flow-page-host .rs-flow-nav-title{min-width:0;display:flex;flex-direction:column;gap:3px;text-align:center}
+html body #modalHost.rs-flow-page-host .rs-flow-nav-title small{font-size:10px;font-weight:800;color:#6cb8f5;letter-spacing:.12em}
+html body #modalHost.rs-flow-page-host .rs-flow-nav-title strong{font-size:clamp(14px,1.55vw,18px);line-height:1.2;font-weight:900;color:#f0f8ff;overflow-wrap:anywhere}
+html body #modalHost.rs-flow-page-host .rs-flow-chip{display:flex;align-items:center;justify-content:center;min-height:34px;min-width:84px;padding:6px 10px;border:1px solid #276297;border-radius:999px;background:#0b3152;color:#9bd5ff;font-size:10px;font-weight:900;letter-spacing:.06em;text-align:center}
+html body #modalHost.rs-flow-page-host>.modal-backdrop>.modal>:not(.rs-flow-nav):not(.modal-close){box-sizing:border-box!important;width:min(calc(100% - 40px),920px)!important;min-width:0!important;max-width:920px!important;margin:clamp(22px,4vh,48px) auto calc(32px + env(safe-area-inset-bottom))!important;flex:0 0 auto!important}
+html body #modalHost.rs-flow-page-host :is(.rs-v4-checkout,.rs-simple-checkout,.rs-wallet-deposit-v2,.rs-wallet-deposit-v3,.rs-wallet-request-v2,.rs14-review,.v10-receipt,.rs-result-screen,.rs-topup-flow,.rs-cart-modal,.rs-checkout-v5,.rs-review-v5,.rs-result-v5){box-sizing:border-box!important;max-height:none!important;overflow:visible!important;min-width:0!important}
+html body #modalHost.rs-flow-page-host :is(.rs-v4-close,.rs14-close,.rs-v2-close,.v10-close,.rs-flow-x){display:none!important}
+html body #modalHost.rs-flow-page-host :is(input,select,textarea){max-width:100%;min-width:0;box-sizing:border-box}
+html body #modalHost.rs-flow-page-host :is(.rs-v4-submit,.rs14-submit,.rs-v2-submit,.v10-primary-action,.v10-secondary-action,.rs-full-btn,.rs-cart-checkout-btn){min-height:49px}
+html body #modalHost.rs-flow-page-host :where(button,a,input,select,textarea):focus-visible{outline:2px solid #79c8ff!important;outline-offset:3px!important}
+html body #modalHost.rs-flow-page-host :is(.rs-v4-product,.rs14-product,.v10-product-line,.rs-summary-card,.rs-v2-preview){min-width:0;overflow-wrap:anywhere}
+html body #modalHost.rs-flow-page-host .rs-v4-checkout{max-width:860px!important}
+html body #modalHost.rs-flow-page-host .rs14-review{max-width:840px!important}
+html body #modalHost.rs-flow-page-host .rs-result-screen{max-width:760px!important;text-align:center}
+html body #modalHost.rs-flow-page-host .rs-wallet-deposit-v2,html body #modalHost.rs-flow-page-host .rs-wallet-request-v2{max-width:820px!important}
+html body #modalHost.rs-flow-page-host .rs-result-screen .rs-summary-card{width:100%;max-width:660px;margin-inline:auto}
+html body #modalHost.rs-flow-page-host .rs-flow-nav + .rs-result-screen{padding-block:clamp(20px,5vh,64px)!important}
+@media(min-width:900px){
+ html body #modalHost.rs-flow-page-host .rs-v4-checkout{display:grid!important;grid-template-columns:minmax(0,.95fr) minmax(0,1.05fr);column-gap:clamp(22px,3vw,42px);align-items:start}
+ html body #modalHost.rs-flow-page-host .rs-v4-checkout>.rs-v4-head{grid-column:1/-1;min-width:0}
+ html body #modalHost.rs-flow-page-host .rs-v4-checkout>.rs-v4-product{grid-column:1;align-self:start}
+ html body #modalHost.rs-flow-page-host .rs-v4-checkout>form{grid-column:2;grid-row:2/4;min-width:0}
+ html body #modalHost.rs-flow-page-host .rs-v4-checkout .rs-v4-submit{width:100%}
+}
+@media(max-width:700px){
+ html body #modalHost.rs-flow-page-host>.modal-backdrop>.modal{scrollbar-gutter:auto!important}
+ html body #modalHost.rs-flow-page-host>.modal-backdrop>.modal>.rs-flow-nav{min-height:66px;gap:9px;padding:calc(8px + env(safe-area-inset-top)) 12px 8px}
+ html body #modalHost.rs-flow-page-host .rs-flow-go-back{min-height:42px;padding:8px 10px;gap:5px;font-size:11px}
+ html body #modalHost.rs-flow-page-host .rs-flow-chip{min-width:0;padding:7px 8px;white-space:nowrap;font-size:9px}
+ html body #modalHost.rs-flow-page-host .rs-flow-nav-title small{font-size:8px}
+ html body #modalHost.rs-flow-page-host .rs-flow-nav-title strong{font-size:13px}
+ html body #modalHost.rs-flow-page-host>.modal-backdrop>.modal>:not(.rs-flow-nav):not(.modal-close){width:100%!important;min-width:0!important;max-width:none!important;margin:0 auto calc(14px + env(safe-area-inset-bottom))!important;padding:clamp(15px,4vw,22px)!important;border-radius:0!important;border-left:0!important;border-right:0!important;box-shadow:none!important}
+ html body #modalHost.rs-flow-page-host :is(.rs-v4-checkout,.rs-wallet-deposit-v2,.rs-wallet-request-v2,.rs14-review,.rs-result-screen){min-height:0!important}
+ html body #modalHost.rs-flow-page-host :is(.rs-v2-submit,.rs14-submit,.rs-v4-submit,.rs-v4-balance,.rs-v2-amount){width:100%;box-sizing:border-box}
+ html body #modalHost.rs-flow-page-host .rs-v4-checkout{display:block!important}
+}
+@media(max-width:375px){
+ html body #modalHost.rs-flow-page-host .rs-flow-nav-title small{display:none}
+ html body #modalHost.rs-flow-page-host .rs-flow-chip{font-size:8px}
+ html body #modalHost.rs-flow-page-host .rs-flow-go-back span{display:none}
+ html body #modalHost.rs-flow-page-host .rs-flow-go-back{min-width:42px;justify-content:center}
+}
+@media(prefers-reduced-motion:reduce){html body #modalHost.rs-flow-page-host .modal,html body #modalHost.rs-flow-page-host *{scroll-behavior:auto!important}}
+/* El comprobante puede contener títulos largos: no dividir cada palabra en una columna estrecha. */
+html body #modalHost.rs-flow-page-host .v10-product-line>b:only-child{display:block!important;grid-column:1/-1!important;width:100%!important;min-width:0!important;overflow-wrap:anywhere!important;white-space:normal!important}
+</style>
+<script id="rs-flow-page-js">
+/* REFILLS SHOP - Vistas completas para Wallet / Datos / Revisión / Listo.
+   La lógica de los formularios, la validación, el carrito y el pago permanece intacta. */
+(function(){
+ 'use strict';
+ const host=document.getElementById('modalHost');
+ if(!host || !window.MutationObserver || !window.history || !window.URL)return;
+ const routeKey='pantalla';
+ const pages={
+  wallet:{label:'WALLET USD',title:'Recargar Wallet',chip:'AGREGAR FONDOS'},
+  'wallet-listo':{label:'WALLET USD',title:'Solicitud de recarga',chip:'CONFIRMACIÓN'},
+  datos:{label:'COMPRA SEGURA',title:'Datos de entrega',chip:'PASO 1 DE 3'},
+  revision:{label:'COMPRA SEGURA',title:'Revisión del pedido',chip:'PASO 2 DE 3'},
+  listo:{label:'COMPRA SEGURA',title:'Comprobante',chip:'PASO 3 DE 3'}
+ };
+ let wasOpen=false;
+ let internalPop=false;
+ function getPage(modal){
+  if(!modal)return null;
+  if(modal.querySelector('.rs-wallet-request-v2'))return 'wallet-listo';
+  if(modal.querySelector('.rs-wallet-deposit-v2,.rs-wallet-deposit-v3'))return 'wallet';
+  if(modal.querySelector('.v10-receipt,.rs-result-screen,.rs-result-v5,.rs-cart-created-list'))return 'listo';
+  if(modal.querySelector('.rs14-review,.rs-review-v5,.rs-cart-check-summary'))return 'revision';
+  if(modal.querySelector('.rs-v4-checkout,.v10-checkout,.rs-checkout-v5,.rs-cart-modal'))return 'datos';
+  if(modal.querySelector('.rs-topup-flow'))return 'wallet';
+  return null;
+ }
+ function urlFor(step){const url=new URL(location.href);if(step)url.searchParams.set(routeKey,step);else url.searchParams.delete(routeKey);return url.pathname+url.search+url.hash}
+ function newState(step){const previous=history.state&&typeof history.state==='object'?history.state:{};const state=Object.assign({},previous);if(step)state.__refillsFlowScreen=step;else delete state.__refillsFlowScreen;return state}
+ function route(step,wasAlreadyOpen){
+  try{
+   const old=new URL(location.href).searchParams.get(routeKey);
+   if(old===step)return;
+   if(!step){if(old&&pages[old])history.replaceState(newState(null),'',urlFor(null));return}
+   if(!wasAlreadyOpen && !history.state?.__refillsFlowScreen){history.pushState(newState(step),'',urlFor(step))}
+   else history.replaceState(newState(step),'',urlFor(step));
+  }catch(e){/* La interfaz sigue funcionando incluso si el navegador impide cambiar la URL. */}
+ }
+ function nav(step){
+  const m=pages[step];
+  const el=document.createElement('header');el.className='rs-flow-nav';
+  const arrow='<svg viewBox="0 0 24 24" aria-hidden="true" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M15 18l-6-6 6-6"/></svg>';
+  el.innerHTML='<button type="button" class="rs-flow-go-back" onclick="closeModal()" aria-label="Cerrar esta pantalla y volver a la tienda">'+arrow+'<span>Volver</span></button><div class="rs-flow-nav-title"><small>REFILLS SHOP · '+m.label+'</small><strong>'+m.title+'</strong></div><span class="rs-flow-chip">'+m.chip+'</span>';
+  return el;
+ }
+ function sync(){
+  const modal=host.querySelector(':scope > .modal-backdrop > .modal');
+  const step=getPage(modal);
+  const previously=wasOpen;
+  if(!step){
+   if(previously){host.classList.remove('rs-flow-page-host');document.body.classList.remove('rs-flow-locked');document.documentElement.classList.remove('rs-flow-locked')}
+   wasOpen=false;
+   if(!internalPop)route(null,true);
+   return;
+  }
+  wasOpen=true;
+  host.classList.add('rs-flow-page-host');
+  document.body.classList.add('rs-flow-locked');document.documentElement.classList.add('rs-flow-locked');
+  let header=modal.querySelector(':scope > .rs-flow-nav');
+  if(!header){header=nav(step);modal.insertBefore(header,modal.firstChild)}
+  else if(header.dataset.step!==step)header.replaceWith(header=nav(step));
+  header.dataset.step=step;
+  route(step,previously);
+  if(!previously || header.dataset.justSwitched!==step){
+   modal.scrollTop=0;
+   header.dataset.justSwitched=step;
+  }
+ }
+ const observer=new MutationObserver(sync);observer.observe(host,{childList:true});
+ addEventListener('popstate',function(){
+  if(!wasOpen)return;
+  const active=new URL(location.href).searchParams.get(routeKey);
+  if(active && pages[active] && active===host.querySelector('.rs-flow-nav')?.dataset.step)return;
+  internalPop=true;
+  host.replaceChildren();
+  sync();
+  internalPop=false;
+  if(active&&pages[active])route(null,true);
+ });
+ addEventListener('pagehide',function(){document.body.classList.remove('rs-flow-locked');document.documentElement.classList.remove('rs-flow-locked')});
+ sync();
+})();
+</script>
 </body>
 </html>
