@@ -997,8 +997,7 @@ button:disabled{opacity:.45}
 .account-form-card{box-shadow:0 20px 50px #000000a0!important}
 .modal-backdrop,.modal-overlay{background:rgba(0,0,0,.72)!important;backdrop-filter:blur(6px)}
 .modal,.modal-card,.modal-content{background:#090e1a!important;color:#e5f0ff!important;border-color:#1b4a8d!important;box-shadow:0 28px 80px #000000d0!important}
-.modal h2,.modal h3,.rs-result-screen h2,.rs-checkout h2{color:#fff}.modal-sub,.rs-result-lead,.rs-small-note{color:#8da6c8}
-.rs-summary-card{background:#060b16!important}.rs-summary-row{border-color:#16305c!important;color:#8da6c8}.rs-summary-row b{color:#fff}
+.modal h2,.modal h3,.rs-result-screen h2,.rs-checkout h2{color:#fff}.modal-sub,.rs-result-lead,.rs-small-note{color:#8da6c8}.rs-summary-card{background:#060b16!important}.rs-summary-row{border-color:#16305c!important;color:#8da6c8}.rs-summary-row b{color:#fff}
 .rs-checkout-section,.rs-checkout-total{background:#090e1a!important}.rs-balance-line{background:#071a38;border-color:#1b4a8d;color:#b9d6ff}.rs-legal-note{color:#6f8fbb}
 .toast{background:#0b2a55;color:#fff;border:1px solid #2d8cff;box-shadow:0 12px 36px #000000b0}
 .mobile-bottom{background:rgba(0,0,0,.96);border-top:1px solid #16305c;box-shadow:0 -10px 30px #000000aa}.mobile-bottom button{color:#7f98ba}.mobile-bottom button.active{color:#6db4ff}.mobile-bottom button.active span:first-child{background:#0b2a55}
@@ -1997,8 +1996,7 @@ button, input, select, textarea { min-width: 0; max-width: 100%; }
 .rs-checkout{width:100%;max-width:720px;margin:0 auto}
 .rs-checkout form{display:flex;flex-direction:column;gap:14px}
 .rs-checkout-section,.rs-checkout-total{min-width:0}
-.rs-form-grid{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:12px}
-.rs-checkout input,.rs-checkout select{width:100%;max-width:100%;min-width:0;box-sizing:border-box}
+.rs-form-grid{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:12px}.rs-checkout input,.rs-checkout select{width:100%;max-width:100%;min-width:0;box-sizing:border-box}
 .rs-checkout-submit{width:100%;min-height:48px}
 .rs-result-screen{width:100%;max-width:620px;margin:0 auto}
 .rs-result-screen .rs-summary-card{overflow-wrap:anywhere}
@@ -2999,7 +2997,6 @@ html{scroll-behavior:smooth}body{overflow-x:hidden}
 }
 </style>
 
-
 <style id="refills-v51-wng-inspired">
 
 
@@ -3997,8 +3994,7 @@ const seed={
  loyalty:{coinsPerUsd:1,rouletteCost:10,referralInviterCoins:5,referralFriendCoins:2,referralMinSpend:5},
  specialOffers:[],
  methods:[{id:'sm',name:'Saldo móvil (SM)',enabled:true,instructions:'Espera las instrucciones del administrador antes de realizar el envío.'},{id:'transfer',name:'Transferencia CUP',enabled:true,instructions:'Realiza la transferencia solo cuando el administrador confirme los datos.'},{id:'cash',name:'Efectivo CUP',enabled:true,instructions:'Coordina con soporte el lugar y la entrega del efectivo.'},{id:'usdt',name:'USDT',enabled:true,instructions:'Confirma con soporte la red y la dirección antes de enviar USDT.'}],
- games:[
- {id:'blood-strike',name:'Blood Strike',category:'Shooter',tag:'EN TENDENCIA',icon:'↯',description:'Gold y paquetes para entrar preparado a la batalla.',color:'#e13b64',active:true},
+ games:[ {id:'blood-strike',name:'Blood Strike',category:'Shooter',tag:'EN TENDENCIA',icon:'↯',description:'Gold y paquetes para entrar preparado a la batalla.',color:'#e13b64',active:true},
  {id:'free-fire',name:'Free Fire',category:'Battle Royale',tag:'MÁS VENDIDO',icon:'▲',description:'Diamantes, membresías y packs para Free Fire.',color:'#9d55ff',active:true},
  {id:'pubg-mobile',name:'PUBG Mobile',category:'Battle Royale',tag:'POPULAR',icon:'◎',description:'UC para pases, cajas y objetos del juego.',color:'#e2ae38',active:true},
  {id:'mobile-legends',name:'Mobile Legends',category:'MOBA',tag:'COMPETITIVO',icon:'◈',description:'Diamantes para héroes, skins y eventos.',color:'#4f9aff',active:true},
@@ -4932,7 +4928,7 @@ function productCard(o){
    <button class="btn btn-primary btn-small rs-product-cta" onclick="openBuy('${esc(o.id)}')"><span>Elegir este pack</span><span>Continuar</span></button>
   </div></article>`;
 }
-function gameView(id){const g=gameById(id);if(!g||!g.active)return `<div class="empty"><span>▣</span>Este juego no existe o está desactivado.<button class="btn btn-primary" onclick="navigate('juegos')">Volver al catálogo</button></div>`;const list=activeOffers(id);const featured=list.filter(o=>o.featured).length;return `<button class="text-link" onclick="navigate('juegos')">Volver a todos los juegos</button><section class="game-hero" style="margin-top:14px;--game-accent:${esc(g.color||'#2d8cff')}">${imageHTML(id)}<div class="game-hero-overlay"></div><div class="game-hero-content"><span class="eyebrow">${esc(g.category)} / RECARGAS</span><h1>${esc(g.name)}</h1><p>${esc(g.description)} Selecciona el pack que necesitas y revisa tus datos antes de confirmar.</p><div class="game-hero-pills"><span>Precios en USD</span><span>${list.length} packs activos</span><span>${featured?featured+' ofertas destacadas':'Compra desde tu Wallet'}</span></div></div></section><div class="section-head"><div><span class="eyebrow">CATÁLOGO DEL JUEGO</span><h2>Elige tu recarga</h2><p>${list.length} packs disponibles · las equivalencias se calculan con la tasa actual.</p></div><span class="coupon-badge">PRECIOS ACTUALIZADOS</span></div><div class="rs-game-purchase-intro"><div><span class="eyebrow">PACKS DISPONIBLES</span><h3>Encuentra la cantidad que necesitas</h3><p>Compara el importe, revisa las equivalencias y elige tu pack. Verás los datos de destino antes de confirmar.</p></div><div class="rs-game-purchase-points"><span><b>01</b> Elige el pack</span><span><b>02</b> Añade tu ID</span><span><b>03</b> Confirma el pedido</span></div></div><div class="products-grid rs-game-products-grid">${list.map(productCard).join('')||'<div class="empty">Por ahora no hay ofertas activas para este juego. Vuelve a consultar más tarde o contacta con soporte.</div>'}</div><section class="rs-offers-after" aria-label="Cómo completar tu recarga"><div class="rs-offers-after-head"><span class="eyebrow">COMPRA FÁCIL Y SEGURA</span><h2>Completa tu recarga en tres pasos</h2><p>Elige el paquete y sigue estas indicaciones para evitar errores al realizar tu pedido.</p></div><div class="rs-offers-after-grid"><article class="rs-offers-after-card"><span class="rs-offers-after-number">01</span><div><h3>Selecciona el pack</h3><p>Desliza las tarjetas, compara los importes y pulsa en el paquete que quieres comprar.</p></div></article><article class="rs-offers-after-card"><span class="rs-offers-after-number">02</span><div><h3>Comprueba tu ID</h3><p>Escribe el ID de jugador y el servidor correctos. Revisa los datos antes de confirmar.</p></div></article><article class="rs-offers-after-card"><span class="rs-offers-after-number">03</span><div><h3>Paga y sigue el pedido</h3><p>Confirma el pago con tu Wallet USD y consulta el progreso desde tus pedidos.</p></div></article></div><div class="rs-offers-after-footer"><div><b>¿Necesitas ayuda con tu recarga?</b><span>Consulta las instrucciones o revisa el estado de tus pedidos.</span></div><div class="rs-offers-after-actions"><button type="button" class="btn btn-secondary" onclick="navigate(&#39;ayuda&#39;)">Centro de ayuda</button><button type="button" class="btn btn-primary" onclick="navigate(&#39;pedidos&#39;)">Mis pedidos</button></div></div></section>`}
+function gameView(id){const g=gameById(id);if(!g||!g.active)return `<div class="empty"><span>▣</span>Este juego no existe o está desactivado.<button class="btn btn-primary" onclick="navigate('juegos')">Volver al catálogo</button></div>`;const list=activeOffers(id);const featured=list.filter(o=>o.featured).length;return `<button class="text-link" onclick="navigate('juegos')">Volver a todos los juegos</button><section class="game-hero" style="margin-top:14px;--game-accent:${esc(g.color||'#2d8cff')}">${imageHTML(id)}<div class="game-hero-overlay"></div><div class="game-hero-content"><span class="eyebrow">${esc(g.category)} / RECARGAS</span><h1>${esc(g.name)}</h1><p>${esc(g.description)} Selecciona el pack que necesitas y revisa tus datos antes de confirmar.</p><div class="game-hero-pills"><span>Precios en USD</span><span>${list.length} packs activos</span><span>${featured?featured+' ofertas destacadas':'Compra desde tu Wallet'}</span></div></div></section><div class="section-head"><div><span class="eyebrow">CATÁLOGO DEL JUEGO</span><h2>Elige tu recarga</h2><p>${list.length} packs disponibles · las equivalencias se calculan con la tasa actual.</p></div><span class="coupon-badge">PRECIOS ACTUALIZADOS</span></div><div class="rs-game-purchase-intro"><div><span class="eyebrow">PACKS DISPONIBLES</span><h3>Encuentra la cantidad que necesitas</h3><p>Compara el importe, revisa las equivalencias y elige tu pack. Verás los datos de destino antes de confirmar.</p></div><div class="rs-game-purchase-points"><span><b>01</b> Elige el pack</span><span><b>02</b> Añade tu ID</span><span><b>03</b> Confirma el pedido</span></div></div><div class="products-grid rs-game-products-grid">${list.map(productCard).join('')||'<div class="empty">Por ahora no hay ofertas activas para este juego. Vuelve a consultar más tarde o contacta con soporte.</div>'}</div><section class="rs-game-checklist"><div><span class="eyebrow">ANTES DE CONFIRMAR</span><h3>Comprueba los datos de destino</h3><p>Revisa el ID de jugador, servidor, zona o teléfono que solicita este juego. Un dato incorrecto puede impedir la entrega o retrasar la revisión.</p></div><div class="rs-game-checklist-actions"><button class="btn btn-secondary" onclick="navigate('ayuda')">Ver instrucciones</button><button class="btn btn-primary" onclick="navigate('pedidos')">Mis recargas</button></div></section>`}
 function offersView(){const activeGames=db.games.filter(g=>g.active);const all=activeOffers().filter(o=>(offerGameFilter==='Todos'||o.gameId===offerGameFilter)&&(`${o.name} ${o.description||''} ${gameById(o.gameId)?.name||''}`).toLowerCase().includes(offerSearchText.toLowerCase()));return `<div class="rs-offers-page"><section class="offers-intro"><div><span class="eyebrow">CATÁLOGO DE REVENTA · MONEDA BASE USD</span><h1 class="page-title">Todas las ofertas</h1><p class="page-desc">Busca el juego y el pack que necesitas. Revisa el precio en USD y sus equivalencias aproximadas; la compra se descuenta de tu Wallet.</p></div><div class="offers-intro-stat"><small>OFERTAS DISPONIBLES</small><strong>${activeOffers().length}</strong><span>Actualizadas según las tasas del sitio</span></div></section><div class="offers-toolbar"><div class="filter-row"><button class="filter-chip ${offerGameFilter==='Todos'?'active':''}" onclick="offerGameFilter='Todos';render()">Todos los juegos</button>${activeGames.map(g=>`<button class="filter-chip ${offerGameFilter===g.id?'active':''}" onclick="offerGameFilter='${g.id}';render()">${esc(g.icon)} ${esc(g.name)}</button>`).join('')}</div><div class="search-wrap"><input value="${esc(offerSearchText)}" placeholder="Buscar oferta o juego..." oninput="const v=this.value;const p=this.selectionStart;offerSearchText=v;render();const i=document.querySelector('.offers-toolbar .search-wrap input');if(i){i.focus();i.setSelectionRange(p,p)}"></div></div><div class="offers-results"><div class="offers-results-head"><div><h2>Ofertas disponibles</h2><p>${all.length} productos para explorar</p></div><span class="coupon-badge">⇄ USD · CUP · SM · USDT</span></div><div class="products-grid">${all.map(productCard).join('')||'<div class="empty">No encontramos ofertas con esos filtros.</div>'}</div><section class="rs-offers-after" aria-label="Información para comprar"><div class="rs-offers-after-head"><span class="eyebrow">COMPRA CON TRANQUILIDAD</span><h2>Tu recarga, en tres pasos</h2><p>Un proceso claro para que elijas tu paquete y puedas seguir tu pedido.</p></div><div class="rs-offers-after-grid"><article class="rs-offers-after-card"><span class="rs-offers-after-number">01</span><div><h3>Elige tu oferta</h3><p>Filtra por juego, busca el paquete y comprueba el importe y sus equivalencias antes de continuar.</p></div></article><article class="rs-offers-after-card"><span class="rs-offers-after-number">02</span><div><h3>Confirma tus datos</h3><p>Introduce el ID, servidor o información que solicite el juego. Revísalos para evitar errores en la entrega.</p></div></article><article class="rs-offers-after-card"><span class="rs-offers-after-number">03</span><div><h3>Consulta tu pedido</h3><p>Después de realizar la compra, puedes revisar el estado y los detalles desde el apartado de pedidos.</p></div></article></div><div class="rs-offers-after-footer"><div><b>¿Necesitas ayuda antes de comprar?</b><span>Consulta las instrucciones o contacta con el centro de ayuda.</span></div><div class="rs-offers-after-actions"><button type="button" class="btn btn-secondary" onclick="navigate('ayuda')">Centro de ayuda</button><button type="button" class="btn btn-primary" onclick="navigate('pedidos')">Ver mis pedidos</button></div></div></section></div>`}
 
 function plansView(){
@@ -4997,8 +4993,7 @@ function walletView(){
  <div class="wallet-layout reseller-wallet-layout" style="margin-top:23px"><div>
   <section class="wallet-total wallet-visual-card"><div class="wallet-card-top"><div class="wallet-card-brand"><span class="wallet-card-chip">R</span><span><b>REFILLS WALLET</b><small>BILLETERA DIGITAL INTERNA</small></span></div><span class="wallet-card-status">● ACTIVA</span></div><div class="wallet-card-number-label">IDENTIFICADOR INTERNO</div><div class="wallet-card-number">${esc(walletId)}</div><div class="wallet-card-owner-row"><div><small>TITULAR DE LA CUENTA</small><b>${esc(u.name||'Cliente')}</b></div><div class="wallet-card-balance"><small>SALDO DISPONIBLE</small><strong>${cash(db.balance)} <em>USD</em></strong></div></div><div class="wallet-card-rule"></div><small class="wallet-card-footnote">No es una tarjeta bancaria. El saldo es crédito interno de REFILLS SHOP.</small><span class="wallet-total-sub">Crédito interno para pagar compras · USD</span><div class="wallet-action-row wallet-action-trio"><button class="btn btn-primary" type="button" onclick="openDeposit()"><svg class="ui-icon" viewBox="0 0 24 24" width="18" height="18" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M12 5v14M5 12h14"/></svg> Recargar Wallet</button><button class="btn btn-secondary" type="button" onclick="var p=document.getElementById('walletTransferPanel');p&&p.scrollIntoView({behavior:'smooth',block:'start'})"><svg class="ui-icon" viewBox="0 0 24 24" width="18" height="18" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M17 4l4 4-4 4M21 8H7M7 20l-4-4 4-4M3 16h14"/></svg> Transferir a otra persona</button><button class="btn btn-secondary" type="button" onclick="var p=document.getElementById('walletHelpPanel');p&&p.scrollIntoView({behavior:'smooth',block:'start'})"><svg class="ui-icon" viewBox="0 0 24 24" width="18" height="18" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><circle cx="12" cy="12" r="9"/><path d="M9.5 9a2.5 2.5 0 1 1 3.5 2.3c-.7.4-1 1-1 1.7M12 17h.01"/></svg> Ayuda · no sé cómo</button></div>
    <div class="rate-mini"><div><small>1 USD →</small><b>${offerWhole(db.rates.sm)} SM</b></div><div><small>1 USD →</small><b>${offerWhole(db.rates.cup)} CUP</b></div><div><small>1 USD →</small><b>${num(db.rates.usdt)} USDT</b></div><div><small>1 SM →</small><b>${num(db.rates.smCUPValue)} CUP</b></div></div>
-  </section>
-  <section id="walletTransferPanel" class="panel subsection wallet-transfer-panel"><div class="wallet-transfer-header"><span class="wallet-transfer-icon" aria-hidden="true">⇄</span><div><h3>Transferir saldo</h3><p class="muted">Envía USD a otra Wallet REFILLS SHOP usando el teléfono de la persona.</p></div></div><form class="wallet-transfer-form" onsubmit="transferWalletToAccount(event)"><label class="field"><span>Teléfono del destinatario</span><input id="walletTransferPhone" type="tel" inputmode="tel" maxlength="24" required placeholder="+53 5XXXXXXX"></label><label class="field"><span>Importe en USD</span><input id="walletTransferAmount" type="number" inputmode="decimal" min="0.01" max="100000" step="0.01" required placeholder="1.00"></label><button class="btn btn-primary" id="walletTransferSubmit" type="submit">Enviar saldo</button></form><p class="wallet-transfer-help muted">Revisa el teléfono y la cantidad antes de enviar. Nunca compartas tu PIN.</p><div id="walletTransferStatus" role="status" aria-live="polite"></div></section>
+  </section>  <section id="walletTransferPanel" class="panel subsection wallet-transfer-panel"><div class="wallet-transfer-header"><span class="wallet-transfer-icon" aria-hidden="true">⇄</span><div><h3>Transferir saldo</h3><p class="muted">Envía USD a otra Wallet REFILLS SHOP usando el teléfono de la persona.</p></div></div><form class="wallet-transfer-form" onsubmit="transferWalletToAccount(event)"><label class="field"><span>Teléfono del destinatario</span><input id="walletTransferPhone" type="tel" inputmode="tel" maxlength="24" required placeholder="+53 5XXXXXXX"></label><label class="field"><span>Importe en USD</span><input id="walletTransferAmount" type="number" inputmode="decimal" min="0.01" max="100000" step="0.01" required placeholder="1.00"></label><button class="btn btn-primary" id="walletTransferSubmit" type="submit">Enviar saldo</button></form><p class="wallet-transfer-help muted">Revisa el teléfono y la cantidad antes de enviar. Nunca compartas tu PIN.</p><div id="walletTransferStatus" role="status" aria-live="polite"></div></section>
   <section id="walletHelpPanel" class="panel subsection wallet-help-panel"><div class="wallet-transfer-header"><span class="wallet-transfer-icon" aria-hidden="true">?</span><div><h3>¿No sabes cómo hacerlo? Te guiamos</h3><p class="muted">Sigue estos pasos. Si algo no queda claro, escríbenos y te ayudamos.</p></div></div><div class="wallet-help-cols"><div class="history-steps"><p class="wallet-help-h"><b>Para recargar saldo</b></p><p><b>01 · Elige el importe</b><br><span class="muted">Indica cuántos USD quieres tener disponibles.</span></p><p><b>02 · Escoge el método</b><br><span class="muted">Verás cuánto debes enviar en SM, CUP o USDT según el método.</span></p><p><b>03 · Espera la confirmación</b><br><span class="muted">El administrador comprueba el pago y acredita el saldo.</span></p></div><div class="history-steps"><p class="wallet-help-h"><b>Para transferir a otra persona</b></p><p><b>01 · Teléfono</b><br><span class="muted">Escribe el teléfono con el que la otra persona se registró.</span></p><p><b>02 · Importe</b><br><span class="muted">Indica cuántos USD quieres enviarle.</span></p><p><b>03 · Revisa y envía</b><br><span class="muted">Comprueba bien los datos antes de enviar. No se puede deshacer.</span></p></div></div><div class="notice">No realices el mismo depósito dos veces. Guarda el número de solicitud hasta que aparezca como aprobado. Nunca compartas tu PIN.</div><a class="btn btn-secondary rs-full-btn" style="margin-top:12px" href="${esc(supportWhatsAppHref('Hola, REFILLS SHOP. Necesito ayuda con mi Wallet.'))}" target="_blank" rel="noopener noreferrer">Hablar con soporte por WhatsApp</a></section>
   <section class="panel subsection"><div class="section-head"><div><h3>Últimas solicitudes de depósito</h3><p>El saldo solo cambia después de que administración apruebe la solicitud.</p></div><button class="btn btn-secondary btn-small" type="button" onclick="navigate('movimientos')">Ver movimientos</button></div>${last.length?`<div class="table-scroll"><table class="list-table"><thead><tr><th>FECHA</th><th>MÉTODO</th><th>IMPORTE USD</th><th>ESTADO</th></tr></thead><tbody>${last.map(d=>`<tr><td>${esc(d.date)}</td><td>${esc(methodName(d.method))}</td><td>${cash(d.amount)}</td><td>${statusBadge(d.status)}</td></tr>`).join('')}</tbody></table></div>`:empty('◈','Todavía no has hecho una solicitud de depósito.')}</section>
  </div></div>`;
@@ -5997,8 +5992,7 @@ function refillsSetPendingImport(keys,user,balance){
 function getPendingBalanceMigration(){try{return JSON.parse(localStorage.getItem(BALANCE_MIGRATION_KEY)||'null')}catch{return null}}
 function showBalanceMigrationModal(){return;
  const p=getPendingBalanceMigration();if(!p)return;
- const isAdmin=Boolean(adminAuthed&&remoteAdminToken);
- if(isAdmin){
+ const isAdmin=Boolean(adminAuthed&&remoteAdminToken); if(isAdmin){
   modal(`<span class="eyebrow">WALLET EN SUPABASE</span><h2>Importar saldo existente</h2><p class="modal-sub">Saldo local detectado: <b>${cash(p.balance)} USD</b>. Esta consulta requiere permisos de administrador de Supabase y solo corresponde a esta Wallet.</p><ol style="padding-left:20px;line-height:1.6"><li>Verifica que el teléfono y el importe correspondan al cliente.</li><li>Ejecuta el SQL una sola vez en el proyecto correcto.</li><li>Regresa y comprueba el saldo remoto.</li></ol><textarea id="refillsBalanceMigrationSql" readonly style="width:100%;min-height:190px;resize:vertical;font:12px/1.5 monospace;padding:10px;border-radius:10px;border:1px solid var(--border,#444);background:var(--surface,#111);color:var(--text,#fff)">${esc(p.sql)}</textarea><div class="modal-actions" style="display:flex;gap:8px;flex-wrap:wrap;margin-top:12px"><button class="btn btn-primary" type="button" onclick="copyBalanceMigrationSql()">Copiar consulta SQL</button><button class="btn btn-secondary" type="button" onclick="checkWalletMigration()">Comprobar saldo remoto</button></div><p class="security-note">No compartas esta consulta. No modifica una Wallet que ya tenga un saldo diferente de cero.</p>`);
   return;
  }
@@ -6752,10 +6746,9 @@ window.spinRoulette=spinRoulette;window.adminAdjustCoins=adminAdjustCoins;window
   var gp='<button type="button" class="gp'+(offerGameFilter==='Todos'?' on':'')+'" onclick="ofSetGame(\'Todos\')"><span class="gp-img gp-all">✦</span><span class="gp-n">Todos</span></button>'+games.map(function(g,i){var a=A(g,0);return '<button type="button" class="gp'+(offerGameFilter===g.id?' on':'')+'" style="--ac:'+esc(g.color||'#2d8cff')+'" onclick="ofSetGame(\''+esc(g.id)+'\')"><span class="gp-img'+a.c+'" style="'+a.s+'">'+(a.c?esc(g.icon||'▣'):'')+'</span><span class="gp-n">'+esc(g.name)+'</span></button>'}).join('');
   var list=groups.map(function(x,gi){var m=Math.min.apply(null,x.l.map(pr)),a=A(x.g,2);
    return '<section class="og"><header class="ogb'+a.c+'" style="'+a.s+'"><span class="gx-shade"></span><div class="ogb-t"><h2>'+esc(x.g.name)+'</h2><p>'+x.l.length+(x.l.length===1?' pack':' packs')+' · desde '+cash(m)+' USD</p></div></header><div class="og-grid">'+x.l.map(productCard).join('')+'</div></section>'}).join('');
-  var guide='<section class="rs-offers-after" aria-label="Cómo completar tu compra"><div class="rs-offers-after-head"><span class="eyebrow">COMPRA FÁCIL Y SEGURA</span><h2>Tu compra en tres pasos</h2><p>Un proceso claro para elegir tu paquete y seguir tu recarga.</p></div><div class="rs-offers-after-grid"><article class="rs-offers-after-card"><span class="rs-offers-after-number">01</span><div><h3>Elige tu pack</h3><p>Busca el juego, compara los precios y selecciona el paquete que necesitas.</p></div></article><article class="rs-offers-after-card"><span class="rs-offers-after-number">02</span><div><h3>Confirma tus datos</h3><p>Introduce tu ID o los datos que solicite el juego y comprueba que sean correctos.</p></div></article><article class="rs-offers-after-card"><span class="rs-offers-after-number">03</span><div><h3>Revisa tu pedido</h3><p>Confirma el pago con Wallet USD y consulta el estado de la recarga en tu cuenta.</p></div></article></div><div class="rs-offers-after-footer"><div><b>¿Tienes alguna duda?</b><span>El centro de ayuda y tus pedidos están siempre a mano.</span></div><div class="rs-offers-after-actions"><button type="button" class="btn btn-secondary" onclick="navigate(&#39;ayuda&#39;)">Centro de ayuda</button><button type="button" class="btn btn-primary" onclick="navigate(&#39;pedidos&#39;)">Mis pedidos</button></div></div></section>';
   return '<div class="of-page"><header class="of-head"><div><h1>Ofertas</h1><p>Elige tu juego, escoge el pack y paga con el saldo de tu Wallet.</p></div><div class="of-count"><b>'+act.length+'</b><span>packs disponibles</span></div></header>'+hero+'<div class="gp-row" role="group" aria-label="Filtrar por juego">'+gp+'</div>'+
    '<div class="of-bar"><label class="of-search">'+SVG+'<input id="ofQ" type="search" value="'+esc(offerSearchText||'')+'" placeholder="Buscar juego o pack…" aria-label="Buscar oferta" oninput="ofSetQ(this)"></label><select class="of-sort" aria-label="Ordenar" onchange="ofSetSort(this.value)"><option value="rec"'+(ofSort==='rec'?' selected':'')+'>Recomendadas</option><option value="asc"'+(ofSort==='asc'?' selected':'')+'>Precio: menor a mayor</option><option value="desc"'+(ofSort==='desc'?' selected':'')+'>Precio: mayor a menor</option></select></div>'+
-   (shown?'<div class="of-list">'+list+'</div>':'<div class="of-empty"><b>No hay packs con esa búsqueda</b><span>Prueba con otro nombre o quita los filtros.</span><button type="button" class="btn btn-secondary" onclick="ofClear()">Quitar filtros</button></div>')+guide+'</div>';
+   (shown?'<div class="of-list">'+list+'</div>':'<div class="of-empty"><b>No hay packs con esa búsqueda</b><span>Prueba con otro nombre o quita los filtros.</span><button type="button" class="btn btn-secondary" onclick="ofClear()">Quitar filtros</button></div>')+'</div>';
  };
  function dec(id,step){try{var o=offerById(id),g=o&&gameById(o.gameId),m=document.querySelector('#modalHost .modal-order'),sc=m&&m.querySelector('.ob-screen');if(!sc||sc.querySelector('.obh'))return;var a=A(g,2),h=document.createElement('div');h.className='obh';
   h.innerHTML='<div class="obh-art'+a.c+'" style="'+a.s+'"><span class="gx-shade"></span><div class="obh-t"><small>'+esc(g.name)+'</small><b>'+esc(o.name)+'</b></div><span class="obh-p">'+cash(offerDisplayPrice(o))+' <em>USD</em></span></div><ol class="obh-steps"><li class="'+(step>1?'ok':'on')+'">1 · Datos</li><li class="'+(step===2?'on':'')+'">2 · Revisar</li><li>3 · Listo</li></ol>';
@@ -6998,8 +6991,7 @@ try{
   if(user?.planType==='reseller')return 'Plan revendedor vencido';
   return 'Cliente';
  };
- window.rsResellerPrice=function(offer){
-  if(!offer)return null;
+ window.rsResellerPrice=function(offer){  if(!offer)return null;
   const primaryCost=Number(offer.costUSDT),secondaryCost=Number(offer.cost);
   const providerCost=Number.isFinite(primaryCost)&&primaryCost>0?primaryCost:secondaryCost;
   const base=Number.isFinite(providerCost)&&providerCost>0?providerCost:Number(offer.price||0);
@@ -7998,8 +7990,7 @@ td{padding:12px!important;border-top:1px solid #0e2a55!important}tbody tr:hover 
 #view .wallet-transfer-form .field>span{color:#c4dcf8!important}
 #view .wallet-transfer-form input{background:#06172b!important;color:#f3f8ff!important;border-color:#315d84!important}
 #view .rates-readonly-value{background:#071a32!important;border-color:#1b4a79!important;color:#8dccff!important}
-#view .rates-derived-cup .field span{color:#c1d8f4!important}
-.mobile-menu-trigger{background:#0b2441!important;border:1px solid #1b4776!important;color:#d8edff!important;box-shadow:0 6px 18px #0005!important}
+#view .rates-derived-cup .field span{color:#c1d8f4!important}.mobile-menu-trigger{background:#0b2441!important;border:1px solid #1b4776!important;color:#d8edff!important;box-shadow:0 6px 18px #0005!important}
 .rh-featured-section{display:flex;flex-direction:column;gap:17px;margin:clamp(22px,3vw,34px) 0}
 .rh-featured-grid{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:16px}
 .rh-game-feature{position:relative;display:block;min-width:0;min-height:245px;padding:0;overflow:hidden;text-align:left;border:1px solid #1e4e82;border-radius:21px;background:#061327;color:#fff;isolation:isolate;box-shadow:0 14px 34px #0008;transition:transform .2s,border-color .2s,box-shadow .2s}
@@ -8998,8 +8989,7 @@ html body.nk-rail .nk-sidefoot{justify-content:center}
 
 html body .nk-cmd{position:fixed;inset:0;z-index:100000;display:grid;place-items:start center;padding:12vh 16px 16px}
 html body .nk-cmd-backdrop{position:absolute;inset:0;background:#010512bb;backdrop-filter:blur(6px)}
-html body .nk-cmd-box{position:relative;width:min(620px,100%);border:1px solid #2a5a8f;border-radius:20px;background:linear-gradient(165deg,#0a2146,#06142b);box-shadow:0 30px 80px #000a;overflow:hidden;animation:nkPop .16s ease-out}
-html body .nk-cmd-box::before{content:"";display:block;height:3px;background:linear-gradient(90deg,#3fa2ff,#1259d6)}
+html body .nk-cmd-box{position:relative;width:min(620px,100%);border:1px solid #2a5a8f;border-radius:20px;background:linear-gradient(165deg,#0a2146,#06142b);box-shadow:0 30px 80px #000a;overflow:hidden;animation:nkPop .16s ease-out}html body .nk-cmd-box::before{content:"";display:block;height:3px;background:linear-gradient(90deg,#3fa2ff,#1259d6)}
 @keyframes nkPop{from{opacity:0;transform:translateY(-8px) scale(.98)}to{opacity:1;transform:none}}
 html body .nk-cmd-input{display:flex;align-items:center;gap:12px;padding:14px 16px;border-bottom:1px solid #16396a;color:#79c3ff}
 html body .nk-cmd-input input{flex:1;min-width:0;border:0;outline:0;background:transparent;color:#fff;font-size:16px;font-weight:600}
@@ -9998,8 +9988,7 @@ body.admin-full .page,body.admin-full #view,body.admin-full .main{max-width:none
  #view .rs-game-products-grid .rs-product-cta{width:100%!important}
  #view .game-card{min-width:0}
  #view .panel,#view .subsection{padding:clamp(14px,4vw,20px)}
-}
-@media(max-width:380px){
+}@media(max-width:380px){
  #view .rs-game-products-grid .product-art{height:178px!important;min-height:178px!important}
  #view .rs-game-products-grid .product-card-body{padding:15px!important}
  #view .rs-game-products-grid .price-alt>div{gap:4px!important}
@@ -10998,8 +10987,7 @@ html body #view .pc{--ac:var(--game-accent,#2d8cff);-webkit-appearance:none;appe
 .pc-price b{font-size:22px;font-weight:850;letter-spacing:-.02em}
 .pc-price small{font-size:11px;color:#8ea3c2;font-weight:700}
 .pc-go{margin-top:8px;padding:11px 0;text-align:center;border-radius:12px;background:#2d8cff;color:#fff;font-size:14px;font-weight:800}
-html body #view .og-grid,html body #view .sq-slider{grid-template-columns:repeat(auto-fill,minmax(210px,1fr))!important;align-items:stretch}
-@media(max-width:700px){html body #view .og-grid,html body #view .sq-slider{grid-template-columns:repeat(2,minmax(0,1fr))!important;gap:12px!important}html body #view .pc{padding:12px!important}.pc-name{font-size:16px}.pc-price b{font-size:21px}}
+html body #view .og-grid,html body #view .sq-slider{grid-template-columns:repeat(auto-fill,minmax(210px,1fr))!important;align-items:stretch}@media(max-width:700px){html body #view .og-grid,html body #view .sq-slider{grid-template-columns:repeat(2,minmax(0,1fr))!important;gap:12px!important}html body #view .pc{padding:12px!important}.pc-name{font-size:16px}.pc-price b{font-size:21px}}
 
 
 .gx-shade{position:absolute;left:0;right:0;top:0;bottom:0;background:linear-gradient(to top,rgba(6,12,24,.92) 4%,rgba(6,12,24,.35) 55%,rgba(6,12,24,.1))}
@@ -11496,15 +11484,15 @@ html body #view .wo-btn{box-shadow:0 8px 20px #1a6bff55,0 1px 0 #ffffff40 inset!
     var base=gameView;
     gameView=function(id){
       var html=base.apply(this,arguments);
-      if(typeof html!=='string'||html.indexOf('sq-slider')<0)return html;
+      if(typeof html!=='string'||(html.indexOf('sq-slider')<0&&html.indexOf('ofc-track')<0))return html;
       var ac='#2d8cff';try{var g=gameById(id);if(g&&g.color)ac=String(g.color).replace(/[^#\w(),.% ]/g,'')}catch(e){}
-      var marker='<section class="rs-game-checklist">',d='';
+      var marker='<section class="rs-game-checklist">',d=decor(id);
       html=html.indexOf(marker)>=0?html.replace(marker,d+marker):html+d;
       return '<div class="rsd-stage" style="--rsd-ac:'+ac+'">'+html+'</div>';
     };
   }
   document.addEventListener('scroll',function(e){
-    var s=e.target;if(!s||!s.classList||!s.classList.contains('sq-slider'))return;
+    var s=e.target;if(!s||!s.classList||!(s.classList.contains('sq-slider')||s.classList.contains('ofc-track')))return;
     var stage=s.closest('.rsd-stage'),dots=stage&&stage.querySelectorAll('.rsd-dots i');if(!dots||!dots.length)return;
     var cards=s.children,max=s.scrollWidth-s.clientWidth,idx=0;
     if(max>0&&cards.length>1)idx=Math.round(s.scrollLeft/max*(cards.length-1));
@@ -11998,8 +11986,7 @@ button:focus-visible,a:focus-visible,input:focus-visible,select:focus-visible,te
 #view .field input,#view .field select,#view .field textarea,
 #view input:not([type="checkbox"]):not([type="radio"]):not([type="range"]),
 #view select,#view textarea{
-  border:1px solid rgba(110,169,242,.20)!important;
-  border-radius:12px!important;
+  border:1px solid rgba(110,169,242,.20)!important;  border-radius:12px!important;
   background:linear-gradient(145deg,#08172a,#071222)!important;
   color:#eff6ff!important;
   box-shadow:inset 0 1px 0 rgba(255,255,255,.02)!important;
@@ -12998,8 +12985,7 @@ html body.admin-full .afs-main button,html body.admin-full .afs-main input,html 
 }
 #modalHost .v10-receipt .v10-checkout-head{
   display:grid!important;grid-template-columns:54px minmax(0,1fr) 38px!important;
-  align-items:center!important;gap:14px!important;padding:0 0 17px!important;
-  border-bottom:1px solid #ffffff17!important;
+  align-items:center!important;gap:14px!important;padding:0 0 17px!important;  border-bottom:1px solid #ffffff17!important;
 }
 #modalHost .v10-receipt .v10-brand-mark{
   display:grid!important;place-items:center!important;width:54px!important;height:54px!important;
@@ -13530,16 +13516,9 @@ html body #rsCartFab{box-shadow:0 12px 34px #0008,0 0 25px #0a72ed33!important}
 window.rsResellerConfig=null;
 window.rsResellerApi=async function(action,data={}){
  const cfg=lioGetPublicConfig();if(!cfg.url||!cfg.publicKey)throw new Error('Configura Supabase en administración.');
- const endpoint=cfg.url.replace(/\/$/,'')+'/functions/v1/refills-reseller';
- const options={method:'POST',cache:'no-store',headers:{'Content-Type':'application/json','apikey':cfg.publicKey,'Authorization':'Bearer '+cfg.publicKey,'x-client-info':'refills-shop-web/1.0'},body:JSON.stringify({action,...data})};
- let response=null,networkError=null;
- for(let attempt=0;attempt<2;attempt++){
-   try{response=await fetch(endpoint,options);networkError=null;break;}
-   catch(err){networkError=err;if(attempt===0)await new Promise(resolve=>setTimeout(resolve,450));}
- }
- if(!response)throw new Error('No se pudo conectar con Supabase. Comprueba tu conexión e inténtalo de nuevo.'+(networkError?.message?' ('+networkError.message+')':''));
- let result;try{result=await response.json()}catch{throw new Error('Supabase respondió, pero devolvió una respuesta inválida (HTTP '+response.status+').');}
- if(!response.ok||!result?.ok)throw new Error(result?.error||'No se pudo completar la operación (HTTP '+response.status+').');
+ const response=await fetch(cfg.url.replace(/\/$/,'')+'/functions/v1/refills-reseller',{method:'POST',headers:{'Content-Type':'application/json','apikey':cfg.publicKey,'Authorization':'Bearer '+cfg.publicKey},body:JSON.stringify({action,...data})});
+ let result;try{result=await response.json()}catch{throw new Error('El servidor devolvió una respuesta inválida.');}
+ if(!response.ok||!result?.ok)throw new Error(result?.error||'No se pudo completar la operación.');
  return result;
 };
 window.rsResellerToken=function(){try{return activeWalletAccessToken||sessionStorage.getItem(REFILLS_WALLET_SESSION_KEY)||localStorage.getItem(REFILLS_WALLET_SESSION_KEY)||''}catch{return activeWalletAccessToken||''}};
@@ -13559,7 +13538,7 @@ window.rsBuyResellerPlan=async function(){
 };
 function refresh(){syncConfig();syncMembership(false)}
 window.addEventListener('hashchange',()=>{if(location.hash.includes('planes')||location.hash.includes('cuenta'))refresh()});
-const startRefresh=()=>{refresh();setInterval(()=>{if(document.visibilityState==='visible'&&currentUser()){syncMembership(true);if(location.hash.includes('planes'))syncConfig()}},120000)};if(document.readyState==='loading')window.addEventListener('DOMContentLoaded',startRefresh,{once:true});else startRefresh();
+window.addEventListener('DOMContentLoaded',()=>{refresh();setInterval(()=>{if(document.visibilityState==='visible'&&currentUser()){syncMembership(true);if(location.hash.includes('planes'))syncConfig()}},120000)});
 })();
 </script>
 <style id="rs-v22-admin-fix">
@@ -14005,8 +13984,7 @@ html body.admin-full #modalHost .modal input,html body.admin-full #modalHost .mo
  html body.admin-full .rs35-games-top{align-items:stretch;flex-direction:column}
  html body.admin-full .rs35-games-top .rs35-add{width:100%}
  html body.admin-full .rs34-admin{grid-template-columns:minmax(0,1fr)!important}
- html body.admin-full .rs34-layout{grid-column:1!important;width:100%!important;min-width:0!important}
- html body.admin-full .rs34-work{overflow-x:hidden!important}
+ html body.admin-full .rs34-layout{grid-column:1!important;width:100%!important;min-width:0!important} html body.admin-full .rs34-work{overflow-x:hidden!important}
  html body.admin-full .rs34-content>*{max-width:100%!important;min-width:0!important}
  html body.admin-full #modalHost .modal-backdrop{align-items:flex-start!important}
  html body.admin-full #modalHost .modal .form-grid{grid-template-columns:minmax(0,1fr)!important;gap:10px!important}
@@ -14857,7 +14835,7 @@ html body:not(.admin-full) #view .rs47-offer__actions button:focus-visible{outli
 
 
 <style id="rs-offers-after-styles">
-html body:not(.admin-full) #view .rs-offers-after{width:100%;margin:18px 0 12px;padding:26px;border:1px solid #23496f;border-radius:22px;background:linear-gradient(145deg,#0b2039 0%,#081629 72%);box-sizing:border-box}
+html body:not(.admin-full) #view .rs-offers-after{width:100%;margin:34px 0 12px;padding:26px;border:1px solid #23496f;border-radius:22px;background:linear-gradient(145deg,#0b2039 0%,#081629 72%);box-sizing:border-box}
 html body:not(.admin-full) #view .rs-offers-after-head{max-width:720px;margin:0 0 20px}
 html body:not(.admin-full) #view .rs-offers-after-head h2{margin:7px 0 6px;font-size:clamp(22px,2.4vw,30px);letter-spacing:-.5px;color:#f3f8ff}
 html body:not(.admin-full) #view .rs-offers-after-head p{margin:0;color:#a9c1dc;font-size:14px;line-height:1.6}
@@ -14875,6 +14853,234 @@ html body:not(.admin-full) #view .rs-offers-after-actions button{min-height:44px
 @media(max-width:900px){html body:not(.admin-full) #view .rs-offers-after-grid{grid-template-columns:1fr}}
 @media(max-width:600px){html body:not(.admin-full) #view .rs-offers-after{margin-top:24px;padding:17px;border-radius:17px}html body:not(.admin-full) #view .rs-offers-after-card{padding:14px}html body:not(.admin-full) #view .rs-offers-after-footer{align-items:stretch;flex-direction:column;padding:15px}html body:not(.admin-full) #view .rs-offers-after-actions{display:grid;grid-template-columns:1fr 1fr}html body:not(.admin-full) #view .rs-offers-after-actions button{min-width:0;white-space:normal}}
 @media(max-width:380px){html body:not(.admin-full) #view .rs-offers-after-actions{grid-template-columns:1fr}}
+</style>
+
+
+<!-- Fix: hueco vacio bajo las ofertas del juego -->
+<style id="rs-game-gap-fix">
+/* Menos espacio muerto entre el contenido y el footer en las pantallas de ofertas/juego */
+html body:not(.admin-full) #view.page:has(.ofp-page){padding-bottom:calc(36px + env(safe-area-inset-bottom))!important}
+html body #view .rsd-stage .ofp-page{padding-bottom:0!important;margin-bottom:0!important}
+html body #view .rsd-stage .ofc-track{margin-bottom:6px!important}
+html body #view .rsd-wrap{margin-bottom:0}
+@media screen and (max-width:800px){
+  html body:not(.admin-full) #view.page:has(.ofp-page){padding-bottom:18px!important}
+}
+</style>
+
+
+<!-- Preguntas frecuentes al final de cada apartado -->
+<style id="rs-faq-style">
+html body:not(.admin-full) #view .rs-faq{width:100%;box-sizing:border-box;margin:22px 0 0}
+html body:not(.admin-full) #view .rs-faq-head{margin:0 0 12px}
+html body:not(.admin-full) #view .rs-faq-head small{display:block;color:#66b9ff;font-size:10px;font-weight:900;letter-spacing:2px}
+html body:not(.admin-full) #view .rs-faq-head h2{margin:5px 0 0;color:#f3f8ff;font-size:clamp(19px,2.2vw,25px);letter-spacing:-.4px}
+html body:not(.admin-full) #view .rs-faq-list{display:grid;gap:9px}
+html body:not(.admin-full) #view .rs-faq details{border:1px solid #23476b;border-radius:14px;background:#0a1b30;overflow:hidden}
+html body:not(.admin-full) #view .rs-faq details[open]{border-color:#2f6fb0;background:#0c2038}
+html body:not(.admin-full) #view .rs-faq summary{list-style:none;cursor:pointer;display:flex;align-items:center;justify-content:space-between;gap:12px;padding:15px 16px;color:#eef6ff;font-size:13px;font-weight:700;line-height:1.4}
+html body:not(.admin-full) #view .rs-faq summary::-webkit-details-marker{display:none}
+html body:not(.admin-full) #view .rs-faq summary::after{content:"";flex:0 0 9px;width:9px;height:9px;border-right:2px solid #7bc7ff;border-bottom:2px solid #7bc7ff;transform:rotate(45deg);margin-top:-4px;transition:transform .2s}
+html body:not(.admin-full) #view .rs-faq details[open] summary::after{transform:rotate(-135deg);margin-top:4px}
+html body:not(.admin-full) #view .rs-faq details p{margin:0;padding:0 16px 15px;color:#a9c0da;font-size:12px;line-height:1.7}
+html body:not(.admin-full) #view .rs-faq-more{display:inline-block;margin-top:12px;padding:0;border:0;background:none;color:#7cc1ff;font-size:12px;font-weight:800}
+html body:not(.admin-full) #view.page:has(.rs-faq){padding-bottom:18px!important}
+@media(min-width:900px){html body:not(.admin-full) #view .rs-faq-list{grid-template-columns:1fr 1fr;align-items:start}}
+</style>
+<script id="rs-faq-js">
+(function(){
+  var Q={
+    compra:[
+      ['¿Cómo pago mis recargas?','Los packs se pagan con el saldo de tu Wallet. Al confirmar el pedido se descuenta el importe en USD.'],
+      ['¿Dónde encuentro mi ID de jugador?','Lo encuentras dentro del juego, en tu perfil. En el Centro de ayuda tienes una guía para localizarlo.'],
+      ['¿Qué pasa si me falta saldo?','Puedes añadir fondos a tu Wallet desde la sección Wallet y luego volver a elegir tu pack.'],
+      ['¿Puedo comprar varios packs a la vez?','Sí. Usa el carrito para juntar varios packs y pagarlos en una sola compra.']],
+    wallet:[
+      ['¿Cómo añado saldo a mi Wallet?','Entra a Wallet, elige la opción de recarga y sigue los pasos que se muestran en pantalla.'],
+      ['¿Dónde veo mis movimientos?','En la sección Movimientos aparece cada recarga de saldo y cada compra descontada.'],
+      ['¿Qué moneda se usa?','Los precios están en USD. Verás también la equivalencia en SM, CUP y USDT con la tasa actual.'],
+      ['¿Qué hago si tengo un problema con un pago?','Ten a mano tu comprobante y entra al Centro de ayuda para contactar con soporte.']],
+    pedidos:[
+      ['¿Cómo sé el estado de mi recarga?','En esta pantalla ves cada pedido con su estado: pendiente, completado o rechazado.'],
+      ['¿Qué hago si mi pedido tiene un error?','Ten a mano el número de pedido y el ID de jugador que usaste y entra al Centro de ayuda.'],
+      ['¿Puedo repetir una recarga?','Sí, puedes volver a la sección Juegos y elegir de nuevo el pack que necesites.'],
+      ['¿Piden mi contraseña?','Nunca. Nunca te pedimos contraseñas ni PIN de tus juegos.']],
+    general:[
+      ['¿Cómo funciona REFILLS SHOP?','Eliges tu juego, seleccionas el pack, escribes tu ID y confirmas el pedido pagando con tu Wallet.'],
+      ['¿Es seguro comprar aquí?','Nunca te pedimos contraseñas ni PIN de tus juegos. Revisa siempre los datos antes de confirmar.'],
+      ['¿En qué moneda están los precios?','En USD, con su equivalencia en SM, CUP y USDT según la tasa actual.'],
+      ['¿Dónde obtengo ayuda?','En el Centro de ayuda encontrarás guías y la forma de contactar con soporte.']]
+  };
+  function pick(r){
+    if(r==='game'||r==='ofertas'||r==='juegos'||r==='especiales'||r==='precios-usd'||r==='giftcards'||r==='manuales')return Q.compra;
+    if(r==='wallet'||r==='movimientos'||r==='refillcoins')return Q.wallet;
+    if(r==='pedidos'||r==='solicitudes')return Q.pedidos;
+    return Q.general;
+  }
+  function html(list){
+    return '<section class="rs-faq" id="rsFaqBlock" aria-label="Preguntas frecuentes"><div class="rs-faq-head"><small>AYUDA</small><h2>Preguntas frecuentes</h2></div><div class="rs-faq-list">'+
+      list.map(function(x){return '<details><summary>'+x[0]+'</summary><p>'+x[1]+'</p></details>'}).join('')+
+      '</div><button type="button" class="rs-faq-more" onclick="navigate(\'ayuda\')">Ver más en el Centro de ayuda ›</button></section>';
+  }
+  var busy=false;
+  function addFaq(){
+    if(busy)return;
+    var v=document.getElementById('view');if(!v)return;
+    var b=document.body.classList,old=document.getElementById('rsFaqBlock');
+    var r='inicio';try{r=routeParts()[0]||'inicio'}catch(e){}
+    if(b.contains('admin-full')||b.contains('rs-auth-guest')||r==='admin'||r==='cuenta'||r==='ayuda'||v.querySelector('.maintenance-screen')){if(old)old.remove();return}
+    if(!v.children.length)return;
+    busy=true;
+    try{if(old)old.remove();v.insertAdjacentHTML('beforeend',html(pick(r)))}finally{busy=false}
+  }
+  var prev=window.render;
+  if(typeof prev==='function'){
+    window.render=render=function(){var out=prev.apply(this,arguments);try{addFaq()}catch(e){}return out};
+  }
+  var v0=document.getElementById('view');
+  if(v0&&window.MutationObserver){
+    new MutationObserver(function(){if(!busy&&!document.getElementById('rsFaqBlock')){try{addFaq()}catch(e){}}}).observe(v0,{childList:true});
+  }
+  try{addFaq()}catch(e){}
+})();
+</script>
+
+
+<!-- Mejora visual: pedido (datos, revision, listo), anadir saldo y Wallet -->
+<style id="rs-flow-polish">
+/* ---- Indicador de pasos (Datos · Revision · Listo) ---- */
+html body #modalHost .rs-stepper{display:flex;align-items:flex-start;justify-content:center;width:100%;max-width:340px;margin:0 auto 18px;padding:0}
+html body #modalHost .rs-st{position:relative;flex:1 1 0;display:grid;justify-items:center;gap:6px;min-width:0;color:#6f8fb3;font-size:10px;font-weight:800;letter-spacing:.6px;text-transform:uppercase}
+html body #modalHost .rs-st:not(:first-child):before{content:"";position:absolute;top:13px;right:50%;width:100%;height:2px;background:#1d3f66;z-index:0}
+html body #modalHost .rs-st i{position:relative;z-index:1;display:grid;place-items:center;width:27px;height:27px;border-radius:50%;border:2px solid #25507f;background:#08192e;color:#7da3cf;font-style:normal;font-size:12px;font-weight:900}
+html body #modalHost .rs-st.now{color:#d8ecff}
+html body #modalHost .rs-st.now i{border-color:#4aa8ff;background:linear-gradient(145deg,#2f95ff,#0b62e6);color:#fff;box-shadow:0 0 0 4px #2b8cff2b,0 6px 16px #0a63e655}
+html body #modalHost .rs-st.done{color:#8fe9c4}
+html body #modalHost .rs-st.done i{border-color:#2fc78f;background:#0f5f49;color:#aaf5d6}
+html body #modalHost .rs-st.done:not(:first-child):before,html body #modalHost .rs-st.now:not(:first-child):before{background:linear-gradient(90deg,#2fc78f,#3a9bff)}
+
+/* ---- Paso 1: datos de la cuenta/juego ---- */
+html body #modalHost .ob-screen .ob-fields{display:grid;gap:14px}
+html body #modalHost .ob-field>span{display:block;margin-bottom:7px;color:#cfe3fa;font-size:12px;font-weight:750;letter-spacing:.2px}
+html body #modalHost .ob-field>span em{color:#7f9dbf;font-style:normal;font-weight:500}
+html body #modalHost .ob-input-wrap{position:relative;display:flex;align-items:center;gap:8px}
+html body #modalHost .ob-input-wrap input{width:100%;min-height:52px;padding:0 16px;border:1.5px solid #27507e;border-radius:14px;background:#06162a;color:#f3f9ff;font-size:15px;font-weight:600;letter-spacing:.2px;transition:border-color .15s,box-shadow .15s}
+html body #modalHost .ob-input-wrap input::placeholder{color:#58789d;font-weight:500}
+html body #modalHost .ob-input-wrap input:focus{outline:none;border-color:#44a2ff;box-shadow:0 0 0 4px #2b8cff26}
+html body #modalHost .ob-paste{flex:0 0 auto;min-height:52px;padding:0 16px;border:1.5px solid #2b6bb3;border-radius:14px;background:#0e2d52;color:#a7d6ff;font-size:12px;font-weight:800}
+html body #modalHost .ob-paste:active{background:#15427a}
+html body #modalHost .ob-field small{display:block;margin-top:7px;color:#86a5c8;font-size:11px;line-height:1.5}
+
+/* ---- Paso 3: listo ---- */
+html body #modalHost .rs-success-screen .rs-result-icon{width:78px;height:78px;border-radius:50%;animation:rsPop .5s cubic-bezier(.2,1.4,.4,1) both}
+@keyframes rsPop{from{transform:scale(.5);opacity:0}to{transform:scale(1);opacity:1}}
+html body #modalHost .rs-success-screen h2{letter-spacing:-.5px}
+html body #modalHost .rs-success-screen .rs-summary-card{border-color:#1f6a56!important}
+
+/* ---- Anadir saldo a la Wallet ---- */
+html body #modalHost .rs-wallet-deposit-v3 .rs-v2-amount{display:flex;align-items:center;gap:8px;padding:6px 16px;border:1.5px solid #2a5a90;border-radius:16px;background:#06162a;transition:border-color .15s,box-shadow .15s}
+html body #modalHost .rs-wallet-deposit-v3 .rs-v2-amount:focus-within{border-color:#44a2ff;box-shadow:0 0 0 4px #2b8cff26}
+html body #modalHost .rs-wallet-deposit-v3 .rs-v2-amount small{font-size:22px;color:#7bbcff;font-weight:800}
+html body #modalHost .rs-wallet-deposit-v3 .rs-v2-amount input{flex:1;min-width:0;border:0!important;background:transparent!important;box-shadow:none!important;color:#fff;font-size:32px;font-weight:900;letter-spacing:-.5px;padding:6px 0}
+html body #modalHost .rs-wallet-deposit-v3 .rs-v2-amount input:focus{outline:none}
+html body #modalHost .rs-wallet-deposit-v3 .rs-v2-amount em{font-style:normal;color:#7f9fc4;font-size:12px;font-weight:800}html body #modalHost .rs-deposit-quick{display:grid!important;grid-template-columns:repeat(4,minmax(0,1fr))!important;gap:8px!important}
+html body #modalHost .rs-deposit-quick button{min-height:42px!important;width:100%!important;border-radius:12px!important;font-size:14px!important;font-weight:850!important}
+html body #modalHost .rs-wallet-deposit-v3 .rs-v2-field select,
+html body #modalHost .rs-wallet-deposit-v3 .rs-v2-field input:not(#depositAmount){min-height:50px;border-radius:13px;font-size:14px}
+html body #modalHost .rs-v2-submit{min-height:54px;border-radius:15px;font-size:15px;font-weight:900;letter-spacing:.3px;background:linear-gradient(135deg,#3aa0ff,#0a60e4)!important;box-shadow:0 12px 26px #0a63e64d,0 1px 0 #ffffff40 inset!important}
+html body #modalHost .rs-v2-submit:active{transform:translateY(1px)}
+
+/* ---- Wallet ---- */
+html body #view .wallet-visual-card{border-radius:24px!important;box-shadow:0 22px 50px #02102a88,0 0 0 1px #5fb0ff2e inset,0 0 44px #1b7bff26!important}
+html body #view .wallet-card-balance strong,html body #view .wallet-visual-card>strong{letter-spacing:-1.5px}
+html body #view .wallet-visual-card .btn{min-height:46px;border-radius:13px;font-weight:850}
+html body #view .rate-mini{gap:9px}
+html body #view .rate-mini>div{border-radius:14px;border:1px solid #28507f;background:linear-gradient(160deg,#0b2240,#071629)}
+html body #view .rate-mini b{font-size:14px}
+html body #view .wallet-transfer-panel,html body #view .wallet-help-panel{border-radius:20px}
+html body #view .wallet-transfer-icon{display:grid;place-items:center;width:42px;height:42px;border-radius:13px;background:#123c68;border:1px solid #286aa5;color:#8fd0ff}
+@media(max-width:560px){
+  html body #modalHost .rs-stepper{max-width:300px}
+  html body #modalHost .ob-input-wrap input,html body #modalHost .ob-paste{min-height:50px}
+  html body #modalHost .rs-wallet-deposit-v3 .rs-v2-amount input{font-size:28px}
+  html body #view .rate-mini{grid-template-columns:repeat(2,minmax(0,1fr))}
+}
+@media(prefers-reduced-motion:reduce){html body #modalHost .rs-success-screen .rs-result-icon{animation:none}}
+</style>
+<script id="rs-flow-polish-js">
+(function(){
+  var LABELS=['Datos','Revisión','Listo'];
+  function enhance(){
+    var h=document.getElementById('modalHost');if(!h)return;
+    var sc=h.querySelector('.rs-result-screen');if(!sc)return;
+    if(sc.firstElementChild&&sc.firstElementChild.classList.contains('rs-stepper'))return;
+    var eb=null;for(var i=0;i<sc.children.length;i++){if(sc.children[i].classList.contains('eyebrow')){eb=sc.children[i];break}}
+    var n=0,m=eb&&eb.textContent.match(/PASO\s*(\d)\s*DE\s*3/i);
+    if(m)n=+m[1];
+    else{var t=sc.querySelector('h2');if(t&&/recibido|creada|listo|enviad|completad/i.test(t.textContent))n=3}
+    if(!n)return;
+    var out='<div class="rs-stepper" role="list" aria-label="Progreso del pedido">';
+    for(var k=1;k<=3;k++){var c=n===3?'done':(k<n?'done':(k===n?'now':''));
+      out+='<div class="rs-st '+c+'" role="listitem"><i>'+(c==='done'?'\u2713':k)+'</i><span>'+LABELS[k-1]+'</span></div>'}
+    out+='</div>';
+    sc.insertAdjacentHTML('afterbegin',out);
+    if(n===3)sc.classList.add('rs-success-screen');
+  }
+  function start(){
+    var h=document.getElementById('modalHost');
+    if(h&&window.MutationObserver){new MutationObserver(function(){try{enhance()}catch(e){}}).observe(h,{childList:true,subtree:true});try{enhance()}catch(e){}return true}
+    return false;
+  }
+  if(!start()&&window.MutationObserver){
+    var w=new MutationObserver(function(){if(start())w.disconnect()});
+    w.observe(document.body,{childList:true});
+  }
+})();
+</script>
+
+
+<!-- Fix: cuadrado azul al tocar botones (resaltado de toque y contorno de foco) -->
+<style id="rs-no-tap-square">
+/* 1) Resaltado azul/gris que el navegador movil dibuja como rectangulo al tocar */
+html,body,*,*::before,*::after{-webkit-tap-highlight-color:rgba(0,0,0,0)!important;tap-highlight-color:transparent!important}
+/* 2) Contorno de foco: solo con teclado, nunca por clic o toque */
+html body :where(button,a,input,select,textarea,summary,label,[role="button"],[tabindex]):focus:not(:focus-visible){outline:none!important}
+html body :where(button,a,summary,[role="button"]):active{outline:none!important}
+@media (pointer:coarse),(hover:none){
+  html body *:focus{outline:none!important}
+}
+/* 3) Las tarjetas ya no se enmarcan al tocar un boton de dentro; solo con teclado */
+html body #view .game-card:focus-within,
+html body #view .product-card:focus-within{outline:none!important}
+html body #view .game-card:has(:focus-visible),
+html body #view .product-card:has(:focus-visible){outline:2px solid #58aaff;outline-offset:3px}
+/* 4) Casilla "Recordarme": sin recuadro extra */
+html body #view .rs-remember-login input:focus:not(:focus-visible){outline:none!important;box-shadow:none}
+</style>
+
+
+<!-- Ofertas en movil: misma forma y tamano que la tarjeta de escritorio -->
+<style id="rs-ofc-mobile-same">
+@media(max-width:719px){
+  html body #view .ofc-track{display:flex!important;gap:14px!important;padding:4px 2px 16px!important;margin:0 -2px!important;scroll-snap-type:x mandatory!important;scroll-padding-inline:2px}
+  html body #view .ofc-track>.ofc{flex:0 0 min(312px,calc(100vw - 44px))!important;width:min(312px,calc(100vw - 44px))!important;min-width:0!important;max-width:312px!important;scroll-snap-align:start}
+  html body #view .ofc .ofc-art{aspect-ratio:2/1!important;height:auto!important}
+  html body #view .ofc .ofc-body{padding:16px!important;gap:10px!important}
+  html body #view .ofc .ofc-name{font-size:19px!important}
+  html body #view .ofc .ofc-price b{font-size:28px!important}
+  html body #view .ofc .ofc-eq{flex-wrap:nowrap!important;gap:6px!important}
+  html body #view .ofc .ofc-eq span{flex:1 1 0!important;min-width:0;padding:6px 4px!important;font-size:11px!important}
+  html body #view .ofc .ofc-actions{grid-template-columns:minmax(0,1fr)!important;gap:10px!important}
+  html body #view .ofc .ofc-btn{min-height:46px!important;width:100%!important}
+}
+</style>
+
+
+<!-- Fix: hueco inferior en movil en todas las pantallas -->
+<style id="rs-mobile-bottom-gap">
+@media screen and (max-width:800px){
+  html body:not(.admin-full):not(.rs-auth-guest) main#view.page.page{padding-bottom:18px!important}
+}
 </style>
 
 </body>
