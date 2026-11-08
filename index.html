@@ -15034,87 +15034,126 @@ html body #modalHost.rs-flow-page-host .rs-flow-nav + .rs-result-screen{padding-
 html body #modalHost.rs-flow-page-host .v10-product-line>b:only-child{display:block!important;grid-column:1/-1!important;width:100%!important;min-width:0!important;overflow-wrap:anywhere!important;white-space:normal!important}
 </style>
 <script id="rs-flow-page-js">
-/* REFILLS SHOP - Vistas completas para Wallet / Datos / Revisión / Listo.
-   La lógica de los formularios, la validación, el carrito y el pago permanece intacta. */
+/* REFILLS SHOP - Todas las vistas de sección y todos los diálogos como pantallas completas. */
 (function(){
  'use strict';
  const host=document.getElementById('modalHost');
  if(!host || !window.MutationObserver || !window.history || !window.URL)return;
  const routeKey='pantalla';
- const pages={
-  wallet:{label:'WALLET USD',title:'Recargar Wallet',chip:'AGREGAR FONDOS'},
-  'wallet-listo':{label:'WALLET USD',title:'Solicitud de recarga',chip:'CONFIRMACIÓN'},
-  datos:{label:'COMPRA SEGURA',title:'Datos de entrega',chip:'PASO 1 DE 3'},
-  revision:{label:'COMPRA SEGURA',title:'Revisión del pedido',chip:'PASO 2 DE 3'},
-  listo:{label:'COMPRA SEGURA',title:'Comprobante',chip:'PASO 3 DE 3'}
- };
- let wasOpen=false;
- let internalPop=false;
- function getPage(modal){
-  if(!modal)return null;
-  if(modal.querySelector('.rs-wallet-request-v2'))return 'wallet-listo';
-  if(modal.querySelector('.rs-wallet-deposit-v2,.rs-wallet-deposit-v3'))return 'wallet';
-  if(modal.querySelector('.v10-receipt,.rs-result-screen,.rs-result-v5,.rs-cart-created-list'))return 'listo';
-  if(modal.querySelector('.rs14-review,.rs-review-v5,.rs-cart-check-summary'))return 'revision';
-  if(modal.querySelector('.rs-v4-checkout,.v10-checkout,.rs-checkout-v5,.rs-cart-modal'))return 'datos';
-  if(modal.querySelector('.rs-topup-flow'))return 'wallet';
-  return null;
+ let wasOpen=false,internalPop=false;
+ function has(m,s){return Boolean(m.querySelector(s))}
+ function titleOf(m){const h=m.querySelector('h2');return String(h&&h.textContent||'Detalles').replace(/\s+/g,' ').trim().slice(0,92)||'Detalles'}
+ function getMeta(m){
+  if(!m)return null;
+  const title=titleOf(m);
+  if(has(m,'.rs-wallet-request-v2'))return {key:'wallet-listo',label:'WALLET USD',title,chip:'CONFIRMACIÓN'};
+  if(has(m,'.rs-wallet-deposit-v2,.rs-wallet-deposit-v3,.rs-topup-flow'))return {key:'wallet',label:'WALLET USD',title,chip:'AGREGAR FONDOS'};
+  if(has(m,'.v10-receipt,.rs-cart-created-list'))return {key:'listo',label:'COMPRA SEGURA',title,chip:'COMPROBANTE'};
+  if(has(m,'.rs14-review,.rs-review-v5,.rs-cart-check-summary'))return {key:'revision',label:'COMPRA SEGURA',title,chip:'REVISIÓN'};
+  if(has(m,'.rs-v4-checkout,.v10-checkout,.rs-checkout-v5'))return {key:'datos',label:'COMPRA SEGURA',title,chip:'DATOS DE ENTREGA'};
+  if(has(m,'.rs-cart-checkout'))return {key:'carrito-datos',label:'COMPRA MÚLTIPLE',title,chip:'DATOS DE ENTREGA'};
+  if(has(m,'.rs-cart-modal'))return {key:'carrito',label:'COMPRA MÚLTIPLE',title,chip:'CARRITO'};
+  if(has(m,'.rs-result-screen,.rs-result-v5'))return {key:'resultado',label:'REFILLS SHOP',title,chip:'RESULTADO'};
+  if(has(m,'.manual-request-modal'))return {key:'solicitud',label:'SERVICIOS',title,chip:'SOLICITUD'};
+  if(has(m,'.offer-editor-root'))return {key:'editor-oferta',label:'ADMINISTRACIÓN',title,chip:'EDITOR'};
+  if(has(m,'.rs-admin-action-confirm,.admin-confirm-modal'))return {key:'confirmacion',label:'ADMINISTRACIÓN',title,chip:'CONFIRMACIÓN'};
+  if(has(m,'.rs-notification-modal'))return {key:'notificaciones',label:'CENTRO DE ACTIVIDAD',title,chip:'NOTIFICACIONES'};
+  if(has(m,'#whatsappOtpCode'))return {key:'verificacion',label:'SEGURIDAD DE CUENTA',title,chip:'VERIFICACIÓN'};
+  if(has(m,'.v10-review-destination'))return {key:'saldo',label:'WALLET USD',title,chip:'SINCRONIZACIÓN'};
+  if(has(m,'#newMethodName'))return {key:'metodo-pago',label:'ADMINISTRACIÓN',title,chip:'PAGOS'};
+  if(has(m,'#catalogItemName'))return {key:'catalogo',label:'ADMINISTRACIÓN',title,chip:'CATÁLOGO'};
+  if(has(m,'#buyPlayerId,#buyRecipientPhone,#buyAccountEmail'))return {key:'datos',label:'COMPRA SEGURA',title,chip:'DATOS DE ENTREGA'};
+  if(has(m,'.rs-admin-balance-actions'))return {key:'saldo-admin',label:'ADMINISTRACIÓN',title,chip:'WALLET'};
+  if(has(m,'.admin-content,.admin-confirm-modal'))return {key:'admin-modal',label:'ADMINISTRACIÓN',title,chip:'GESTIÓN'};
+  return {key:'modal',label:'REFILLS SHOP',title,chip:'PANTALLA COMPLETA'};
  }
- function urlFor(step){const url=new URL(location.href);if(step)url.searchParams.set(routeKey,step);else url.searchParams.delete(routeKey);return url.pathname+url.search+url.hash}
- function newState(step){const previous=history.state&&typeof history.state==='object'?history.state:{};const state=Object.assign({},previous);if(step)state.__refillsFlowScreen=step;else delete state.__refillsFlowScreen;return state}
- function route(step,wasAlreadyOpen){
-  try{
-   const old=new URL(location.href).searchParams.get(routeKey);
-   if(old===step)return;
-   if(!step){if(old&&pages[old])history.replaceState(newState(null),'',urlFor(null));return}
-   if(!wasAlreadyOpen && !history.state?.__refillsFlowScreen){history.pushState(newState(step),'',urlFor(step))}
-   else history.replaceState(newState(step),'',urlFor(step));
-  }catch(e){/* La interfaz sigue funcionando incluso si el navegador impide cambiar la URL. */}
+ function ensureContent(m){
+  let w=m.querySelector(':scope > .rs-flow-content');if(w)return w;
+  w=document.createElement('div');w.className='rs-flow-content';
+  const nodes=Array.from(m.childNodes).filter(n=>!(n.nodeType===1&&(n.classList.contains('modal-close')||n.classList.contains('rs-flow-nav'))));
+  const close=m.querySelector(':scope > .modal-close');
+  m.insertBefore(w,close?close.nextSibling:m.firstChild);
+  nodes.forEach(n=>w.appendChild(n));return w;
  }
- function nav(step){
-  const m=pages[step];
-  const el=document.createElement('header');el.className='rs-flow-nav';
-  const arrow='<svg viewBox="0 0 24 24" aria-hidden="true" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M15 18l-6-6 6-6"/></svg>';
-  el.innerHTML='<button type="button" class="rs-flow-go-back" onclick="closeModal()" aria-label="Cerrar esta pantalla y volver a la tienda">'+arrow+'<span>Volver</span></button><div class="rs-flow-nav-title"><small>REFILLS SHOP · '+m.label+'</small><strong>'+m.title+'</strong></div><span class="rs-flow-chip">'+m.chip+'</span>';
-  return el;
+ function urlFor(step){const u=new URL(location.href);if(step)u.searchParams.set(routeKey,step);else u.searchParams.delete(routeKey);return u.pathname+u.search+u.hash}
+ function stateFor(step){const p=history.state&&typeof history.state==='object'?history.state:{};const s=Object.assign({},p);if(step)s.__refillsFlowScreen=step;else delete s.__refillsFlowScreen;return s}
+ function route(step,already){
+  try{const old=new URL(location.href).searchParams.get(routeKey);if(old===step)return;if(!step){if(old)history.replaceState(stateFor(null),'',urlFor(null));return}
+   if(!already&&!history.state?.__refillsFlowScreen)history.pushState(stateFor(step),'',urlFor(step));else history.replaceState(stateFor(step),'',urlFor(step));
+  }catch(e){}
+ }
+ function nav(meta){
+  const h=document.createElement('header');h.className='rs-flow-nav';
+  const b=document.createElement('button');b.type='button';b.className='rs-flow-go-back';b.setAttribute('aria-label','Volver a la sección anterior');b.setAttribute('onclick','closeModal()');
+  const svg=document.createElementNS('http://www.w3.org/2000/svg','svg');svg.setAttribute('viewBox','0 0 24 24');svg.setAttribute('aria-hidden','true');svg.setAttribute('fill','none');svg.setAttribute('stroke','currentColor');svg.setAttribute('stroke-width','2');svg.setAttribute('stroke-linecap','round');svg.setAttribute('stroke-linejoin','round');
+  const p=document.createElementNS('http://www.w3.org/2000/svg','path');p.setAttribute('d','M15 18l-6-6 6-6');svg.appendChild(p);
+  const bt=document.createElement('span');bt.textContent='Volver';b.append(svg,bt);
+  const box=document.createElement('div');box.className='rs-flow-nav-title';const small=document.createElement('small');small.textContent='REFILLS SHOP · '+meta.label;const strong=document.createElement('strong');strong.textContent=meta.title;box.append(small,strong);
+  const chip=document.createElement('span');chip.className='rs-flow-chip';chip.textContent=meta.chip;h.append(b,box,chip);return h;
  }
  function sync(){
-  const modal=host.querySelector(':scope > .modal-backdrop > .modal');
-  const step=getPage(modal);
-  const previously=wasOpen;
-  if(!step){
-   if(previously){host.classList.remove('rs-flow-page-host');document.body.classList.remove('rs-flow-locked');document.documentElement.classList.remove('rs-flow-locked')}
-   wasOpen=false;
-   if(!internalPop)route(null,true);
-   return;
-  }
-  wasOpen=true;
-  host.classList.add('rs-flow-page-host');
-  document.body.classList.add('rs-flow-locked');document.documentElement.classList.add('rs-flow-locked');
-  let header=modal.querySelector(':scope > .rs-flow-nav');
-  if(!header){header=nav(step);modal.insertBefore(header,modal.firstChild)}
-  else if(header.dataset.step!==step)header.replaceWith(header=nav(step));
-  header.dataset.step=step;
-  route(step,previously);
-  if(!previously || header.dataset.justSwitched!==step){
-   modal.scrollTop=0;
-   header.dataset.justSwitched=step;
-  }
+  const m=host.querySelector(':scope > .modal-backdrop > .modal'),meta=getMeta(m),previous=wasOpen;
+  if(!meta){if(previous){host.classList.remove('rs-flow-page-host');document.body.classList.remove('rs-flow-locked');document.documentElement.classList.remove('rs-flow-locked')}wasOpen=false;if(!internalPop)route(null,true);return}
+  wasOpen=true;host.classList.add('rs-flow-page-host');document.body.classList.add('rs-flow-locked');document.documentElement.classList.add('rs-flow-locked');
+  let h=m.querySelector(':scope > .rs-flow-nav');const signature=[meta.key,meta.label,meta.title,meta.chip].join('|');
+  if(!h){h=nav(meta);m.insertBefore(h,m.firstChild)}else if(h.dataset.signature!==signature)h.replaceWith(h=nav(meta));
+  h.dataset.step=meta.key;h.dataset.signature=signature;ensureContent(m);route(meta.key,previous);
+  if(!previous||h.dataset.justSwitched!==signature){m.scrollTop=0;h.dataset.justSwitched=signature}
  }
- const observer=new MutationObserver(sync);observer.observe(host,{childList:true});
- addEventListener('popstate',function(){
-  if(!wasOpen)return;
-  const active=new URL(location.href).searchParams.get(routeKey);
-  if(active && pages[active] && active===host.querySelector('.rs-flow-nav')?.dataset.step)return;
-  internalPop=true;
-  host.replaceChildren();
-  sync();
-  internalPop=false;
-  if(active&&pages[active])route(null,true);
- });
+ new MutationObserver(sync).observe(host,{childList:true});
+ addEventListener('popstate',function(){if(!wasOpen)return;internalPop=true;host.replaceChildren();sync();internalPop=false});
  addEventListener('pagehide',function(){document.body.classList.remove('rs-flow-locked');document.documentElement.classList.remove('rs-flow-locked')});
  sync();
 })();
 </script>
+<style id="rs-all-sections-page-css">
+/* Todas las secciones principales ocupan el alto disponible de la pantalla. */
+html body .main{display:flex!important;flex-direction:column!important;min-height:100dvh!important}
+html body #view.page{flex:1 0 auto!important;min-height:0!important;width:100%!important;max-width:1600px!important;align-self:stretch!important}
+html body .footer{flex:0 0 auto!important;margin-top:auto!important}
+html body #view.page :where(img,svg,video,canvas){max-width:100%}
+html body #view.page :where(input,select,textarea,button){min-width:0;max-width:100%}
+/* Una sola columna de contenido mantiene juntos los controles al pasar a pantalla completa. */
+html body #modalHost.rs-flow-page-host>.modal-backdrop>.modal>.rs-flow-content{
+ box-sizing:border-box!important;display:flex!important;flex-direction:column!important;align-items:stretch!important;gap:14px!important;
+ width:min(calc(100% - 40px),920px)!important;max-width:920px!important;min-width:0!important;
+ margin:clamp(22px,4vh,48px) auto calc(32px + env(safe-area-inset-bottom))!important;padding:0!important;flex:0 0 auto!important
+}
+html body #modalHost.rs-flow-page-host>.modal-backdrop>.modal>.rs-flow-content>*{box-sizing:border-box;min-width:0;max-width:100%}
+html body #modalHost.rs-flow-page-host>.modal-backdrop>.modal>.rs-flow-content:has(> .eyebrow),
+html body #modalHost.rs-flow-page-host>.modal-backdrop>.modal>.rs-flow-content:has(> form),
+html body #modalHost.rs-flow-page-host>.modal-backdrop>.modal>.rs-flow-content:has(> h2){padding:clamp(18px,3vw,28px)!important}
+html body #modalHost.rs-flow-page-host>.modal-backdrop>.modal>.rs-flow-content:has(> .rs-simple-checkout),
+html body #modalHost.rs-flow-page-host>.modal-backdrop>.modal>.rs-flow-content:has(> .rs-wallet-deposit-v2),
+html body #modalHost.rs-flow-page-host>.modal-backdrop>.modal>.rs-flow-content:has(> .rs-wallet-request-v2),
+html body #modalHost.rs-flow-page-host>.modal-backdrop>.modal>.rs-flow-content:has(> .rs14-review),
+html body #modalHost.rs-flow-page-host>.modal-backdrop>.modal>.rs-flow-content:has(> .rs-topup-flow),
+html body #modalHost.rs-flow-page-host>.modal-backdrop>.modal>.rs-flow-content:has(> .rs-result-screen),
+html body #modalHost.rs-flow-page-host>.modal-backdrop>.modal>.rs-flow-content:has(> .rs-cart-modal),
+html body #modalHost.rs-flow-page-host>.modal-backdrop>.modal>.rs-flow-content:has(> .rs-notification-modal),
+html body #modalHost.rs-flow-page-host>.modal-backdrop>.modal>.rs-flow-content:has(> .manual-request-modal),
+html body #modalHost.rs-flow-page-host>.modal-backdrop>.modal>.rs-flow-content:has(> .offer-editor-root),
+html body #modalHost.rs-flow-page-host>.modal-backdrop>.modal>.rs-flow-content:has(> .admin-confirm-modal),
+html body #modalHost.rs-flow-page-host>.modal-backdrop>.modal>.rs-flow-content:has(> .rs-admin-action-confirm){padding:0!important}
+@media(max-width:700px){
+ html body #view.page{padding-bottom:calc(88px + env(safe-area-inset-bottom))!important}
+ html body #modalHost.rs-flow-page-host>.modal-backdrop>.modal>.rs-flow-content{
+  width:100%!important;max-width:none!important;margin:0 auto calc(14px + env(safe-area-inset-bottom))!important;
+  padding:clamp(16px,4vw,22px)!important;gap:12px!important
+ }
+ html body #modalHost.rs-flow-page-host>.modal-backdrop>.modal>.rs-flow-content:has(> .rs-simple-checkout),
+ html body #modalHost.rs-flow-page-host>.modal-backdrop>.modal>.rs-flow-content:has(> .rs-wallet-deposit-v2),
+ html body #modalHost.rs-flow-page-host>.modal-backdrop>.modal>.rs-flow-content:has(> .rs-wallet-request-v2),
+ html body #modalHost.rs-flow-page-host>.modal-backdrop>.modal>.rs-flow-content:has(> .rs14-review),
+ html body #modalHost.rs-flow-page-host>.modal-backdrop>.modal>.rs-flow-content:has(> .rs-topup-flow),
+ html body #modalHost.rs-flow-page-host>.modal-backdrop>.modal>.rs-flow-content:has(> .rs-result-screen),
+ html body #modalHost.rs-flow-page-host>.modal-backdrop>.modal>.rs-flow-content:has(> .rs-cart-modal),
+ html body #modalHost.rs-flow-page-host>.modal-backdrop>.modal>.rs-flow-content:has(> .rs-notification-modal),
+ html body #modalHost.rs-flow-page-host>.modal-backdrop>.modal>.rs-flow-content:has(> .manual-request-modal),
+ html body #modalHost.rs-flow-page-host>.modal-backdrop>.modal>.rs-flow-content:has(> .offer-editor-root),
+ html body #modalHost.rs-flow-page-host>.modal-backdrop>.modal>.rs-flow-content:has(> .admin-confirm-modal),
+ html body #modalHost.rs-flow-page-host>.modal-backdrop>.modal>.rs-flow-content:has(> .rs-admin-action-confirm){padding:0!important}
+}
+</style>
 </body>
 </html>
