@@ -4877,7 +4877,7 @@ function homeView(){
  return `<section class="rh-hero"><div class="rh-hero-main"><h1>${u?`Hola${u.name?`, ${esc(u.name.split(' ')[0])}`:''}.`:'Recarga tus juegos.'}<em>${u?'¿Qué recargamos hoy?':'Rápido y seguro.'}</em></h1><div class="rh-cta"><button class="btn btn-primary rh-all-games" onclick="navigate('juegos')">Ver juegos</button>${u?'':`<button class="btn btn-secondary" onclick="navigate('cuenta/registro')">Crear cuenta</button>`}</div></div></section>
   <section class="rh-featured-section">
    <div class="rh-head">
-    <div><span class="eyebrow">${'JUEGOS'}</span><h2>${hasRanking?'Juegos populares y disponibles':'Explora nuestros juegos'}</h2></div>
+    <div><span class="eyebrow">JUEGOS</span><h2>${hasRanking?'Juegos populares y disponibles':'Explora nuestros juegos'}</h2></div>
    </div>
    <div id="rsHomeGamesCarousel" class="rh-games rh-featured-grid rs-home-games-carousel" role="region" aria-label="Juegos populares y disponibles. Desliza horizontalmente para ver más juegos." tabindex="0">${cards.map(tile).join('')||empty('▣','Todavía no hay juegos activos.')}</div>
   </section>
