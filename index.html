@@ -15236,5 +15236,84 @@ html body #modalHost.rs-flow-page-host>.modal-backdrop>.modal>.rs-flow-content:h
 }
 </style>
 
+
+<style id="rs-mobile-viewport-hard-fix">
+/* FIX específico para móvil: elimina límites heredados de la barra lateral y usa el ancho físico del viewport. */
+@media screen and (max-width: 760px) {
+  html, body {
+    box-sizing: border-box !important;
+    width: 100vw !important;
+    min-width: 0 !important;
+    max-width: 100vw !important;
+    margin: 0 !important;
+    padding: 0 !important;
+    overflow-x: hidden !important;
+  }
+  body:not(.admin-full) .app-shell {
+    display: block !important;
+    box-sizing: border-box !important;
+    position: relative !important;
+    left: 0 !important;
+    width: 100vw !important;
+    min-width: 0 !important;
+    max-width: 100vw !important;
+    margin: 0 !important;
+    padding: 0 !important;
+    overflow-x: clip !important;
+  }
+  html body:not(.admin-full) .main,
+  html body.nk-rail:not(.admin-full) .main {
+    display: flex !important;
+    flex-direction: column !important;
+    box-sizing: border-box !important;
+    position: relative !important;
+    left: 0 !important;
+    width: 100vw !important;
+    min-width: 0 !important;
+    max-width: 100vw !important;
+    margin: 0 !important;
+    padding: 0 !important;
+    align-self: stretch !important;
+    overflow-x: clip !important;
+  }
+  html body:not(.admin-full) .main > .topbar,
+  html body:not(.admin-full) .main > #view.page,
+  html body:not(.admin-full) .main > .footer {
+    box-sizing: border-box !important;
+    width: 100% !important;
+    min-width: 0 !important;
+    max-width: 100% !important;
+    margin-left: 0 !important;
+    margin-right: 0 !important;
+  }
+  html body:not(.admin-full) .main > #view.page {
+    flex: 1 0 auto !important;
+    align-self: stretch !important;
+    padding-left: 12px !important;
+    padding-right: 12px !important;
+    overflow-x: clip !important;
+  }
+  html body:not(.admin-full) #view :is(.panel,.card,.account-card,.wallet-panel,.section-card,.profile-card,.profile-panel,.profile-form,.profile-summary) {
+    box-sizing: border-box !important;
+    width: 100% !important;
+    min-width: 0 !important;
+    max-width: 100% !important;
+  }
+  html body:not(.admin-full) #view :is(.btn-row,.actions-row,.form-actions,.hero-buttons,.rs-product-actions) {
+    display: grid !important;
+    grid-template-columns: repeat(auto-fit, minmax(min(100%, 135px), 1fr)) !important;
+    width: 100% !important;
+    min-width: 0 !important;
+    max-width: 100% !important;
+  }
+  html body:not(.admin-full) #view :is(.btn-row,.actions-row,.form-actions,.hero-buttons,.rs-product-actions) > :is(button,.btn,a) {
+    box-sizing: border-box !important;
+    width: 100% !important;
+    min-width: 0 !important;
+    max-width: 100% !important;
+  }
+}
+</style>
+
 </body>
 </html>
