@@ -4999,8 +4999,8 @@ function ordersView(){
  const orders=[...(db.orders||[])].sort((a,b)=>Number(b.ts||0)-Number(a.ts||0));
  const done=orders.filter(o=>displayOrderStatus(o)==='Completado').length;
  const returned=orders.filter(o=>['Reembolsado','Rechazado'].includes(displayOrderStatus(o))||o.walletRefunded).length;
- return `<div class="page-head-row"><div><span class="eyebrow">ACTIVIDAD DE TU CUENTA</span><h1 class="page-title">Mis recargas</h1><p class="page-desc">Sigue cada pedido, comprueba los datos enviados y consulta cualquier devolución de saldo.</p></div><button class="btn btn-secondary" onclick="navigate('juegos')">＋ Nueva recarga</button></div>
- <div class="rs-order-cloud-status"><span>${esc(remoteMyOrdersState)}</span><button type="button" onclick="refreshMyOrdersRemote(true)">Actualizar historial</button></div>
+ return `<div class="page-head-row"><div><h1 class="page-title">Mis recargas</h1></div><button class="btn btn-secondary" onclick="navigate('juegos')">Nueva recarga</button></div>
+ <div class="rs-order-cloud-status"><span>${esc(remoteMyOrdersState)}</span><button type="button" onclick="refreshMyOrdersRemote(true)">Actualizar</button></div>
  <div class="rs-customer-order-stats"><div><span>Pedidos</span><b>${orders.length}</b></div><div><span>Completados</span><b>${done}</b></div><div><span>Rechazados / reembolsados</span><b>${returned}</b></div></div>
  ${orders.length?`<div class="rs-orders-list">${orders.map(o=>{const status=displayOrderStatus(o),tone=orderStatusTone(o);const progress=status==='Completado'?3:status==='Rechazado'||status==='Reembolsado'?2:status==='Procesando'?2:1;return `<article class="rs-order-card ${tone}">
  <div class="rs-order-card-top"><div><span class="rs-order-id">PEDIDO #${esc(o.id)}</span><h3>${esc(o.offerName)}</h3><p>${esc(o.gameName)} · ${esc(o.date||'')}</p></div><span class="rs-order-status ${tone}">${orderStatusCaption(o)}</span></div>
