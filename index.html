@@ -13530,9 +13530,16 @@ html body #rsCartFab{box-shadow:0 12px 34px #0008,0 0 25px #0a72ed33!important}
 window.rsResellerConfig=null;
 window.rsResellerApi=async function(action,data={}){
  const cfg=lioGetPublicConfig();if(!cfg.url||!cfg.publicKey)throw new Error('Configura Supabase en administración.');
- const response=await fetch(cfg.url.replace(/\/$/,'')+'/functions/v1/refills-reseller',{method:'POST',headers:{'Content-Type':'application/json','apikey':cfg.publicKey,'Authorization':'Bearer '+cfg.publicKey},body:JSON.stringify({action,...data})});
- let result;try{result=await response.json()}catch{throw new Error('El servidor devolvió una respuesta inválida.');}
- if(!response.ok||!result?.ok)throw new Error(result?.error||'No se pudo completar la operación.');
+ const endpoint=cfg.url.replace(/\/$/,'')+'/functions/v1/refills-reseller';
+ const options={method:'POST',cache:'no-store',headers:{'Content-Type':'application/json','apikey':cfg.publicKey,'Authorization':'Bearer '+cfg.publicKey,'x-client-info':'refills-shop-web/1.0'},body:JSON.stringify({action,...data})};
+ let response=null,networkError=null;
+ for(let attempt=0;attempt<2;attempt++){
+   try{response=await fetch(endpoint,options);networkError=null;break;}
+   catch(err){networkError=err;if(attempt===0)await new Promise(resolve=>setTimeout(resolve,450));}
+ }
+ if(!response)throw new Error('No se pudo conectar con Supabase. Comprueba tu conexión e inténtalo de nuevo.'+(networkError?.message?' ('+networkError.message+')':''));
+ let result;try{result=await response.json()}catch{throw new Error('Supabase respondió, pero devolvió una respuesta inválida (HTTP '+response.status+').');}
+ if(!response.ok||!result?.ok)throw new Error(result?.error||'No se pudo completar la operación (HTTP '+response.status+').');
  return result;
 };
 window.rsResellerToken=function(){try{return activeWalletAccessToken||sessionStorage.getItem(REFILLS_WALLET_SESSION_KEY)||localStorage.getItem(REFILLS_WALLET_SESSION_KEY)||''}catch{return activeWalletAccessToken||''}};
@@ -13552,7 +13559,7 @@ window.rsBuyResellerPlan=async function(){
 };
 function refresh(){syncConfig();syncMembership(false)}
 window.addEventListener('hashchange',()=>{if(location.hash.includes('planes')||location.hash.includes('cuenta'))refresh()});
-window.addEventListener('DOMContentLoaded',()=>{refresh();setInterval(()=>{if(document.visibilityState==='visible'&&currentUser()){syncMembership(true);if(location.hash.includes('planes'))syncConfig()}},120000)});
+const startRefresh=()=>{refresh();setInterval(()=>{if(document.visibilityState==='visible'&&currentUser()){syncMembership(true);if(location.hash.includes('planes'))syncConfig()}},120000)};if(document.readyState==='loading')window.addEventListener('DOMContentLoaded',startRefresh,{once:true});else startRefresh();
 })();
 </script>
 <style id="rs-v22-admin-fix">
