@@ -15155,5 +15155,17 @@ html body #modalHost.rs-flow-page-host>.modal-backdrop>.modal>.rs-flow-content:h
  html body #modalHost.rs-flow-page-host>.modal-backdrop>.modal>.rs-flow-content:has(> .rs-admin-action-confirm){padding:0!important}
 }
 </style>
+
+
+<style id="rs-mobile-visual-scale">
+/* Ajuste moderado de escala móvil: deja ver algo más de contenido sin sacrificar legibilidad. */
+@media screen and (max-width: 760px) {
+  html { zoom: 0.95; }
+}
+/* En pantallas muy estrechas se conserva la escala natural para no reducir demasiado los controles. */
+@media screen and (max-width: 350px) {
+  html { zoom: 1; }
+}
+</style>
 </body>
 </html>
