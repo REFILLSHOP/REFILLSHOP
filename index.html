@@ -15163,162 +15163,125 @@ html body #modalHost.rs-flow-page-host>.modal-backdrop>.modal>.rs-flow-content:h
 }
 </style>
 
-
-<style id="rs-mobile-visual-scale">
-/* No reducir el body: mantiene el viewport completo y elimina la franja derecha. */
-@media screen and (max-width: 760px) {
-  html {
-    width: 100% !important;
-    max-width: 100% !important;
-    font-size: 95% !important;
-    zoom: 1 !important;
-    overflow-x: clip !important;
+<style id="rs-mobile-final-layout">
+/* Ajuste consolidado: un único ancho fluido, controles proporcionados y flotantes separados. */
+@media screen and (max-width:760px){
+  html,body{
+    box-sizing:border-box!important;
+    width:100%!important;
+    min-width:0!important;
+    max-width:100%!important;
+    margin:0!important;
+    overflow-x:clip!important;
   }
-  body:not(.admin-full) {
-    width: 100% !important;
-    min-width: 0 !important;
-    max-width: 100% !important;
-    margin: 0 !important;
-    zoom: 1 !important;
-    overflow-x: clip !important;
-  }
-}
-</style>
-
-
-<style id="rs-mobile-width-fit">
-/* Cada contenedor móvil utiliza el ancho real del dispositivo, sin escalado lateral. */
-@media screen and (max-width: 760px) {
   body:not(.admin-full) .app-shell,
-  body:not(.admin-full) .main,
-  body:not(.admin-full) main,
-  body:not(.admin-full) #view.page {
-    box-sizing: border-box !important;
-    width: 100% !important;
-    min-width: 0 !important;
-    max-width: 100% !important;
-    margin-left: 0 !important;
-    margin-right: 0 !important;
+  body:not(.admin-full) .main{
+    box-sizing:border-box!important;
+    position:relative!important;
+    left:auto!important;
+    width:100%!important;
+    min-width:0!important;
+    max-width:100%!important;
+    margin:0!important;
   }
-  body:not(.admin-full) #view.page {
-    padding-left: clamp(10px, 3vw, 16px) !important;
-    padding-right: clamp(10px, 3vw, 16px) !important;
+  body:not(.admin-full) .app-shell{display:block!important;overflow-x:clip!important}
+  body:not(.admin-full) .main{display:flex!important;flex-direction:column!important;align-self:stretch!important}
+  body:not(.admin-full) .main>.topbar,
+  body:not(.admin-full) .main>#view.page,
+  body:not(.admin-full) .main>.footer{
+    box-sizing:border-box!important;
+    width:100%!important;
+    min-width:0!important;
+    max-width:100%!important;
+    margin-inline:0!important;
   }
-  body:not(.admin-full) #view.page > *,
-  body:not(.admin-full) #view :is(.panel,.section-head,.wallet-layout,.account-layout,.form-grid,.rs-form-grid) {
-    box-sizing: border-box !important;
-    min-width: 0 !important;
-    max-width: 100% !important;
+  body:not(.admin-full) .main>#view.page{
+    flex:1 0 auto!important;
+    align-self:stretch!important;
+    padding-left:clamp(12px,3vw,18px)!important;
+    padding-right:clamp(12px,3vw,18px)!important;
+    overflow-x:clip!important;
   }
-  body:not(.admin-full) #view :is(button,.btn,input,select,textarea) {
-    box-sizing: border-box !important;
-    max-width: 100% !important;
+  body:not(.admin-full) #view>*,
+  body:not(.admin-full) #view :is(.panel,.card,.account-card,.wallet-panel,.section-card,.profile-card,.profile-panel,.profile-form,.profile-summary,.section-head,.wallet-layout,.account-layout,.form-grid,.rs-form-grid){
+    box-sizing:border-box!important;
+    min-width:0!important;
+    max-width:100%!important;
+  }
+  body:not(.admin-full) #view :is(input,select,textarea,button,.btn){
+    box-sizing:border-box!important;
+    min-width:0!important;
+    max-width:100%!important;
+  }
+  body:not(.admin-full) #view :is(.btn-row,.actions-row,.form-actions,.hero-buttons,.rs-product-actions){
+    display:grid!important;
+    grid-template-columns:repeat(2,minmax(0,1fr))!important;
+    align-items:stretch!important;
+    gap:9px!important;
+    width:100%!important;
+    min-width:0!important;
+    max-width:100%!important;
+  }
+  body:not(.admin-full) #view :is(.btn-row,.actions-row,.form-actions,.hero-buttons,.rs-product-actions)>:only-child{
+    grid-column:1/-1!important;
+  }
+  body:not(.admin-full) #view :is(.btn-row,.actions-row,.form-actions,.hero-buttons,.rs-product-actions)>:is(button,.btn,a){
+    box-sizing:border-box!important;
+    width:100%!important;
+    min-width:0!important;
+    min-height:44px!important;
+    max-width:100%!important;
+    white-space:normal!important;
+    overflow-wrap:anywhere!important;
+  }
+  body:not(.admin-full) #view :is(.table-wrap,.table-responsive,.table-scroll){
+    max-width:100%!important;
+    overflow-x:auto!important;
+    -webkit-overflow-scrolling:touch;
+  }
+  body:not(.admin-full) #rsCartFab.rs-cart-fab{
+    position:fixed!important;
+    left:12px!important;
+    right:auto!important;
+    bottom:calc(96px + env(safe-area-inset-bottom))!important;
+    width:54px!important;
+    min-width:54px!important;
+    max-width:54px!important;
+    height:54px!important;
+    min-height:54px!important;
+    padding:5px!important;
+    border-radius:17px!important;
+    justify-content:center!important;
+    z-index:9996!important;
+  }
+  body:not(.admin-full) #rsCartFab .rs-cart-fab-copy{display:none!important}
+  body:not(.admin-full) #rsCartFab>i{position:absolute!important;top:-6px!important;right:-6px!important}
+  body:not(.admin-full) #rsBotBtn{
+    position:fixed!important;
+    right:12px!important;
+    left:auto!important;
+    bottom:calc(96px + env(safe-area-inset-bottom))!important;
+    z-index:9995!important;
+  }
+  body:not(.admin-full) #rsTop{
+    position:fixed!important;
+    right:16px!important;
+    left:auto!important;
+    bottom:calc(162px + env(safe-area-inset-bottom))!important;
+    z-index:9994!important;
+  }
+  body:not(.admin-full):has(.mobile-drawer[aria-hidden="false"]) :is(#rsCartFab,#rsBotBtn,#rsTop){
+    visibility:hidden!important;
+    pointer-events:none!important;
   }
 }
-</style>
-
-
-<style id="rs-mobile-fill-width">
-/* El lienzo compensado ocupa todo el ancho visible; los botones y paneles se estiran con él. */
-@media screen and (max-width: 760px) {
-  html, body { overflow-x: clip !important; }
-  body:not(.admin-full) .main,
-  body:not(.admin-full) main#view,
-  body:not(.admin-full) #view.page {
-    box-sizing: border-box !important;
-    width: 100% !important;
-    min-width: 0 !important;
-    max-width: 100% !important;
-  }
-  body:not(.admin-full) #view.page > *,
-  body:not(.admin-full) #view :is(.panel,.section-head,.wallet-layout,.account-layout,.form-grid,.rs-form-grid) {
-    box-sizing: border-box !important;
-    min-width: 0 !important;
-    max-width: 100% !important;
-  }
-  body:not(.admin-full) #view :is(button,.btn,.rs47-offer__actions button,.rs-flow-content button) {
-    box-sizing: border-box !important;
-    max-width: 100% !important;
-  }
+@media screen and (max-width:390px){
+  body:not(.admin-full) .main>.topbar{gap:6px!important;padding-left:9px!important;padding-right:9px!important}
+  body:not(.admin-full) .main>.topbar>.top-actions{gap:5px!important}
+  body:not(.admin-full) #view :is(.btn-row,.actions-row,.form-actions,.hero-buttons,.rs-product-actions){gap:7px!important}
 }
-</style>
-
-
-<style id="rs-mobile-viewport-hard-fix">
-/* FIX específico para móvil: elimina límites heredados de la barra lateral y usa el ancho físico del viewport. */
-@media screen and (max-width: 760px) {
-  html, body {
-    box-sizing: border-box !important;
-    width: 100vw !important;
-    min-width: 0 !important;
-    max-width: 100vw !important;
-    margin: 0 !important;
-    padding: 0 !important;
-    overflow-x: hidden !important;
-  }
-  body:not(.admin-full) .app-shell {
-    display: block !important;
-    box-sizing: border-box !important;
-    position: relative !important;
-    left: 0 !important;
-    width: 100vw !important;
-    min-width: 0 !important;
-    max-width: 100vw !important;
-    margin: 0 !important;
-    padding: 0 !important;
-    overflow-x: clip !important;
-  }
-  html body:not(.admin-full) .main,
-  html body.nk-rail:not(.admin-full) .main {
-    display: flex !important;
-    flex-direction: column !important;
-    box-sizing: border-box !important;
-    position: relative !important;
-    left: 0 !important;
-    width: 100vw !important;
-    min-width: 0 !important;
-    max-width: 100vw !important;
-    margin: 0 !important;
-    padding: 0 !important;
-    align-self: stretch !important;
-    overflow-x: clip !important;
-  }
-  html body:not(.admin-full) .main > .topbar,
-  html body:not(.admin-full) .main > #view.page,
-  html body:not(.admin-full) .main > .footer {
-    box-sizing: border-box !important;
-    width: 100% !important;
-    min-width: 0 !important;
-    max-width: 100% !important;
-    margin-left: 0 !important;
-    margin-right: 0 !important;
-  }
-  html body:not(.admin-full) .main > #view.page {
-    flex: 1 0 auto !important;
-    align-self: stretch !important;
-    padding-left: 12px !important;
-    padding-right: 12px !important;
-    overflow-x: clip !important;
-  }
-  html body:not(.admin-full) #view :is(.panel,.card,.account-card,.wallet-panel,.section-card,.profile-card,.profile-panel,.profile-form,.profile-summary) {
-    box-sizing: border-box !important;
-    width: 100% !important;
-    min-width: 0 !important;
-    max-width: 100% !important;
-  }
-  html body:not(.admin-full) #view :is(.btn-row,.actions-row,.form-actions,.hero-buttons,.rs-product-actions) {
-    display: grid !important;
-    grid-template-columns: repeat(auto-fit, minmax(min(100%, 135px), 1fr)) !important;
-    width: 100% !important;
-    min-width: 0 !important;
-    max-width: 100% !important;
-  }
-  html body:not(.admin-full) #view :is(.btn-row,.actions-row,.form-actions,.hero-buttons,.rs-product-actions) > :is(button,.btn,a) {
-    box-sizing: border-box !important;
-    width: 100% !important;
-    min-width: 0 !important;
-    max-width: 100% !important;
-  }
+@media(prefers-reduced-motion:reduce){
+  html,body{scroll-behavior:auto!important}
 }
 </style>
 
