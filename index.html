@@ -15158,45 +15158,33 @@ html body #modalHost.rs-flow-page-host>.modal-backdrop>.modal>.rs-flow-content:h
 
 
 <style id="rs-mobile-visual-scale">
-/* Reduce ligeramente los elementos, compensando el ancho para ocupar toda la pantalla. */
+/* No reducir el body: mantiene el viewport completo y elimina la franja derecha. */
 @media screen and (max-width: 760px) {
   html {
     width: 100% !important;
     max-width: 100% !important;
+    font-size: 95% !important;
     zoom: 1 !important;
+    overflow-x: clip !important;
   }
   body:not(.admin-full) {
-    zoom: 0.95 !important;
-    width: 105.263158% !important;
-    max-width: none !important;
-    min-width: 0 !important;
-    margin-left: 0 !important;
-    margin-right: 0 !important;
-  }
-}
-@media screen and (max-width: 350px) {
-  body:not(.admin-full) {
-    zoom: 1 !important;
     width: 100% !important;
+    min-width: 0 !important;
+    max-width: 100% !important;
+    margin: 0 !important;
+    zoom: 1 !important;
+    overflow-x: clip !important;
   }
 }
 </style>
 
 
 <style id="rs-mobile-width-fit">
-/* Corrige el ancho real del lienzo después del ajuste de escala móvil. */
+/* Cada contenedor móvil utiliza el ancho real del dispositivo, sin escalado lateral. */
 @media screen and (max-width: 760px) {
-  html, body {
-    max-width: 100%;
-    overflow-x: clip !important;
-  }
-  body:not(.admin-full) {
-    width: 100% !important;
-    min-width: 0 !important;
-    margin-inline: 0 !important;
-  }
+  body:not(.admin-full) .app-shell,
   body:not(.admin-full) .main,
-  body:not(.admin-full) main#view,
+  body:not(.admin-full) main,
   body:not(.admin-full) #view.page {
     box-sizing: border-box !important;
     width: 100% !important;
@@ -15206,21 +15194,17 @@ html body #modalHost.rs-flow-page-host>.modal-backdrop>.modal>.rs-flow-content:h
     margin-right: 0 !important;
   }
   body:not(.admin-full) #view.page {
-    padding-left: clamp(10px, 3vw, 18px) !important;
-    padding-right: clamp(10px, 3vw, 18px) !important;
-    overflow-x: clip !important;
+    padding-left: clamp(10px, 3vw, 16px) !important;
+    padding-right: clamp(10px, 3vw, 16px) !important;
   }
   body:not(.admin-full) #view.page > *,
-  body:not(.admin-full) #view .panel,
-  body:not(.admin-full) #view .section-head,
-  body:not(.admin-full) #view .wallet-layout,
-  body:not(.admin-full) #view .account-layout {
+  body:not(.admin-full) #view :is(.panel,.section-head,.wallet-layout,.account-layout,.form-grid,.rs-form-grid) {
     box-sizing: border-box !important;
     min-width: 0 !important;
     max-width: 100% !important;
   }
-  body:not(.admin-full) #view :is(.products-grid,.rs-game-products-grid,.rs-offers-featured-grid,.og-grid) {
-    min-width: 0 !important;
+  body:not(.admin-full) #view :is(button,.btn,input,select,textarea) {
+    box-sizing: border-box !important;
     max-width: 100% !important;
   }
 }
