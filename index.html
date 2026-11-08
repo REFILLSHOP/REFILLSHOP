@@ -3772,6 +3772,77 @@ html body #rsTop{right:27px!important;left:auto!important;bottom:88px!important}
 body:has(#modalHost .modal-backdrop) :is(#rsBotBtn,#rsCartFab,#rsTop){visibility:hidden!important;pointer-events:none!important}
 </style>
 
+
+<style id="rs-edge-spacing-final">
+/* Mantener las pantallas a altura completa, pero separar los paneles del borde físico. */
+html body #modalHost.rs-flow-page-host>.modal-backdrop>.modal>.rs-flow-content{
+  box-sizing:border-box!important;
+  width:min(calc(100% - 40px),920px)!important;
+  max-width:920px!important;
+  margin:clamp(18px,3vh,34px) auto calc(24px + env(safe-area-inset-bottom))!important;
+  padding:0!important;
+}
+html body #modalHost.rs-flow-page-host>.modal-backdrop>.modal>.rs-flow-content>:is(
+  .rs-simple-checkout,.rs-wallet-deposit-v2,.rs-wallet-request-v2,.rs14-review,
+  .rs-topup-flow,.rs-result-screen,.rs-cart-modal,.rs-notification-modal,
+  .manual-request-modal,.offer-editor-root,.admin-confirm-modal,.rs-admin-action-confirm
+){
+  box-sizing:border-box!important;
+  width:100%!important;
+  max-width:100%!important;
+  min-width:0!important;
+  margin-inline:0!important;
+  border:1px solid #294766!important;
+  border-radius:18px!important;
+  padding:clamp(16px,2.5vw,26px)!important;
+  box-shadow:0 16px 42px #0004!important;
+}
+html body #modalHost.rs-flow-page-host .rs-notification-modal{
+  max-height:calc(100dvh - 150px)!important;
+  min-height:0!important;
+  overflow:hidden!important;
+}
+html body #modalHost.rs-flow-page-host .rs-notification-list{
+  min-width:0!important;
+  max-width:100%!important;
+}
+@media(max-width:700px){
+  html body #modalHost.rs-flow-page-host>.modal-backdrop>.modal>.rs-flow-nav{
+    padding-left:16px!important;padding-right:16px!important;
+  }
+  html body #modalHost.rs-flow-page-host>.modal-backdrop>.modal>.rs-flow-content{
+    width:calc(100% - 32px)!important;
+    max-width:none!important;
+    margin:16px auto calc(18px + env(safe-area-inset-bottom))!important;
+    padding:0!important;
+    gap:12px!important;
+  }
+  html body #modalHost.rs-flow-page-host>.modal-backdrop>.modal>.rs-flow-content>:is(
+    .rs-simple-checkout,.rs-wallet-deposit-v2,.rs-wallet-request-v2,.rs14-review,
+    .rs-topup-flow,.rs-result-screen,.rs-cart-modal,.rs-notification-modal,
+    .manual-request-modal,.offer-editor-root,.admin-confirm-modal,.rs-admin-action-confirm
+  ){
+    width:100%!important;
+    max-width:100%!important;
+    padding:16px!important;
+    border-radius:16px!important;
+    border-left:1px solid #294766!important;
+    border-right:1px solid #294766!important;
+  }
+  html body #modalHost.rs-flow-page-host .rs-notification-modal{
+    max-height:calc(100dvh - 132px - env(safe-area-inset-bottom))!important;
+  }
+  html body #modalHost.rs-flow-page-host .rs-notification-item{
+    width:100%!important;max-width:100%!important;min-width:0!important;
+  }
+}
+@media(max-width:380px){
+  html body #modalHost.rs-flow-page-host>.modal-backdrop>.modal>.rs-flow-content{
+    width:calc(100% - 24px)!important;
+  }
+}
+</style>
+
 </head>
 <body>
 <div id="rsSplash" role="status" aria-live="polite" aria-label="Cargando REFILLS SHOP">
