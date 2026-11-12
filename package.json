@@ -1,0 +1,13 @@
+{
+  "name": "refills-shop-render-test",
+  "version": "0.1.0",
+  "private": true,
+  "description": "Refills Shop isolated Render deployment smoke test (no payments or credentials)",
+  "engines": {
+    "node": ">=20"
+  },
+  "scripts": {
+    "start": "node server.js",
+    "test": "node --test tests/server.test.js"
+  }
+}
