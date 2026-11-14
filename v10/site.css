@@ -335,3 +335,13 @@ body.auth-guest .mobile-admin-row,body.admin-view .mobile-admin-row{display:none
 .phone-auth-form .honeypot{position:absolute!important;left:-9999px!important;width:1px!important;height:1px!important;opacity:0!important;pointer-events:none!important}
 .auth-separator{text-align:center;color:#a5bdd4;font-size:.8rem;margin:16px 0}
 @media(max-width:700px){.phone-auth-switch{margin:12px 0 18px}.phone-prefix-field input{width:100%}.phone-auth-form{max-width:100%}}
+
+/* Unified native country menu: readable text even in Windows Chrome's white popup. */
+.phone-country-select{display:block;width:100%;min-width:0;max-width:100%;padding:13px 40px 13px 14px;border:1px solid #39729e;border-radius:13px;background-color:#0b1d32;color:#f3faff;font:600 15px/1.4 system-ui;appearance:auto;cursor:pointer;box-sizing:border-box}
+.phone-country-select option,.phone-country-select optgroup{background-color:#ffffff!important;color:#13263a!important;font:500 15px/1.4 system-ui!important}
+.phone-country-select:focus-visible{outline:2px solid #6bccff;outline-offset:2px}
+.admin-contact-buttons{display:flex;flex-wrap:wrap;gap:8px;max-width:460px;justify-content:flex-end}.admin-contact-buttons .btn{flex:none;min-height:38px}.admin-client .state-pill{font-size:.69rem;width:fit-content;max-width:100%;white-space:normal}
+@media(max-width:700px){.phone-country-select{font-size:16px;max-width:100%}.admin-contact-buttons{width:100%;max-width:none;justify-content:flex-start}.admin-contact-buttons .btn{width:auto!important;flex:1 0 auto;margin:0!important}.admin-client-main{width:100%}}
+/* Windows/Chromium native popup: light popup with dark readable option labels. */
+.field select.phone-country-select{color-scheme:light!important;appearance:none!important;-webkit-appearance:none!important;background-color:#0b1d32!important;background-image:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='16' height='16' viewBox='0 0 24 24' fill='none' stroke='%239dd6ff' stroke-width='2' stroke-linecap='round' stroke-linejoin='round'%3E%3Cpath d='m6 9 6 6 6-6'/%3E%3C/svg%3E")!important;background-position:right 12px center!important;background-repeat:no-repeat!important;color:#f3faff!important;padding-right:40px!important}
+.field select.phone-country-select option{background-color:#fff!important;color:#13263a!important}

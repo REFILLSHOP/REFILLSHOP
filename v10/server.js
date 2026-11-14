@@ -272,18 +272,29 @@ const server=http.createServer(async(req,res)=>{
  }
  if(p==='/api/admin/customers'&&req.method==='GET'){
   if(!authAdmin(req))return send(res,403,{error:'Acceso no autorizado'});
-  const [profiles,wallets,memberships,orders,users]=await Promise.all([
+  const [profiles,wallets,memberships,orders,users,reviews]=await Promise.all([
    sb('rs5_profiles',{query:'select=user_id,full_name,phone,created_at,updated_at&order=created_at.desc&limit=1000'}),
    sb('rs5_wallets',{query:'select=user_id,balance_usdt&limit=1000'}),
    sb('rs5_reseller_memberships',{query:'select=user_id,expires_at&limit=1000'}),
    sb('rs5_orders',{query:'select=user_id,id&status=neq.uploading&limit=1000'}),
-   authAdminUsers(1,100).catch(()=>[])
+   authAdminUsers(1,100).catch(()=>[]),
+   sb('rs5_registration_reviews',{query:'select=user_id,status,channel,created_at,updated_at&limit=1000'})
   ]);
   const wm=new Map(wallets.map(w=>[w.user_id,w]));const mm=new Map(memberships.map(m=>[m.user_id,m]));const counts=new Map();for(const o of orders)counts.set(o.user_id,(counts.get(o.user_id)||0)+1);
-  const pm=new Map(profiles.map(x=>[x.user_id,x]));const um=new Map(users.map(x=>[x.id,x]));
+  const pm=new Map(profiles.map(x=>[x.user_id,x]));const um=new Map(users.map(x=>[x.id,x]));const rm=new Map(reviews.map(x=>[x.user_id,x]));
   const ids=[...new Set([...pm.keys(),...um.keys()])];
-  const clients=ids.slice(0,1000).map(id=>({id,name:pm.get(id)?.full_name||'',phone:pm.get(id)?.phone||'',email:um.get(id)?.user_metadata?.signup_source==='phone_password'?null:(um.get(id)?.email||null),createdAt:um.get(id)?.created_at||pm.get(id)?.created_at||null,provider:um.get(id)?.app_metadata?.provider||null,balanceUsdt:Number(wm.get(id)?.balance_usdt||0),resellerUntil:mm.get(id)?.expires_at||null,orders:counts.get(id)||0}));
+  const clients=ids.slice(0,1000).map(id=>({id,name:pm.get(id)?.full_name||'',phone:pm.get(id)?.phone||'',email:um.get(id)?.user_metadata?.signup_source==='phone_password'?null:(um.get(id)?.email||null),createdAt:um.get(id)?.created_at||pm.get(id)?.created_at||null,provider:um.get(id)?.app_metadata?.provider||null,balanceUsdt:Number(wm.get(id)?.balance_usdt||0),resellerUntil:mm.get(id)?.expires_at||null,orders:counts.get(id)||0,reviewStatus:rm.get(id)?.status||'pending',reviewChannel:rm.get(id)?.channel||null,phoneVerified:um.get(id)?.phone_confirmed_at?true:false}));
   return send(res,200,{clients,limited:ids.length>1000,authUsersLoaded:users.length>0});
+ }
+ if(p==='/api/admin/registration-review'&&req.method==='POST'){
+  if(!authAdmin(req))return send(res,403,{error:'Acceso no autorizado'});
+  const b=await bodyJSON(req,1500),uid=String(b.userId||''),status=String(b.status||'');
+  if(!validUUID(uid)||!['pending','contacted','confirmed'].includes(status))return send(res,400,{error:'Revisión inválida'});
+  const profile=await sb('rs5_profiles',{query:'select=user_id&user_id=eq.'+encodeURIComponent(uid)+'&limit=1'});
+  if(!profile.length)return send(res,404,{error:'Cliente no encontrado'});
+  const review=await sb('rs5_registration_reviews',{method:'POST',query:'on_conflict=user_id',prefer:'resolution=merge-duplicates,return=representation',body:{user_id:uid,status,updated_at:new Date().toISOString()}});
+  await audit('registration_review','customer',uid,{status});
+  return send(res,200,{ok:true,status:review[0]?.status||status,phoneVerified:false});
  }
  if(p==='/api/admin/customer-profile'&&req.method==='POST'){
   if(!authAdmin(req))return send(res,403,{error:'Acceso no autorizado'});

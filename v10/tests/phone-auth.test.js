@@ -56,7 +56,7 @@ test('server creates a password account, stores phone in private profile, reject
   assert.equal(createdBody.user_metadata.phone_verification,'unverified');
   assert.equal(createdBody.email_confirm,true);
   const page=await fetch(url+'/app.js');const script=await page.text();
-  assert.ok(script.includes('phoneAuthForm'));assert.ok(script.includes('No necesitas un correo electrónico'));assert.ok(script.includes('countryCodeManual'));assert.ok(script.includes('Selecciona tu país'));
+  assert.ok(script.includes('phoneAuthForm'));assert.ok(script.includes('No necesitas un correo electrónico'));assert.ok(!script.includes('countryCodeManual'));assert.ok(!script.includes('Otro prefijo (opcional)'));assert.ok(script.includes('Selecciona tu país'));assert.ok(script.includes('data-contact=\"whatsapp\"'));assert.ok(script.includes('data-review=\"confirmed\"'));
   assert.ok(!script.includes('fake-server-secret'));
   response=await req({fullName:'Cliente Internacional',phone:'+13055550199',password:'Abcd123456'});
   assert.equal(response.status,201);
