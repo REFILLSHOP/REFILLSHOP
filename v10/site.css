@@ -1217,3 +1217,7 @@ body.shop-refresh .cart-footer p{flex:1 1 100%;margin:0 0 4px}
  body.shop-refresh .cart-footer{justify-content:stretch}
  body.shop-refresh .cart-footer .btn{flex:1}
 }
+
+/* Compact mobile header for the added cart action */
+@media(max-width:680px){body.shop-refresh .header-inner{grid-template-columns:minmax(0,1fr) auto!important;gap:6px!important}body.shop-refresh .header-tools{gap:5px!important;justify-self:end;min-width:0}body.shop-refresh .header-action{width:34px!important;height:34px!important}body.shop-refresh .header-action .icon{width:17px!important;height:17px!important}body.shop-refresh .balance-chip{min-width:72px!important;max-width:84px!important;padding:5px 6px!important;gap:4px!important}body.shop-refresh .balance-coin{width:25px!important;height:25px!important}body.shop-refresh .balance-label{font-size:.42rem!important}body.shop-refresh .balance-chip strong{font-size:.82rem!important}}
+@media(max-width:390px){body.shop-refresh .header-inner{gap:4px!important;padding-inline:7px!important}body.shop-refresh .header-tools{gap:3px!important}body.shop-refresh .balance-chip{min-width:52px!important;max-width:61px!important;padding:5px!important}body.shop-refresh .balance-coin{display:none!important}body.shop-refresh .header-action{width:30px!important;height:30px!important}body.shop-refresh .header-action .icon{width:15px!important;height:15px!important}body.shop-refresh .cart-count{top:-4px;right:-4px;min-width:15px;height:15px;font-size:9px}}
