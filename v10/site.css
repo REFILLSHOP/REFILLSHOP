@@ -787,3 +787,70 @@ body.admin-view .rs-v3 #adminPricePreview .adm-price-grid>div{padding:10px;backg
 @media(max-width:900px){body.admin-view .rs-v3-searchform{grid-template-columns:1fr}body.admin-view .rs-v3-searchform>.rs-v3-form-actions{margin:0 0 10px}}
 @media(max-width:760px){body.admin-view .rs-v3-panel{padding:15px}body.admin-view .rs-v3-inline-fields{grid-template-columns:minmax(0,1fr)}body.admin-view .rs-v3-item{flex-wrap:wrap}body.admin-view .rs-v3-item-actions{width:100%;justify-content:flex-start}body.admin-view .rs-v3-item-actions .btn{flex:1 1 auto}body.admin-view .rs-v3-product-price{margin-left:auto}}
 @media(max-width:420px){body.admin-view .rs-v3-panel{padding:12px}body.admin-view .rs-v3-heading-actions{width:100%}body.admin-view .rs-v3-heading-actions .btn{flex:1 1 auto}body.admin-view .rs-v3-form-actions .btn{width:100%}body.admin-view .rs-v3-item-content{flex:1 1 calc(100% - 60px)}body.admin-view .rs-v3-product-price{text-align:left;flex:1 1 100%;margin-left:0}body.admin-view .rs-v3-stat strong{font-size:20px}}
+
+
+/* Storefront refresh: same clean visual language as the administration, without changing existing flows */
+body.shop-refresh{--shop-stroke:#284763;--shop-panel:#0c1d30;--shop-raised:#102740;--shop-soft:#95b7d0}
+body.shop-refresh .main-content{width:min(1240px,calc(100% - 42px));padding-top:24px;overflow:visible}
+body.shop-refresh .header-inner,body.shop-refresh .topnav{max-width:1240px}
+body.shop-refresh .header{background:#061324ed;border-bottom:1px solid #25435c}
+body.shop-refresh .header-inner{min-height:76px}
+body.shop-refresh .hero-next{display:grid;grid-template-columns:minmax(0,1.2fr) minmax(260px,.8fr);gap:25px;padding:clamp(24px,3.7vw,42px)!important;min-height:290px!important;border:1px solid #2f5575!important;border-radius:22px!important;background:radial-gradient(ellipse at 93% 10%,#1366aa3a,transparent 55%),linear-gradient(125deg,#0d2740,#09182b 72%)!important;box-shadow:0 18px 45px #020a1738}
+body.shop-refresh .hero-next h1{font-size:clamp(2rem,4.1vw,3.5rem)!important;line-height:1.09!important;letter-spacing:-.055em!important;max-width:640px}
+body.shop-refresh .hero-next p{font-size:.94rem!important;line-height:1.65!important;color:#b4d0e3!important;max-width:570px}
+body.shop-refresh .hero-actions .btn{min-height:41px;border-radius:10px;padding:10px 16px}
+body.shop-refresh .hero-side{display:flex;flex-direction:column;gap:12px;min-width:0}
+body.shop-refresh .hero-benefit{padding:15px;border-radius:13px;border:1px solid #2e587a;background:linear-gradient(145deg,#10314d,#0c1d30)}
+body.shop-refresh .hero-benefit strong{font-size:13px}
+body.shop-refresh .hero-search{min-height:49px;border:1px solid #2b5c80;border-radius:12px;background:#0b2035}
+body.shop-refresh .section-head{margin-bottom:14px;align-items:end;gap:12px}
+body.shop-refresh .section-head h2{font-size:clamp(1.25rem,2.1vw,1.7rem);line-height:1.24;letter-spacing:-.025em;margin-top:5px}
+body.shop-refresh .game-grid,body.shop-refresh .offer-grid{gap:14px;min-width:0}
+body.shop-refresh .game-card,body.shop-refresh .offer-card{border-radius:15px!important;border:1px solid var(--shop-stroke)!important;background:linear-gradient(155deg,#102740,#0a1a2d)!important;box-shadow:0 9px 26px #0207133d!important;min-width:0}
+body.shop-refresh .game-card:hover{transform:translateY(-2px);border-color:#4888bc!important}
+body.shop-refresh .game-cover{height:188px}
+body.shop-refresh .offer-cover{height:140px}
+body.shop-refresh .offer-content{padding:16px;gap:11px}
+body.shop-refresh .offer-content h3{font-size:1.03rem;line-height:1.4}
+body.shop-refresh .currency-grid{gap:6px}
+body.shop-refresh .currency-box{border:1px solid #294c6e;border-radius:10px;padding:10px 6px;background:#0a2036}
+body.shop-refresh .currency-box small{font-size:9px}
+body.shop-refresh .currency-box strong{font-size:clamp(13px,1.7vw,17px)}
+body.shop-refresh .offer-card .btn{min-height:40px;border-radius:10px}
+body.shop-refresh .shop-offers-intro{margin:0 0 16px;border:1px solid #2d5675;background:#0d283f;border-radius:11px;padding:12px 15px;color:#b6d7eb;font-size:12px;line-height:1.55}
+body.shop-refresh .checkout-form,body.shop-refresh .checkout-summary,body.shop-refresh .howto,body.shop-refresh .card.pad{border:1px solid #2c4d6a;border-radius:15px;background:linear-gradient(150deg,#0e243a,#09192b);box-shadow:0 9px 26px #02071329}
+body.shop-refresh .checkout{max-width:850px}
+body.shop-refresh .checkout-form{padding:clamp(18px,3vw,25px)}
+body.shop-refresh .fields{gap:13px}
+body.shop-refresh .field input,body.shop-refresh .field select,body.shop-refresh .field textarea{border-radius:10px;border-color:#325f82;min-height:42px}
+body.shop-refresh .stepper{gap:7px}
+body.shop-refresh .step{border-radius:10px}
+body.shop-refresh .btn{transition:border-color .16s,background-color .16s,transform .16s}
+body.shop-refresh .btn:focus-visible,body.shop-refresh .game-card:focus-visible{outline:2px solid #61bcf8;outline-offset:3px}
+body.shop-refresh .footer{border-color:#1e3b53}
+@media(max-width:850px){
+ body.shop-refresh .hero-next{grid-template-columns:minmax(0,1fr);min-height:0!important}
+ body.shop-refresh .hero-side{display:grid;grid-template-columns:1fr;gap:10px}
+ body.shop-refresh .main-content{width:calc(100% - 30px)}
+ body.shop-refresh .game-grid{grid-template-columns:repeat(2,minmax(0,1fr))}
+}
+@media(max-width:560px){
+ body.shop-refresh .main-content{width:calc(100% - 24px);padding-top:14px}
+ body.shop-refresh .hero-next{padding:21px!important;gap:19px;border-radius:16px!important}
+ body.shop-refresh .hero-next h1{font-size:clamp(1.8rem,8vw,2.35rem)!important}
+ body.shop-refresh .hero-next p{font-size:.85rem!important}
+ body.shop-refresh .game-grid{grid-template-columns:repeat(2,minmax(0,1fr));gap:10px}
+ body.shop-refresh .game-cover{height:152px}
+ body.shop-refresh .offer-grid{grid-template-columns:minmax(0,1fr);gap:12px}
+ body.shop-refresh .offer-cover{height:124px}
+ body.shop-refresh .offer-content{padding:14px}
+ body.shop-refresh .game-card,body.shop-refresh .offer-card{border-radius:12px!important}
+ body.shop-refresh .currency-grid{grid-template-columns:repeat(3,minmax(0,1fr))}
+ body.shop-refresh .hero-actions .btn{flex:1 1 auto}
+}
+@media(max-width:360px){
+ body.shop-refresh .game-grid{grid-template-columns:minmax(0,1fr)}
+ body.shop-refresh .game-cover{height:170px}
+ body.shop-refresh .currency-box{padding:7px 4px}
+}
+@media(prefers-reduced-motion:reduce){body.shop-refresh .game-card:hover{transform:none}body.shop-refresh .btn{transition:none}}
