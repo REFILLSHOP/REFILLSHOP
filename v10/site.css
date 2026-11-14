@@ -381,3 +381,64 @@ body:has(.admin-tabs) input:focus-visible,body:has(.admin-tabs) select:focus-vis
 .admin-workspace .adm-hero{margin-bottom:18px}
 .admin-workspace .adm-editor-panel{border:1px solid #315071;border-radius:18px}
 @media(max-width:1100px){.admin-workspace-offers .adm-editor-grid{grid-template-columns:minmax(0,1fr)}}
+
+
+/* Admin V10 compact professional workspace refinements */
+body:has(.admin-tabs) main.wrap{max-width:1240px!important;width:calc(100% - 36px);font-size:13px;line-height:1.45}
+body:has(.admin-tabs) main.wrap>.pagehead{margin:0 0 12px}
+body:has(.admin-tabs) .pagehead h1{font-size:clamp(1.25rem,2vw,1.75rem);margin:2px 0 4px}
+body:has(.admin-tabs) .pagehead p{font-size:.82rem;margin:0}
+body:has(.admin-tabs) .admin-tabs{top:105px;z-index:10;gap:0;padding:12px 8px;background:#0b192e;border-color:#27415e;box-shadow:none}
+body:has(.admin-tabs) .admin-tabs .chip{min-height:35px;font-size:12px;padding:8px 11px;font-weight:600;border-radius:8px}
+body:has(.admin-tabs) .admin-tabs .chip:last-child{margin-top:8px}
+.adm-nav-brand{font-size:11px;font-weight:800;letter-spacing:.09em;color:#e2f1ff;padding:10px 11px 14px}
+.adm-nav-brand small{display:block;color:#7eaccf;font-size:9px;letter-spacing:.16em;margin-top:3px}
+.adm-nav-group{display:grid;gap:2px;padding:7px 0;border-top:1px solid #203852}
+.adm-nav-label{color:#7d9ebd;font-size:9px;letter-spacing:.13em;font-weight:800;padding:6px 11px;text-transform:uppercase}
+body:has(.admin-tabs) .adm-signout{color:#ffb8c3!important}
+.admin-workspace .pagehead{margin-bottom:12px}
+.admin-workspace .adm-hero{display:none!important}
+.admin-workspace .adm-toolbar{display:flex;justify-content:space-between;align-items:center;gap:12px;margin:0 0 14px;padding:10px 14px;background:#0e2036;border:1px solid #244665;border-radius:11px}
+.admin-workspace .adm-counter{font-size:11px;color:#a5c7e1;font-weight:700}
+.admin-workspace .adm-toolbar-actions{display:flex;gap:6px;flex-wrap:wrap}
+.admin-workspace .adm-editor-grid{gap:12px}
+.admin-workspace .adm-editor-panel{border:1px solid #29425f;background:#0c1c30;border-radius:12px;padding:18px!important}
+.admin-workspace .adm-step-heading{margin-bottom:14px;gap:9px}
+.admin-workspace .adm-step-heading h2{font-size:16px;margin:0}
+.admin-workspace .adm-step-heading p{font-size:11px}
+.admin-workspace .adm-step-num{width:31px;height:31px;min-width:31px;border-radius:8px;font-size:11px;box-shadow:none}
+body:has(.admin-tabs) .card{border-radius:12px}
+body:has(.admin-tabs) input:not([type=checkbox]),body:has(.admin-tabs) select,body:has(.admin-tabs) textarea{min-height:38px;padding:8px 11px;font-size:12px;border-radius:9px}
+body:has(.admin-tabs) .field label{font-size:11px}
+body:has(.admin-tabs) .fields{gap:10px}
+body:has(.admin-tabs) .btn{min-height:34px;font-size:11px;padding:8px 13px;border-radius:8px}
+body:has(.admin-tabs) .btn-wide{width:100%}
+.admin-workspace .adm-form-actions{display:flex;flex-wrap:wrap;gap:9px}
+.admin-workspace .adm-form-actions .btn{min-width:125px}
+.admin-workspace-games .adm-editor-grid{max-width:none}
+.admin-workspace-games .adm-editor-panel{width:100%}
+.admin-workspace .adm-inline-list{margin-top:17px;padding-top:12px;border-color:#25415c}
+.admin-workspace .adm-list-head{display:flex;align-items:center;justify-content:space-between;gap:12px;margin-bottom:9px}
+.admin-workspace .adm-list-head h3{margin:0;font-size:13px}
+.admin-workspace .adm-list-head h3 small{color:#809fbb;font-weight:500}
+.admin-workspace #adminGameFilter{width:min(240px,48%);min-height:34px}
+.admin-workspace .adm-game-rows{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:8px}
+.admin-workspace .adm-mini-game{gap:10px;border:1px solid #28425e;border-radius:10px;padding:9px 10px;background:#0c1d32;min-width:0}
+.admin-workspace .adm-mini-game[hidden]{display:none!important}
+.admin-workspace .adm-mini-game img{width:38px;height:38px;flex-shrink:0;border-radius:8px}
+.admin-workspace .adm-mini-game strong{font-size:12px}
+.admin-workspace .adm-mini-game small{font-size:10px}
+.admin-workspace .adm-game-actions{display:flex;flex-wrap:wrap;justify-content:flex-end;gap:5px;max-width:58%}
+.admin-workspace .adm-game-actions .btn{font-size:10px;padding:6px 8px;min-height:30px}
+.admin-workspace-offers .adm-editor-grid{grid-template-columns:repeat(2,minmax(0,1fr));align-items:start}
+.admin-workspace-offers .adm-offer-editor{grid-column:auto}
+.admin-workspace .adm-price-summary{padding:10px}
+.admin-workspace .adm-price-grid strong{font-size:15px}
+.admin-workspace .adm-provider-results{max-height:360px;overflow:auto}
+body:has(.admin-tabs) .admin-stats{gap:10px}
+body:has(.admin-tabs) .stat{padding:13px}
+body:has(.admin-tabs) .stat strong{font-size:1.45rem}
+@media(min-width:1000px){body:has(.admin-tabs) main.wrap{grid-template-columns:194px minmax(0,1fr);gap:0 16px}}
+@media(max-width:999px){body:has(.admin-tabs) .admin-tabs{top:auto;display:flex;gap:8px;overflow-x:auto;padding:8px}body:has(.admin-tabs) .adm-nav-brand{display:none}body:has(.admin-tabs) .adm-nav-group{display:flex;gap:5px;padding:0;border:0}body:has(.admin-tabs) .adm-nav-label{display:none}body:has(.admin-tabs) .admin-tabs .chip{min-width:max-content}body:has(.admin-tabs) main.wrap{width:calc(100% - 28px)}}
+@media(max-width:820px){.admin-workspace .adm-game-rows,.admin-workspace-offers .adm-editor-grid{grid-template-columns:minmax(0,1fr)}}
+@media(max-width:560px){.admin-workspace .adm-list-head{align-items:stretch;flex-direction:column}.admin-workspace #adminGameFilter{width:100%}.admin-workspace .adm-mini-game{flex-wrap:wrap}.admin-workspace .adm-game-actions{max-width:none;width:100%;justify-content:flex-start}.admin-workspace .adm-toolbar{align-items:flex-start;flex-direction:column}body:has(.admin-tabs) main.wrap{width:calc(100% - 24px)}}
