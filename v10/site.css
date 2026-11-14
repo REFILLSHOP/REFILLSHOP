@@ -650,3 +650,52 @@ body.admin-view .rs-admin-content .admin-workspace-games .adm-saved-offers,body.
 body.admin-view .rs-admin-content .admin-workspace-offer-list .adm-editor-grid{display:none!important}
 @media(max-width:999px){body.admin-view main.wrap{width:calc(100% - 24px)!important}body.admin-view .rs-admin-shell{display:block!important}body.admin-view .rs-admin-shell>.admin-tabs{position:relative!important;top:auto!important;display:flex;overflow-x:auto!important;overflow-y:hidden!important;width:100%!important;max-height:none!important;margin-bottom:14px}body.admin-view .rs-admin-content{width:100%!important}}
 @media(max-width:620px){body.admin-view main.wrap{width:calc(100% - 20px)!important}body.admin-view .rs-admin-content .admin-entity{align-items:stretch}body.admin-view .rs-admin-content .admin-entity>div:nth-child(2){flex-basis:100%;min-width:0}body.admin-view .rs-admin-content .admin-entity .btn{flex:1 1 auto}body.admin-view .rs-admin-content .adm-list-head{display:flex;flex-direction:column;align-items:stretch}body.admin-view .rs-admin-content #adminGameFilter{width:100%;max-width:none}}
+
+
+/* Refills Shop V10 — independent games workspace replacing the legacy editor */
+body.admin-view .rs-gv2{display:grid;grid-template-columns:minmax(0,1fr);gap:16px;width:100%;min-width:0}
+body.admin-view .rs-gv2-panel{width:100%;min-width:0;padding:20px 22px;background:linear-gradient(160deg,#0e233a,#09192b);border:1px solid #2e506f;border-radius:16px;box-shadow:0 10px 30px #02071329}
+body.admin-view .rs-gv2-panel-head{display:flex;align-items:center;justify-content:space-between;gap:15px;flex-wrap:wrap;margin-bottom:17px}
+body.admin-view .rs-gv2-panel-head h2{font-size:18px;line-height:1.3;margin:0 0 5px;color:#ecf8ff}
+body.admin-view .rs-gv2-panel-head p{font-size:12px;line-height:1.5;color:#9ab8d1;margin:0;max-width:680px}
+body.admin-view .rs-gv2-pill{display:inline-flex;align-items:center;background:#103d4a;border:1px solid #2b987f;color:#a0f1d1;font-size:10px;letter-spacing:.06em;padding:7px 10px;border-radius:999px;white-space:nowrap;font-weight:800}
+body.admin-view .rs-gv2-fields{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));column-gap:14px;row-gap:12px}
+body.admin-view .rs-gv2 .field{display:flex;flex-direction:column;gap:6px;font-size:12px;font-weight:650;color:#c5dff3;min-width:0;margin-bottom:12px}
+body.admin-view .rs-gv2 .field input,body.admin-view .rs-gv2 .field select{display:block;width:100%;max-width:none;min-width:0;margin:0;height:42px;background:#081629;color:#e9f7ff;border:1px solid #2b5a81;border-radius:10px;padding:9px 12px;font-size:13px}
+body.admin-view .rs-gv2 .field input:focus-visible,body.admin-view .rs-gv2 .field select:focus-visible{border-color:#65c7ff;outline:2px solid #1f82c655;outline-offset:1px}
+body.admin-view .rs-gv2 .field small{font-weight:400;color:#81a8c7;font-size:10px}
+body.admin-view .rs-gv2-check{display:flex;align-items:center;gap:9px;min-height:38px;font-size:12px;color:#c6def1}
+body.admin-view .rs-gv2-check input{width:17px;height:17px;min-width:17px;flex:none;appearance:auto}
+body.admin-view .rs-gv2-controls{display:flex;flex-wrap:wrap;align-items:center;gap:10px;margin-top:13px}
+body.admin-view .rs-gv2-controls button{min-width:145px;min-height:40px;font-size:12px}
+body.admin-view .rs-gv2-controls button:disabled{cursor:wait;opacity:.7}
+body.admin-view .rs-gv2-status{border:1px solid #315673;background:#102c45;color:#c0e9ff;padding:11px 13px;border-radius:10px;font-size:12px;line-height:1.5;margin:14px 0 0;overflow-wrap:anywhere}
+body.admin-view .rs-gv2-status.rs-gv2-error{border-color:#aa5161;background:#40202c;color:#ffd0d4}
+body.admin-view .rs-gv2-count{display:inline-block;font-size:12px;color:#8cc8f4;padding-left:5px}
+body.admin-view .rs-gv2-search{width:100%;max-width:370px;min-height:40px;margin:0 0 14px!important}
+body.admin-view .rs-gv2-list{display:flex;flex-direction:column;gap:9px;width:100%;min-width:0}
+body.admin-view .rs-gv2-item{display:flex;align-items:center;gap:12px;border:1px solid #2a4560;border-radius:12px;background:#0a1b2e;padding:11px 13px;min-width:0}
+body.admin-view .rs-gv2-item[hidden]{display:none!important}
+body.admin-view .rs-gv2-item img{width:45px;height:45px;flex:none;object-fit:cover;border-radius:9px;background:#122d4a}
+body.admin-view .rs-gv2-item-info{display:flex;flex-direction:column;gap:4px;flex:1 1 auto;min-width:0;overflow-wrap:anywhere}
+body.admin-view .rs-gv2-item-info strong{color:#f0f8ff;font-size:12px}
+body.admin-view .rs-gv2-item-info small{font-size:10px;color:#91b2cc}
+body.admin-view .rs-gv2-active{color:#8ce6c3}
+body.admin-view .rs-gv2-inactive{color:#e5bc80}
+body.admin-view .rs-gv2-actions{display:flex;flex-wrap:wrap;justify-content:flex-end;gap:6px;flex:0 0 auto}
+body.admin-view .rs-gv2-actions button{min-height:32px;font-size:11px}
+body.admin-view .rs-gv2-empty{padding:17px 10px;color:#9bb5cf;font-size:12px;margin:0}
+body.admin-view .admin-workspace-offers .adm-editor-grid>.adm-editor-panel:first-child{display:block!important}
+body.admin-view .admin-workspace-offers .adm-editor-grid>.adm-editor-panel{display:block!important}
+@media(max-width:780px){
+body.admin-view .rs-gv2-panel{padding:15px}
+body.admin-view .rs-gv2-fields{grid-template-columns:minmax(0,1fr)}
+body.admin-view .rs-gv2-item{flex-wrap:wrap}
+body.admin-view .rs-gv2-actions{flex:0 0 100%;justify-content:flex-start}
+body.admin-view .rs-gv2-actions button{flex:1 1 auto}
+}
+@media(max-width:420px){
+body.admin-view .rs-gv2-panel{padding:12px}
+body.admin-view .rs-gv2-controls button{width:100%;min-width:0}
+body.admin-view .rs-gv2-item-info{flex:1 1 calc(100% - 60px)}
+}
