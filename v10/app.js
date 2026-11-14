@@ -66,7 +66,7 @@ function paymentTotalV6(){const amount=payAmount();return `<div class="payment-t
 
 const PAYMENT_LOGOS_V5={
  mobile:{src:assetSrc('etecsa.svg'),fallback:'etecsa.svg',kind:'etecsa'},
- wallet:{src:assetSrc('mitransfer.svg'),fallback:'mitransfer.svg',kind:'mitransfer'},
+ wallet:{src:'https://www.etecsa.cu/sites/default/files/2026-01/Monedero-MiTransfer.-Web-ETECSA_1.jpg',fallback:'mitransfer.svg',kind:'mitransfer'},
  card:{src:'https://www.etecsa.cu/sites/default/files/aplicaciones/190x190.jpg',fallback:'transfermovil.svg',kind:'transfermovil'},
  usdt_bep20:{src:assetSrc('usdt-bep20.svg'),fallback:'usdt-bep20.svg',kind:'bep20'}
 };
