@@ -9,6 +9,7 @@ on:
   push:
     branches:
       - "deploy/refills-v10-ready"
+      - "admin-v10-redesign"
     paths:
       - "v10/**"
       - "edge/**"
