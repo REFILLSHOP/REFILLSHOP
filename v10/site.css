@@ -699,3 +699,91 @@ body.admin-view .rs-gv2-panel{padding:12px}
 body.admin-view .rs-gv2-controls button{width:100%;min-width:0}
 body.admin-view .rs-gv2-item-info{flex:1 1 calc(100% - 60px)}
 }
+
+
+/* V10 admin V3: brand new controls matched to the Games workspace, no legacy card layout */
+body.admin-view .rs-v3{width:100%;min-width:0;display:flex;flex-direction:column;gap:15px}
+body.admin-view .rs-v3-heading{display:flex;justify-content:space-between;align-items:center;gap:12px;padding:2px 0 3px;min-width:0;flex-wrap:wrap}
+body.admin-view .rs-v3-heading>div{min-width:0}
+body.admin-view .rs-v3-heading .caps{color:#73baff;font-size:10px;letter-spacing:.15em;font-weight:800;margin-bottom:4px}
+body.admin-view .rs-v3-heading h1{font-size:clamp(20px,2.3vw,27px);letter-spacing:-.035em;color:#f0f8ff;line-height:1.15;margin:0 0 8px}
+body.admin-view .rs-v3-heading p{color:#9bbad2;font-size:12px;line-height:1.5;margin:0}
+body.admin-view .rs-v3-heading-actions{display:flex;align-items:center;gap:8px;flex-wrap:wrap}
+body.admin-view .rs-v3-panel{display:block;min-width:0;width:100%;padding:19px 21px;background:linear-gradient(160deg,#0e233a,#09192b);border:1px solid #2e506f;border-radius:16px;box-shadow:0 10px 30px #02071329}
+body.admin-view .rs-v3-panel-head{display:flex;justify-content:space-between;align-items:center;flex-wrap:wrap;gap:12px;margin-bottom:14px}
+body.admin-view .rs-v3-panel-head>div{min-width:0;flex:1 1 220px}
+body.admin-view .rs-v3-panel-head h2{color:#ecf8ff;font-size:17px;line-height:1.3;font-weight:750;margin:0 0 5px;letter-spacing:-.02em}
+body.admin-view .rs-v3-panel-head p{color:#94b6cf;font-size:12px;line-height:1.5;margin:0}
+body.admin-view .rs-v3-panel>.rs-v3-form{margin-top:4px}
+body.admin-view .rs-v3 .field{display:flex!important;flex-direction:column!important;min-width:0;gap:7px;color:#c8def0;font-size:12px;font-weight:650;line-height:1.35;margin:0 0 12px}
+body.admin-view .rs-v3 input:not([type=checkbox]),body.admin-view .rs-v3 select,body.admin-view .rs-v3 textarea{box-sizing:border-box;display:block;width:100%;min-width:0;max-width:none;height:42px!important;min-height:42px!important;background:#081629!important;border:1px solid #2b5a81!important;border-radius:10px!important;color:#e9f7ff!important;font-size:13px!important;padding:9px 12px!important}
+body.admin-view .rs-v3 input::placeholder{color:#668cac}
+body.admin-view .rs-v3 .field input:focus-visible,body.admin-view .rs-v3 .field select:focus-visible{outline:2px solid #268ecb8a;outline-offset:1px;border-color:#65c7ff!important}
+body.admin-view .rs-v3-inline-fields{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:0 14px;min-width:0}
+body.admin-view .rs-v3-form-actions{display:flex;flex-wrap:wrap;align-items:center;gap:8px;margin:7px 0 13px}
+body.admin-view .rs-v3 .btn{min-height:38px;padding:9px 13px;font-size:12px;font-weight:670;border-radius:9px;white-space:normal}
+body.admin-view .rs-v3 .btn-sm{min-height:33px;padding:7px 10px;font-size:11px}
+body.admin-view .rs-v3 .btn:disabled{opacity:.6;cursor:not-allowed}
+body.admin-view .rs-v3-chip{display:inline-flex;align-items:center;justify-content:center;white-space:nowrap;background:#1b3046;color:#b5d6ed;border:1px solid #365775;border-radius:99px;padding:7px 11px;font-size:10px;font-weight:800}
+body.admin-view .rs-v3-chip.rs-v3-connected{background:#133a39;color:#a3e5cc;border-color:#307b74}
+body.admin-view .rs-v3-stats{display:grid;grid-template-columns:1fr;gap:9px}
+body.admin-view .rs-v3-stat{display:flex;justify-content:space-between;align-items:center;gap:15px;width:100%;min-width:0;padding:13px 17px;background:linear-gradient(145deg,#0f2842,#0b1a2c);border:1px solid #2b4967;border-radius:12px}
+body.admin-view .rs-v3-stat>div{display:flex;flex-direction:column;gap:4px}
+body.admin-view .rs-v3-stat small{font-size:11px;color:#a5c7dd}
+body.admin-view .rs-v3-stat strong{font-size:23px;color:#eaf7ff;line-height:1.1}
+body.admin-view .rs-v3-stat>span{font-size:11px;color:#7fa8c8}
+body.admin-view .rs-v3-shortcuts,.rs-v3-list{display:flex;flex-direction:column;gap:9px;min-width:0;width:100%}
+body.admin-view .rs-v3-shortcut{display:flex;align-items:center;justify-content:space-between;gap:15px;text-align:left;width:100%;min-width:0;background:#0b1e32;border:1px solid #2a4967;border-radius:11px;padding:13px 15px;color:#e9f6ff;cursor:pointer;transition:background .15s,border-color .15s}
+body.admin-view .rs-v3-shortcut:hover{background:#153451;border-color:#3d7aab}
+body.admin-view .rs-v3-shortcut>span:first-child{display:flex;flex-direction:column;gap:5px;min-width:0}
+body.admin-view .rs-v3-shortcut strong{font-size:13px;font-weight:750}
+body.admin-view .rs-v3-shortcut small{font-size:11px;color:#94b5cf}
+body.admin-view .rs-v3-shortcut-arrow{font-size:18px;color:#78c7ff;flex:none}
+body.admin-view .rs-v3-list-title{display:flex;justify-content:space-between;align-items:center;flex-wrap:wrap;gap:9px;color:#cbe4f8;font-size:12px;padding:11px 2px 9px}
+body.admin-view .rs-v3-list-title small{font-size:11px;color:#8fb0ca}
+body.admin-view .rs-v3-list{margin-top:9px}
+body.admin-view .rs-v3-item{display:flex;align-items:center;gap:12px;width:100%;min-width:0;border:1px solid #2c4865;border-radius:12px;background:#0a1b2e;padding:12px 13px;color:#e8f4ff}
+body.admin-view button.rs-v3-item{text-align:left;cursor:pointer}
+body.admin-view button.rs-v3-item:hover{background:#13304c;border-color:#529ac9}
+body.admin-view button.rs-v3-item.is-selected{background:#123452;border-color:#60b5ea;box-shadow:inset 3px 0 #61caff}
+body.admin-view .rs-v3-product-mark{width:43px;height:43px;min-width:43px;flex:none;display:grid;place-items:center;background:#183957;color:#92cefa;border:1px solid #345c7d;border-radius:10px}
+body.admin-view .rs-v3-product-mark svg{width:21px;height:21px}
+body.admin-view .rs-v3-item-content{flex:1 1 auto;display:flex;flex-direction:column;gap:5px;min-width:0;overflow-wrap:anywhere;word-break:normal}
+body.admin-view .rs-v3-item-content strong{font-size:12px;color:#eaf7ff}
+body.admin-view .rs-v3-item-content small{font-size:11px;color:#9bb9d2;line-height:1.4}
+body.admin-view .rs-v3-product-price{text-align:right;flex:none;display:flex;flex-direction:column;gap:5px}
+body.admin-view .rs-v3-product-price strong{font-size:12px;white-space:nowrap;color:#9de0ff}
+body.admin-view .rs-v3-product-price small{font-size:10px;color:#86b3ce}
+body.admin-view .rs-v3-item-actions{flex:none;display:flex;justify-content:flex-end;flex-wrap:wrap;align-items:center;gap:6px;min-width:0}
+body.admin-view .rs-v3-blank{background:#0b2035;border:1px dashed #355774;border-radius:11px;padding:22px 18px;color:#a6c6dd;font-size:12px;line-height:1.5;min-width:0}
+body.admin-view .rs-v3-blank strong{color:#e9f5ff;font-size:13px}
+body.admin-view .rs-v3-blank p{color:#9db9d3;margin:8px 0 14px}
+body.admin-view .rs-v3-selected{display:flex;flex-direction:column;gap:5px;padding:13px 14px;border:1px solid #345472;border-radius:11px;background:#0b2034;margin:1px 0 12px;min-width:0}
+body.admin-view .rs-v3-selected>span{color:#81aaca;font-size:10px;font-weight:700;text-transform:uppercase;letter-spacing:.05em}
+body.admin-view .rs-v3-selected>strong{font-size:12px;color:#edf7ff;overflow-wrap:anywhere}
+body.admin-view .rs-v3-selected>small{font-size:11px;color:#9ac2db}
+body.admin-view .rs-v3-check{display:flex;align-items:center;gap:9px;color:#c0daef;font-size:12px;min-height:38px}
+body.admin-view .rs-v3-check input{width:17px;height:17px;min-width:17px;flex:none;appearance:auto}
+body.admin-view .rs-v3-help{color:#8faec8;font-size:11px;line-height:1.5;margin:12px 0 6px}
+body.admin-view .rs-v3-wide{width:100%;margin-top:11px}
+body.admin-view .rs-v3-savebar{display:flex!important;align-items:center;justify-content:space-between;gap:13px;flex-wrap:wrap}
+body.admin-view .rs-v3-savebar>div{display:flex;flex-direction:column;gap:4px}
+body.admin-view .rs-v3-savebar>div strong{font-size:13px;color:#e8f7ff}
+body.admin-view .rs-v3-savebar>div small{font-size:11px;color:#8caec8}
+body.admin-view .rs-v3-integration{font-size:12px;line-height:1.6;color:#a9c5db}
+body.admin-view .rs-v3-integration p{margin:10px 0 13px}
+body.admin-view .rs-v3-plainlink{display:inline-flex;margin-top:8px;color:#7bc9ff;text-decoration:underline;text-underline-offset:3px}
+body.admin-view .rs-v3-searchform{display:grid;grid-template-columns:minmax(0,1fr) auto;align-items:end;gap:12px}
+body.admin-view .rs-v3-searchform>.rs-v3-form-actions{margin:0 0 12px}
+body.admin-view .rs-v3-order .order-card{max-width:none;width:100%;margin:0}
+body.admin-view .rs-v3-customer .admin-client{margin:0;max-width:none;width:100%;border:1px solid #2c4865;border-radius:12px;background:#0a1b2e;padding:13px;min-width:0}
+body.admin-view .rs-v3-customer .admin-client-main{min-width:0;flex:1 1 auto}
+body.admin-view .rs-v3-customer .admin-client-main strong,body.admin-view .rs-v3-customer .admin-client-main small{overflow-wrap:anywhere}
+body.admin-view .rs-v3-customer .admin-client{display:flex;gap:12px;flex-wrap:wrap}
+body.admin-view .rs-v3-product-results{max-height:480px;overflow-y:auto;scrollbar-width:thin;scrollbar-color:#376487 #0b1e32}
+body.admin-view .rs-v3 #adminPricePreview .adm-price-summary{background:#0b2035;border:1px solid #2c4c6b;border-radius:11px;padding:13px;max-width:none}
+body.admin-view .rs-v3 #adminPricePreview .adm-price-grid{display:grid;grid-template-columns:minmax(0,1fr);gap:8px}
+body.admin-view .rs-v3 #adminPricePreview .adm-price-grid>div{padding:10px;background:#0d2840;border:1px solid #264e70;border-radius:9px;min-width:0}
+@media(max-width:900px){body.admin-view .rs-v3-searchform{grid-template-columns:1fr}body.admin-view .rs-v3-searchform>.rs-v3-form-actions{margin:0 0 10px}}
+@media(max-width:760px){body.admin-view .rs-v3-panel{padding:15px}body.admin-view .rs-v3-inline-fields{grid-template-columns:minmax(0,1fr)}body.admin-view .rs-v3-item{flex-wrap:wrap}body.admin-view .rs-v3-item-actions{width:100%;justify-content:flex-start}body.admin-view .rs-v3-item-actions .btn{flex:1 1 auto}body.admin-view .rs-v3-product-price{margin-left:auto}}
+@media(max-width:420px){body.admin-view .rs-v3-panel{padding:12px}body.admin-view .rs-v3-heading-actions{width:100%}body.admin-view .rs-v3-heading-actions .btn{flex:1 1 auto}body.admin-view .rs-v3-form-actions .btn{width:100%}body.admin-view .rs-v3-item-content{flex:1 1 calc(100% - 60px)}body.admin-view .rs-v3-product-price{text-align:left;flex:1 1 100%;margin-left:0}body.admin-view .rs-v3-stat strong{font-size:20px}}
