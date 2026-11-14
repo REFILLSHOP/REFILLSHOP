@@ -1065,3 +1065,12 @@ body.shop-refresh .purchase-payment-detail-v5 .upload:has(input:not([required]))
 body.shop-refresh .purchase-form-actions-v5 .btn[disabled]{cursor:not-allowed;opacity:.65}
 @media(min-width:521px){body.shop-refresh .purchase-layout-v5 .payment-methods-v5{display:grid!important;grid-template-columns:repeat(2,minmax(0,1fr))!important}}
 @media(max-width:520px){body.shop-refresh .purchase-layout-v5 .payment-methods-v5{grid-template-columns:minmax(0,1fr)!important}}
+
+
+body.shop-refresh .purchase-preview-payment-v5{display:flex;align-items:flex-start;gap:13px;border:1px solid #32647d;border-radius:12px;background:#102c41;padding:16px 17px;color:#d9effb;min-width:0}
+body.shop-refresh .purchase-preview-seal-v5{display:grid;place-items:center;width:42px;height:42px;flex:0 0 42px;background:#174e67;border:1px solid #367b9d;border-radius:10px;color:#9bdeff}
+body.shop-refresh .purchase-preview-seal-v5 svg{width:23px;height:23px}
+body.shop-refresh .purchase-preview-payment-v5>div:last-child{min-width:0}
+body.shop-refresh .purchase-preview-payment-v5 strong{display:block;font-size:13px;margin-bottom:6px}
+body.shop-refresh .purchase-preview-payment-v5 p{font-size:12px;line-height:1.65;color:#b0d2e6;margin:0}
+body.shop-refresh .purchase-preview-payment-v5 b{color:#e6fbff}
