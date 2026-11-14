@@ -1190,3 +1190,30 @@ body.shop-refresh .rs-v3-provider-types .chip{min-width:140px;justify-content:ce
 
 /* Security-critical display gate: generic balance-chip rules use !important. */
 body:not(.wallet-authorized) #balanceChip{display:none!important;visibility:hidden!important}
+
+/* Shopping cart */
+.header-cart{position:relative}
+.cart-count{position:absolute;top:-5px;right:-5px;min-width:18px;height:18px;padding:0 5px;display:grid;place-items:center;border-radius:999px;background:#2f9cff;color:#06111e;border:2px solid #07111d;font-size:10px;font-weight:900;line-height:1;font-variant-numeric:tabular-nums}
+.cart-count[hidden]{display:none}
+body.shop-refresh .offer-actions-v4{display:grid;grid-template-columns:1fr 1fr;gap:8px;margin-top:10px}
+body.shop-refresh .offer-actions-v4 .btn{width:100%;min-width:0;white-space:normal}
+body.shop-refresh .cart-list{display:grid;gap:12px;margin:18px 0}
+body.shop-refresh .cart-item{display:grid;grid-template-columns:64px minmax(0,1fr) auto;align-items:center;gap:14px;padding:15px}
+body.shop-refresh .cart-item-art{width:64px;height:64px;border-radius:13px;overflow:hidden;background:#0b1b2b;border:1px solid #29465f}
+body.shop-refresh .cart-item-art img{width:100%;height:100%;object-fit:cover}
+body.shop-refresh .cart-item-main{display:grid;gap:5px;min-width:0}
+body.shop-refresh .cart-item-main>small{color:#8eb2d1;font-size:11px}
+body.shop-refresh .cart-item-main>strong{color:#f2f7fc;font-size:14px}
+body.shop-refresh .cart-item-actions{display:flex;gap:7px;align-items:center}
+body.shop-refresh .cart-footer{display:flex;align-items:center;gap:10px;flex-wrap:wrap;justify-content:flex-end;margin:14px 0 24px}
+body.shop-refresh .cart-footer p{flex:1 1 100%;margin:0 0 4px}
+@media(max-width:680px){
+ body.shop-refresh .offer-actions-v4{grid-template-columns:1fr 1fr;gap:6px}
+ body.shop-refresh .offer-actions-v4 .btn{padding-inline:8px;font-size:11px}
+ body.shop-refresh .cart-item{grid-template-columns:54px minmax(0,1fr);gap:10px;padding:12px}
+ body.shop-refresh .cart-item-art{width:54px;height:54px}
+ body.shop-refresh .cart-item-actions{grid-column:1/-1;display:grid;grid-template-columns:1fr 1fr}
+ body.shop-refresh .cart-item-actions .btn{width:100%}
+ body.shop-refresh .cart-footer{justify-content:stretch}
+ body.shop-refresh .cart-footer .btn{flex:1}
+}
