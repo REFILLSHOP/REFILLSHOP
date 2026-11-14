@@ -31,7 +31,7 @@ const SESSION_SECRET=process.env.SESSION_SECRET||crypto.randomBytes(32).toString
 const SESSION_SECONDS=4*60*60;
 const COOKIE_SECURE=process.env.COOKIE_SECURE==='true';
 const {priceOf,finite}=require('./prices');
-const {normalizeCubaMobile,loginEmailForPhone,validPhonePassword}=require('./phone-auth');
+const {normalizeInternationalPhone,normalizeProfilePhone,loginEmailForPhone,validPhonePassword}=require('./phone-auth');
 const sessions=new Map();
 const phoneSignupLimits=new Map();
 let catalogCache=null, catalogTime=0, retryUntil=0, centralCache=null, centralTime=0, centralRetry=0, storeTime=0, storeCache=null;
@@ -176,7 +176,7 @@ function parseReceipt(data){
 }
 function code(){return 'RS-'+new Date().getUTCFullYear().toString().slice(-2)+'-'+crypto.randomBytes(5).toString('hex').toUpperCase()}
 function cleanOrder(o){return {id:o.id,code:o.code,game:o.game_name,offer:o.offer_name,playerId:o.player_id,zoneId:o.zone_id||'',targetPayload:o.target_payload||{},method:o.method,sourcePhone:o.source_phone||'',amount:Number(o.amount),currency:o.currency,status:o.status,note:o.admin_note||'',created:o.created_at,receiptAvailable:!!o.receipt_path}}
-function validPhone(v){return /^[0-9]{8}$/.test(String(v||''))}
+function validPhone(v){return !!normalizeProfilePhone(v)}
 function validUUID(v){return /^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i.test(String(v||''))}
 async function accountData(uid){
  const [profiles,membership,wallet]=await Promise.all([
@@ -202,9 +202,9 @@ const server=http.createServer(async(req,res)=>{
  if(p==='/api/auth/phone-register'&&req.method==='POST'){
   if(!allowPhoneSignup(req))return send(res,429,{error:'Demasiados intentos de registro. Espera una hora.'});
   if(!SB_SECRET||!SB_URL||!SB_PUBLIC)return send(res,503,{error:'El registro de usuarios aún no está disponible.'});
-  const b=await bodyJSON(req,2500),phone=normalizeCubaMobile(b.phone),name=String(b.fullName||'').trim().replace(/\s+/g,' '),password=b.password;
+  const b=await bodyJSON(req,2500),phone=normalizeInternationalPhone(b.phone),name=String(b.fullName||'').trim().replace(/\s+/g,' '),password=b.password;
   if(b.website)return send(res,200,{ok:true}); // honeypot for basic automated submissions
-  if(!phone||name.length<2||name.length>90||!validPhonePassword(password))return send(res,400,{error:'Introduce tu nombre, un móvil cubano válido y una contraseña de 10 a 72 caracteres con letras y números.'});
+  if(!phone||name.length<2||name.length>90||!validPhonePassword(password))return send(res,400,{error:'Introduce tu nombre, tu número con prefijo internacional (+código de país) y una contraseña de 10 a 72 caracteres con letras y números.'});
   try{await createPhonePasswordUser(phone,password,name);return send(res,201,{ok:true,phone,phoneVerified:false,message:'Cuenta creada. Tu número todavía no está verificado.'});}
   catch(e){if(e.message==='PHONE_ALREADY_REGISTERED')return send(res,409,{error:'Este número ya tiene una cuenta. Inicia sesión.'});
    console.error('Phone signup failed:',String(e.message).slice(0,90));return send(res,503,{error:'No se pudo crear la cuenta. Reintenta más tarde.'});}
@@ -215,8 +215,8 @@ const server=http.createServer(async(req,res)=>{
  }
  if(p==='/api/profile'&&req.method==='PUT'){
  const user=await authUser(req);if(!user)return send(res,401,{error:'Inicia sesión'});
- const b=await bodyJSON(req),fullName=String(b.fullName||'').trim().replace(/\s+/g,' '),phone=String(b.phone||'').trim();
- if(fullName.length<2||fullName.length>90||!validPhone(phone))return send(res,400,{error:'Introduce nombre y teléfono cubano de ocho dígitos'});
+ const b=await bodyJSON(req),fullName=String(b.fullName||'').trim().replace(/\s+/g,' '),phone=normalizeProfilePhone(b.phone);
+ if(fullName.length<2||fullName.length>90||!validPhone(phone))return send(res,400,{error:'Introduce nombre y teléfono con prefijo internacional'});
  if(user.user_metadata?.signup_source==='phone_password'&&loginEmailForPhone(phone)!==user.email)return send(res,409,{error:'El número de acceso no se puede cambiar desde el perfil. Contacta con soporte.'});
  await sb('rs5_profiles',{query:'on_conflict=user_id',method:'POST',prefer:'resolution=merge-duplicates,return=representation',body:{user_id:user.id,full_name:fullName,phone,updated_at:new Date().toISOString()}});
  return send(res,200,{ok:true,profile:{fullName,phone}});
@@ -287,7 +287,7 @@ const server=http.createServer(async(req,res)=>{
  }
  if(p==='/api/admin/customer-profile'&&req.method==='POST'){
   if(!authAdmin(req))return send(res,403,{error:'Acceso no autorizado'});
-  const b=await bodyJSON(req),uid=String(b.userId||''),name=String(b.fullName||'').trim().replace(/\s+/g,' '),phone=String(b.phone||'');
+  const b=await bodyJSON(req),uid=String(b.userId||''),name=String(b.fullName||'').trim().replace(/\s+/g,' '),phone=normalizeProfilePhone(b.phone);
   if(!validUUID(uid)||name.length<2||name.length>90||!validPhone(phone))return send(res,400,{error:'Revisa los datos del cliente'});
   await sb('rs5_profiles',{method:'POST',query:'on_conflict=user_id',prefer:'resolution=merge-duplicates,return=representation',body:{user_id:uid,full_name:name,phone,updated_at:new Date().toISOString()}});
   await audit('profile_update','customer',uid,{updatedFields:['full_name','phone']});return send(res,200,{ok:true});
