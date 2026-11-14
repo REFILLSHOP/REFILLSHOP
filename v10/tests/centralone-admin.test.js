@@ -7,12 +7,12 @@ const client=fs.readFileSync(path.resolve(__dirname,'../app.js'),'utf8');
 const edge=fs.readFileSync(path.resolve(__dirname,'../../edge/rs10-api/index.ts'),'utf8');
 const css=fs.readFileSync(path.resolve(__dirname,'../site.css'),'utf8');
 test('editor ADM busca producto real y calcula precio de revendedor con regla antigua 2%',()=>{
- assert.match(client,/adminOfferWizard\(\)/);
+ assert.match(client,/adminOfferPageV3\(\)/);
  assert.match(client,/adminProviderSearchForm/);
  assert.match(client,/adminLinkedOfferForm/);
  assert.match(client,/coProductSearch/);
  assert.match(client,/adminPricePreview/);
- assert.match(client,/resellerPrice\*1\.02/);
+ assert.match(client,/resell=ceilToCent\(cost\*1\.02\)/);
  assert.match(css,/\.adm-editor-grid/);
  assert.match(css,/@media\(max-width:600px\)/);
 });
