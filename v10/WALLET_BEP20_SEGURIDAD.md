@@ -31,12 +31,19 @@ Tras completar los controles, el administrador puede habilitar de forma explíci
 **No habilitar mediante una captura de pago, una notificación sin firma o el balance total de la wallet.**
 
 ## Frontend
-- `v10/app.js`: sólo revendedores activos ven el saldo y el módulo de recarga; validación de ID muestra nombre real cuando el proveedor lo confirma.
+- `v10/app.js`: sólo revendedores activos ven el saldo y el módulo de recarga; validación de ID exige respuesta válida y nombre real del proveedor; se retiró el éxito ficticio de checkout.
+- Ofertas de cada juego ordenadas por SM de menor a mayor.
+- Carrito persistente por navegador, con añadir, quitar, vaciar y compra individual por artículo.
+- Catálogo de Central One en administración con filtros Todos / Recargas / PIN-Códigos, Región, Categoría y Familia.
+- Campo técnico `player_id` se presenta al cliente como `ID de jugador`.
 - `v10/index.html`: balance oculto hasta que la sesión confirma el rol.
 - Los iconos de Transfermóvil y MiTransfer se obtienen de páginas oficiales de ETECSA, con respaldos SVG locales para fallos de red.
 - La página no muestra juegos ficticios si el catálogo real no responde.
 
 ## Entornos
-- Preview de pruebas: `https://refills-shop-v10-pruebas.refills-shop-preview.workers.dev/`; operaciones normales bloqueadas.
-- Entorno principal `refills-shop-v10-activo`: interfaz y proxy del monedero actualizados a la versión V11; **la acreditación de depósitos USDT permanece bloqueada hasta las pruebas monetarias**.
-- `main` de GitHub conserva la página de mantenimiento actual. Esta rama no cambia el inicio público.
+- Producción Pages: `https://refillshop.pages.dev/` desplegada desde commit `c9fc6f5d56438f39dfed6f0b9d45fb2c708df80e`; comprobados `/health`, catálogo y rechazo 401 de la ruta de depósitos sin sesión.
+- Dirección alternativa Cloudflare Workers: `https://refills-shop-v10-activo.refills-shop-preview.workers.dev/`; comparte la red Cloudflare y debe probarse desde ETECSA sin VPN.
+- Preview Pages: `https://feature-revendedor-usdt-bep2.refillshop.pages.dev/`.
+- **La acreditación de depósitos USDT permanece bloqueada** hasta la prueba monetaria controlada.
+- Se intentó preparar un espejo estático gratuito en Render; el conector devolvió `need_payment_info`, por lo que no se creó ningún servicio ni se autorizó ningún cargo.
+- `main` de GitHub conserva la página de mantenimiento actual; Pages se actualizó mediante despliegue directo y la PR sigue en borrador.
