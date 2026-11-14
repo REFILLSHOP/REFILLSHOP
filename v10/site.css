@@ -517,3 +517,6 @@ body.admin-view .admin-workspace .adm-toolbar-actions{flex-direction:column}
 body.admin-view .admin-workspace .adm-toolbar-actions .btn{width:100%}
 body.admin-view .modal-card{max-height:94dvh;padding:16px}
 }
+/* Specificity fix: manual draft editor is visible only in Crear ofertas */
+.admin-workspace-offers .adm-editor-grid + .adm-manual-draft{display:block!important}
+.admin-workspace-offer-list .adm-editor-grid + .adm-manual-draft,.admin-workspace-games .adm-editor-grid + .adm-manual-draft{display:none!important}
