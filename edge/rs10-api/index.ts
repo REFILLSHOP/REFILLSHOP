@@ -32,13 +32,24 @@ async function storefront(){
  service<any[]>('/rest/v1/rs5_settings?select=buy_sm_per_usdt,cup_per_sm,card_fee_pct,mobile_phone,wallet_phone,card_number,confirm_phone,reseller_plan_price_usdt,reseller_plan_days&id=eq.1')]);
  const cfg=c[0];if(!cfg)throw Error('Settings missing');const rate=Number(cfg.buy_sm_per_usdt),cup=Number(cfg.cup_per_sm),fee=Number(cfg.card_fee_pct),r2=(x:number)=>Math.round((x+Number.EPSILON)*100)/100;
  if(rate<=0||cup<=0||fee<0||fee>100)throw Error('Invalid prices');
- const offers=o.filter(x=>Number(x.provider_price_usdt)>0).map(x=>{const cost=Number(x.provider_price_usdt),sm=r2(cost*rate+Number(x.gain_sm||0)),cp=r2(sm*cup);return {id:x.id,gameId:x.game_id,name:x.display_name||x.name,inStock:x.provider_in_stock!==false,targetSchema:Array.isArray(x.provider_target_schema)?x.provider_target_schema:[],featured:!!x.featured,sortOrder:x.sort_order||99,sm,cup:cp,usdt:r2(sm/rate),card:r2(cp*(1+fee/100)),resellerUsdt:r2(cost*1.03)}});
+ const offers=o.filter(x=>Number(x.provider_price_usdt)>0).map(x=>{const cost=Number(x.provider_price_usdt),sm=r2(cost*rate+Number(x.gain_sm||0)),cp=r2(sm*cup);return {id:x.id,gameId:x.game_id,name:x.display_name||x.name,inStock:x.provider_in_stock!==false,targetSchema:Array.isArray(x.provider_target_schema)?x.provider_target_schema:[],featured:!!x.featured,sortOrder:x.sort_order||99,sm,cup:cp,usdt:r2(sm/rate),card:r2(cp*(1+fee/100)),resellerUsdt:r2(cost*1.02)}});
  return {live:true,games:g.map(x=>({id:x.id,name:x.name,tag:x.category,imageUrl:x.image_url,featured:x.featured,sortOrder:x.sort_order})),offers,config:{buySmPerUsdt:rate,cupPerSm:cup,cardFee:fee,mobilePhone:cfg.mobile_phone,walletPhone:cfg.wallet_phone||'',cardNumber:cfg.card_number,confirmPhone:cfg.confirm_phone,planPrice:cfg.reseller_plan_price_usdt,planDays:cfg.reseller_plan_days}};
 }
+// Central One keys are vaulted at rest in Postgres and can only be read by the Edge service role.
+// No secret is returned to the browser or written to a public table.
+const CENTRAL_ONE_BASE='https://portal.centraloneglobal.com/api/v1';
+interface CentralOneItem{productId:string;sku:string;name:string;familyId:string;familyName:string;category:string;productType:string;region:string;market:string;resellerPrice:number;inStock:boolean;availableStock:number|null;priceUpdatedAt:string|null;targetSchema:Array<{key:string;label:string;type:'text'|'select';options:Array<{value:string;label:string}>|null}>}
+let coCache:{at:number,items:CentralOneItem[]}|null=null;
+const coUuid=(x:unknown)=>/^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i.test(String(x||''));
+const coNumber=(x:unknown)=>{const n=Number(x);return Number.isFinite(n)&&n>0&&n<100000?n:null};
+async function centralOneKey(){const key=Deno.env.get('CENTRALONE_CATALOG_API_KEY')||await service<string|null>('/rest/v1/rpc/rs10_read_centralone_catalog_key','POST',{});return typeof key==='string'&&key.startsWith('co_live_')?key:null}
+async function centralOneFetch(path:string,key:string){const r=await fetch(CENTRAL_ONE_BASE+path,{headers:{authorization:'Bearer '+key,accept:'application/json'},signal:AbortSignal.timeout(14000)});const json=await r.json().catch(()=>({}));if(!r.ok){if(r.status===401||r.status===403)throw Error('La llave de Central One no tiene permisos o fue revocada.');if(r.status===429)throw Error('Central One alcanzó el límite de solicitudes. Vuelve a intentarlo.');throw Error('Central One no responde: '+r.status)}return json}
+async function centralOneCatalog(force=false):Promise<CentralOneItem[]>{const key=await centralOneKey();if(!key)throw Error('Conecta tu llave de Central One en ADM → Conexiones.');if(!force&&coCache&&Date.now()-coCache.at<15*60_000)return coCache.items;const data=await centralOneFetch('/catalog',key);if(!Array.isArray(data?.items))throw Error('Central One devolvió un catálogo inesperado');const items:CentralOneItem[]=data.items.filter((o:any)=>coUuid(o.product_id)&&coNumber(o.reseller_price)!==null).slice(0,12000).map((o:any)=>({productId:String(o.product_id),sku:String(o.sku||'').slice(0,120),name:String(o.name||'Producto').slice(0,160),familyId:String(o.product_family_id||'').slice(0,100),familyName:String(o.product_family_name||'Juego').slice(0,120),category:String(o.category||'').slice(0,45),productType:String(o.product_type||'').slice(0,40),region:String(o.region||'GLOBAL').slice(0,50),market:String(o.market||'').slice(0,50),resellerPrice:Number(o.reseller_price),inStock:o.in_stock===true&&String(o.status).toLowerCase()==='active',availableStock:o.available_stock===null?null:Math.max(0,Number(o.available_stock)||0),priceUpdatedAt:o.price_updated_at||null,targetSchema:Array.isArray(o.target_schema)?o.target_schema.filter((f:any)=>/^[a-z0-9_]{1,50}$/i.test(String(f?.key||''))).slice(0,15).map((f:any)=>({key:String(f.key),label:String(f.label||f.key).slice(0,100),type:f.type==='select'?'select':'text',options:Array.isArray(f.options)?f.options.slice(0,200).map((v:any)=>({value:String(v.value||'').slice(0,70),label:String(v.label||v.value||'').slice(0,100)})):null})):[]}));coCache={at:Date.now(),items};return items}
+
 Deno.serve(async req=>{
  const url=new URL(req.url);const action=url.pathname.replace(/^\/rs10-api\/?/,'/').replace(/^\/+/,'/');
  const origin=req.headers.get('origin')||'';
- const cors=ORIGINS.has(origin)?{'access-control-allow-origin':origin,'vary':'Origin','access-control-allow-methods':'GET, POST, OPTIONS','access-control-allow-headers':'authorization,content-type,apikey'}:{};
+ const cors:Record<string,string>=ORIGINS.has(origin)?{'access-control-allow-origin':origin,'vary':'Origin','access-control-allow-methods':'GET, POST, OPTIONS','access-control-allow-headers':'authorization,content-type,apikey'}:{};
  if(req.method==='OPTIONS')return new Response(null,{status:204,headers:cors});
  // Requests sent directly from arbitrary browsers to this API are not authorized to create accounts.
  // Same-origin Cloudflare proxy strips Origin after host validation and adds a required server-side key in the future.
@@ -125,6 +136,52 @@ Deno.serve(async req=>{
     const clause=q?'&code=ilike.*'+encodeURIComponent(q.replace(/[%*,]/g,''))+'*':'';
     const orders=await service<any[]>('/rest/v1/rs5_orders?select=id,code,game_name,offer_name,player_id,zone_id,target_payload,method,source_phone,amount,currency,status,admin_note,created_at,receipt_path&status=neq.uploading&order=created_at.desc&limit=150'+clause);
     return respond({orders:orders.map(o=>({id:o.id,code:o.code,game:o.game_name,offer:o.offer_name,playerId:o.player_id,zoneId:o.zone_id||'',targetPayload:o.target_payload||{},method:o.method,sourcePhone:o.source_phone||'',amount:Number(o.amount),currency:o.currency,status:o.status,note:o.admin_note||'',created:o.created_at,receiptAvailable:!!o.receipt_path}))},200,cors);
+   }
+   if(action==='/admin/centralone/status'&&req.method==='GET'){
+    const connected=!!(await centralOneKey());return respond({connected,catalogCached:!!coCache,cachedProducts:coCache?.items?.length||0,updatedAt:coCache?.at||null,ordersEnabled:false},200,cors);
+   }
+   if(action==='/admin/centralone/connect'&&req.method==='POST'){
+    const raw=await req.text();if(raw.length>750)return respond({error:'Llave demasiado larga'},413,cors);
+    const input=JSON.parse(raw||'{}'),key=String(input.apiKey||'').trim();
+    if(!/^co_live_[a-zA-Z0-9_-]{20,180}$/.test(key))return respond({error:'Introduce una llave de Central One válida (co_live_...)'},400,cors);
+    const test=await centralOneFetch('/ping',key);if(test.ok!==true)return respond({error:'Central One no confirmó la llave'},409,cors);
+    await service('/rest/v1/rpc/rs10_store_centralone_catalog_key','POST',{p_key:key});
+    coCache=null;
+    return respond({ok:true,connected:true,message:'Central One conectado. La llave queda cifrada en Supabase Vault.'},200,cors);
+   }
+   if(action==='/admin/centralone/catalog'&&req.method==='GET'){
+    const query=String(url.searchParams.get('q')||'').trim().slice(0,110).toLowerCase(),family=String(url.searchParams.get('family')||'').slice(0,100),offset=Math.min(5000,Math.max(0,Number(url.searchParams.get('offset')||0)||0));
+    const all=await centralOneCatalog(url.searchParams.get('refresh')==='1');
+    const families=Array.from(new Map(all.map(p=>[p.familyId,{id:p.familyId,name:p.familyName}])).values()).filter(f=>f.id).sort((a,b)=>a.name.localeCompare(b.name)).slice(0,250);
+    const filtered=all.filter(p=>(!family||p.familyId===family)&&(!query||(p.name+' '+p.sku+' '+p.familyName+' '+p.region).toLowerCase().includes(query)));
+    return respond({connected:true,total:filtered.length,products:filtered.slice(offset,offset+60),families,nextOffset:offset+60<filtered.length?offset+60:null,cachedAt:coCache?.at||0},200,cors);
+   }
+   if(action==='/admin/centralone/offer'&&req.method==='POST'){
+    const raw=await req.text();if(raw.length>2500)return respond({error:'Formulario demasiado largo'},413,cors);
+    const b=JSON.parse(raw||'{}'),gameId=String(b.gameId||'').trim(),productId=String(b.productId||''),profit=Number(b.gainSm);
+    if(!/^[a-z0-9-]{2,60}$/.test(gameId)||!coUuid(productId)||!Number.isFinite(profit)||profit<0||profit>1000000)return respond({error:'Selecciona el juego, el producto de Central One y tu ganancia en SM'},400,cors);
+    const games=await service<any[]>('/rest/v1/rs5_games?select=id&id=eq.'+encodeURIComponent(gameId)+'&active=eq.true');if(!games.length)return respond({error:'Primero crea o activa el juego'},404,cors);
+    const product=(await centralOneCatalog()).find(p=>p.productId===productId);
+    if(!product)return respond({error:'Producto no disponible en tu catálogo Central One; actualiza la búsqueda'},409,cors);
+    if(product.productType==='gift_card'||product.productType==='pin_code')return respond({error:'Los códigos de regalo necesitan entrega específica; esta opción es para recargas de juegos'},409,cors);
+    const label=String(b.displayName||'').trim().slice(0,120)||product.name;
+    const payload={game_id:gameId,name:product.name,display_name:label,provider_name:'centralone',provider_product_key:product.productId,provider_family:product.familyId,provider_region:product.region,provider_price_usdt:product.resellerPrice,gain_sm:profit,provider_target_schema:product.targetSchema,provider_in_stock:product.inStock,provider_price_updated_at:product.priceUpdatedAt,active:false,featured:b.featured===true,updated_at:new Date().toISOString()};
+    const existing=await service<any[]>('/rest/v1/rs5_offers?select=id&provider_name=eq.centralone&provider_product_key=eq.'+encodeURIComponent(productId)+'&limit=1');
+    let result:any;
+    if(existing.length){result=await fetch(SB+'/rest/v1/rs5_offers?id=eq.'+encodeURIComponent(existing[0].id),{method:'PATCH',headers:{...reqHeaders(SECRET),Prefer:'return=representation'},body:JSON.stringify(payload),signal:AbortSignal.timeout(10000)});}
+    else result=await fetch(SB+'/rest/v1/rs5_offers',{method:'POST',headers:{...reqHeaders(SECRET),Prefer:'return=representation'},body:JSON.stringify(payload),signal:AbortSignal.timeout(10000)});
+    const saved=await result.json().catch(()=>null);if(!result.ok||!saved?.[0])throw Error('No se pudo vincular el producto: '+result.status);
+    const cfg=(await service<any[]>('/rest/v1/rs5_settings?select=buy_sm_per_usdt,cup_per_sm&id=eq.1'))[0];
+    const sm=Math.round((product.resellerPrice*Number(cfg.buy_sm_per_usdt)+profit)*100)/100;
+    return respond({ok:true,offer:saved[0],created:existing.length===0,prices:{sm,cup:Math.round(sm*Number(cfg.cup_per_sm)*100)/100,usdt:Math.round(sm/Number(cfg.buy_sm_per_usdt)*100)/100,resellerUsdt:Math.round(product.resellerPrice*1.02*100)/100},message:'Oferta vinculada al producto real de Central One y guardada como borrador. Las ventas siguen cerradas hasta validar pagos y entrega.'},201,cors);
+   }
+   if(action==='/admin/centralone/sync'&&req.method==='POST'){
+    const all=await centralOneCatalog(true),map=new Map<string,CentralOneItem>(all.map(x=>[x.productId,x]));
+    const existing=await service<any[]>('/rest/v1/rs5_offers?select=id,provider_product_key,provider_price_usdt,provider_in_stock&provider_name=eq.centralone&limit=300');
+    let updated=0,notFound=0;for(const row of existing){const x=map.get(row.provider_product_key);if(!x){notFound++;continue}if(Number(row.provider_price_usdt)===x.resellerPrice&&row.provider_in_stock===x.inStock)continue;
+     await service('/rest/v1/rs5_offers?id=eq.'+encodeURIComponent(row.id),'PATCH',{provider_price_usdt:x.resellerPrice,provider_in_stock:x.inStock,provider_target_schema:x.targetSchema,provider_price_updated_at:x.priceUpdatedAt,updated_at:new Date().toISOString()});updated++;
+    }
+    return respond({ok:true,updated,notFound,checked:existing.length,message:'Precios y existencias sincronizados. Las ofertas siguen sin aceptar pedidos hasta publicar la tienda.'},200,cors);
    }
    if(action==='/admin/offers'&&req.method==='GET')return respond({offers:await service<any[]>('/rest/v1/rs5_offers?select=id,game_id,name,provider_name,provider_product_key,provider_price_usdt,gain_sm,active,provider_in_stock&order=updated_at.desc&limit=300')},200,cors);
    // Administrative catalog controls. All routes above require a valid Supabase
