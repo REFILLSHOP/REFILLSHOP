@@ -1074,3 +1074,48 @@ body.shop-refresh .purchase-preview-payment-v5>div:last-child{min-width:0}
 body.shop-refresh .purchase-preview-payment-v5 strong{display:block;font-size:13px;margin-bottom:6px}
 body.shop-refresh .purchase-preview-payment-v5 p{font-size:12px;line-height:1.65;color:#b0d2e6;margin:0}
 body.shop-refresh .purchase-preview-payment-v5 b{color:#e6fbff}
+
+
+/* Refills V11 — support, legal pages and release polish */
+body.shop-refresh .legal-page{width:100%;max-width:1180px;margin:0 auto 70px;min-width:0}
+body.shop-refresh .legal-heading{display:flex;flex-direction:column;gap:9px;padding:18px 0 25px}
+body.shop-refresh .legal-heading .caps{font-size:11px;letter-spacing:.15em;color:#6fc9fa}
+body.shop-refresh .legal-heading h1{font-size:clamp(27px,3.4vw,41px);line-height:1.15;letter-spacing:-.04em;font-weight:850;color:#f0f9ff;margin:0}
+body.shop-refresh .legal-heading p{color:#adc9da;line-height:1.6;font-size:13px;margin:0;max-width:720px}
+body.shop-refresh .legal-update{display:inline-flex;align-self:flex-start;color:#8cb3cf;background:#0e3048;border:1px solid #2b5679;border-radius:10px;padding:8px 11px;margin-top:4px;font-size:11px}
+body.shop-refresh .legal-grid{display:grid;grid-template-columns:minmax(0,1fr) 285px;gap:20px;align-items:start;min-width:0}
+body.shop-refresh .legal-main{display:flex;flex-direction:column;gap:13px;min-width:0}
+body.shop-refresh .legal-block{border:1px solid #305270;border-radius:15px;background:linear-gradient(145deg,#10273d,#0a1b2d);padding:19px 21px;min-width:0}
+body.shop-refresh .legal-block h2{font-size:16px;color:#e9f5ff;line-height:1.38;font-weight:770;margin:0 0 10px}
+body.shop-refresh .legal-block p{font-size:12.5px;color:#b0c8da;line-height:1.75;margin:0 0 10px}
+body.shop-refresh .legal-block p:last-child{margin-bottom:0}
+body.shop-refresh .legal-block a{color:#82d1ff;text-decoration:underline;text-underline-offset:3px}
+body.shop-refresh .legal-contact-grid{display:grid;grid-template-columns:minmax(0,1fr);gap:10px}
+body.shop-refresh .legal-contact-grid>div{display:flex;flex-direction:column;gap:6px;padding:11px 13px;background:#0b263c;border:1px solid #2b4d6e;border-radius:10px;min-width:0}
+body.shop-refresh .legal-contact-grid small{font-size:10px;color:#89bbd7;letter-spacing:.03em}
+body.shop-refresh .legal-contact-grid strong,body.shop-refresh .legal-contact-grid a{font-size:12px;overflow-wrap:anywhere;color:#e8f7ff;font-weight:720}
+body.shop-refresh .legal-sidebar{position:sticky;top:107px;display:flex;flex-direction:column;gap:12px;padding:18px;border-radius:15px;border:1px solid #2e5876;background:linear-gradient(145deg,#0e2b44,#0a1e30)}
+body.shop-refresh .legal-sidebar>strong{font-size:14px;color:#f5fcff}
+body.shop-refresh .legal-sidebar p{color:#afd0e6;font-size:11.5px;line-height:1.7;margin:0}
+body.shop-refresh .legal-sidebar nav{display:flex;flex-direction:column;gap:4px;padding:8px 0;border-top:1px solid #2c506c;border-bottom:1px solid #2c506c}
+body.shop-refresh .legal-sidebar nav a{display:block;color:#b8d9ef;text-decoration:none;padding:7px;border-radius:6px;font-size:12px}
+body.shop-refresh .legal-sidebar nav a:hover{background:#173d5c;color:white}
+body.shop-refresh .legal-sidebar .btn{font-size:12px;border-radius:9px;min-height:39px}
+body .footer-v11{background:linear-gradient(135deg,#0a1e31,#071523);border-top:1px solid #244763;position:relative;z-index:2}
+body .footer-grid-v11{display:grid;grid-template-columns:minmax(0,1.65fr) repeat(2,minmax(0,1fr));gap:34px;padding:30px 0 26px;min-width:0}
+body .footer-brand-v11{color:#edf9ff;font-size:17px;font-weight:900;letter-spacing:.06em;text-decoration:none}
+body .footer-brand-v11 span{color:#5db7f4}
+body .footer-grid-v11 p{color:#91afc5;font-size:12px;line-height:1.6;max-width:350px;margin:9px 0 0}
+body .footer-links-v11{display:flex;flex-direction:column;gap:9px;min-width:0}
+body .footer-links-v11 strong{font-size:12px;color:#e4f5ff;font-weight:750;margin:0 0 3px}
+body .footer-links-v11 a{font-size:12px;color:#9dc4dd;text-decoration:none;line-height:1.4}
+body .footer-links-v11 a:hover{color:#6acbff;text-decoration:underline;text-underline-offset:3px}
+body .footer-bottom-v11{border-top:1px solid #1c3c56;padding:14px 0 21px;display:flex;justify-content:space-between;flex-wrap:wrap;gap:11px;font-size:10px;color:#81a5bd}
+body .footer-v11:has(+ .bottom-nav){} 
+body.shop-refresh .main-content{min-height:56vh}
+body.shop-refresh .route-trail{font-size:11px;color:#89afc6;max-width:100%;overflow-wrap:anywhere}
+body.shop-refresh .btn:disabled{opacity:.62;cursor:not-allowed}
+body.shop-refresh .card input,body.shop-refresh .card textarea,body.shop-refresh .card select{max-width:100%}
+@media(max-width:890px){body.shop-refresh .legal-grid{grid-template-columns:minmax(0,1fr)}body.shop-refresh .legal-sidebar{position:static;top:auto}body .footer-grid-v11{grid-template-columns:repeat(2,minmax(0,1fr));gap:22px}body .footer-grid-v11>div:first-child{grid-column:1/-1}}
+@media(max-width:610px){body.shop-refresh .legal-heading{padding:13px 0 18px}body.shop-refresh .legal-grid{gap:14px}body.shop-refresh .legal-block{padding:15px}body.shop-refresh .legal-sidebar{padding:15px}body .footer-grid-v11{gap:17px;padding:25px 0 21px}body .footer-links-v11 a{font-size:11.5px}body .footer-bottom-v11{padding-bottom:83px}body.shop-refresh .main-content{min-height:45vh}}
+@media(max-width:350px){body .footer-grid-v11{grid-template-columns:minmax(0,1fr)}body .footer-grid-v11>div:first-child{grid-column:auto}}
