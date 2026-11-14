@@ -4,11 +4,15 @@ on:
   pull_request:
     paths:
       - "v10/**"
+      - "edge/**"
+      - ".github/workflows/refills-v10-tests.yml"
   push:
     branches:
       - "deploy/refills-v10-ready"
     paths:
       - "v10/**"
+      - "edge/**"
+      - ".github/workflows/refills-v10-tests.yml"
 
 jobs:
   test:

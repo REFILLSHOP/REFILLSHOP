@@ -4,7 +4,7 @@ const assert=require('node:assert/strict');
 const fs=require('node:fs');
 const path=require('node:path');
 const client=fs.readFileSync(path.resolve(__dirname,'../app.js'),'utf8');
-const edge=fs.readFileSync(path.resolve(__dirname,'../../edge/index.ts'),'utf8');
+const edge=fs.readFileSync(path.resolve(__dirname,'../../edge/rs10-api/index.ts'),'utf8');
 const css=fs.readFileSync(path.resolve(__dirname,'../site.css'),'utf8');
 test('editor ADM busca producto real y calcula precio de revendedor con regla antigua 2%',()=>{
  assert.match(client,/adminOfferWizard\(\)/);
