@@ -20,7 +20,7 @@ function normalizePhone(v:unknown):string|null {
 }
 function phoneAlias(phone:string):string {const s=phone.slice(1);return s.startsWith('53')&&s.length===10?'cu'+s+'@refillshop.pages.dev':'tel'+s+'@refillshop.pages.dev'}
 function securePassword(v:unknown):v is string{return typeof v==='string'&&v.length>=10&&v.length<=72&&/[A-Za-zÁÉÍÓÚáéíóúÑñ]/.test(v)&&/[0-9]/.test(v)}
-async function userFromRequest(req:Request):Promise<{id:string}|null>{
+async function userFromRequest(req:Request):Promise<{id:string,app_metadata?:{role?:string}}|null>{
  const value=req.headers.get('authorization')||'';if(!/^Bearer [\w.\-]+$/.test(value))return null;
  const response=await fetch(SB+'/auth/v1/user',{headers:reqHeaders(PUBLISHABLE,value.slice(7)),signal:AbortSignal.timeout(9000)});
  if(!response.ok)return null;const u=await response.json().catch(()=>({}));return typeof u.id==='string'?u:null;
@@ -45,10 +45,10 @@ Deno.serve(async req=>{
  if(origin&&!ORIGINS.has(origin))return respond({error:'Origen no permitido'},403,cors);
  if(!SB||!SECRET||!PUBLISHABLE)return respond({error:'El servidor necesita las claves de Supabase'},503,cors);
  try{
-  if(req.method==='GET'&&action==='/health')return respond({ok:true,database:true,auth:true,payments:false,orders:false,admin:false,providerPurchases:false,environment:'preproduction'},200,cors);
+  if(req.method==='GET'&&action==='/health')return respond({ok:true,database:true,auth:true,payments:false,orders:false,admin:true,providerPurchases:false,environment:'preproduction'},200,cors);
   if(req.method==='GET'&&action==='/client-config')return respond({supabaseUrl:SB,publishableKey:PUBLISHABLE,googleLoginEnabled:false},200,cors);
   if(req.method==='GET'&&(action==='/bootstrap'||action==='/storefront')){
-   const data=await storefront();return respond(action==='/bootstrap'?{storefront:data,storefrontError:null,adminConfigured:false,databaseConfigured:true,googleLoginEnabled:false,supabaseUrl:SB,publishableKey:PUBLISHABLE}:data,200,cors);
+   const data=await storefront();return respond(action==='/bootstrap'?{storefront:data,storefrontError:null,adminConfigured:true,databaseConfigured:true,googleLoginEnabled:false,supabaseUrl:SB,publishableKey:PUBLISHABLE}:data,200,cors);
   }
   if(req.method==='POST'&&action==='/auth/phone-register'){
    if(Number(req.headers.get('content-length')||0)>3000)return respond({error:'Formulario demasiado grande'},413,cors);
@@ -83,7 +83,52 @@ Deno.serve(async req=>{
    const rows=await service<any[]>('/rest/v1/rs5_orders?select=id,code,game_name,offer_name,player_id,zone_id,target_payload,method,source_phone,amount,currency,status,admin_note,created_at,receipt_path&user_id=eq.'+encodeURIComponent(user.id)+'&status=neq.uploading&order=created_at.desc&limit=100');
    return respond({orders:rows.map(o=>({id:o.id,code:o.code,game:o.game_name,offer:o.offer_name,playerId:o.player_id,zoneId:o.zone_id||'',targetPayload:o.target_payload||{},method:o.method,sourcePhone:o.source_phone||'',amount:Number(o.amount),currency:o.currency,status:o.status,note:o.admin_note||'',created:o.created_at,receiptAvailable:!!o.receipt_path}))},200,cors);
   }
-  if(action.startsWith('/admin/'))return respond({error:'ADM real pendiente de configuración segura. No uses el modo de demostración.'},503,cors);
+  if(action.startsWith('/admin/')){
+   const adminUser=await userFromRequest(req);
+   if(!adminUser||adminUser.app_metadata?.role!=='refills_admin')return respond({error:'No autorizado: inicia sesión con tu cuenta administradora.'},403,cors);
+   if(action==='/admin/login'&&req.method==='POST')return respond({ok:true,admin:true},200,cors);
+   if(action==='/admin/session'&&req.method==='GET')return respond({admin:true},200,cors);
+   if(action==='/admin/logout'&&req.method==='POST')return respond({ok:true},200,cors);
+   if(action==='/admin/overview'&&req.method==='GET'){
+    const [g,o,p,orders,reviews]=await Promise.all([
+     service<any[]>('/rest/v1/rs5_games?select=id&active=eq.true'),
+     service<any[]>('/rest/v1/rs5_offers?select=id&active=eq.true'),
+     service<any[]>('/rest/v1/rs5_profiles?select=user_id&limit=1000'),
+     service<any[]>('/rest/v1/rs5_orders?select=id,status&limit=1000'),
+     service<any[]>('/rest/v1/rs5_registration_reviews?select=user_id,status&limit=1000')]);
+    return respond({counts:{games:g.length,offers:o.length,orders:orders.length,pending:orders.filter(x=>x.status==='pending').length,profiles:p.length,newRegistrations:reviews.filter(x=>x.status==='pending').length},integration:{supabase:true,centralCatalog:false,centralPurchases:false,googleConfigured:false}},200,cors);
+   }
+   if(action==='/admin/customers'&&req.method==='GET'){
+    const [profiles,reviews,wallets,plans,orders]=await Promise.all([
+     service<any[]>('/rest/v1/rs5_profiles?select=user_id,full_name,phone,created_at&order=created_at.desc&limit=1000'),
+     service<any[]>('/rest/v1/rs5_registration_reviews?select=user_id,status,channel,created_at&limit=1000'),
+     service<any[]>('/rest/v1/rs5_wallets?select=user_id,balance_usdt&limit=1000'),
+     service<any[]>('/rest/v1/rs5_reseller_memberships?select=user_id,expires_at&limit=1000'),
+     service<any[]>('/rest/v1/rs5_orders?select=user_id,id&limit=1000')]);
+    const rm=new Map(reviews.map(x=>[x.user_id,x]));const wm=new Map(wallets.map(x=>[x.user_id,x]));const mm=new Map(plans.map(x=>[x.user_id,x]));const counts=new Map<string,number>();
+    for(const x of orders)counts.set(x.user_id,(counts.get(x.user_id)||0)+1);
+    const clients=profiles.map(p=>({id:p.user_id,name:p.full_name,phone:p.phone,email:null,createdAt:p.created_at,provider:'phone_password',balanceUsdt:Number(wm.get(p.user_id)?.balance_usdt||0),resellerUntil:mm.get(p.user_id)?.expires_at||null,orders:counts.get(p.user_id)||0,reviewStatus:rm.get(p.user_id)?.status||'pending',reviewChannel:rm.get(p.user_id)?.channel||null,phoneVerified:false}));
+    return respond({clients,limited:clients.length>=1000},200,cors);
+   }
+   if(action==='/admin/registration-review'&&req.method==='POST'){
+    const input=await req.text();if(input.length>1200)return respond({error:'Formulario demasiado grande'},413,cors);
+    const b=JSON.parse(input),uid=String(b.userId||''),status=String(b.status||'');
+    if(!/^[a-f0-9-]{36}$/i.test(uid)||!['pending','contacted','confirmed'].includes(status))return respond({error:'Revisión inválida'},400,cors);
+    const customer=await service<any[]>('/rest/v1/rs5_profiles?select=user_id&user_id=eq.'+encodeURIComponent(uid));
+    if(!customer.length)return respond({error:'Cliente no encontrado'},404,cors);
+    const channel=['whatsapp','sms','other'].includes(String(b.channel||''))?String(b.channel):null;
+    await service('/rest/v1/rs5_registration_reviews?user_id=eq.'+encodeURIComponent(uid),'PATCH',{status,channel,updated_at:new Date().toISOString()});
+    return respond({ok:true,status,phoneVerified:false},200,cors);
+   }
+   if(action==='/admin/orders'&&req.method==='GET'){
+    const q=String(url.searchParams.get('q')||'').slice(0,60);
+    const clause=q?'&code=ilike.*'+encodeURIComponent(q.replace(/[%*,]/g,''))+'*':'';
+    const orders=await service<any[]>('/rest/v1/rs5_orders?select=id,code,game_name,offer_name,player_id,zone_id,target_payload,method,source_phone,amount,currency,status,admin_note,created_at,receipt_path&status=neq.uploading&order=created_at.desc&limit=150'+clause);
+    return respond({orders:orders.map(o=>({id:o.id,code:o.code,game:o.game_name,offer:o.offer_name,playerId:o.player_id,zoneId:o.zone_id||'',targetPayload:o.target_payload||{},method:o.method,sourcePhone:o.source_phone||'',amount:Number(o.amount),currency:o.currency,status:o.status,note:o.admin_note||'',created:o.created_at,receiptAvailable:!!o.receipt_path}))},200,cors);
+   }
+   if(action==='/admin/offers'&&req.method==='GET')return respond({offers:await service<any[]>('/rest/v1/rs5_offers?select=id,game_id,name,provider_price_usdt,gain_sm,active,provider_in_stock&limit=300')},200,cors);
+   return respond({error:'Acción administrativa no disponible hasta verificar el proceso de compras y pagos.'},503,cors);
+  }
   if(req.method!=='GET')return respond({error:'Operación de compra o pago no habilitada. No envíes dinero hasta la activación verificada.'},503,cors);
   return respond({error:'Ruta no encontrada'},404,cors);
  }catch(e){console.error('rs10 edge failure',String(e));return respond({error:'Servicio temporalmente no disponible'},503,cors)}
