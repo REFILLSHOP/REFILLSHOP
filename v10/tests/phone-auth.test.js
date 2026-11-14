@@ -56,10 +56,12 @@ test('server creates a password account, stores phone in private profile, reject
   assert.equal(createdBody.user_metadata.phone_verification,'unverified');
   assert.equal(createdBody.email_confirm,true);
   const page=await fetch(url+'/app.js');const script=await page.text();
-  assert.ok(script.includes('phoneAuthForm'));assert.ok(script.includes('No necesitas un correo electrónico'));assert.ok(script.includes('countryCodeManual'));
+  assert.ok(script.includes('phoneAuthForm'));assert.ok(script.includes('No necesitas un correo electrónico'));assert.ok(script.includes('countryCodeManual'));assert.ok(script.includes('Selecciona tu país'));
   assert.ok(!script.includes('fake-server-secret'));
-  response=await req({fullName:'Cliente Prueba',phone:'+5351234567',password:'Abcd123456'});
+  response=await req({fullName:'Cliente Internacional',phone:'+13055550199',password:'Abcd123456'});
   assert.equal(response.status,201);
+  assert.equal(createdBody.email,'tel13055550199@refillshop.pages.dev');
+  assert.equal(profiles,2);
   response=await req({fullName:'Cliente Prueba',phone:'+5351234567',password:'Abcd123456'});
   // Same IP has a 5-attempt/hour cap (valid + invalid attempts share it).
   assert.equal(response.status,429);
