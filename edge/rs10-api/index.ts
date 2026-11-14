@@ -126,7 +126,60 @@ Deno.serve(async req=>{
     const orders=await service<any[]>('/rest/v1/rs5_orders?select=id,code,game_name,offer_name,player_id,zone_id,target_payload,method,source_phone,amount,currency,status,admin_note,created_at,receipt_path&status=neq.uploading&order=created_at.desc&limit=150'+clause);
     return respond({orders:orders.map(o=>({id:o.id,code:o.code,game:o.game_name,offer:o.offer_name,playerId:o.player_id,zoneId:o.zone_id||'',targetPayload:o.target_payload||{},method:o.method,sourcePhone:o.source_phone||'',amount:Number(o.amount),currency:o.currency,status:o.status,note:o.admin_note||'',created:o.created_at,receiptAvailable:!!o.receipt_path}))},200,cors);
    }
-   if(action==='/admin/offers'&&req.method==='GET')return respond({offers:await service<any[]>('/rest/v1/rs5_offers?select=id,game_id,name,provider_price_usdt,gain_sm,active,provider_in_stock&limit=300')},200,cors);
+   if(action==='/admin/offers'&&req.method==='GET')return respond({offers:await service<any[]>('/rest/v1/rs5_offers?select=id,game_id,name,provider_name,provider_product_key,provider_price_usdt,gain_sm,active,provider_in_stock&order=updated_at.desc&limit=300')},200,cors);
+   // Administrative catalog controls. All routes above require a valid Supabase
+   // user JWT with app_metadata.role=refills_admin; never trust client metadata.
+   const readBody=async()=>{const text=await req.text();if(text.length>4000)throw Error('Formulario demasiado largo');return JSON.parse(text||'{}')};
+   const safeText=(x:unknown,max:number)=>String(x||'').trim().slice(0,max);
+   const positive=(x:unknown,min:number,max:number)=>Number.isFinite(Number(x))&&Number(x)>=min&&Number(x)<=max?Number(x):null;
+   if(action==='/admin/game'&&req.method==='POST'){
+    const b=await readBody(),id=safeText(b.id,60),name=safeText(b.name,90),category=safeText(b.category,70)||'Juegos',imageUrl=safeText(b.imageUrl,500);
+    if(!/^[a-z0-9-]{2,60}$/.test(id)||name.length<2||name.length>90||category.length<2)return respond({error:'Revisa ID, nombre y categoría del juego'},400,cors);
+    if(imageUrl&&!/^https:\/\/[^\s<>"']{5,500}$/i.test(imageUrl))return respond({error:'La imagen debe ser una URL HTTPS válida'},400,cors);
+    const data={id,name,category,image_url:imageUrl||null,featured:b.featured===true,sort_order:b.featured===true?1:99,active:true,updated_at:new Date().toISOString()};
+    const res=await fetch(SB+'/rest/v1/rs5_games?on_conflict=id',{method:'POST',headers:{...reqHeaders(SECRET),Prefer:'resolution=merge-duplicates,return=representation'},body:JSON.stringify(data)});
+    if(!res.ok)throw Error('No se pudo guardar juego '+res.status);
+    return respond({ok:true,game:(await res.json())[0]},200,cors);
+   }
+   if(action==='/admin/offer-manual'&&req.method==='POST'){
+    const b=await readBody(),gameId=safeText(b.gameId,60),name=safeText(b.name,120),provider=safeText(b.provider,30)||'centralone',cost=positive(b.providerPriceUsdt,0.0001,100000),gain=positive(b.gainSm,0,1000000),productKey=safeText(b.productKey,100);
+    if(!/^[a-z0-9-]{2,60}$/.test(gameId)||name.length<2||!['centralone','recargasamerica'].includes(provider)||cost===null||gain===null)return respond({error:'Completa juego, nombre, proveedor, costo USDT y ganancia SM'},400,cors);
+    const games=await service<any[]>('/rest/v1/rs5_games?select=id&id=eq.'+encodeURIComponent(gameId)+'&active=eq.true');
+    if(!games.length)return respond({error:'Primero crea o activa el juego'},404,cors);
+    if(productKey&&provider==='centralone'&&!/^[0-9a-f]{8}-[0-9a-f-]{27,36}$/i.test(productKey))return respond({error:'El ID de Central One debe ser un UUID del catálogo'},400,cors);
+    const data={game_id:gameId,name,display_name:name,provider_name:provider,provider_product_key:productKey||null,provider_price_usdt:cost,gain_sm:gain,active:false,provider_in_stock:false,provider_target_schema:[],updated_at:new Date().toISOString()};
+    const res=await fetch(SB+'/rest/v1/rs5_offers',{method:'POST',headers:{...reqHeaders(SECRET),Prefer:'return=representation'},body:JSON.stringify(data)});
+    if(!res.ok)throw Error('No se pudo guardar la oferta '+res.status);
+    return respond({ok:true,offer:(await res.json())[0],published:false,message:'Oferta guardada como borrador hasta verificar proveedor y cobros'},201,cors);
+   }
+   if(action==='/admin/offer-edit'&&req.method==='POST'){
+    const b=await readBody(),id=safeText(b.id,50),gain=positive(b.gainSm,0,1000000);
+    if(!/^[0-9a-f-]{36}$/i.test(id)||gain===null)return respond({error:'Oferta inválida'},400,cors);
+    if(b.active===true)return respond({error:'La venta sigue bloqueada: antes de publicar hay que verificar el proveedor y los cobros'},409,cors);
+    await service('/rest/v1/rs5_offers?id=eq.'+encodeURIComponent(id),'PATCH',{gain_sm:gain,active:false,provider_in_stock:false,updated_at:new Date().toISOString()});
+    return respond({ok:true,active:false},200,cors);
+   }
+   if(action==='/admin/delete-game'&&req.method==='POST'){
+    const b=await readBody(),id=safeText(b.id,60);if(!/^[a-z0-9-]{2,60}$/.test(id))return respond({error:'Juego inválido'},400,cors);
+    await service('/rest/v1/rs5_offers?game_id=eq.'+encodeURIComponent(id),'PATCH',{active:false,provider_in_stock:false});
+    await service('/rest/v1/rs5_games?id=eq.'+encodeURIComponent(id),'PATCH',{active:false,updated_at:new Date().toISOString()});
+    return respond({ok:true,archived:true},200,cors);
+   }
+   if(action==='/admin/delete-offer'&&req.method==='POST'){
+    const b=await readBody(),id=safeText(b.id,50);if(!/^[0-9a-f-]{36}$/i.test(id))return respond({error:'Oferta inválida'},400,cors);
+    await service('/rest/v1/rs5_offers?id=eq.'+encodeURIComponent(id),'PATCH',{active:false,provider_in_stock:false,updated_at:new Date().toISOString()});
+    return respond({ok:true,archived:true},200,cors);
+   }
+   if(action==='/admin/settings'&&req.method==='POST'){
+    const b=await readBody(),rate=positive(b.buySmPerUsdt,0.01,1000000),cup=positive(b.cupPerSm,0.01,1000000),fee=positive(b.cardFee,0,100),planDays=positive(b.planDays,1,365);
+    if(rate===null||cup===null||fee===null||planDays===null||!Number.isInteger(planDays))return respond({error:'Revisa las tasas y duración del plan'},400,cors);
+    const p=String(b.mobilePhone||''),w=String(b.walletPhone||''),c=String(b.cardNumber||''),confirm=String(b.confirmPhone||'');
+    if(!/^[0-9]{8}$/.test(p)||w&&!/^[0-9]{8}$/.test(w)||c.length<8||c.length>40||!/^[0-9]{8}$/.test(confirm))return respond({error:'Revisa teléfono, monedero y tarjeta'},400,cors);
+    const plan=b.planPrice===null||b.planPrice===''?null:positive(b.planPrice,0.01,10000);if(b.planPrice!==null&&b.planPrice!==''&&plan===null)return respond({error:'Precio del plan inválido'},400,cors);
+    await service('/rest/v1/rs5_settings?id=eq.1','PATCH',{buy_sm_per_usdt:rate,cup_per_sm:cup,card_fee_pct:fee,mobile_phone:p,wallet_phone:w||null,card_number:c,confirm_phone:confirm,reseller_plan_price_usdt:plan,reseller_plan_days:planDays,updated_at:new Date().toISOString()});
+    return respond({ok:true,message:'Tasas guardadas. Los pagos siguen bloqueados hasta su verificación.'},200,cors);
+   }
+
    return respond({error:'Acción administrativa no disponible hasta verificar el proceso de compras y pagos.'},503,cors);
   }
   if(req.method!=='GET')return respond({error:'Operación de compra o pago no habilitada. No envíes dinero hasta la activación verificada.'},503,cors);
