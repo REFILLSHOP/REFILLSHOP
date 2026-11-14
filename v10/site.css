@@ -908,3 +908,150 @@ body.admin-view .rs-v3-crypto-toggle p{font-size:12px;color:#bed7e9;line-height:
 @media(max-width:1050px){body.shop-refresh .game-grid-v4,body.shop-refresh .offer-grid-v4{grid-template-columns:minmax(0,1fr)}}
 @media(max-width:760px){body.shop-refresh .game-card-v4{min-height:160px}body.shop-refresh .game-art-v4{flex-basis:125px;width:125px;min-height:125px;margin:10px}body.shop-refresh .game-art-v4 img{height:125px}body.shop-refresh .game-content-v4{padding:14px 12px 14px 2px}body.shop-refresh .payment-methods{grid-template-columns:minmax(0,1fr)}body.shop-refresh .offer-grid-v4{grid-template-columns:minmax(0,1fr)}}
 @media(max-width:480px){body.shop-refresh .game-card-v4{min-height:142px}body.shop-refresh .game-art-v4{flex-basis:112px;width:112px;min-height:112px;margin:9px}body.shop-refresh .game-art-v4 img{height:112px}body.shop-refresh .game-content-v4{padding:12px 9px 12px 0;gap:6px}body.shop-refresh .game-content-v4 h3{font-size:16px}body.shop-refresh .game-content-v4 .btn{font-size:11px;padding:8px}body.shop-refresh .offer-head-v4{padding:14px 13px;gap:11px}body.shop-refresh .offer-icon-v4{flex-basis:73px;width:73px;height:73px}body.shop-refresh .offer-content-v4{padding:0 13px 14px}body.shop-refresh .payment-option{gap:11px;padding:12px 10px!important}body.shop-refresh .crypto-invoice-amount strong{font-size:20px}}
+
+
+/* Refills Shop / Checkout V5 — single, modern responsive purchase system */
+body.shop-refresh .checkout-v5{width:100%;max-width:1120px!important;margin:0 auto 64px;min-width:0;padding:4px 0 25px}
+body.shop-refresh .purchase-heading-v5{display:flex;align-items:center;justify-content:space-between;gap:24px;padding:7px 2px 22px;margin:0;min-width:0}
+body.shop-refresh .purchase-heading-v5>div:first-child{min-width:0}
+body.shop-refresh .purchase-overline-v5{display:block;color:#64bcf3;font-size:10px;font-weight:850;letter-spacing:.15em;margin:0 0 10px}
+body.shop-refresh .purchase-heading-v5 h1{font-size:clamp(23px,3.2vw,34px);font-weight:850;letter-spacing:-.04em;line-height:1.18;color:#f3faff;margin:0 0 8px}
+body.shop-refresh .purchase-heading-v5 p{color:#96bbd8;font-size:13px;line-height:1.55;margin:0;max-width:620px}
+body.shop-refresh .purchase-heading-game-v5{display:flex;align-items:center;gap:9px;flex:none;max-width:240px;border:1px solid #2e506e;background:#0c2136;border-radius:12px;padding:8px 12px 8px 8px;min-width:0}
+body.shop-refresh .purchase-heading-game-v5 img{width:41px;height:41px;object-fit:contain;object-position:center;border-radius:8px;background:#15324b}
+body.shop-refresh .purchase-heading-game-v5 span{font-size:12px;color:#deeffd;font-weight:750;line-height:1.3}
+body.shop-refresh .purchase-progress-v5{display:grid;grid-template-columns:repeat(4,minmax(0,1fr));gap:10px;margin:0 0 22px;max-width:none}
+body.shop-refresh .purchase-progress-v5 .purchase-progress-step{display:flex;align-items:center;justify-content:center;gap:10px;min-width:0;min-height:52px;padding:9px 10px;background:#0a1e32;border:1px solid #2c4e69;border-radius:13px;color:#91adbf;transition:background .18s,border .18s}
+body.shop-refresh .purchase-progress-v5 .purchase-progress-step.active{background:#103f6d;border-color:#4099e5;color:#fff;box-shadow:inset 0 0 0 1px #1f84cc60}
+body.shop-refresh .purchase-progress-v5 .purchase-progress-step.complete{background:#0c3038;border-color:#276e68;color:#b8f6e0}
+body.shop-refresh .purchase-progress-v5 .purchase-progress-index{display:grid;place-items:center;flex:0 0 26px;width:26px;height:26px;border:1px solid #315577;background:#102d49;border-radius:9px;font-size:12px;font-weight:850;color:#a7cef2}
+body.shop-refresh .purchase-progress-v5 .active .purchase-progress-index{background:#078bf9;border-color:#62cbff;color:#fff}
+body.shop-refresh .purchase-progress-v5 .complete .purchase-progress-index{background:#11664c;border-color:#28795a;color:#dcfff0}
+body.shop-refresh .purchase-progress-v5 .purchase-progress-label{font-size:12px;font-weight:750;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+body.shop-refresh .purchase-layout-v5{display:grid;grid-template-columns:minmax(0,1fr) 310px;align-items:start;gap:18px;min-width:0}
+body.shop-refresh .purchase-layout-v5:has(.purchase-done-v5){grid-template-columns:minmax(0,1fr)}
+body.shop-refresh .purchase-main-v5{padding:clamp(18px,2.7vw,28px)!important;min-width:0;min-height:0;background:linear-gradient(152deg,#0c263f 0%,#091a2c 76%)!important;border:1px solid #30516f!important;border-radius:19px!important;box-shadow:0 16px 38px #00000024!important}
+body.shop-refresh .purchase-form-v5{display:flex;flex-direction:column;gap:18px;min-width:0}
+body.shop-refresh .purchase-panel-head-v5{display:flex;align-items:flex-start;gap:14px;padding:0 0 17px;border-bottom:1px solid #254c6a}
+body.shop-refresh .purchase-mini-icon-v5{display:grid;place-items:center;flex:0 0 46px;width:46px;height:46px;background:#103f67;border:1px solid #367bad;border-radius:12px;color:#9bdcff}
+body.shop-refresh .purchase-mini-icon-v5 svg{width:24px;height:24px}
+body.shop-refresh .purchase-kicker-v5{display:block;color:#75bcf1;font-size:10px;font-weight:850;letter-spacing:.15em;margin:0 0 7px}
+body.shop-refresh .purchase-panel-head-v5 h2{color:#f0f9ff;font-size:clamp(17px,2.1vw,23px);font-weight:800;letter-spacing:-.03em;line-height:1.24;margin:0 0 6px}
+body.shop-refresh .purchase-panel-head-v5 p{color:#8cacc5;font-size:12px;line-height:1.5;margin:0}
+body.shop-refresh .purchase-game-row-v5{display:flex;align-items:center;gap:14px;padding:12px 13px;border:1px solid #294d6a;border-radius:13px;background:#0a2035;min-width:0}
+body.shop-refresh .purchase-game-row-v5 img{display:block;width:61px;height:61px;flex:0 0 61px;object-fit:contain;border-radius:10px;background:#102d4c}
+body.shop-refresh .purchase-game-row-v5>div{display:flex;flex-direction:column;gap:6px;min-width:0}
+body.shop-refresh .purchase-game-row-v5 strong{font-size:14px;color:#f4fbff}
+body.shop-refresh .purchase-game-row-v5 small{font-size:12px;color:#a7c5d8;overflow-wrap:anywhere;line-height:1.45}
+body.shop-refresh .purchase-fields-v5{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:14px;min-width:0}
+body.shop-refresh .purchase-fields-v5 .field{display:flex;flex-direction:column;gap:8px;min-width:0;margin:0}
+body.shop-refresh .purchase-fields-v5 .field label{font-size:12px;font-weight:700;color:#c3daee}
+body.shop-refresh .purchase-fields-v5 input,body.shop-refresh .purchase-fields-v5 select{width:100%;min-width:0;min-height:47px!important;height:auto;border:1px solid #305576!important;background:#07182a!important;border-radius:11px!important;color:#f3fbff;font-size:13px;padding:11px 13px}
+body.shop-refresh .purchase-fields-v5 input:focus-visible,body.shop-refresh .purchase-fields-v5 select:focus-visible{outline:2px solid #2d98dc;outline-offset:2px}
+body.shop-refresh .purchase-form-actions-v5,body.shop-refresh .purchase-preview-actions-v5{display:flex;align-items:center;justify-content:space-between;gap:12px;padding-top:4px;flex-wrap:wrap}
+body.shop-refresh .purchase-form-actions-v5 .btn,body.shop-refresh .purchase-preview-actions-v5 .btn{min-height:44px;border-radius:11px!important;padding:11px 18px;font-size:12px;font-weight:770}
+body.shop-refresh .purchase-form-actions-v5 .btn-primary,body.shop-refresh .purchase-preview-actions-v5 .btn-primary{min-width:190px;display:inline-flex;align-items:center;justify-content:center;gap:7px}
+body.shop-refresh .purchase-form-actions-v5 svg{width:15px;height:15px}
+body.shop-refresh .purchase-summary-v5{display:flex;flex-direction:column;gap:17px;position:sticky;top:112px!important;max-width:none;min-width:0;padding:20px!important;background:linear-gradient(157deg,#102c48 0%,#081b2f 95%)!important;border:1px solid #2a577d!important;border-radius:18px!important;box-shadow:0 16px 36px #00000025}
+body.shop-refresh .purchase-summary-v5 .purchase-summary-top{display:flex;flex-direction:column;gap:7px;align-items:flex-start;padding-bottom:16px;border-bottom:1px solid #2c4b6b}
+body.shop-refresh .purchase-summary-v5 .purchase-summary-top .caps{font-size:10px;color:#76bce8;font-weight:800;letter-spacing:.14em}
+body.shop-refresh .purchase-summary-v5 .purchase-summary-top>strong{font-size:clamp(25px,2.2vw,32px);letter-spacing:-.045em;color:#fff;font-weight:860}
+body.shop-refresh .purchase-summary-v5 .purchase-summary-top>strong small{font-size:13px;color:#90cffb;letter-spacing:0}
+body.shop-refresh .purchase-summary-main{display:flex;align-items:center;gap:11px;min-width:0}
+body.shop-refresh .purchase-summary-cover{width:55px;height:55px;flex:0 0 55px;border-radius:11px;overflow:hidden;background:#102c48;border:1px solid #385d77}
+body.shop-refresh .purchase-summary-cover img{height:100%;width:100%;object-fit:contain!important}
+body.shop-refresh .purchase-summary-main>div:last-child{display:flex;flex-direction:column;gap:5px;min-width:0}
+body.shop-refresh .purchase-summary-main small{font-size:11px;color:#91b7d1}
+body.shop-refresh .purchase-summary-main strong{font-size:12px;line-height:1.5;color:#e7f7ff;overflow-wrap:anywhere}
+body.shop-refresh .purchase-summary-rows{display:flex;flex-direction:column;gap:0;border-top:1px solid #28465f}
+body.shop-refresh .purchase-summary-rows>div{display:flex;flex-direction:column;gap:5px;padding:12px 0;border-bottom:1px solid #28465f;min-width:0}
+body.shop-refresh .purchase-summary-rows span{font-size:11px;color:#94b2c8}
+body.shop-refresh .purchase-summary-rows strong{color:#effbff;font-size:12px;overflow-wrap:anywhere}
+body.shop-refresh .purchase-summary-note{color:#84a7bf;font-size:11px;line-height:1.6;margin:0}
+body.shop-refresh .payment-methods-v5{display:grid!important;grid-template-columns:repeat(2,minmax(0,1fr))!important;gap:12px!important}
+body.shop-refresh .payment-option-v5{display:flex!important;position:relative;flex-direction:row;align-items:center;gap:12px;width:100%;min-width:0;min-height:93px!important;padding:13px!important;border:1px solid #2e526f!important;border-radius:13px!important;background:#0b2137!important;transition:border-color .15s,background .15s}
+body.shop-refresh .payment-option-v5:has(input:checked),body.shop-refresh .payment-option-v5.active{border-color:#42a8fa!important;background:linear-gradient(148deg,#123e62,#0d263f)!important;box-shadow:inset 3px 0 #54bbfa}
+body.shop-refresh .payment-option-v5 input[type=radio]{width:17px;height:17px;flex:0 0 17px;min-width:17px;accent-color:#41a6ff;position:relative;opacity:1;margin:0}
+body.shop-refresh .payment-logo-v5{display:grid;place-items:center;flex:0 0 71px;width:71px;height:66px;border-radius:12px;border:1px solid #d6ebf6;background:#fff;overflow:hidden}
+body.shop-refresh .payment-logo-v5 img{display:block;width:100%;height:100%;max-width:none;max-height:none;object-fit:contain!important;object-position:center!important;padding:5px;background:white}
+body.shop-refresh .payment-logo-transfermovil img,body.shop-refresh .payment-logo-bep20 img{padding:3px!important}
+body.shop-refresh .payment-logo-etecsa img{padding:6px 3px!important}
+body.shop-refresh .payment-logo-mitransfer img{object-fit:cover!important;transform:scale(1.72);transform-origin:63% 20%;padding:0!important}
+body.shop-refresh .payment-copy-v5{display:flex;flex-direction:column;gap:6px;min-width:0;flex:1}
+body.shop-refresh .payment-copy-v5 strong{font-size:13px;color:#eef9ff;line-height:1.25;overflow-wrap:anywhere}
+body.shop-refresh .payment-copy-v5 small{font-size:10px;color:#93b4ce;line-height:1.45;overflow-wrap:anywhere}
+body.shop-refresh .payment-option-v5.unavailable{opacity:.57;cursor:not-allowed}
+body.shop-refresh .payment-pick-v5{width:10px;height:10px;flex:none;border:1px solid #326482;border-radius:50%;background:#0a2035}
+body.shop-refresh .payment-option-v5.active .payment-pick-v5{background:#65d3ff;border-color:#65d3ff;box-shadow:0 0 0 3px #2b88b63a}
+body.shop-refresh .purchase-payment-detail-v5{margin-top:3px;padding:16px 17px;border-radius:14px;background:#0a1f34;border:1px solid #2d4d68;min-width:0}
+body.shop-refresh .purchase-payment-detail-v5>.fields{display:flex;flex-direction:column;gap:13px}
+body.shop-refresh .purchase-payment-detail-v5 .notice{border:1px solid #2f5879!important;border-radius:11px!important;background:#0d2b45!important;color:#c2e4fb;font-size:12px;line-height:1.6;margin:0;padding:13px!important}
+body.shop-refresh .purchase-payment-detail-v5 .recipient{display:flex;align-items:center;justify-content:space-between;gap:12px;min-width:0;padding:12px 14px!important;background:#0b273f;border:1px solid #2c5878!important;border-radius:11px!important}
+body.shop-refresh .purchase-payment-detail-v5 .recipient>div{display:flex;flex-direction:column;gap:6px;min-width:0}
+body.shop-refresh .purchase-payment-detail-v5 .recipient small{color:#92bcd8;font-size:10px}
+body.shop-refresh .purchase-payment-detail-v5 .recipient strong{color:#fff;font-size:13px;overflow-wrap:anywhere}
+body.shop-refresh .purchase-payment-detail-v5 .upload{display:flex;align-items:center;justify-content:space-between;gap:10px;flex-wrap:wrap;min-height:80px;padding:14px;border-radius:11px;background:#0c2b42;border:1px dashed #4384ae}
+body.shop-refresh .purchase-payment-detail-v5 .upload small{font-size:11px}
+body.shop-refresh .purchase-payment-detail-v5 .upload input[type=file]{max-width:100%;font-size:11px}
+body.shop-refresh .purchase-review-v5{gap:18px}
+body.shop-refresh .purchase-review-amount-v5{display:flex;flex-direction:column;align-items:flex-start;gap:7px;background:linear-gradient(135deg,#104b60,#103555);border:1px solid #398f9c;border-radius:14px;padding:18px 20px}
+body.shop-refresh .purchase-review-amount-v5>span:first-child{color:#a7dbe6;font-size:10px;font-weight:850;letter-spacing:.15em}
+body.shop-refresh .purchase-review-amount-v5 strong{color:#fff;font-size:clamp(27px,3.1vw,41px);line-height:1.12;letter-spacing:-.04em}
+body.shop-refresh .purchase-review-amount-v5 strong small{font-size:15px;letter-spacing:0;color:#c0f6f2}
+body.shop-refresh .purchase-review-amount-v5>span:last-child{font-size:12px;color:#b5dced}
+body.shop-refresh .purchase-review-list-v5{display:flex;flex-direction:column;border-top:1px solid #284b67}
+body.shop-refresh .purchase-review-list-v5>div{display:flex;align-items:center;justify-content:space-between;gap:20px;padding:14px 2px;border-bottom:1px solid #284b67;min-width:0}
+body.shop-refresh .purchase-review-list-v5 span{flex:0 0 34%;font-size:12px;color:#99b9d1}
+body.shop-refresh .purchase-review-list-v5 strong{font-size:12px;line-height:1.5;font-weight:740;color:#f2f9ff;text-align:right;overflow-wrap:anywhere;min-width:0;max-width:66%}
+body.shop-refresh .purchase-review-warning-v5{display:flex;align-items:flex-start;gap:10px;border:1px solid #4e6a7e;background:#173247;color:#cbe7fb;padding:13px 14px;border-radius:12px;font-size:12px;line-height:1.6}
+body.shop-refresh .purchase-review-warning-v5 svg{flex:0 0 18px;width:18px;height:18px;color:#79cdff;margin-top:1px}
+body.shop-refresh .purchase-confirm-checkbox-v5{display:flex;align-items:center;gap:10px;min-height:42px;color:#cce5f7;font-size:12px;line-height:1.5}
+body.shop-refresh .purchase-confirm-checkbox-v5 input{flex:none;width:18px;height:18px;min-width:18px;accent-color:#1b95f2}
+body.shop-refresh .purchase-done-v5{display:flex;flex-direction:column;align-items:flex-start;gap:14px;padding:clamp(15px,2.5vw,30px);min-width:0}
+body.shop-refresh .purchase-done-icon-v5{display:grid;place-items:center;width:60px;height:60px;border-radius:18px;background:#0d584f;border:1px solid #329d8d;color:#bfffe7}
+body.shop-refresh .purchase-done-icon-v5 svg{width:32px;height:32px}
+body.shop-refresh .purchase-done-v5 h2{color:#f3fdff;line-height:1.2;font-size:clamp(22px,3vw,31px);letter-spacing:-.035em;margin:0}
+body.shop-refresh .purchase-done-v5>p{color:#a5c5d8;font-size:13px;line-height:1.6;margin:0;max-width:680px}
+body.shop-refresh .purchase-done-code-v5{display:flex;flex-direction:column;align-items:flex-start;gap:8px;background:#0d2b43;border:1px solid #37688a;padding:17px 18px;border-radius:13px;max-width:100%;width:100%}
+body.shop-refresh .purchase-done-code-v5>span{font-size:10px;letter-spacing:.15em;color:#90c1e2}
+body.shop-refresh .purchase-done-code-v5>strong{color:#fff;letter-spacing:.05em;font-size:clamp(20px,3vw,29px);overflow-wrap:anywhere}
+body.shop-refresh .purchase-done-status-v5{display:flex;flex-wrap:wrap;align-items:center;gap:12px}
+body.shop-refresh .purchase-done-status-v5 small{font-size:12px;color:#a7c2d9}
+body.shop-refresh .purchase-crypto-done-v5 .crypto-invoice-address,body.shop-refresh .purchase-crypto-done-v5 .crypto-invoice-amount{width:100%}
+@media(max-width:990px){
+ body.shop-refresh .purchase-layout-v5{grid-template-columns:minmax(0,1fr);gap:14px}
+ body.shop-refresh .purchase-summary-v5{position:static!important;display:grid;grid-template-columns:repeat(2,minmax(0,1fr));column-gap:20px;row-gap:10px;top:auto!important}
+ body.shop-refresh .purchase-summary-v5 .purchase-summary-top{border:0;justify-content:center}
+ body.shop-refresh .purchase-summary-rows{grid-column:1/-1;display:grid;grid-template-columns:repeat(3,minmax(0,1fr))}
+ body.shop-refresh .purchase-summary-rows>div{padding:12px 8px}
+ body.shop-refresh .purchase-summary-note{grid-column:1/-1}
+}
+@media(max-width:660px){
+ body.shop-refresh .checkout-v5{margin:0 auto 32px;padding:0}
+ body.shop-refresh .purchase-heading-v5{padding:6px 3px 16px;gap:9px}
+ body.shop-refresh .purchase-heading-v5 p{font-size:12px}
+ body.shop-refresh .purchase-heading-game-v5{display:none}
+ body.shop-refresh .purchase-progress-v5{gap:5px;margin-bottom:13px}
+ body.shop-refresh .purchase-progress-v5 .purchase-progress-step{min-height:45px;padding:6px 3px;gap:4px;border-radius:10px;flex-direction:column}
+ body.shop-refresh .purchase-progress-v5 .purchase-progress-index{width:21px;height:21px;flex-basis:21px;border-radius:7px;font-size:10px}
+ body.shop-refresh .purchase-progress-v5 .purchase-progress-label{font-size:10px}
+ body.shop-refresh .purchase-main-v5{padding:16px!important;border-radius:14px!important}
+ body.shop-refresh .purchase-panel-head-v5{gap:10px}
+ body.shop-refresh .purchase-mini-icon-v5{width:38px;height:38px;flex-basis:38px}
+ body.shop-refresh .purchase-mini-icon-v5 svg{width:21px;height:21px}
+ body.shop-refresh .purchase-fields-v5{grid-template-columns:minmax(0,1fr)}
+ body.shop-refresh .payment-methods-v5{grid-template-columns:minmax(0,1fr)!important;gap:9px!important}
+ body.shop-refresh .payment-option-v5{min-height:80px!important;padding:10px 12px!important}
+ body.shop-refresh .payment-logo-v5{flex-basis:62px;width:62px;height:57px}
+ body.shop-refresh .payment-copy-v5 strong{font-size:13px}
+ body.shop-refresh .purchase-payment-detail-v5{padding:12px}
+ body.shop-refresh .purchase-form-actions-v5 .btn,body.shop-refresh .purchase-preview-actions-v5 .btn{flex:1 1 100%;width:100%;min-width:0}
+ body.shop-refresh .purchase-summary-v5{padding:15px!important;grid-template-columns:minmax(0,1fr);gap:12px}
+ body.shop-refresh .purchase-summary-v5 .purchase-summary-top{padding-bottom:12px;border-bottom:1px solid #31536c}
+ body.shop-refresh .purchase-summary-rows{grid-column:1;grid-template-columns:minmax(0,1fr);gap:0}
+ body.shop-refresh .purchase-summary-rows>div{padding:8px 0}
+ body.shop-refresh .purchase-summary-note{grid-column:1}
+ body.shop-refresh .purchase-review-list-v5>div{align-items:flex-start}
+ body.shop-refresh .purchase-review-list-v5 span{flex-basis:31%}
+ body.shop-refresh .purchase-review-list-v5 strong{max-width:69%}
+}
