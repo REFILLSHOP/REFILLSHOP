@@ -321,3 +321,17 @@ body.auth-guest .mobile-admin-row,body.admin-view .mobile-admin-row{display:none
 
 /* V10: extended ADM controls, same V9 visual language */
 .admin-client-list{display:grid;gap:12px;margin-top:18px}.admin-client{display:flex;align-items:center;gap:14px;background:linear-gradient(125deg,#09182a,#0b1d30);border:1px solid #30547a;padding:15px;border-radius:20px;box-shadow:inset 0 1px #cdeaff12}.admin-client-icon{flex:none;width:46px;height:46px;display:grid;place-items:center;border-radius:14px;background:#102c4c;color:#81d5ff;border:1px solid #396b99}.admin-client-main{display:grid;gap:5px;min-width:0;flex:1}.admin-client-main strong{font-size:1.02rem;color:#fff}.admin-client-main small{font-size:.8rem;color:#abc7dc;overflow-wrap:anywhere}.admin-client .btn{flex:none}.import-panel{padding:17px;border:1px solid #3778a6;background:linear-gradient(140deg,#0a2542,#081a2f);border-radius:20px}.import-panel .caps{margin-bottom:9px}.admin-view .main-content{padding-bottom:60px!important}@media(max-width:700px){.admin-client{flex-wrap:wrap;padding:13px}.admin-client .btn{width:100%;margin-top:3px}.admin-tabs{display:flex;overflow-x:auto;gap:8px;padding-bottom:8px;scrollbar-width:none}.admin-tabs .chip{flex:none}.import-panel{padding:14px}.admin-grid{grid-template-columns:1fr!important}.admin-stats{grid-template-columns:repeat(2,minmax(0,1fr))!important}}
+
+/* V10 phone-first registration, same blue-black design on PC and mobile. */
+.phone-auth-switch{display:grid;grid-template-columns:1fr 1fr;gap:8px;padding:5px;background:#081a30;border:1px solid #315678;border-radius:16px;margin:15px 0 20px}
+.phone-auth-switch button{border:0;border-radius:12px;padding:12px 8px;background:transparent;color:#a6c5dd;font-weight:800;cursor:pointer}
+.phone-auth-switch button.active{color:white;background:linear-gradient(145deg,#185ed2,#267bfa);box-shadow:0 5px 16px #1153c644}
+.phone-auth-form{text-align:left;width:100%;max-width:520px;margin:0 auto}
+.phone-prefix-field{display:grid;grid-template-columns:auto 1fr;gap:0;align-items:center;border:1px solid #294c71;border-radius:16px;background:#060e19;overflow:hidden}
+.phone-prefix-field span{padding:13px 15px;background:#122c49;border-right:1px solid #335777;color:#d1e9ff;font-weight:850}
+.phone-prefix-field input{border:0!important;border-radius:0!important;min-width:0!important;box-shadow:none!important}
+.phone-prefix-field:focus-within{border-color:#7ad4ff;box-shadow:0 0 0 3px #2791ff26}
+.phone-auth-form .auth-hint{margin:0;color:#a6c4db;font-size:.81rem;line-height:1.5}
+.phone-auth-form .honeypot{position:absolute!important;left:-9999px!important;width:1px!important;height:1px!important;opacity:0!important;pointer-events:none!important}
+.auth-separator{text-align:center;color:#a5bdd4;font-size:.8rem;margin:16px 0}
+@media(max-width:700px){.phone-auth-switch{margin:12px 0 18px}.phone-prefix-field input{width:100%}.phone-auth-form{max-width:100%}}

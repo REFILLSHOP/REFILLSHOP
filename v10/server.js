@@ -31,7 +31,9 @@ const SESSION_SECRET=process.env.SESSION_SECRET||crypto.randomBytes(32).toString
 const SESSION_SECONDS=4*60*60;
 const COOKIE_SECURE=process.env.COOKIE_SECURE==='true';
 const {priceOf,finite}=require('./prices');
+const {normalizeCubaMobile,loginEmailForPhone,validPhonePassword}=require('./phone-auth');
 const sessions=new Map();
+const phoneSignupLimits=new Map();
 let catalogCache=null, catalogTime=0, retryUntil=0, centralCache=null, centralTime=0, centralRetry=0, storeTime=0, storeCache=null;
 const now=()=>Date.now();
 const saneNumber=(v,min,max)=>Number.isFinite(Number(v))&&Number(v)>=min&&Number(v)<=max?Number(v):null;
@@ -51,6 +53,37 @@ async function sb(table,options={}){
  const text=await r.text();let data;try{data=JSON.parse(text||'null')}catch{data=text.slice(0,1000)};
  if(!r.ok)throw Error('DB_'+r.status+':'+(data?.code||data?.message||'unknown'));
  return data;
+}
+// Signup is intentionally password-only; phone ownership is NOT verified.
+// Automated recovery and wallet approvals must never trust this phone number.
+function allowPhoneSignup(req){
+ const key=req.socket.remoteAddress||'unknown';
+ const t=now(),windowMs=60*60_000;
+ // The count is incremented even on failed submissions to deter enumeration.
+ for(const [ip,state] of phoneSignupLimits){if(state.until<t)phoneSignupLimits.delete(ip)}
+ const state=phoneSignupLimits.get(key)||{count:0,until:t+windowMs};
+ if(state.until<t){state.count=0;state.until=t+windowMs}
+ state.count++;phoneSignupLimits.set(key,state);
+ return state.count<=5;
+}
+async function createPhonePasswordUser(phone,password,name){
+ if(!SB_URL||!SB_SECRET)throw Error('SUPABASE_SECRET_NOT_CONFIGURED');
+ const email=loginEmailForPhone(phone),headers={'apikey':SB_SECRET,'Content-Type':'application/json','Accept':'application/json'};
+ if(SB_SECRET.startsWith('eyJ'))headers.Authorization='Bearer '+SB_SECRET;
+ const result=await timedFetch(SB_URL+'/auth/v1/admin/users',{method:'POST',headers,body:JSON.stringify({email,password,email_confirm:true,user_metadata:{signup_source:'phone_password',phone_verification:'unverified'}})});
+ const created=await result.json().catch(()=>({}));
+ if(!result.ok){if(result.status===422||result.status===409)throw Error('PHONE_ALREADY_REGISTERED');throw Error('AUTH_CREATE_'+result.status)}
+ const id=created?.user?.id||created?.id;
+ if(!/^[a-f0-9-]{36}$/i.test(String(id)))throw Error('AUTH_INVALID_USER');
+ try{
+  await sb('rs5_profiles',{method:'POST',query:'on_conflict=user_id',prefer:'resolution=merge-duplicates,return=representation',body:{user_id:id,full_name:name,phone,updated_at:new Date().toISOString()}});
+ }catch(e){
+  // Do not leave an orphaned login if its profile could not be created.
+  try{await timedFetch(SB_URL+'/auth/v1/admin/users/'+encodeURIComponent(id),{method:'DELETE',headers})}catch{}
+  if(String(e.message).includes('23505'))throw Error('PHONE_ALREADY_REGISTERED');
+  throw Error('PROFILE_CREATE_FAILED');
+ }
+ return id;
 }
 async function authUser(req){const h=req.headers.authorization||'';if(!SB_URL||!SB_PUBLIC||!/^Bearer [\w.\-]+$/.test(h))return null;try{const r=await timedFetch(SB_URL+'/auth/v1/user',{headers:{'apikey':SB_PUBLIC,'Authorization':h}});if(!r.ok)return null;const data=await r.json();return data?.id?data:null}catch{return null}}
 function cleanProducts(data){if(!Array.isArray(data))throw Error('INVALID_CATALOG');return data.filter(x=>Number.isInteger(Number(x.id))&&Number(x.price)>0).slice(0,3500).map(x=>({id:Number(x.id),sku:String(x.sku||'').slice(0,80),name:String(x.name||'Producto').slice(0,150),price:Number(x.price),type:String(x.type||'recharge'),required_fields:Array.isArray(x.required_fields)?x.required_fields.filter(v=>typeof v==='string'):[],field_options:x.field_options||{},categories:Array.isArray(x.categories)?x.categories:[]}))}
@@ -166,6 +199,16 @@ const server=http.createServer(async(req,res)=>{
  try{publicStore=await storefront()}catch(e){storefrontError='No se pudo sincronizar el catálogo. El acceso al ADM sigue disponible; revisa la conexión de Supabase.';publicStore={live:false,games:[],offers:[],config:{buySmPerUsdt:350,cupPerSm:3,cardFee:5,mobilePhone:'50237996',walletPhone:'',cardNumber:'9204-1299-7870-3553',confirmPhone:'50237996',planPrice:null,planDays:30}}}
  return send(res,200,{storefront:publicStore,storefrontError,adminConfigured:!!ADMIN_PASSWORD,databaseConfigured:!!SB_SECRET,googleLoginEnabled:process.env.ENABLE_GOOGLE_LOGIN==='true'&&!!SB_PUBLIC,supabaseUrl:SB_URL,publishableKey:SB_PUBLIC});
  }
+ if(p==='/api/auth/phone-register'&&req.method==='POST'){
+  if(!allowPhoneSignup(req))return send(res,429,{error:'Demasiados intentos de registro. Espera una hora.'});
+  if(!SB_SECRET||!SB_URL||!SB_PUBLIC)return send(res,503,{error:'El registro de usuarios aún no está disponible.'});
+  const b=await bodyJSON(req,2500),phone=normalizeCubaMobile(b.phone),name=String(b.fullName||'').trim().replace(/\s+/g,' '),password=b.password;
+  if(b.website)return send(res,200,{ok:true}); // honeypot for basic automated submissions
+  if(!phone||name.length<2||name.length>90||!validPhonePassword(password))return send(res,400,{error:'Introduce tu nombre, un móvil cubano válido y una contraseña de 10 a 72 caracteres con letras y números.'});
+  try{await createPhonePasswordUser(phone,password,name);return send(res,201,{ok:true,phone,phoneVerified:false,message:'Cuenta creada. Tu número todavía no está verificado.'});}
+  catch(e){if(e.message==='PHONE_ALREADY_REGISTERED')return send(res,409,{error:'Este número ya tiene una cuenta. Inicia sesión.'});
+   console.error('Phone signup failed:',String(e.message).slice(0,90));return send(res,503,{error:'No se pudo crear la cuenta. Reintenta más tarde.'});}
+ }
  if(p==='/api/profile'&&req.method==='GET'){
  const user=await authUser(req);if(!user)return send(res,401,{error:'Inicia sesión'});
  return send(res,200,await accountData(user.id));
@@ -174,6 +217,7 @@ const server=http.createServer(async(req,res)=>{
  const user=await authUser(req);if(!user)return send(res,401,{error:'Inicia sesión'});
  const b=await bodyJSON(req),fullName=String(b.fullName||'').trim().replace(/\s+/g,' '),phone=String(b.phone||'').trim();
  if(fullName.length<2||fullName.length>90||!validPhone(phone))return send(res,400,{error:'Introduce nombre y teléfono cubano de ocho dígitos'});
+ if(user.user_metadata?.signup_source==='phone_password'&&loginEmailForPhone(phone)!==user.email)return send(res,409,{error:'El número de acceso no se puede cambiar desde el perfil. Contacta con soporte.'});
  await sb('rs5_profiles',{query:'on_conflict=user_id',method:'POST',prefer:'resolution=merge-duplicates,return=representation',body:{user_id:user.id,full_name:fullName,phone,updated_at:new Date().toISOString()}});
  return send(res,200,{ok:true,profile:{fullName,phone}});
  }
@@ -238,7 +282,7 @@ const server=http.createServer(async(req,res)=>{
   const wm=new Map(wallets.map(w=>[w.user_id,w]));const mm=new Map(memberships.map(m=>[m.user_id,m]));const counts=new Map();for(const o of orders)counts.set(o.user_id,(counts.get(o.user_id)||0)+1);
   const pm=new Map(profiles.map(x=>[x.user_id,x]));const um=new Map(users.map(x=>[x.id,x]));
   const ids=[...new Set([...pm.keys(),...um.keys()])];
-  const clients=ids.slice(0,1000).map(id=>({id,name:pm.get(id)?.full_name||'',phone:pm.get(id)?.phone||'',email:um.get(id)?.email||null,createdAt:um.get(id)?.created_at||pm.get(id)?.created_at||null,provider:um.get(id)?.app_metadata?.provider||null,balanceUsdt:Number(wm.get(id)?.balance_usdt||0),resellerUntil:mm.get(id)?.expires_at||null,orders:counts.get(id)||0}));
+  const clients=ids.slice(0,1000).map(id=>({id,name:pm.get(id)?.full_name||'',phone:pm.get(id)?.phone||'',email:um.get(id)?.user_metadata?.signup_source==='phone_password'?null:(um.get(id)?.email||null),createdAt:um.get(id)?.created_at||pm.get(id)?.created_at||null,provider:um.get(id)?.app_metadata?.provider||null,balanceUsdt:Number(wm.get(id)?.balance_usdt||0),resellerUntil:mm.get(id)?.expires_at||null,orders:counts.get(id)||0}));
   return send(res,200,{clients,limited:ids.length>1000,authUsersLoaded:users.length>0});
  }
  if(p==='/api/admin/customer-profile'&&req.method==='POST'){
