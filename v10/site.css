@@ -854,3 +854,57 @@ body.shop-refresh .footer{border-color:#1e3b53}
  body.shop-refresh .currency-box{padding:7px 4px}
 }
 @media(prefers-reduced-motion:reduce){body.shop-refresh .game-card:hover{transform:none}body.shop-refresh .btn{transition:none}}
+
+
+/* Refills Shop – horizontal cards, uncropped game artwork & USDT BEP-20 checkout */
+body.shop-refresh .game-grid-v4{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:14px;align-items:stretch}
+body.shop-refresh .game-card-v4{display:flex!important;flex-direction:row!important;align-items:stretch;gap:0;width:100%;min-width:0;max-width:none;min-height:190px;overflow:hidden;border-radius:18px!important}
+body.shop-refresh .game-art-v4{display:grid;place-items:center;flex:0 0 160px;width:160px;min-height:160px;margin:12px;background:radial-gradient(circle at center,#193955 0,#0a1d31 73%);border:1px solid #31536f;border-radius:13px;overflow:hidden}
+body.shop-refresh .game-art-v4 img{display:block;max-width:100%;max-height:100%;width:100%;height:160px;object-fit:contain!important;object-position:center!important}
+body.shop-refresh .game-content-v4{display:flex;flex:1;flex-direction:column;justify-content:center;align-items:stretch;gap:10px;padding:19px 18px 17px 7px;min-width:0}
+body.shop-refresh .game-content-v4 h3{font-size:clamp(18px,2vw,22px);line-height:1.2;margin:0;overflow-wrap:anywhere}
+body.shop-refresh .game-content-v4 p{font-size:12px;margin:0;color:#a9c9dd}
+body.shop-refresh .game-content-v4>.btn{margin-top:5px;min-height:36px;border-radius:9px}
+body.shop-refresh .game-category-v4{font-size:10px;letter-spacing:.03em;font-weight:650;color:#7ec5f0;line-height:1.5}
+body.shop-refresh .offer-grid-v4{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));align-items:stretch;gap:14px}
+body.shop-refresh .offer-card-v4{display:flex!important;flex-direction:column;justify-content:space-between;padding:0!important;overflow:hidden;min-width:0;border-radius:17px!important;background:linear-gradient(155deg,#102740,#0a1b2e)!important}
+body.shop-refresh .offer-head-v4{display:flex;gap:15px;align-items:center;padding:18px 18px 13px;min-height:110px}
+body.shop-refresh .offer-icon-v4{display:grid;place-items:center;flex:0 0 89px;width:89px;height:89px;background:#0a2136;border:1px solid #355b79;border-radius:14px;overflow:hidden}
+body.shop-refresh .offer-icon-v4 img{display:block;width:100%;height:100%;object-fit:contain!important;object-position:center!important}
+body.shop-refresh .offer-info-v4{min-width:0;flex:1}
+body.shop-refresh .offer-info-v4 .offer-eyebrow{font-size:10px;letter-spacing:.1em;color:#68c8fa;font-weight:750;white-space:normal}
+body.shop-refresh .offer-info-v4 h3{font-size:clamp(14px,1.8vw,17px);margin:7px 0 8px;line-height:1.35;overflow-wrap:anywhere;color:#f0f8ff}
+body.shop-refresh .offer-info-v4 small{font-size:11px;color:#9cbdd2;line-height:1.5}
+body.shop-refresh .offer-content-v4{display:flex;flex-direction:column;gap:13px;padding:0 18px 18px}
+body.shop-refresh .offer-content-v4 .currency-grid{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:8px}
+body.shop-refresh .offer-content-v4 .currency-box{display:flex;flex-direction:column;align-items:center;justify-content:center;padding:11px 6px;min-width:0;background:#0a2139;border-radius:10px}
+body.shop-refresh .offer-content-v4 .currency-box strong{font-size:clamp(15px,1.8vw,20px)}
+body.shop-refresh .offer-content-v4 .btn{width:100%;min-height:41px}
+body.shop-refresh .payment-methods{display:grid!important;grid-template-columns:repeat(2,minmax(0,1fr));gap:12px!important}
+body.shop-refresh .payment-option{display:flex!important;flex-direction:row;align-items:center;justify-content:flex-start;gap:12px;min-width:0!important;width:100%;padding:14px 12px!important;min-height:95px!important;border:1px solid #315574!important;border-radius:13px!important;background:linear-gradient(160deg,#0e253b,#0a1c2f);cursor:pointer}
+body.shop-refresh .payment-option:has(input:checked){background:linear-gradient(145deg,#0f3b60,#0d2440)!important;border-color:#48b8ff!important;box-shadow:inset 3px 0 #48bdff}
+body.shop-refresh .payment-option:has(input:disabled){opacity:.7;cursor:not-allowed}
+body.shop-refresh .payment-option>input{appearance:auto;flex:none;width:17px;height:17px;min-width:17px;accent-color:#319bff;opacity:1!important;position:relative!important}
+body.shop-refresh .payment-option .payment-symbol{display:grid;place-items:center;flex:0 0 57px;width:57px;height:57px;min-width:57px;padding:4px;border-radius:13px;border:1px solid #d9e8f3;background:#fbfdff;overflow:hidden}
+body.shop-refresh .payment-option .payment-symbol img{width:100%;height:100%;max-width:48px;max-height:48px;object-fit:contain!important;object-position:center!important;border-radius:8px}
+body.shop-refresh .payment-option .payment-copy{display:flex;flex-direction:column;gap:5px;min-width:0;overflow-wrap:anywhere}
+body.shop-refresh .payment-option .payment-copy strong{font-size:13px;line-height:1.25}
+body.shop-refresh .payment-option .payment-copy small{font-size:10px;line-height:1.45;color:#9dc5dd}
+body.shop-refresh .payment-option:has(input:disabled) .payment-copy small{color:#e1bc87}
+body.shop-refresh .crypto-method-notice{border-radius:11px;border-color:#317c70;background:#113a3a;color:#b9f3e2;padding:15px}
+body.shop-refresh .crypto-method-notice p{margin:7px 0;font-size:12px;line-height:1.6}
+body.shop-refresh .crypto-invoice-v4{width:100%;padding:18px;max-width:none;background:linear-gradient(150deg,#112b40,#0b1c30);border:1px solid #2c617e;border-radius:16px;text-align:left}
+body.shop-refresh .crypto-invoice-v4 h2{font-size:22px;margin:8px 0 10px}
+body.shop-refresh .crypto-invoice-amount{display:flex;flex-direction:column;gap:5px;border:1px solid #2e7971;background:#103b39;border-radius:13px;padding:18px;margin:15px 0}
+body.shop-refresh .crypto-invoice-amount small{color:#a4d6c7}
+body.shop-refresh .crypto-invoice-amount strong{font-size:25px;color:#e9fff5;letter-spacing:-.04em}
+body.shop-refresh .crypto-invoice-address{display:flex;flex-direction:column;gap:10px;border:1px solid #31587a;border-radius:13px;background:#0b1f35;padding:14px}
+body.shop-refresh .crypto-invoice-address small{font-size:10px;color:#97bfd8}
+body.shop-refresh .crypto-invoice-address code{display:block;white-space:normal;word-break:break-all;color:#ecf9ff;font-size:13px;line-height:1.65}
+body.shop-refresh .crypto-invoice-address .btn{align-self:flex-start}
+body.shop-refresh .crypto-invoice-status{background:#112d41;border:1px solid #346586;border-radius:10px;padding:12px 14px;color:#c1e9ff;margin:14px 0;font-size:12px}
+body.admin-view .rs-v3-crypto-toggle{border:1px solid #365776;background:#0b2235;padding:15px 16px;border-radius:12px;margin:14px 0}
+body.admin-view .rs-v3-crypto-toggle p{font-size:12px;color:#bed7e9;line-height:1.6;margin:0 0 11px}
+@media(max-width:1050px){body.shop-refresh .game-grid-v4,body.shop-refresh .offer-grid-v4{grid-template-columns:minmax(0,1fr)}}
+@media(max-width:760px){body.shop-refresh .game-card-v4{min-height:160px}body.shop-refresh .game-art-v4{flex-basis:125px;width:125px;min-height:125px;margin:10px}body.shop-refresh .game-art-v4 img{height:125px}body.shop-refresh .game-content-v4{padding:14px 12px 14px 2px}body.shop-refresh .payment-methods{grid-template-columns:minmax(0,1fr)}body.shop-refresh .offer-grid-v4{grid-template-columns:minmax(0,1fr)}}
+@media(max-width:480px){body.shop-refresh .game-card-v4{min-height:142px}body.shop-refresh .game-art-v4{flex-basis:112px;width:112px;min-height:112px;margin:9px}body.shop-refresh .game-art-v4 img{height:112px}body.shop-refresh .game-content-v4{padding:12px 9px 12px 0;gap:6px}body.shop-refresh .game-content-v4 h3{font-size:16px}body.shop-refresh .game-content-v4 .btn{font-size:11px;padding:8px}body.shop-refresh .offer-head-v4{padding:14px 13px;gap:11px}body.shop-refresh .offer-icon-v4{flex-basis:73px;width:73px;height:73px}body.shop-refresh .offer-content-v4{padding:0 13px 14px}body.shop-refresh .payment-option{gap:11px;padding:12px 10px!important}body.shop-refresh .crypto-invoice-amount strong{font-size:20px}}
