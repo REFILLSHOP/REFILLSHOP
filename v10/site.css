@@ -1055,3 +1055,13 @@ body.shop-refresh .purchase-crypto-done-v5 .crypto-invoice-address,body.shop-ref
  body.shop-refresh .purchase-review-list-v5 span{flex-basis:31%}
  body.shop-refresh .purchase-review-list-v5 strong{max-width:69%}
 }
+
+
+/* Purchase V5 corrective pass after live browser verification */
+body.shop-refresh .payment-logo-mitransfer{background:#07549a;border-color:#d9ebf5!important;padding:0;overflow:hidden}
+body.shop-refresh .payment-wallet-mark-v5{display:block;width:100%;height:100%;background-image:url("https://www.averquesale.com/sites/default/files/styles/blog_full/public/2025-10/IMG_5734.jpeg.webp?itok=U47cIsuQ"),url("/assets/mitransfer.svg");background-repeat:no-repeat;background-size:180% 190%,contain;background-position:68% 28%,center;background-color:#07549a}
+body.shop-refresh .purchase-preview-note-v5{background:#0f3347!important;border-color:#2f6b83!important;color:#cbeeff}
+body.shop-refresh .purchase-payment-detail-v5 .upload:has(input:not([required])){border-color:#326883}
+body.shop-refresh .purchase-form-actions-v5 .btn[disabled]{cursor:not-allowed;opacity:.65}
+@media(min-width:521px){body.shop-refresh .purchase-layout-v5 .payment-methods-v5{display:grid!important;grid-template-columns:repeat(2,minmax(0,1fr))!important}}
+@media(max-width:520px){body.shop-refresh .purchase-layout-v5 .payment-methods-v5{grid-template-columns:minmax(0,1fr)!important}}
