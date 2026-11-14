@@ -33,15 +33,17 @@
   <div id="splash" class="splash" role="status" aria-live="polite">
     <div class="splash-art" aria-hidden="true"></div>
     <div class="splash-center">
-      <img src="/assets/refills-icon.png" alt="Refills Shop" class="splash-logo">
-      <div class="loading-track"><div class="loading-fill"></div></div>
-      <p id="splashMessage">Cargando Refills Shop y sincronizando catálogo…</p>
+      <div class="splash-brand"><img src="/assets/refills-icon.png" alt="" class="splash-logo"><span class="splash-brand-name">REFILLS <small>SHOP</small></span></div>
+      <div class="splash-line" aria-hidden="true"></div>
+      <p id="splashMessage">Preparando tu tienda y actualizando el catálogo…</p>
+      <div class="loading-track" aria-hidden="true"><div class="loading-fill"></div></div>
+      <p class="splash-hint">Juegos y ofertas sincronizados con el servidor</p>
       <button id="splashRetry" type="button" class="btn btn-primary hide">Reintentar conexión</button>
     </div>
   </div>
   <header class="header">
     <div class="wrap header-inner">
-      <a class="brand" href="/inicio" data-link aria-label="Volver al inicio"><span class="brand-mark"><img src="/assets/refills-icon.png" alt="" width="44" height="44"></span><span class="brand-words">REFILLS <small>SHOP</small></span></a>
+      <a class="brand" href="/inicio" data-link aria-label="Volver al inicio"><span class="brand-mark"><img src="/assets/refills-icon.png" alt="" width="34" height="34"></span><span class="brand-words">REFILLS <small>SHOP</small></span></a>
       <div class="header-tools">
         <div id="balanceChip" class="balance-chip" title="Saldo disponible para revendedores" aria-label="Saldo USDT"><span class="balance-coin" aria-hidden="true">₮</span><span class="balance-copy"><span class="balance-label">SALDO USDT</span><strong id="balanceValue">0.00</strong></span></div>
         <a class="header-action" href="/pedidos" data-link aria-label="Mis pedidos" title="Mis pedidos"><svg class="icon" aria-hidden="true"><use href="#icon-bag"></use></svg></a>
