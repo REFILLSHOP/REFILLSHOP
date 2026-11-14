@@ -369,3 +369,15 @@ body:has(.admin-tabs) input:focus-visible,body:has(.admin-tabs) select:focus-vis
 @media(min-width:1000px){body:has(.admin-tabs) main.wrap{display:grid;grid-template-columns:230px minmax(0,1fr);column-gap:24px;align-content:start}body:has(.admin-tabs) main.wrap>.admin-tabs{grid-column:1;grid-row:2 / span 12;align-self:start}body:has(.admin-tabs) main.wrap>*:not(.admin-tabs){grid-column:2;min-width:0}}
 @media(max-width:999px){body:has(.admin-tabs) .admin-tabs{position:relative;display:flex;overflow-x:auto;scroll-snap-type:x proximity;flex-wrap:nowrap;padding:10px;gap:7px}body:has(.admin-tabs) .admin-tabs .chip{width:auto;min-width:max-content;min-height:42px;scroll-snap-align:start}body:has(.admin-tabs) .admin-tabs .chip:last-child{margin-top:0;border-top:0}body:has(.admin-tabs) .admin-stats{grid-template-columns:repeat(2,minmax(0,1fr))}}
 @media(max-width:560px){body:has(.admin-tabs) .admin-stats{grid-template-columns:1fr}body:has(.admin-tabs) .admin-grid{grid-template-columns:1fr}body:has(.admin-tabs) .stat{padding:16px}}
+
+
+/* Dedicated administration workspaces: games, offer editor, offer library */
+.admin-workspace .adm-editor-grid{display:grid;grid-template-columns:minmax(0,1fr);gap:18px}
+.admin-workspace .adm-editor-panel{min-width:0}
+.admin-workspace-games .adm-editor-grid>.adm-editor-panel:not(:first-child),.admin-workspace-games .adm-editor-grid+section{display:none!important}
+.admin-workspace-offers .adm-editor-grid>.adm-editor-panel:first-child,.admin-workspace-offers .adm-editor-grid+section{display:none!important}
+.admin-workspace-offer-list .adm-editor-grid,.admin-workspace-offer-list .adm-hero{display:none!important}
+.admin-workspace-offers .adm-editor-grid{grid-template-columns:repeat(2,minmax(0,1fr))}
+.admin-workspace .adm-hero{margin-bottom:18px}
+.admin-workspace .adm-editor-panel{border:1px solid #315071;border-radius:18px}
+@media(max-width:1100px){.admin-workspace-offers .adm-editor-grid{grid-template-columns:minmax(0,1fr)}}
