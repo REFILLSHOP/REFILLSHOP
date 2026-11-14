@@ -1,0 +1,13 @@
+{
+  "name": "refills-shop-v10",
+  "private": true,
+  "version": "10.0.0",
+  "description": "Refills Shop V10: Supabase-backed catalog, secure admin customer management and idempotent Central One purchase workflow",
+  "scripts": {
+    "start": "node --env-file-if-exists=.env server.js",
+    "test": "node --test --test-concurrency=1 tests/*.test.js"
+  },
+  "engines": {
+    "node": ">=22"
+  }
+}
