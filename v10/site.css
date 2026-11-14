@@ -1121,3 +1121,13 @@ body.shop-refresh .card input,body.shop-refresh .card textarea,body.shop-refresh
 @media(max-width:350px){body .footer-grid-v11{grid-template-columns:minmax(0,1fr)}body .footer-grid-v11>div:first-child{grid-column:auto}}
 
 body.shop-refresh .not-found-page{display:grid;place-items:center;min-height:55vh;padding:35px 0 70px}body.shop-refresh .not-found-page .legal-block{width:min(100%,660px);padding:clamp(22px,4vw,38px);text-align:left}body.shop-refresh .not-found-page h1{font-size:clamp(24px,3.3vw,36px);color:#eefaff;line-height:1.18;letter-spacing:-.035em;margin:11px 0}body.shop-refresh .not-found-page .btn-row{display:flex;align-items:center;flex-wrap:wrap;gap:10px;margin-top:20px}
+
+
+/* Final game-art pass: fill the complete frame without letterbox gaps */
+body.shop-refresh .game-card-v4{align-items:stretch}
+body.shop-refresh .game-art-v4{display:block;align-self:stretch;flex:0 0 160px;width:160px;height:auto;min-height:0;margin:0;border:0;border-radius:0;background:#081a2b;overflow:hidden}
+body.shop-refresh .game-art-v4 img{display:block;width:100%;height:100%;min-height:100%;max-width:none;max-height:none;object-fit:cover!important;object-position:center 42%!important}
+body.shop-refresh .offer-icon-v4 img{width:100%;height:100%;object-fit:cover!important;object-position:center 42%!important}
+body.shop-refresh .purchase-heading-game-v5 img,body.shop-refresh .purchase-game-row-v5 img{object-fit:cover!important;object-position:center 42%!important}
+@media(max-width:760px){body.shop-refresh .game-art-v4{flex-basis:125px;width:125px;margin:0}body.shop-refresh .game-art-v4 img{height:100%;min-height:100%}}
+@media(max-width:480px){body.shop-refresh .game-art-v4{flex-basis:112px;width:112px;margin:0}body.shop-refresh .game-art-v4 img{height:100%;min-height:100%}}
