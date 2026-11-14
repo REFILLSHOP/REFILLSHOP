@@ -520,3 +520,70 @@ body.admin-view .modal-card{max-height:94dvh;padding:16px}
 /* Specificity fix: manual draft editor is visible only in Crear ofertas */
 .admin-workspace-offers .adm-editor-grid + .adm-manual-draft{display:block!important}
 .admin-workspace-offer-list .adm-editor-grid + .adm-manual-draft,.admin-workspace-games .adm-editor-grid + .adm-manual-draft{display:none!important}
+
+
+/* V10: streamlined startup and smaller brand icon */
+.header .brand-mark{width:36px;height:36px;border-radius:11px;box-shadow:0 4px 12px #0d78ff30}
+.header .brand-mark img{width:34px;height:34px;object-fit:cover}
+.header .brand{gap:8px}
+.header .brand-words{font-size:1.06rem}
+.splash{background:radial-gradient(ellipse 40% 32% at 50% 39%,#0f426b77,transparent 85%),#060e1c}
+.splash-art{background:linear-gradient(180deg,#0613216e,#030915d4),radial-gradient(circle at 50% 42%,#178cfc21,transparent 50%);pointer-events:none}
+.splash-center{width:min(380px,calc(100% - 40px));gap:10px;padding:26px 24px;border-radius:22px;border:1px solid #284764;background:linear-gradient(160deg,#0d2238df,#081628ec);box-shadow:0 28px 75px #0007}
+.splash-brand{display:flex;align-items:center;justify-content:center;gap:12px}
+.splash-logo{width:58px!important;height:58px!important;border-radius:15px!important;box-shadow:0 5px 22px #0e72da42!important;animation:none!important;object-fit:cover}
+.splash-brand-name{font-weight:900;color:#eff8ff;font-size:21px;letter-spacing:-.05em;line-height:1.05}
+.splash-brand-name small{display:block;margin-top:3px;color:#65c6ff;font-size:9px;letter-spacing:.37em}
+.splash-line{width:56px;height:2px;background:linear-gradient(90deg,transparent,#39a9ff,transparent);margin:7px 0 1px}
+.splash-center #splashMessage{margin:2px 0!important;font-size:12px!important;color:#d3e8fb!important;text-align:center;line-height:1.5}
+.splash-hint{margin:2px 0 0!important;color:#779ebd;font-size:10px;text-align:center}
+.splash-center .loading-track{width:100%;max-width:255px;height:4px;border-radius:99px;overflow:hidden;background:#233d55;margin-top:8px}
+.splash-center .loading-fill{width:36%;height:100%;border-radius:99px;background:linear-gradient(90deg,#2b87ff,#6bdfff);animation:rs-loading-advance 1.55s ease-in-out infinite alternate}
+@keyframes rs-loading-advance{from{transform:translateX(-90%)}to{transform:translateX(280%)}}
+@media(prefers-reduced-motion:reduce){.splash-center .loading-fill{animation:none;width:100%;opacity:.6}}
+/* All administration content panels are horizontal full-width sections stacked vertically */
+body.admin-view .main-content{max-width:1200px}
+body.admin-view .admin-grid,
+body.admin-view .admin-stats,
+body.admin-view .adm-editor-grid,
+body.admin-view .admin-workspace-offers .adm-editor-grid,
+body.admin-view .admin-workspace-games .adm-editor-grid,
+body.admin-view .admin-workspace .adm-game-rows,
+body.admin-view .adm-price-grid,
+body.admin-view .admin-workspace .adm-price-grid,
+body.admin-view .admin-workspace .adm-hero,
+body.admin-view .admin-workspace .adm-product-meta{grid-template-columns:minmax(0,1fr)!important}
+body.admin-view .admin-grid,body.admin-view .admin-stats,body.admin-view .adm-editor-grid{display:grid;gap:12px;align-items:stretch}
+body.admin-view .admin-stats{margin:12px 0}
+body.admin-view .admin-stats .stat{padding:13px 16px;display:flex;justify-content:space-between;align-items:center;gap:12px}
+body.admin-view .admin-stats .stat strong{font-size:1.5rem;flex:none}
+body.admin-view .admin-stats .stat small{font-size:12px}
+body.admin-view .admin-grid>*,body.admin-view .adm-editor-grid>*,body.admin-view .admin-stats>*{grid-column:1/-1!important;width:100%;min-width:0;max-width:none}
+body.admin-view .adm-editor-grid>.adm-offer-editor{grid-column:1/-1!important}
+body.admin-view .admin-workspace .adm-editor-panel{width:100%;max-width:none}
+body.admin-view .admin-workspace .adm-mini-game{width:100%;display:flex;flex-wrap:wrap;padding:10px 14px}
+body.admin-view .admin-workspace .adm-mini-game>.adm-game-offers-detail{flex:0 0 100%;border-top:1px solid #25405e;padding-top:8px;margin-top:4px}
+body.admin-view .adm-game-offers-detail summary{cursor:pointer;font-size:11px;color:#82c7f9;font-weight:700;list-style-position:inside}
+body.admin-view .adm-game-offer-row{display:flex;justify-content:space-between;gap:12px;border-bottom:1px solid #1e334b;padding:8px 4px;font-size:11px}
+body.admin-view .adm-game-offer-row strong,body.admin-view .adm-game-offer-row span{overflow-wrap:anywhere}
+body.admin-view .admin-workspace .adm-game-actions{margin-left:auto;max-width:none}
+body.admin-view .admin-workspace .adm-manual-draft form{max-width:none}
+body.admin-view .admin-workspace .adm-provider-results{max-height:420px}
+body.admin-view .admin-workspace .adm-saved-offers{width:100%}
+body.admin-view .admin-workspace .adm-toolbar{display:flex;flex-wrap:wrap}
+body.admin-view .admin-workspace .adm-form-actions{display:flex}
+body.admin-view .adm-editor-panel .twofields,body.admin-view .profile-card .twofields{grid-template-columns:repeat(2,minmax(0,1fr))}
+body.admin-view .adm-step-heading{align-items:center}
+body.admin-view .admin-workspace .adm-offer-editor{margin-top:0}
+body.admin-view .admin-workspace-offer-list .adm-editor-grid,
+body.admin-view .admin-workspace-games .adm-editor-grid>.adm-editor-panel:not(:first-child){display:none!important}
+@media(max-width:760px){
+  .header .brand-mark{width:32px;height:32px}
+  .header .brand-mark img{width:30px;height:30px}
+  .header .brand-words{font-size:.96rem}
+  body.admin-view .adm-editor-panel .twofields,body.admin-view .profile-card .twofields{grid-template-columns:minmax(0,1fr)}
+  body.admin-view .admin-workspace .adm-game-actions{width:100%;margin-left:0;justify-content:flex-start;display:flex;flex-wrap:wrap}
+  body.admin-view .adm-game-offer-row{flex-direction:column;gap:3px}
+  body.admin-view .admin-grid,body.admin-view .admin-stats{gap:9px}
+  body.admin-view .admin-stats .stat{padding:12px}
+}
