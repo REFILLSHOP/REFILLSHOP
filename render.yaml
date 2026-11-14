@@ -1,0 +1,11 @@
+services:
+  - type: web
+    name: refills-shop-cuba
+    runtime: static
+    branch: feature/revendedor-usdt-bep20-20261114
+    buildCommand: echo "Refills Shop static deployment"
+    staticPublishPath: v10
+    routes:
+      - type: rewrite
+        source: /*
+        destination: /index.html
