@@ -19,6 +19,6 @@ test('las secciones de tienda y administración respetan el ancho del móvil',()
   assert.match(css,/html\{[^}]*overflow-x:clip/);
   assert.match(css,/body\.shop-refresh \.main-content\{[^}]*margin-inline:auto/);
   assert.match(css,/body\.shop-refresh \.offer-grid-v4\{[^}]*width:100%/);
-  assert.match(css,/@media\(max-width:620px\)\{[^}]*body\.admin-view \.rs-v3-item\{[^}]*flex-wrap:wrap/);
+  assert.match(css,/body\.admin-view \.rs-admin-content \.rs-v3-item\{[^}]*flex-wrap:wrap/);
   assert.doesNotMatch(css,/100vw/);
 });
