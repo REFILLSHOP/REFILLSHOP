@@ -244,10 +244,10 @@ function routeLabel(){const path=PREVIEW?(new URLSearchParams(location.search).g
 
 function legalSection(title,body){return `<section class="legal-block"><h2>${title}</h2>${body}</section>`}
 function legalContactBlock(){
- const c=S.store?.config||{},email=String(c.supportEmail||'').trim(),wa=String(c.supportWhatsapp||'').replace(/[^0-9]/g,''),business=String(c.operatorName||'').trim();
+ const c=S.store?.config||{},email=String(c.supportEmail||'').trim(),wa=String(c.supportWhatsapp||'').replace(/[^0-9]/g,''),waDisplay=wa.startsWith('53')&&wa.length===10?'+53 '+wa.slice(2):'+'+wa,business=String(c.operatorName||'').trim();
  return `<div class="legal-contact-grid">
    <div><small>Atención por correo</small>${email?`<a href="mailto:${esc(email)}">${esc(email)}</a>`:'<strong>Aún sin configurar</strong>'}</div>
-   <div><small>Atención por WhatsApp</small>${wa?`<a href="https://wa.me/${esc(wa)}" target="_blank" rel="noopener noreferrer">Abrir WhatsApp de soporte</a>`:'<strong>Aún sin configurar</strong>'}</div>
+   <div><small>Atención por WhatsApp</small>${wa?`<a href="https://wa.me/${esc(wa)}" target="_blank" rel="noopener noreferrer">${esc(waDisplay)} · Abrir WhatsApp</a>`:'<strong>Aún sin configurar</strong>'}</div>
    <div><small>Responsable comercial</small><strong>${business?esc(business):'Pendiente de identificación pública'}</strong></div>
   </div>`;
 }
@@ -279,7 +279,7 @@ function legalPage(path){
   +legalSection('Pagos duplicados o importes incorrectos',`<p>Si realizaste dos pagos o el importe no coincide, contacta con soporte y conserva los justificantes. No compartas contraseñas ni claves privadas para solicitar una revisión.</p>`)
   +legalSection('Condiciones por finalizar',`<p>Antes de habilitar ventas reales se deben definir y publicar los plazos, canales de respuesta y procedimiento de reembolso aplicables a la actividad y jurisdicción del operador.</p>`);
  }else{
-  body=legalSection('Solicitar asistencia',`<p>Para una incidencia, indica el código de pedido, el juego y una descripción breve. Evita enviar contraseñas, códigos de autenticación o claves de tu billetera.</p><p>Si los canales de contacto aparecen como «Aún sin configurar», el responsable de la tienda deberá habilitarlos antes de comenzar a recibir pagos reales.</p>`)
+  body=legalSection('Solicitar asistencia',`<p>Para una incidencia, indica el código de pedido, el juego y una descripción breve. Si se trata de un problema de pago, adjunta el comprobante correspondiente desde tu cuenta.</p><p>Si los canales de contacto aparecen como «Aún sin configurar», el responsable de la tienda deberá habilitarlos antes de comenzar a recibir pagos reales.</p>`)
   +legalSection('Estado de tus pedidos',`<p>Los pedidos registrados pueden consultarse en <a href="/pedidos" data-link>Mis pedidos</a> desde tu cuenta. Revisa siempre el estado antes de realizar una nueva transferencia.</p>`);
  }
  const c=S.store?.config||{};
