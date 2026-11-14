@@ -1,6 +1,6 @@
 # Refills Shop — USDT BEP-20 para el saldo de revendedores
 
-Estado: integración instalada en rama de trabajo, validación final de pagos pendiente. **No habilitar envíos de dinero sin probar la integración de principio a fin.**
+Estado: interfaz ya publicada en el Worker activo; backend instalado, validación monetaria final y habilitación de fondos pendientes. **No habilitar envíos de dinero sin probar la integración de principio a fin.**
 
 ## Backend protegido
 - Supabase proyecto `kcgjlnymhmxylrjchcvl`; función `rs11-wallet`.
@@ -38,5 +38,5 @@ Tras completar los controles, el administrador puede habilitar de forma explíci
 
 ## Entornos
 - Preview de pruebas: `https://refills-shop-v10-pruebas.refills-shop-preview.workers.dev/`; operaciones normales bloqueadas.
-- Entorno principal `refills-shop-v10-activo`: **no cambiar ni habilitar pagos hasta terminar verificaciones**.
+- Entorno principal `refills-shop-v10-activo`: interfaz y proxy del monedero actualizados a la versión V11; **la acreditación de depósitos USDT permanece bloqueada hasta las pruebas monetarias**.
 - `main` de GitHub conserva la página de mantenimiento actual. Esta rama no cambia el inicio público.
