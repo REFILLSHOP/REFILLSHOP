@@ -1133,24 +1133,24 @@ body.shop-refresh .purchase-heading-game-v5 img,body.shop-refresh .purchase-game
 @media(max-width:480px){body.shop-refresh .game-art-v4{flex-basis:112px;width:112px;margin:0}body.shop-refresh .game-art-v4 img{height:100%;min-height:100%}}
 
 /* Refills Shop · pantalla de carga renovada */
-body.shop-refresh .splash-v2{position:fixed;inset:0;z-index:200;display:grid;place-items:center;overflow:hidden;padding:18px;background:radial-gradient(ellipse at 50% 36%,#0d3c65 0%,#071a2c 38%,#030914 78%)}
-body.shop-refresh .splash-v2-glow{position:absolute;width:min(620px,90vw);aspect-ratio:1;border-radius:50%;background:radial-gradient(circle,#0878dc26 0%,#0878dc0b 38%,transparent 70%);filter:blur(4px);pointer-events:none}
-body.shop-refresh .splash-v2-card{position:relative;display:flex;flex-direction:column;align-items:center;gap:13px;width:min(430px,100%);padding:30px 28px 24px;border:1px solid #24577d;border-radius:23px;background:linear-gradient(155deg,#0d2339f5,#071526f5);box-shadow:0 28px 90px #0009,inset 0 1px #ffffff12;text-align:center}
-body.shop-refresh .splash-v2-brand{display:flex;align-items:center;gap:12px;margin-bottom:4px;color:#f4f9ff;font-size:24px;font-weight:950;letter-spacing:-.055em;line-height:1}
-body.shop-refresh .splash-v2-logo{display:block;width:58px;height:58px;object-fit:contain;border:1px solid #3e92c8;border-radius:16px;box-shadow:0 7px 24px #087de044}
-body.shop-refresh .splash-v2-brand small{display:block;margin-top:5px;color:#65c6ff;font-size:9px;letter-spacing:.42em}
-body.shop-refresh .splash-v2-kicker{margin-top:5px;color:#65c9f7;font-size:9px;font-weight:850;letter-spacing:.24em}
-body.shop-refresh .splash-v2-card h1{margin:0;color:#f3f8ff;font-size:clamp(19px,4vw,23px);font-weight:900;letter-spacing:-.035em}
-body.shop-refresh .splash-v2-card #splashMessage{min-height:34px;margin:0;color:#a9c9e1;font-size:12px;line-height:1.55;text-align:center}
-body.shop-refresh .splash-v2-track{width:100%;height:5px;margin:5px 0 2px;overflow:hidden;border-radius:99px;background:#183550}
-body.shop-refresh .splash-v2-track span{display:block;width:35%;height:100%;border-radius:99px;background:linear-gradient(90deg,#1688ff,#70ddff);animation:rs-splash-v2 1.55s ease-in-out infinite alternate}
-body.shop-refresh .splash-v2-foot{display:flex;justify-content:space-between;gap:12px;width:100%;padding-top:10px;border-top:1px solid #1e3a54;color:#6f94b2;font-size:8px;font-weight:800;letter-spacing:.11em}
-body.shop-refresh .splash-v2-foot span:first-child{display:flex;align-items:center;gap:6px}
-body.shop-refresh .splash-v2-foot i{width:6px;height:6px;border-radius:50%;background:#28d7b0;box-shadow:0 0 9px #28d7b0}
-body.shop-refresh .splash-v2-card #splashRetry{min-width:180px;margin-top:4px}
+.splash-v2{position:fixed;inset:0;z-index:200;display:grid;place-items:center;overflow:hidden;padding:18px;background:radial-gradient(ellipse at 50% 36%,#0d3c65 0%,#071a2c 38%,#030914 78%)}
+.splash-v2-glow{position:absolute;width:min(620px,90vw);aspect-ratio:1;border-radius:50%;background:radial-gradient(circle,#0878dc26 0%,#0878dc0b 38%,transparent 70%);filter:blur(4px);pointer-events:none}
+.splash-v2-card{position:relative;display:flex;flex-direction:column;align-items:center;gap:13px;width:min(430px,100%);padding:30px 28px 24px;border:1px solid #24577d;border-radius:23px;background:linear-gradient(155deg,#0d2339f5,#071526f5);box-shadow:0 28px 90px #0009,inset 0 1px #ffffff12;text-align:center}
+.splash-v2-brand{display:flex;align-items:center;gap:12px;margin-bottom:4px;color:#f4f9ff;font-size:24px;font-weight:950;letter-spacing:-.055em;line-height:1}
+.splash-v2-logo{display:block;width:58px;height:58px;object-fit:contain;border:1px solid #3e92c8;border-radius:16px;box-shadow:0 7px 24px #087de044}
+.splash-v2-brand small{display:block;margin-top:5px;color:#65c6ff;font-size:9px;letter-spacing:.42em}
+.splash-v2-kicker{margin-top:5px;color:#65c9f7;font-size:9px;font-weight:850;letter-spacing:.24em}
+.splash-v2-card h1{margin:0;color:#f3f8ff;font-size:clamp(19px,4vw,23px);font-weight:900;letter-spacing:-.035em}
+.splash-v2-card #splashMessage{min-height:34px;margin:0;color:#a9c9e1;font-size:12px;line-height:1.55;text-align:center}
+.splash-v2-track{width:100%;height:5px;margin:5px 0 2px;overflow:hidden;border-radius:99px;background:#183550}
+.splash-v2-track span{display:block;width:35%;height:100%;border-radius:99px;background:linear-gradient(90deg,#1688ff,#70ddff);animation:rs-splash-v2 1.55s ease-in-out infinite alternate}
+.splash-v2-foot{display:flex;justify-content:space-between;gap:12px;width:100%;padding-top:10px;border-top:1px solid #1e3a54;color:#6f94b2;font-size:8px;font-weight:800;letter-spacing:.11em}
+.splash-v2-foot span:first-child{display:flex;align-items:center;gap:6px}
+.splash-v2-foot i{width:6px;height:6px;border-radius:50%;background:#28d7b0;box-shadow:0 0 9px #28d7b0}
+.splash-v2-card #splashRetry{min-width:180px;margin-top:4px}
 @keyframes rs-splash-v2{from{transform:translateX(-90%)}to{transform:translateX(290%)}}
-@media(max-width:480px){body.shop-refresh .splash-v2-card{gap:11px;padding:25px 19px 20px;border-radius:19px}body.shop-refresh .splash-v2-logo{width:51px;height:51px}body.shop-refresh .splash-v2-brand{font-size:22px}body.shop-refresh .splash-v2-foot{font-size:7px;letter-spacing:.07em}}
-@media(prefers-reduced-motion:reduce){body.shop-refresh .splash-v2-track span{animation:none;width:100%;opacity:.65}}
+@media(max-width:480px){.splash-v2-card{gap:11px;padding:25px 19px 20px;border-radius:19px}.splash-v2-logo{width:51px;height:51px}.splash-v2-brand{font-size:22px}.splash-v2-foot{font-size:7px;letter-spacing:.07em}}
+@media(prefers-reduced-motion:reduce){.splash-v2-track span{animation:none;width:100%;opacity:.65}}
 /* Checkout: un único paso de pago con instrucciones y captura */
 body.shop-refresh .checkout-v6{max-width:1120px}
 body.shop-refresh .checkout-v6 .purchase-layout-v5{grid-template-columns:minmax(0,1.55fr) minmax(260px,.72fr);align-items:start;gap:18px}
