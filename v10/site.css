@@ -1131,3 +1131,59 @@ body.shop-refresh .offer-icon-v4 img{width:100%;height:100%;object-fit:cover!imp
 body.shop-refresh .purchase-heading-game-v5 img,body.shop-refresh .purchase-game-row-v5 img{object-fit:cover!important;object-position:center 42%!important}
 @media(max-width:760px){body.shop-refresh .game-art-v4{flex-basis:125px;width:125px;margin:0}body.shop-refresh .game-art-v4 img{height:100%;min-height:100%}}
 @media(max-width:480px){body.shop-refresh .game-art-v4{flex-basis:112px;width:112px;margin:0}body.shop-refresh .game-art-v4 img{height:100%;min-height:100%}}
+
+/* Refills Shop · pantalla de carga renovada */
+body.shop-refresh .splash-v2{position:fixed;inset:0;z-index:200;display:grid;place-items:center;overflow:hidden;padding:18px;background:radial-gradient(ellipse at 50% 36%,#0d3c65 0%,#071a2c 38%,#030914 78%)}
+body.shop-refresh .splash-v2-glow{position:absolute;width:min(620px,90vw);aspect-ratio:1;border-radius:50%;background:radial-gradient(circle,#0878dc26 0%,#0878dc0b 38%,transparent 70%);filter:blur(4px);pointer-events:none}
+body.shop-refresh .splash-v2-card{position:relative;display:flex;flex-direction:column;align-items:center;gap:13px;width:min(430px,100%);padding:30px 28px 24px;border:1px solid #24577d;border-radius:23px;background:linear-gradient(155deg,#0d2339f5,#071526f5);box-shadow:0 28px 90px #0009,inset 0 1px #ffffff12;text-align:center}
+body.shop-refresh .splash-v2-brand{display:flex;align-items:center;gap:12px;margin-bottom:4px;color:#f4f9ff;font-size:24px;font-weight:950;letter-spacing:-.055em;line-height:1}
+body.shop-refresh .splash-v2-logo{display:block;width:58px;height:58px;object-fit:contain;border:1px solid #3e92c8;border-radius:16px;box-shadow:0 7px 24px #087de044}
+body.shop-refresh .splash-v2-brand small{display:block;margin-top:5px;color:#65c6ff;font-size:9px;letter-spacing:.42em}
+body.shop-refresh .splash-v2-kicker{margin-top:5px;color:#65c9f7;font-size:9px;font-weight:850;letter-spacing:.24em}
+body.shop-refresh .splash-v2-card h1{margin:0;color:#f3f8ff;font-size:clamp(19px,4vw,23px);font-weight:900;letter-spacing:-.035em}
+body.shop-refresh .splash-v2-card #splashMessage{min-height:34px;margin:0;color:#a9c9e1;font-size:12px;line-height:1.55;text-align:center}
+body.shop-refresh .splash-v2-track{width:100%;height:5px;margin:5px 0 2px;overflow:hidden;border-radius:99px;background:#183550}
+body.shop-refresh .splash-v2-track span{display:block;width:35%;height:100%;border-radius:99px;background:linear-gradient(90deg,#1688ff,#70ddff);animation:rs-splash-v2 1.55s ease-in-out infinite alternate}
+body.shop-refresh .splash-v2-foot{display:flex;justify-content:space-between;gap:12px;width:100%;padding-top:10px;border-top:1px solid #1e3a54;color:#6f94b2;font-size:8px;font-weight:800;letter-spacing:.11em}
+body.shop-refresh .splash-v2-foot span:first-child{display:flex;align-items:center;gap:6px}
+body.shop-refresh .splash-v2-foot i{width:6px;height:6px;border-radius:50%;background:#28d7b0;box-shadow:0 0 9px #28d7b0}
+body.shop-refresh .splash-v2-card #splashRetry{min-width:180px;margin-top:4px}
+@keyframes rs-splash-v2{from{transform:translateX(-90%)}to{transform:translateX(290%)}}
+@media(max-width:480px){body.shop-refresh .splash-v2-card{gap:11px;padding:25px 19px 20px;border-radius:19px}body.shop-refresh .splash-v2-logo{width:51px;height:51px}body.shop-refresh .splash-v2-brand{font-size:22px}body.shop-refresh .splash-v2-foot{font-size:7px;letter-spacing:.07em}}
+@media(prefers-reduced-motion:reduce){body.shop-refresh .splash-v2-track span{animation:none;width:100%;opacity:.65}}
+/* Checkout: un único paso de pago con instrucciones y captura */
+body.shop-refresh .checkout-v6{max-width:1120px}
+body.shop-refresh .checkout-v6 .purchase-layout-v5{grid-template-columns:minmax(0,1.55fr) minmax(260px,.72fr);align-items:start;gap:18px}
+body.shop-refresh .purchase-form-v6{gap:18px}
+body.shop-refresh .purchase-form-v6 .purchase-panel-head-v5{padding-bottom:16px;border-bottom:1px solid #24445f}
+body.shop-refresh .payment-total-v6{display:flex;align-items:center;justify-content:space-between;gap:16px;padding:17px 19px;border:1px solid #2c668b;border-radius:15px;background:linear-gradient(135deg,#103c5d,#0a243d)}
+body.shop-refresh .payment-total-v6>div{display:flex;flex-direction:column;gap:5px}
+body.shop-refresh .payment-total-v6>div>small{color:#9bc5df;font-size:9px;font-weight:850;letter-spacing:.15em}
+body.shop-refresh .payment-total-v6 strong{color:#fff;font-size:clamp(26px,4vw,35px);font-weight:950;line-height:1.05}
+body.shop-refresh .payment-total-v6 strong small{font-size:12px;color:#9edfff}
+body.shop-refresh .payment-total-v6>span{color:#b8d9ef;font-size:11px;font-weight:750;text-align:right}
+body.shop-refresh .purchase-form-v6 .payment-methods-v5{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:11px}
+body.shop-refresh .purchase-form-v6 .payment-option-v5{min-width:0;min-height:82px;padding:11px 12px;border-radius:13px}
+body.shop-refresh .payment-logo-mitransfer{background:#fff!important;border-color:#d6ebf6!important}
+body.shop-refresh .payment-logo-mitransfer img{width:100%;height:100%;object-fit:contain!important;object-position:center!important;transform:none!important;padding:3px!important;background:#fff!important}
+body.shop-refresh .payment-detail-v6{display:flex;flex-direction:column;gap:12px}
+body.shop-refresh .payment-instructions-stack-v6{display:flex;flex-direction:column;gap:10px}
+body.shop-refresh .payment-instructions-v6{display:flex;flex-direction:column;gap:7px;padding:15px 16px;border:1px solid #34708f;border-radius:13px;background:linear-gradient(135deg,#103d59,#0c2942);color:#eaf7ff}
+body.shop-refresh .payment-instructions-kicker{color:#82c9ec;font-size:9px;font-weight:900;letter-spacing:.15em}
+body.shop-refresh .payment-instructions-v6>strong{font-size:clamp(20px,3vw,26px);font-weight:950;line-height:1.15}
+body.shop-refresh .payment-instructions-v6 p{margin:0;color:#b6d4e9;font-size:11px;line-height:1.5}
+body.shop-refresh .proof-upload-v6{display:flex;align-items:center;gap:13px;min-height:86px;padding:15px;border:1px dashed #4d99c3;border-radius:13px;background:#0b2a43;cursor:pointer}
+body.shop-refresh .proof-upload-icon-v6{display:grid;place-items:center;flex:0 0 42px;width:42px;height:42px;border:1px solid #36799d;border-radius:11px;background:#124668;color:#9ee0ff}
+body.shop-refresh .proof-upload-icon-v6 svg{width:21px;height:21px}
+body.shop-refresh .proof-upload-copy-v6{display:flex;flex:1;flex-direction:column;gap:5px;min-width:0}
+body.shop-refresh .proof-upload-copy-v6 strong{color:#eff9ff;font-size:12px;font-weight:900}
+body.shop-refresh .proof-upload-copy-v6 small{color:#9bbbd1;font-size:10px;overflow-wrap:anywhere}
+body.shop-refresh .proof-upload-copy-v6 .proof-selected-v6{color:#7ce2c2}
+body.shop-refresh .proof-upload-v6 input{max-width:100%;width:min(190px,100%);font-size:10px;color:#b9d4e6}
+body.shop-refresh .payment-proof-note-v6,.payment-submit-note-v6{margin:0;color:#91b3cc;font-size:10px;line-height:1.5}
+body.shop-refresh .purchase-form-v6 .purchase-confirm-checkbox-v5{padding:12px 14px;border:1px solid #294b66;border-radius:11px;background:#0b2034}
+body.shop-refresh .purchase-done-v6{max-width:680px;margin-inline:auto}
+body.shop-refresh .order-whatsapp-v6{width:100%;justify-content:center;margin:5px 0 2px;background:linear-gradient(135deg,#168b56,#087a4a)!important;border-color:#36bd83!important}
+body.shop-refresh .rs-v3-provider-types{display:flex;gap:9px;flex-wrap:wrap;margin:0 0 14px}
+body.shop-refresh .rs-v3-provider-types .chip{min-width:140px;justify-content:center}
+@media(max-width:760px){body.shop-refresh .checkout-v6 .purchase-layout-v5{grid-template-columns:minmax(0,1fr);gap:12px}body.shop-refresh .checkout-v6 .purchase-summary{order:2}body.shop-refresh .purchase-form-v6 .payment-methods-v5{grid-template-columns:minmax(0,1fr)}body.shop-refresh .payment-total-v6{align-items:flex-start;flex-direction:column;gap:7px}body.shop-refresh .payment-total-v6>span{text-align:left}body.shop-refresh .proof-upload-v6{align-items:flex-start;flex-wrap:wrap}body.shop-refresh .proof-upload-v6 input{width:100%;margin-left:55px}}
