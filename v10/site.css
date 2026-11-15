@@ -1498,3 +1498,62 @@ body.shop-refresh .order-card-v2,body.shop-refresh .cart-item{width:100%!importa
  body.shop-refresh .currency-grid{gap:5px!important}
  body.shop-refresh .currency-box strong{font-size:11px!important}
 }
+
+
+/* Transfermóvil: original user-supplied mark; consistent payment choices */
+body.shop-refresh .payment-logo-transfermovil{background:#0a213b!important;box-sizing:border-box!important}
+body.shop-refresh .payment-logo-transfermovil img{
+ display:block!important;
+ width:100%!important;
+ height:100%!important;
+ object-fit:contain!important;
+ object-position:center!important;
+ clip-path:circle(49.5% at 50% 50%)!important;
+ border-radius:50%!important;
+ transform:none!important;
+}
+body.shop-refresh .payment-methods-v5{
+ display:grid!important;
+ grid-template-columns:repeat(2,minmax(0,1fr))!important;
+ grid-auto-rows:92px!important;
+ align-items:stretch!important;
+ gap:12px!important;
+ min-width:0!important;
+}
+body.shop-refresh .payment-option-v5{
+ width:100%!important;
+ max-width:100%!important;
+ min-width:0!important;
+ min-height:92px!important;
+ height:92px!important;
+ box-sizing:border-box!important;
+ align-items:center!important;
+ padding:12px!important;
+}
+body.shop-refresh .payment-copy-v5{min-width:0!important;overflow-wrap:anywhere!important}
+body.shop-refresh .payment-logo-v5{flex-shrink:0!important;align-self:center!important}
+body.shop-refresh .purchase-layout-v5>*{min-width:0!important}
+@media(max-width:760px){
+ body.shop-refresh .payment-methods-v5{
+  grid-template-columns:minmax(0,1fr)!important;
+  grid-auto-rows:86px!important;
+  gap:10px!important;
+ }
+ body.shop-refresh .payment-option-v5{
+  min-height:86px!important;
+  height:86px!important;
+  padding:10px!important;
+ }
+ body.shop-refresh .purchase-layout-v5,
+ body.shop-refresh .payment-methods-v5{max-width:100%!important}
+}
+@media(max-width:360px){
+ body.shop-refresh .payment-logo-v5{
+  width:50px!important;
+  height:50px!important;
+  min-width:50px!important;
+  max-width:50px!important;
+ }
+ body.shop-refresh .payment-copy-v5 strong{font-size:12px!important}
+ body.shop-refresh .payment-copy-v5 small{font-size:9px!important}
+}
