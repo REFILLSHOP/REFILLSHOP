@@ -1346,3 +1346,7 @@ body.shop-refresh .order-card-v2{display:grid!important;gap:12px!important;width
  .order-modal-row>strong{text-align:left}
 }
 @media(prefers-reduced-motion:reduce){.toast{animation:none!important}.receipt-preview-wrap .admin-image{transition:none!important}}
+
+/* Final image-fit guard: game artwork is never cropped, including inline legacy rules. */
+.game-art-v4 img,.game-card-v4 img[data-cover-id]{object-fit:contain!important;object-position:center!important;border:0!important;outline:0!important;background:transparent!important}
+.game-art-v4{border:0!important;outline:0!important;box-shadow:none!important;background:transparent!important}
