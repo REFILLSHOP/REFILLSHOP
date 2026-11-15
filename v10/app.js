@@ -329,7 +329,8 @@ function adminV3Home(){
  return `<div class="rs-v3">${adminV3Heading('RESUMEN','Tu administración','Controla tu tienda desde un solo lugar.')}<div class="rs-v3-stats">${stats}</div>${adminV3Panel('Accesos rápidos','Cada tarea tiene su propia pantalla.',`<div class="rs-v3-shortcuts">${quick}</div>`)}${adminV3Panel('Registros recientes',pending+' clientes pendientes de revisión.',`<div class="rs-v3-form-actions"><button type="button" class="btn btn-primary" data-href="/admin/customers">Ir a clientes</button><button type="button" class="btn btn-outline" id="refreshCustomers">Actualizar avisos</button></div>`)}</div>`;
 }
 function adminV3Orders(){
- const all=(S.adminOrders||[]).slice().sort((a,b)=>new Date(b.created||0).getTime()-new Date(a.created||0).getTime());
+ const textFilter=String(S.admSearch||'').trim().toLocaleLowerCase('es-ES');
+ const all=(S.adminOrders||[]).filter(o=>!textFilter||[o.code,o.game,o.offer,o.playerId,o.method].some(value=>String(value||'').toLocaleLowerCase('es-ES').includes(textFilter))).slice().sort((a,b)=>new Date(b.created||0).getTime()-new Date(a.created||0).getTime());
  const isPending=o=>o.status==='pending';
  const awaiting=all.filter(o=>isPending(o)&&o.paymentStatus!=='paid');
  const ready=all.filter(o=>isPending(o)&&o.paymentStatus==='paid');
@@ -474,7 +475,7 @@ async function refreshWalletDeposit(silent=false){
 setInterval(()=>{if(!PREVIEW&&S.user&&S.member&&S.route==='/reseller'&&S.walletDeposit?.status==='pending')void refreshWalletDeposit(true)},45000);
 
 async function loadOrders(){if(PREVIEW){S.orders=[];render();return}if(!S.user)return;try{const data=await api('/api/orders',{auth:true});S.orders=data.orders||[];render()}catch(e){notify(e.message)}}
-async function loadAdminOrders({quiet=false}={}){if(PREVIEW||!S.admin)return;try{const incoming=(await api('/api/admin/orders'+(S.admSearch?'?q='+encodeURIComponent(S.admSearch):''))).orders||[];const previous=new Set(S.adminOrders.map(o=>o.id));const newPending=S.adminOrderScanInitialized?incoming.filter(o=>o.status==='pending'&&!previous.has(o.id)):[];S.adminOrders=incoming;S.adminOrderScanInitialized=true;if(newPending.length){const first=newPending[0];notify(newPending.length===1?`Nueva solicitud: ${first.code}. Revisa el comprobante.`:`${newPending.length} solicitudes nuevas. Última: ${first.code}.`)}if(!quiet&&!document.activeElement?.closest('form'))render()}catch(e){notify(e.message)}}
+async function loadAdminOrders({quiet=false}={}){if(PREVIEW||!S.admin)return;try{const codeQuery=/^RS-[A-Z0-9-]+$/i.test(S.admSearch||'')?S.admSearch:'';const incoming=(await api('/api/admin/orders'+(codeQuery?'?q='+encodeURIComponent(codeQuery):''))).orders||[];const previous=new Set(S.adminOrders.map(o=>o.id));const newPending=S.adminOrderScanInitialized?incoming.filter(o=>o.status==='pending'&&!previous.has(o.id)):[];S.adminOrders=incoming;S.adminOrderScanInitialized=true;if(newPending.length){const first=newPending[0];notify(newPending.length===1?`Nueva solicitud: ${first.code}. Revisa el comprobante.`:`${newPending.length} solicitudes nuevas. Última: ${first.code}.`)}if(!quiet&&!document.activeElement?.closest('form'))render()}catch(e){notify(e.message)}}
 async function loadPlanRequests(){if(PREVIEW)return;try{S.planRequests=(await api('/api/admin/plan-requests')).requests||[];render()}catch(e){notify(e.message)}}
 async function loadCustomers(){
  if(PREVIEW||!S.admin)return;
@@ -571,7 +572,7 @@ function showDetail(code,admin){
    <section class="order-modal-v2-section"><h3>Tu recarga</h3><div class="order-modal-row"><span>Juego</span><strong>${esc(o.game)}</strong></div><div class="order-modal-row"><span>Oferta</span><strong>${esc(o.offer)}</strong></div><div class="order-modal-row"><span>ID de jugador</span><strong>${esc(o.playerId||'—')}</strong></div>${targetRows}</section>
    <section class="order-modal-v2-section"><h3>Pago</h3><div class="order-modal-row"><span>Método</span><strong>${esc(paymentName(o.method))}</strong></div><div class="order-modal-row"><span>Verificación</span><strong>${o.paymentStatus==='paid'?'Pago verificado':'Pendiente de verificación'}</strong></div><div class="order-modal-total"><span>Total</span><strong>${money(o.amount)} ${esc(o.currency)}</strong></div></section>
    <section class="order-modal-v2-section"><h3>Comprobante</h3>${receipt}</section>
-   ${o.note?`<section class="order-modal-v2-section"><h3>Nota</h3><p class="order-modal-note">${esc(o.note)}</p></section>`:''}
+   ${o.note?`<section class="order-modal-v2-section"><h3>Nota</h3><p class="order-modal-note">${esc(admin?o.note:safeNoticeMessage(o.note))}</p></section>`:''}
    ${actions}
   </div>
  </section>`;
