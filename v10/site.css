@@ -1722,3 +1722,64 @@ body.shop-refresh .checkout-journey-stage.is-complete .checkout-journey-caption 
 @media(prefers-reduced-motion:reduce){
  body.shop-refresh .checkout-journey-line span{transition:none}
 }
+
+
+/* Checkout v14: a single progress ribbon, no three rectangular step cards */
+body.shop-refresh .checkout-track-v14{
+ display:grid;
+ gap:11px;
+ width:100%;
+ max-width:100%;
+ min-width:0;
+ margin:0 0 19px;
+ padding:15px clamp(15px,3vw,23px);
+ border:1px solid #285272;
+ border-radius:17px;
+ background:linear-gradient(125deg,#10293f,#071c30);
+ box-sizing:border-box;
+ box-shadow:0 12px 28px #0002,inset 0 1px #ffffff0d;
+}
+body.shop-refresh .checkout-track-head{
+ display:flex;
+ align-items:center;
+ justify-content:space-between;
+ gap:16px;
+ min-width:0;
+}
+body.shop-refresh .checkout-track-title{display:grid;gap:5px;min-width:0}
+body.shop-refresh .checkout-track-title>span{color:#6dc8ff;font-size:9px;font-weight:900;letter-spacing:.17em}
+body.shop-refresh .checkout-track-title>strong{color:#f5faff;font-size:clamp(15px,2.3vw,20px);line-height:1.2;overflow-wrap:anywhere}
+body.shop-refresh .checkout-track-counter{
+ flex:none;color:#f4faff;font-size:22px;font-weight:900;
+ font-variant-numeric:tabular-nums;white-space:nowrap
+}
+body.shop-refresh .checkout-track-counter small{color:#719cbe;font-size:12px}
+body.shop-refresh .checkout-track-bar{
+ height:5px;width:100%;overflow:hidden;border-radius:999px;background:#29435d;
+}
+body.shop-refresh .checkout-track-bar>span{
+ display:block;height:100%;border-radius:inherit;
+ background:linear-gradient(90deg,#24a7fa,#6ad8ff);
+ box-shadow:0 0 10px #24a7fa55;
+ transition:width .22s ease
+}
+body.shop-refresh .checkout-track-bottom{
+ display:flex;align-items:center;justify-content:space-between;gap:12px;
+ color:#a9c2d5;font-size:10px;line-height:1.5
+}
+body.shop-refresh .checkout-track-bottom>span:last-child{
+ color:#74baee;font-size:9px;font-weight:800;letter-spacing:.04em;text-align:right
+}
+@media(max-width:560px){
+ body.shop-refresh .checkout-track-v14{padding:12px 13px;gap:10px;margin-bottom:12px;border-radius:14px}
+ body.shop-refresh .checkout-track-title>strong{font-size:16px}
+ body.shop-refresh .checkout-track-counter{font-size:19px}
+ body.shop-refresh .checkout-track-bottom{flex-wrap:wrap;row-gap:2px}
+ body.shop-refresh .checkout-track-bottom>span:last-child{font-size:8.5px}
+}
+@media(max-width:350px){
+ body.shop-refresh .checkout-track-v14{padding-inline:10px}
+ body.shop-refresh .checkout-track-title>strong{font-size:14px}
+ body.shop-refresh .checkout-track-counter{font-size:17px}
+}
+@media(prefers-reduced-motion:reduce){body.shop-refresh .checkout-track-bar>span{transition:none}}

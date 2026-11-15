@@ -66,27 +66,22 @@ function cartPage(){
 }
 function steps(){
  const current=Math.min(3,Math.max(1,Number(S.step)||1));
- const phases=[
-  {label:'Jugador',hint:'Datos de destino',glyph:'game'},
-  {label:'Pago',hint:'Pago y comprobante',glyph:'wallet'},
-  {label:'Solicitud',hint:'Estado del pedido',glyph:'check'}
- ];
- const filled=((current-1)/2)*100;
- return `<section class="checkout-journey" aria-label="Progreso de compra" style="--journey-complete:${filled}%">
-  <div class="checkout-journey-header"><span class="checkout-journey-overline">TU COMPRA, PASO A PASO</span><span class="checkout-journey-count" aria-label="Paso ${current} de 3">${String(current).padStart(2,'0')} <span>/ 03</span></span></div>
-  <nav class="checkout-journey-track" aria-label="Etapas de tu pedido">
-   <div class="checkout-journey-line" aria-hidden="true"><span></span></div>
-   ${phases.map((phase,i)=>{
-     const position=i+1,state=position===current?'is-current':position<current?'is-complete':'is-upcoming';
-     const glyph=position<current?'check':phase.glyph;
-     return `<div class="checkout-journey-stage ${state}" ${position===current?'aria-current="step"':''}>
-      <span class="checkout-journey-icon" aria-hidden="true">${icon(glyph)}</span>
-      <span class="checkout-journey-caption"><strong>${phase.label}</strong><small>${phase.hint}</small></span>
-     </div>`;
-   }).join('')}
-  </nav>
+ const labels=['Datos del jugador','Pago seguro','Solicitud recibida'];
+ const description=['Introduce el ID correcto','Adjunta el comprobante','Consulta el estado'];
+ const next=current<3?labels[current]:'Puedes seguir tu pedido desde tu cuenta';
+ const progress=current===1?33:current===2?67:100;
+ return `<section class="checkout-track-v14" role="group" aria-label="Progreso de compra, etapa ${current} de 3">
+  <div class="checkout-track-head">
+   <div class="checkout-track-title"><span>COMPRA SEGURA</span><strong>${labels[current-1]}</strong></div>
+   <span class="checkout-track-counter">${String(current).padStart(2,'0')} <small>/ 03</small></span>
+  </div>
+  <div class="checkout-track-bar" role="progressbar" aria-label="Progreso" aria-valuemin="0" aria-valuemax="3" aria-valuenow="${current}">
+   <span style="width:${progress}%"></span>
+  </div>
+  <div class="checkout-track-bottom"><span>${description[current-1]}</span><span>${current<3?'SIGUIENTE: '+next.toUpperCase():'PEDIDO REGISTRADO'}</span></div>
  </section>`;
 }
+
 function payAmount(){const {o}=selection();if(!o)return {amount:0,currency:'CUP'};if(S.payment==='usdt_bep20')return {amount:o.usdt,currency:'USDT'};return S.payment==='mobile'?{amount:o.sm,currency:'SM'}:{amount:S.payment==='card'?o.card:o.cup,currency:'CUP'}}
 function paymentName(id){return ({mobile:'ETECSA · Saldo móvil',wallet:'MiTransfer · Monedero',card:'Transfermóvil · CUP',usdt_bep20:'USDT · BEP-20'})[id]||id}
 function sumBox(){const {g,o}=selection();if(!g||!o)return '';const amt=payAmount();return `<aside class="card checkout-summary purchase-summary-v5"><div class="purchase-summary-top"><span class="caps">TU PEDIDO</span><strong>${amt.currency==='USDT'?usdt(amt.amount):money(amt.amount)} <small>${esc(amt.currency)}</small></strong></div><div class="purchase-summary-main"><div class="purchase-summary-cover"><img src="${esc(coverSrc(g))}" alt="${esc(g.name)}" decoding="async"></div><div><small>${esc(g.name)}</small><strong>${esc(o.name)}</strong></div></div><div class="purchase-summary-rows"><div><span>Cuenta / jugador</span><strong>${S.playerId?esc(S.playerId):'Pendiente'}</strong></div>${S.playerName?`<div><span>Nombre verificado</span><strong>${esc(S.playerName)}</strong></div>`:''}<div><span>Método</span><strong>${esc(paymentName(S.payment))}</strong></div><div><span>Estado</span><strong>${S.store.salesEnabled&&o.purchasable?'Disponible para solicitud':'No disponible'}</strong></div></div><p class="purchase-summary-note">El pedido se registra cuando envías la captura. Administración verificará el pago antes de autorizar la recarga.</p></aside>`}
