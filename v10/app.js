@@ -26,7 +26,7 @@ function notify(msg){
  const isError=/error|fall[oó]|incorrect|advert|no se pudo|falta|inv[aá]l|requiere|caduc|conexi[oó]n|rechaz|indisponib|no est[aá]|expir/i.test(message);
  const isSuccess=!isError&&/confirm|correct|guardad|actualiz|complet|copiad|registrad|recibid|añadid|procesad/i.test(message);
  const kind=isError?'alert':isSuccess?'ok':'info';
- host.innerHTML=`<div class="toast toast-${kind}" role="${isError?'alert':'status'}" aria-live="${isError?'assertive':'polite'}"><span class="toast-symbol" aria-hidden="true">${icon(isError?'shield':isSuccess?'check':'info')}</span><div class="toast-message"><strong>${isError?'No se pudo completar':isSuccess?'Listo':'Refills Shop'}</strong><p>${esc(message)}</p></div><button class="toast-close" type="button" aria-label="Cerrar aviso" title="Cerrar">${icon('x')}</button></div>`;
+ host.innerHTML=`<div class="toast toast-${kind}" role="${isError?'alert':'status'}" aria-live="${isError?'assertive':'polite'}"><span class="toast-symbol" aria-hidden="true">${icon(isError?'shield':isSuccess?'check':'shield')}</span><div class="toast-message"><strong>${isError?'No se pudo completar':isSuccess?'Listo':'Refills Shop'}</strong><p>${esc(message)}</p></div><button class="toast-close" type="button" aria-label="Cerrar aviso" title="Cerrar">${icon('x')}</button></div>`;
  clearTimeout(notify.timer);notify.timer=setTimeout(()=>{if(host.querySelector('.toast'))host.innerHTML=''},5200);
  host.querySelector('.toast-close')?.addEventListener('click',()=>{clearTimeout(notify.timer);host.innerHTML='';},{once:true});
 }
