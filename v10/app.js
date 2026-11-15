@@ -20,23 +20,36 @@ const S={idPreview:false,ready:false,store:null,route:location.pathname,google:f
 const LOCAL_CATALOG_GAMES=[]; // No fictitious games or offers when backend is unavailable.
 const LOCAL_CATALOG_OFFERS=[];
 const LOCAL_VIEW_STORE={live:false,cryptoBep20Enabled:false,games:[],offers:[],config:{}};
+function safeNoticeMessage(value){
+ const raw=String(value??'').trim().slice(0,500);
+ if(!raw)return '';
+ if(/central[\s_-]*one|recargas[\s_-]*am[eé]rica|centraloneglobal|proveedor|provider|supplier|upstream|portal\.centralone/i.test(raw)){
+  if(/jugador|player|identificad|cuenta|account|validaci[oó]n|nombre|\bID\b/i.test(raw))return 'No pudimos comprobar el ID del jugador. Revisa el identificador y la región de la cuenta.';
+  if(/l[ií]mite|429|demasiadas/i.test(raw))return 'El servicio está ocupado. Inténtalo nuevamente dentro de unos minutos.';
+  if(/pago|recarga|pedido|order|compra|saldo/i.test(raw))return 'No se pudo completar la operación. Inténtalo nuevamente o contacta con soporte.';
+  return 'No pudimos procesar la solicitud. Inténtalo nuevamente.';
+ }
+ if(/https?:\/\/|status\s*5\d\d|api[_ -]?key|secret|token|stack|internal server error/i.test(raw))return 'El servicio no respondió correctamente. Inténtalo otra vez.';
+ return raw;
+}
 function notify(msg){
  const host=$('toasts');if(!host)return;
- const message=String(msg??'').trim().slice(0,500);if(!message)return;
- const isError=/error|fall[oó]|incorrect|advert|no se pudo|falta|inv[aá]l|requiere|caduc|conexi[oó]n|rechaz|indisponib|no est[aá]|expir|bloquead|denegad|sin permiso/i.test(message);
- const playerVerified=!isError&&/jugador confirmad|nombre de jugador|jugador verificado/i.test(message);
- const isSuccess=!isError&&(playerVerified||/confirm|correct|guardad|actualiz|complet|copiad|registrad|recibid|añadid|procesad|enviad|cread/i.test(message));
+ const message=safeNoticeMessage(msg);if(!message)return;
+ const isError=/error|fall[oó]|incorrect|advert|no se pudo|no pudimos|falta|inv[aá]l|requiere|caduc|conexi[oó]n|rechaz|indisponib|no est[aá]|expir|bloquead|denegad|sin permiso/i.test(message);
+ const verified=!isError&&/jugador confirmad|nombre de jugador|jugador verificado/i.test(message);
+ const isSuccess=!isError&&(verified||/confirm|correct|guardad|actualiz|complet|copiad|registrad|recibid|añadid|procesad|enviad|cread/i.test(message));
  const kind=isError?'alert':isSuccess?'ok':'info';
- const title=isError?'Revisa la solicitud':playerVerified?'Jugador verificado':isSuccess?'Operación realizada':'Refills Shop';
+ const title=isError?'Revisa los datos':verified?'Jugador verificado':isSuccess?'Operación realizada':'Aviso de Refills Shop';
  const graphic=isError?'shield':isSuccess?'check':'shield';
- host.innerHTML=`<div class="toast rs-notice-v15 toast-${kind}" role="${isError?'alert':'status'}" aria-live="${isError?'assertive':'polite'}">
+ host.innerHTML=`<div class="toast rs-notice-v16 toast-${kind}" role="${isError?'alert':'status'}" aria-live="${isError?'assertive':'polite'}">
   <span class="toast-symbol" aria-hidden="true">${icon(graphic)}</span>
   <div class="toast-message"><strong>${title}</strong><p>${esc(message)}</p></div>
-  <button class="toast-close" type="button" aria-label="Cerrar aviso" title="Cerrar">${icon('x')}</button>
+  <button class="toast-close" type="button" aria-label="Cerrar aviso">${icon('x')}</button>
  </div>`;
- clearTimeout(notify.timer);notify.timer=setTimeout(()=>{host.innerHTML=''},5000);
+ clearTimeout(notify.timer);notify.timer=setTimeout(()=>{host.innerHTML=''},5500);
  host.querySelector('.toast-close')?.addEventListener('click',()=>{clearTimeout(notify.timer);host.innerHTML='';},{once:true});
 }
+
 function err(msg){notify(msg);}
 const checkoutPaths={1:'/compra/datos',2:'/compra/pago',3:'/compra/listo'};
 function canonical(path){if(path==='/inicio')return '/';if(path==='/catalogo')return '/catalog';if(path==='/carrito')return '/cart';if(path==='/pedidos')return '/orders';if(path==='/revendedores')return '/reseller';if(path==='/cuenta'||path==='/iniciar-sesion'||path==='/crear-cuenta')return '/account';if(path.startsWith('/juegos/'))return '/games/'+path.slice(8);if(path.startsWith('/compra/'))return '/checkout';return path;}
@@ -572,7 +585,7 @@ if(form==='walletDepositVerifyForm'){
  return;
 }
 
-if(form==='playerForm'){const {o}=selection(),schema=targetSchema(o);if(schema.length){S.targetPayload={};for(const field of schema){const value=String(f.elements['target_'+field.key]?.value||'').trim();if(!value||value.length>64)return notify('Completa '+(field.label||field.key));S.targetPayload[field.key]=value;}S.playerId=String(S.targetPayload.player_id||S.targetPayload.user_id||S.targetPayload.service_user_id||Object.values(S.targetPayload)[0]||'SIN-DATOS').slice(0,80);S.zoneId=String(S.targetPayload.zone_id||S.targetPayload.server||'').slice(0,30)}else{S.playerId=f.elements.playerId.value.trim();S.zoneId=f.elements.zoneId.value.trim();S.targetPayload={}}if(S.playerId.length<3)return notify('Revisa el ID de jugador.');if(PREVIEW||S.idPreview||!S.store?.salesEnabled||!o?.purchasable)return notify('Esta oferta no está habilitada para pedidos reales.');if(!S.user)return notify('Inicia sesión antes de continuar con la compra.');if(!o.providerProductId)return notify('Esta oferta no está vinculada a un producto real del proveedor.');try{const data=await api('/api/player/validate',{method:'POST',auth:true,body:{productId:o.providerProductId,targetPayload:Object.keys(S.targetPayload).length?S.targetPayload:{player_id:S.playerId}}});if(data.status==='invalid')return notify('Central One no reconoce ese ID para esta oferta. Comprueba el identificador y la región de la cuenta.');if(data.status!=='valid'||!String(data.playerName||'').trim())return notify('Central One no pudo confirmar el nombre del jugador. Revisa el ID e inténtalo de nuevo.');S.playerName=String(data.playerName).slice(0,65);notify('Jugador confirmado: '+S.playerName)}catch(e){return notify('No se pudo validar la cuenta con Central One: '+e.message)}S.step=2;route(checkoutPaths[2]);return}
+if(form==='playerForm'){const {o}=selection(),schema=targetSchema(o);if(schema.length){S.targetPayload={};for(const field of schema){const value=String(f.elements['target_'+field.key]?.value||'').trim();if(!value||value.length>64)return notify('Completa '+(field.label||field.key));S.targetPayload[field.key]=value;}S.playerId=String(S.targetPayload.player_id||S.targetPayload.user_id||S.targetPayload.service_user_id||Object.values(S.targetPayload)[0]||'SIN-DATOS').slice(0,80);S.zoneId=String(S.targetPayload.zone_id||S.targetPayload.server||'').slice(0,30)}else{S.playerId=f.elements.playerId.value.trim();S.zoneId=f.elements.zoneId.value.trim();S.targetPayload={}}if(S.playerId.length<3)return notify('Revisa el ID de jugador.');if(PREVIEW||S.idPreview||!S.store?.salesEnabled||!o?.purchasable)return notify('Esta oferta no está habilitada para pedidos reales.');if(!S.user)return notify('Inicia sesión antes de continuar con la compra.');if(!o.providerProductId)return notify('Esta oferta no está vinculada a un producto real del proveedor.');try{const data=await api('/api/player/validate',{method:'POST',auth:true,body:{productId:o.providerProductId,targetPayload:Object.keys(S.targetPayload).length?S.targetPayload:{player_id:S.playerId}}});if(data.status==='invalid')return notify('No pudimos reconocer ese ID para esta oferta. Comprueba el identificador y la región de la cuenta.');if(data.status!=='valid'||!String(data.playerName||'').trim())return notify('No se pudo confirmar el nombre del jugador. Revisa el ID e inténtalo de nuevo.');S.playerName=String(data.playerName).slice(0,65);notify('Jugador confirmado: '+S.playerName)}catch(e){return notify('No se pudo validar la cuenta: '+e.message)}S.step=2;route(checkoutPaths[2]);return}
 if(form==='paymentForm'){
  S.payment=f.elements.payment.value;
  const selected=selection().o;if(PREVIEW||!S.store?.salesEnabled||!selected?.purchasable)return notify('Esta oferta no está habilitada para compras reales.');
@@ -657,7 +670,7 @@ if(t.dataset.adminStatus){changeOrderStatus(t.dataset.code,t.dataset.adminStatus
 if(t.id==='requestPlan'){doPlanRequest();return}
 if(t.id==='logoutAdmin'){try{await api('/api/admin/logout',{method:'POST'});S.admin=false;S.customerScanInitialized=false;S.adminCustomers=[];route('/')}catch(e){notify(e.message)}return}
 if(t.id==='loadProvider'){loadProvider();return}
-if(t.id==='syncCentralOffers'){try{const d=await adminAction('centralone/sync',{});notify('Central One: '+d.updated+' costos o stocks actualizados.');await syncStore();await loadAdminAllOffers()}catch(e){notify(e.message)}return}
+if(t.id==='syncCentralOffers'){try{const d=await adminAction('centralone/sync',{});notify('Catálogo sincronizado: '+d.updated+' precios o disponibilidades actualizados.');await syncStore();await loadAdminAllOffers()}catch(e){notify(e.message)}return}
 if(t.id==='refreshCryptoStatus'){await loadCryptoStatus();notify(S.cryptoConfigured?'NOWPayments configurado. USDT '+(S.cryptoEnabled?'activo.':'desactivado.'):'No existe una conexión de NOWPayments verificada.');return}
 if(t.id==='toggleCryptoGateway'){const enabled=!S.cryptoEnabled;if(enabled){if(!confirm('Confirma que NOWPayments permite legalmente procesar pagos para tu negocio y clientes. Al activar podrás recibir fondos reales en USDT BEP-20. ¿Deseas continuar?'))return;if(!confirm('La pasarela puede cobrar comisiones y exigir pagos mínimos. NO existe una factura de prueba. ¿Activar cobros reales?'))return}else if(!confirm('¿Detener la creación de nuevas facturas USDT?'))return;t.disabled=true;try{const d=await adminAction('crypto/toggle',{enabled,confirmEligibility:enabled,confirmRealFunds:enabled});if(!d.ok)throw Error(d.error||'Estado no confirmado');await Promise.all([loadCryptoStatus(),syncStore({quiet:true})]);route('/admin/integrations');notify(d.message||'Estado de USDT actualizado.')}catch(e){notify('No se pudo activar USDT: '+e.message)}finally{if(t.isConnected)t.disabled=false}return}
 if(t.id==='checkCentralOrders'){await loadCentralOneOrdersStatus();notify(S.coOrdersRead?'Clave de consulta de pedidos comprobada. No se ejecutaron compras.':'No hay una clave de pedidos conectada con orders:read.');return}
@@ -674,8 +687,8 @@ if(t.id==='refreshCustomers'){loadCustomers();return}
 if(t.id==='refreshFulfillments'){loadFulfillments();loadAdminOrders();return}
 if(t.dataset.editCustomer){const c=S.adminCustomers.find(c=>c.id===t.dataset.editCustomer);if(!c)return;$('modal').innerHTML=`<div class="card modal-card" role="dialog" aria-modal="true"><div class="modal-head"><h2>Editar cliente</h2><button class="btn btn-ghost btn-sm" id="closeModal">Cerrar</button></div><form id="adminCustomerEditForm" class="fields mt2"><input type="hidden" name="userId" value="${esc(c.id)}"><div class="field"><label>Nombre</label><input name="fullName" value="${esc(c.name)}" maxlength="90" required></div><div class="field"><label>Teléfono internacional</label><input name="phone" maxlength="19" value="${esc(c.phone)}" required></div><button class="btn btn-primary btn-wide" type="submit">Guardar cliente</button></form></div>`;return}
 if(t.dataset.editOffer){const o=S.adminAllOffers.find(o=>o.id===t.dataset.editOffer);if(!o){notify('Actualiza ofertas en ADM');return}$('modal').innerHTML=`<div class="card modal-card" role="dialog" aria-modal="true"><div class="modal-head"><h2>Editar oferta</h2><button class="btn btn-ghost btn-sm" id="closeModal">Cerrar</button></div><p>${esc(o.name)} · ${esc(o.provider_name)}</p><form id="adminOfferEditForm" class="fields mt2"><input type="hidden" name="id" value="${esc(o.id)}"><div class="field"><label>Ganancia en SM</label><input type="number" name="gainSm" min="0" step="0.01" required value="${esc(o.gain_sm)}"></div><p class="notice">Puedes ajustar la ganancia sin cambiar la visibilidad de la oferta en el catálogo.</p><button class="btn btn-primary btn-wide" type="submit">Guardar oferta en Supabase</button></form></div>`;return}
-if(t.dataset.verifyPayment){if(!confirm('¿Confirmas que recibiste y verificaste el pago del pedido '+t.dataset.verifyPayment+'?'))return;try{await adminAction('verify-payment',{code:t.dataset.verifyPayment,confirmedPayment:true});notify('Pago verificado. La solicitud ya puede pasar a entrega.');await loadAdminOrders();await loadFulfillments()}catch(e){notify(e.message)}return}if(t.dataset.fulfill){if(!confirm('¿Enviar la recarga de '+t.dataset.fulfill+' a Central One? El pago ya debe estar verificado. Esta operación puede consumir saldo real.'))return;try{const r=await adminAction('fulfill-order',{code:t.dataset.fulfill,paymentVerified:true});notify('Compra enviada al proveedor. Estado: '+(r.providerStatus||'confirmada'));await loadFulfillments();await loadAdminOrders()}catch(e){notify(e.message)}return}
-if(t.dataset.reconcile){try{const r=await adminAction('reconcile-order',{orderId:t.dataset.reconcile});notify('Estado del proveedor: '+r.providerStatus);await loadFulfillments();await loadAdminOrders()}catch(e){notify(e.message)}return}
+if(t.dataset.verifyPayment){if(!confirm('¿Confirmas que recibiste y verificaste el pago del pedido '+t.dataset.verifyPayment+'?'))return;try{await adminAction('verify-payment',{code:t.dataset.verifyPayment,confirmedPayment:true});notify('Pago verificado. La solicitud ya puede pasar a entrega.');await loadAdminOrders();await loadFulfillments()}catch(e){notify(e.message)}return}if(t.dataset.fulfill){if(!confirm('¿Enviar la recarga de '+t.dataset.fulfill+' a Central One? El pago ya debe estar verificado. Esta operación puede consumir saldo real.'))return;try{const r=await adminAction('fulfill-order',{code:t.dataset.fulfill,paymentVerified:true});notify('Solicitud de entrega enviada. Estado: '+(r.providerStatus||'confirmada'));await loadFulfillments();await loadAdminOrders()}catch(e){notify(e.message)}return}
+if(t.dataset.reconcile){try{const r=await adminAction('reconcile-order',{orderId:t.dataset.reconcile});notify('Estado de entrega actualizado: '+r.providerStatus);await loadFulfillments();await loadAdminOrders()}catch(e){notify(e.message)}return}
 if(t.id==='reloadAdminOrders'){loadAdminOrders();return}
 if(t.id==='refreshPlans'){loadPlanRequests();return}
 if(t.dataset.approvePlan){planStatus(t.dataset.approvePlan,true);return}
