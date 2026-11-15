@@ -1236,14 +1236,6 @@ body.shop-refresh .cart-footer p{flex:1 1 100%;margin:0 0 4px}
 
 /* Refills Shop V11 · responsive width, uncropped artwork, simpler orders and alerts */
 body{overflow-x:hidden}
-body.shop-refresh .game-art-v4,
-body.shop-refresh .offer-icon-v4{background:transparent!important;border:0!important;box-shadow:none!important;border-radius:0!important}
-body.shop-refresh .game-art-v4 img,
-body.shop-refresh .offer-icon-v4 img,
-body.shop-refresh .purchase-heading-game-v5 img,
-body.shop-refresh .purchase-game-row-v5 img{object-fit:contain!important;object-position:center!important;border:0!important;outline:0!important}
-body.shop-refresh .game-art-v4 img{padding:0!important;max-width:100%!important;max-height:100%!important}
-body.shop-refresh .offer-icon-v4 img{padding:0!important}
 
 /* New compact order cards */
 body.shop-refresh .order-card-v2{display:grid!important;gap:12px!important;width:100%!important;max-width:100%!important;min-width:0!important;padding:15px!important;border-radius:16px!important;background:linear-gradient(145deg,#10253a,#091827)!important}
@@ -1319,14 +1311,10 @@ body.shop-refresh .order-card-v2{display:grid!important;gap:12px!important;width
  body.admin-view .rs-v3-order .order-card{width:100%!important;max-width:100%!important}
  body.shop-refresh .game-grid-v4,body.shop-refresh .offer-grid-v4{grid-template-columns:minmax(0,1fr)!important;width:100%!important;max-width:100%!important}
  body.shop-refresh .game-card-v4{width:100%!important;max-width:100%!important;min-width:0!important;min-height:0!important;align-items:center!important}
- body.shop-refresh .game-art-v4{flex:0 0 clamp(108px,29vw,148px)!important;width:clamp(108px,29vw,148px)!important;height:clamp(132px,36vw,172px)!important;min-height:0!important;margin:0!important;padding:0!important;background:transparent!important;border:0!important;border-radius:0!important}
- body.shop-refresh .game-art-v4 img{display:block!important;width:100%!important;height:100%!important;min-height:0!important;max-width:100%!important;max-height:100%!important;object-fit:contain!important}
  body.shop-refresh .game-content-v4{flex:1 1 auto!important;min-width:0!important;max-width:100%!important;padding:12px!important}
  body.shop-refresh .game-content-v4 h3{overflow-wrap:anywhere}
  body.shop-refresh .offer-card-v4{width:100%!important;max-width:100%!important;min-width:0!important}
  body.shop-refresh .offer-head-v4{min-width:0!important}
- body.shop-refresh .offer-icon-v4{flex:0 0 66px!important;width:66px!important;height:66px!important;background:transparent!important;border:0!important}
- body.shop-refresh .offer-icon-v4 img{object-fit:contain!important}
  .order-card-v2-main{gap:9px}
  .order-card-v2-actions{justify-content:stretch}
  .order-card-v2-actions .btn{flex:1 1 130px}
@@ -1338,7 +1326,6 @@ body.shop-refresh .order-card-v2{display:grid!important;gap:12px!important;width
 }
 @media(max-width:420px){
  body.shop-refresh main.wrap,body.admin-view main.wrap,.main-content{padding-left:10px!important;padding-right:10px!important}
- body.shop-refresh .game-art-v4{flex-basis:102px!important;width:102px!important;height:128px!important}
  .order-card-v2-top{align-items:flex-start;flex-direction:column}
  .order-card-v2-top .state-pill{max-width:100%;align-self:flex-start}
  .order-card-v2-main{grid-template-columns:minmax(0,1fr) auto}
@@ -1347,6 +1334,3 @@ body.shop-refresh .order-card-v2{display:grid!important;gap:12px!important;width
 }
 @media(prefers-reduced-motion:reduce){.toast{animation:none!important}.receipt-preview-wrap .admin-image{transition:none!important}}
 
-/* Final image-fit guard: game artwork is never cropped, including inline legacy rules. */
-.game-art-v4 img,.game-card-v4 img[data-cover-id]{object-fit:contain!important;object-position:center!important;border:0!important;outline:0!important;background:transparent!important}
-.game-art-v4{border:0!important;outline:0!important;box-shadow:none!important;background:transparent!important}
