@@ -175,7 +175,34 @@ function resellerDepositPanel(){
  return h+'</section>';
 }
 
-function reseller(){const active=S.member;const c=S.store.config;const samples=S.store.offers.slice(0,6);return `${pagehead('REVENDEDORES','Tu espacio de recargas','Mira cuánto te cuesta cada oferta antes de solicitar el plan.') }<div class="reseller-top"><section class="card pad" ${active?'':'hidden'}><div class="caps">WALLET DE REVENDEDOR</div><div class="wallet-display">${S.wallet===null?'—':usdt(S.wallet)} <small>USDT</small></div><p class="muted">${active?'Saldo asociado a tu cuenta. Solo el servidor puede modificarlo.':'El saldo se mostrará al activar tu cuenta revendedora.'}</p>${active?`<span class="state-pill completed">Plan activo hasta ${new Date(S.expiry).toLocaleDateString('es-ES')}</span>`:''}</section><section class="card pad"><div class="caps">PLAN REVENDEDOR</div><h2 class="section-title">Acceso a precios especiales</h2><p class="muted">Consulta precios finales en USDT. Solo ves los importes finales de cada recarga, sin información interna del proveedor.</p><div class="wallet-display">${c.planPrice===null?'Por definir':usdt(c.planPrice)+' USDT'}</div><p class="small muted">Vigencia: ${Number(c.planDays||30)} días</p>${active?`<button class="btn btn-ghost btn-wide" data-href="/catalogo">Ver catálogo</button>`:`<button class="btn btn-primary btn-wide" id="requestPlan" ${c.planPrice===null?'disabled':''}>Solicitar plan →</button>`}<p class="tiny muted">Solicitud sujeta a verificación manual del pago. No se activa automáticamente.</p></section></div>${active?resellerDepositPanel():''}<section class="mt"><div class="section-head"><div><div class="caps">VISTA PREVIA</div><h2>Precios para revendedores</h2></div></div>${samples.length?`<div class="price-preview">${samples.map(o=>{const g=game(o.gameId);return `<article class="card reseller-price"><img class="mini-cover" src="${esc(coverSrc(g||{id:'fallback',name:'Juego'}))}" data-cover-id="${esc(g?.id||'fallback')}" alt="${esc(g?.name||'Juego')}"><h3>${esc(g?.name||'Juego')}<br>${esc(o.name)}</h3><small>Precio final</small><strong>${usdt(o.resellerUsdt)} <small>USDT</small></strong></article>`}).join('')}</div>`:`<div class="card empty">Las ofertas se publicarán desde el ADM.</div>`}</section>`}
+function reseller(){
+ const active=Boolean(S.member),c=S.store?.config||{};
+ const grouped=(S.store?.games||[]).map(g=>({g,list:offers(g.id)})).filter(x=>x.list.length);
+ const account=active
+  ?`<div class="reseller-v15-account"><div><small>SALDO DE REVENDEDOR</small><strong>${S.wallet===null?'—':usdt(S.wallet)} <span>USDT</span></strong><p>Plan activo${S.expiry?' hasta '+new Date(S.expiry).toLocaleDateString('es-ES'):''}</p></div><button class="btn btn-outline btn-sm" data-href="/pedidos">Mis pedidos</button></div>`
+  :`<div class="reseller-v15-account reseller-v15-trial"><div><small>PLAN REVENDEDOR</small><strong>Precios especiales</strong><p>${c.planPrice===null?'Precio pendiente de configuración':usdt(c.planPrice)+' USDT por '+Number(c.planDays||30)+' días'}. Consulta las ofertas antes de solicitar el plan.</p></div><button class="btn btn-primary" id="requestPlan" ${c.planPrice===null?'disabled':''}>Solicitar plan ${icon('arrow')}</button></div>`;
+ const groups=grouped.map(({g,list})=>{
+  const valid=list.map(o=>Number(o.resellerUsdt)||0).filter(v=>v>0);
+  const minPrice=valid.length?Math.min(...valid):null;
+  return `<details class="reseller-v15-game" name="reseller-catalog">
+   <summary><img class="reseller-v15-cover" src="${esc(coverSrc(g))}" alt="" loading="lazy" data-cover-id="${esc(g.id)}">
+    <span class="reseller-v15-game-info"><strong>${esc(g.name)}</strong><small>${list.length} ${list.length===1?'oferta':'ofertas'} · ${minPrice===null?'Ver precios':'Desde '+usdt(minPrice)+' USDT'}</small></span>
+    <span class="reseller-v15-toggle" aria-hidden="true">${icon('arrow')}</span></summary>
+   <div class="reseller-v15-offers">
+    ${list.slice().sort((a,b)=>Number(a.resellerUsdt||0)-Number(b.resellerUsdt||0)).map(o=>`<div class="reseller-v15-offer"><span><strong>${esc(o.name)}</strong><small>Precio revendedor</small></span><b>${usdt(o.resellerUsdt)} <small>USDT</small></b></div>`).join('')}
+   </div>
+  </details>`;
+ }).join('');
+ return `<div class="reseller-v15">
+  <header class="reseller-v15-hero"><span class="caps">REFILLS SHOP / REVENDEDORES</span><h1>Tu catálogo de revendedor</h1><p>Elige un juego para consultar todas sus ofertas y precios. Sin imágenes repetidas ni datos internos del proveedor.</p></header>
+  ${account}
+  ${active?resellerDepositPanel():''}
+  <section class="reseller-v15-catalog"><div class="reseller-v15-section-head"><div><span class="caps">VISTA PREVIA</span><h2>Juegos disponibles</h2></div><span>${grouped.length} juegos</span></div>
+  ${grouped.length?`<div class="reseller-v15-games">${groups}</div>`:`<div class="card empty">No hay ofertas publicadas para revendedores todavía.</div>`}
+  </section>
+ </div>`;
+}
+
 function manualContactUrl(phone,channel,name){
  const digits=String(phone||'').replace(/[^0-9]/g,'');
  if(digits.length<8||digits.length>15)return null;
