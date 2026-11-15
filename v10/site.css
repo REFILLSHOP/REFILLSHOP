@@ -1783,3 +1783,145 @@ body.shop-refresh .checkout-track-bottom>span:last-child{
  body.shop-refresh .checkout-track-counter{font-size:17px}
 }
 @media(prefers-reduced-motion:reduce){body.shop-refresh .checkout-track-bar>span{transition:none}}
+
+
+/* Refills Shop V15 — compact centered bottom notifications */
+.toasts{
+ position:fixed!important;
+ inset:auto 12px calc(24px + env(safe-area-inset-bottom,0px)) 12px!important;
+ left:12px!important;right:12px!important;top:auto!important;
+ width:min(440px,calc(100vw - 24px))!important;
+ max-width:440px!important;height:auto!important;
+ min-height:0!important;max-height:35dvh!important;
+ margin:0 auto!important;padding:0!important;
+ display:flex!important;flex-direction:column!important;align-items:center!important;justify-content:flex-end!important;
+ gap:10px!important;overflow:visible!important;
+ background:transparent!important;box-shadow:none!important;
+ pointer-events:none!important;z-index:4000!important
+}
+.toasts:empty{display:none!important}
+.toast.rs-notice-v15{
+ position:relative!important;width:100%!important;max-width:100%!important;
+ min-height:0!important;margin:0!important;padding:12px 14px!important;
+ display:grid!important;grid-template-columns:40px minmax(0,1fr) 26px!important;
+ align-items:center!important;gap:12px!important;
+ border:1px solid #317096!important;border-radius:17px!important;
+ background:linear-gradient(145deg,#10283e,#071a2c)!important;
+ box-shadow:0 13px 38px #000a,0 1px 0 #ffffff0d inset!important;
+ animation:rs-v15-appear .19s ease-out both!important;pointer-events:auto!important;
+ color:#f5fbff!important
+}
+.toast.rs-notice-v15.toast-ok{border-color:#278c78!important}
+.toast.rs-notice-v15.toast-alert{border-color:#b88942!important}
+.toast.rs-notice-v15 .toast-symbol{
+ display:grid!important;place-items:center!important;width:40px!important;height:40px!important;
+ border-radius:13px!important;background:#143d5b!important;border:1px solid #397aab!important;
+ box-shadow:none!important;color:#a1dbff!important
+}
+.toast.rs-notice-v15.toast-ok .toast-symbol{background:#0e423a!important;border-color:#2a987d!important;color:#a7f2d7!important}
+.toast.rs-notice-v15.toast-alert .toast-symbol{background:#46301d!important;border-color:#aa7840!important;color:#ffd6a1!important}
+.toast.rs-notice-v15 .toast-message{min-width:0!important;overflow-wrap:anywhere!important}
+.toast.rs-notice-v15 .toast-message strong{display:block!important;margin:0 0 4px!important;font-size:12px!important;font-weight:850!important;line-height:1.3!important;color:#fff!important}
+.toast.rs-notice-v15 .toast-message p{margin:0!important;color:#c5d9e7!important;font-size:12px!important;line-height:1.4!important}
+.toast.rs-notice-v15 .toast-close{
+ display:grid!important;place-items:center!important;width:26px!important;height:26px!important;
+ padding:3px!important;border:0!important;border-radius:8px!important;background:transparent!important;
+ color:#a9c5dd!important;box-shadow:none!important
+}
+@keyframes rs-v15-appear{from{opacity:0;transform:translateY(12px)}to{opacity:1;transform:translateY(0)}}
+
+/* Refills Shop V15 — real-order receipt, not a simulated confirmation */
+body.shop-refresh .purchase-complete-v15{
+ display:grid!important;justify-items:stretch!important;align-items:start!important;
+ gap:15px!important;width:100%!important;max-width:720px!important;
+ margin:0 auto!important;padding:clamp(17px,3vw,28px)!important;
+ box-sizing:border-box!important;border:1px solid #315b7b!important;border-radius:23px!important;
+ background:linear-gradient(160deg,#102b40,#081d30)!important;
+ box-shadow:inset 0 1px #ffffff16,0 18px 38px #0003!important
+}
+.purchase-complete-v15-head{display:flex;align-items:center;gap:11px;min-width:0}
+.purchase-complete-v15-check{display:grid;place-items:center;width:44px;height:44px;border:1px solid #31ae90;border-radius:14px;background:#104c40;color:#b8ffe6;flex:none}
+.purchase-complete-v15-check .icon{width:26px;height:26px}
+.purchase-complete-v15-label{font-size:10px;letter-spacing:.13em;font-weight:900;color:#89e8cd;overflow-wrap:anywhere}
+body.shop-refresh .purchase-complete-v15 h2{font-size:clamp(23px,3vw,34px)!important;line-height:1.18!important;margin:0!important}
+body.shop-refresh .purchase-complete-v15>p{margin:0!important;color:#b8d0df!important;font-size:13px!important;line-height:1.6!important}
+.purchase-complete-v15-ref{
+ display:grid;grid-template-columns:minmax(0,1fr) auto;align-items:center;gap:8px 12px;
+ padding:16px;border:1px solid #356a8e;border-radius:16px;background:#123550;min-width:0
+}
+.purchase-complete-v15-ref>span{grid-column:1/-1;font-size:10px;font-weight:900;letter-spacing:.12em;text-transform:uppercase;color:#9fc8e6}
+.purchase-complete-v15-ref>strong{font-size:clamp(16px,3vw,23px);letter-spacing:.02em;color:#fff;overflow-wrap:anywhere;min-width:0}
+.purchase-complete-v15-ref>.btn{justify-self:end;white-space:nowrap}
+.purchase-complete-v15-status{display:flex;align-items:start;gap:12px;padding:13px 15px;border-radius:14px;border:1px solid #7a612b;background:#342b1a;min-width:0}
+.purchase-complete-v15-dot{width:10px;height:10px;flex:0 0 10px;margin-top:5px;border-radius:50%;background:#ffcb70;box-shadow:0 0 0 4px #bb90322b}
+.purchase-complete-v15-status>div{display:grid;gap:4px;min-width:0}
+.purchase-complete-v15-status strong{font-size:13px;color:#ffe2ac}
+.purchase-complete-v15-status small{color:#d3c3a9;font-size:11px;line-height:1.45}
+.purchase-complete-v15-actions{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:10px;min-width:0}
+.purchase-complete-v15-actions>.btn{display:flex;justify-content:center;align-items:center;min-width:0;min-height:46px;text-align:center}
+.purchase-complete-v15-actions>.purchase-complete-v15-whatsapp{grid-column:1/-1;background:linear-gradient(135deg,#0a905f,#11ab70)!important;border-color:#5fe0ad!important;color:#fff!important}
+
+/* Refills Shop V15 — reseller browsing with expandable games and text-only offers */
+.reseller-v15{display:grid;gap:18px;min-width:0;width:100%;max-width:100%;box-sizing:border-box}
+.reseller-v15-hero{padding:clamp(20px,3vw,30px);border:1px solid #326187;border-radius:22px;background:linear-gradient(125deg,#153450,#091d30);min-width:0}
+.reseller-v15-hero h1{margin:8px 0 9px;color:#f3f9ff;font-size:clamp(24px,3.8vw,38px);letter-spacing:-.045em;line-height:1.12}
+.reseller-v15-hero p{margin:0;max-width:720px;color:#b2cbe1;line-height:1.55;font-size:13px}
+.reseller-v15-account{display:flex;align-items:center;justify-content:space-between;gap:18px;min-width:0;padding:18px 22px;border:1px solid #295779;border-radius:19px;background:#0c2438}
+.reseller-v15-account>div{display:grid;gap:5px;min-width:0}
+.reseller-v15-account small{font-size:10px;letter-spacing:.1em;font-weight:900;color:#82c8f5}
+.reseller-v15-account strong{font-size:clamp(19px,2.7vw,26px);color:#fff;overflow-wrap:anywhere}
+.reseller-v15-account strong span{font-size:12px;color:#9bc2de}
+.reseller-v15-account p{margin:0;color:#a8c4d8;font-size:12px;line-height:1.5}
+.reseller-v15-account>.btn{flex:0 0 auto}
+.reseller-v15-catalog{min-width:0;display:grid;gap:15px}
+.reseller-v15-section-head{display:flex;align-items:end;justify-content:space-between;gap:12px;min-width:0}
+.reseller-v15-section-head h2{font-size:clamp(20px,3vw,28px);margin:5px 0 0}
+.reseller-v15-section-head>span{font-size:12px;color:#9ebfd9;white-space:nowrap}
+.reseller-v15-games{display:grid;grid-template-columns:1fr;gap:11px;min-width:0}
+.reseller-v15-game{min-width:0;border:1px solid #315a7b;border-radius:17px;background:linear-gradient(150deg,#112b41,#091b2d);overflow:hidden}
+.reseller-v15-game[open]{border-color:#398dc8}
+.reseller-v15-game summary{display:flex;align-items:center;gap:14px;list-style:none;cursor:pointer;min-width:0;padding:13px 17px;min-height:87px;box-sizing:border-box;user-select:none}
+.reseller-v15-game summary::-webkit-details-marker{display:none}
+.reseller-v15-game summary::marker{content:''}
+.reseller-v15-game summary:focus-visible{outline:2px solid #79d0ff;outline-offset:-3px}
+.reseller-v15-cover{width:60px;height:60px;flex:0 0 60px;object-fit:contain;border-radius:11px;background:#081c2e}
+.reseller-v15-game-info{display:grid;gap:5px;min-width:0;flex:1 1 auto}
+.reseller-v15-game-info strong{color:#f4faff;font-size:15px;line-height:1.25;overflow-wrap:anywhere}
+.reseller-v15-game-info small{color:#92bad4;font-size:11px;line-height:1.35}
+.reseller-v15-toggle{display:grid;place-items:center;width:30px;height:30px;flex:0 0 30px;border-radius:9px;background:#123957;border:1px solid #3972a0;color:#a4dcff;transition:transform .2s}
+.reseller-v15-game[open] .reseller-v15-toggle{transform:rotate(90deg)}
+.reseller-v15-offers{padding:2px 16px 15px;display:grid;gap:8px;border-top:1px solid #27435c}
+.reseller-v15-offer{display:grid;grid-template-columns:minmax(0,1fr) auto;gap:10px;align-items:center;min-width:0;padding:12px 13px;border-radius:11px;background:#091b2c;border:1px solid #1f3e5a}
+.reseller-v15-offer>span{display:grid;gap:5px;min-width:0}
+.reseller-v15-offer strong{color:#dbeefa;font-size:13px;line-height:1.35;overflow-wrap:anywhere}
+.reseller-v15-offer>span small{color:#80a9c8;font-size:10px}
+.reseller-v15-offer>b{font-size:15px;color:#f1faff;text-align:right;white-space:nowrap}
+.reseller-v15-offer>b small{font-size:10px;font-weight:750;color:#84bdda}
+.reseller-v15 .reseller-deposit{min-width:0;max-width:100%;margin:0!important}
+
+@media(max-width:700px){
+ .toasts{bottom:calc(111px + env(safe-area-inset-bottom,0px))!important;left:10px!important;right:10px!important;width:min(440px,calc(100vw - 20px))!important}
+ .toast.rs-notice-v15{padding:11px 12px!important;border-radius:15px!important}
+ body.shop-refresh .purchase-complete-v15{padding:16px!important;gap:13px!important}
+ .reseller-v15{gap:13px}
+ .reseller-v15-hero{padding:19px 16px;border-radius:17px}
+ .reseller-v15-account{align-items:stretch;flex-direction:column;padding:16px;gap:12px}
+ .reseller-v15-account>.btn{align-self:stretch}
+ .reseller-v15-game summary{padding:11px 12px;gap:11px;min-height:75px}
+ .reseller-v15-cover{width:51px;height:51px;flex-basis:51px}
+ .reseller-v15-game-info strong{font-size:14px}
+ .reseller-v15-offers{padding:3px 10px 11px}
+ .reseller-v15-offer{padding:11px 10px}
+ .reseller-v15-offer>b{font-size:13px}
+}
+@media(max-width:390px){
+ .purchase-complete-v15-ref{grid-template-columns:minmax(0,1fr)}
+ .purchase-complete-v15-ref>.btn{justify-self:start}
+ .purchase-complete-v15-actions{grid-template-columns:minmax(0,1fr)}
+ .purchase-complete-v15-actions>.purchase-complete-v15-whatsapp{grid-column:1}
+ .reseller-v15-cover{width:45px;height:45px;flex-basis:45px}
+}
+@media(prefers-reduced-motion:reduce){
+ .toast.rs-notice-v15{animation:none!important}
+ .reseller-v15-toggle{transition:none}
+}
