@@ -1334,3 +1334,119 @@ body.shop-refresh .order-card-v2{display:grid!important;gap:12px!important;width
 }
 @media(prefers-reduced-motion:reduce){.toast{animation:none!important}.receipt-preview-wrap .admin-image{transition:none!important}}
 
+
+/* Refills Shop V12 — payment artwork, consistent spacing and alignment */
+body.shop-refresh .main-content,
+body.admin-view .main-content{min-width:0;max-width:100%}
+body.shop-refresh .main-content>*,
+body.admin-view .main-content>*{box-sizing:border-box;min-width:0}
+body.shop-refresh .pagehead{margin:0 0 16px!important}
+body.shop-refresh .game-grid-v4,
+body.shop-refresh .offer-grid-v4,
+body.shop-refresh .order-list,
+body.shop-refresh .cart-list,
+body.admin-view .rs-v3-list{align-items:stretch;gap:15px!important}
+body.shop-refresh .game-card-v4,
+body.shop-refresh .offer-card-v4,
+body.shop-refresh .order-card-v2,
+body.shop-refresh .rs-v3-panel,
+body.shop-refresh .admin-entity,
+body.shop-refresh .purchase-main-v5,
+body.shop-refresh .purchase-summary-v5{box-sizing:border-box;min-width:0}
+body.shop-refresh .purchase-layout-v5{align-items:start;gap:18px!important}
+body.shop-refresh .purchase-form-v6{display:flex;flex-direction:column;gap:16px!important}
+body.shop-refresh .purchase-main-v5{padding:clamp(16px,2vw,24px)}
+body.shop-refresh .purchase-panel-head-v5{align-items:center;gap:14px!important}
+body.shop-refresh .purchase-game-row-v5{margin:0!important;gap:14px!important}
+body.shop-refresh .purchase-payment-detail-v5{display:flex;flex-direction:column;gap:14px!important}
+body.shop-refresh .purchase-payment-detail-v5>.fields{gap:13px!important}
+body.shop-refresh .purchase-form-actions-v5,
+body.shop-refresh .purchase-preview-actions-v5,
+body.shop-refresh .order-card-v2-actions,
+body.shop-refresh .cart-footer{gap:10px!important}
+
+body.shop-refresh .payment-methods-v5{
+ display:grid!important;
+ grid-template-columns:repeat(2,minmax(0,1fr))!important;
+ grid-auto-rows:1fr;
+ align-items:stretch;
+ gap:13px!important;
+}
+body.shop-refresh .payment-option-v5{
+ display:flex!important;
+ flex-direction:row;
+ align-items:center!important;
+ gap:12px!important;
+ min-width:0!important;
+ min-height:94px!important;
+ width:100%;
+ padding:13px!important;
+ border-radius:15px!important;
+ box-sizing:border-box;
+}
+body.shop-refresh .payment-logo-v5{
+ display:grid!important;
+ place-items:center!important;
+ flex:0 0 62px!important;
+ width:62px!important;
+ height:62px!important;
+ min-width:62px!important;
+ padding:0!important;
+ overflow:hidden!important;
+ border:1px solid #315d7d!important;
+ border-radius:13px!important;
+ background:#092746!important;
+}
+body.shop-refresh .payment-logo-v5 img{
+ display:block!important;
+ width:100%!important;
+ height:100%!important;
+ max-width:none!important;
+ max-height:none!important;
+ padding:0!important;
+ margin:0!important;
+ object-fit:contain!important;
+ object-position:center!important;
+ transform:none!important;
+ border-radius:inherit;
+ background:transparent!important;
+}
+body.shop-refresh .payment-logo-etecsa,
+body.shop-refresh .payment-logo-mitransfer{background:#092c50!important}
+body.shop-refresh .payment-logo-transfermovil,
+body.shop-refresh .payment-logo-bep20{background:#f6fbff!important}
+body.shop-refresh .payment-wallet-mark-v5{background-image:none!important}
+body.shop-refresh .payment-copy-v5{
+ display:flex;
+ flex:1 1 auto;
+ flex-direction:column;
+ justify-content:center;
+ gap:5px!important;
+ min-width:0;
+ text-align:left;
+}
+body.shop-refresh .payment-copy-v5 strong{font-size:13px!important;line-height:1.3!important}
+body.shop-refresh .payment-copy-v5 small{font-size:10.5px!important;line-height:1.45!important}
+body.shop-refresh .payment-pick-v5{flex:0 0 10px!important}
+
+body.admin-view .rs-admin-shell{gap:16px!important}
+body.admin-view .rs-v3-panel{box-sizing:border-box;min-width:0}
+
+@media(max-width:760px){
+ body.shop-refresh .pagehead{margin-bottom:13px!important}
+ body.shop-refresh .game-grid-v4,
+ body.shop-refresh .offer-grid-v4,
+ body.shop-refresh .order-list,
+ body.shop-refresh .cart-list,
+ body.admin-view .rs-v3-list{gap:12px!important}
+ body.shop-refresh .purchase-layout-v5{gap:12px!important}
+ body.shop-refresh .purchase-main-v5{padding:14px!important}
+ body.shop-refresh .payment-methods-v5{grid-template-columns:minmax(0,1fr)!important;gap:10px!important}
+ body.shop-refresh .payment-option-v5{min-height:80px!important;padding:10px 12px!important}
+ body.shop-refresh .payment-logo-v5{flex-basis:56px!important;width:56px!important;height:56px!important;min-width:56px!important}
+ body.shop-refresh .purchase-panel-head-v5{gap:11px!important}
+ body.shop-refresh .purchase-payment-detail-v5{gap:12px!important}
+}
+@media(prefers-reduced-motion:reduce){
+ body.shop-refresh .payment-option-v5{transition:none!important}
+}
