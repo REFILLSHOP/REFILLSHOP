@@ -329,10 +329,41 @@ function adminV3Home(){
  return `<div class="rs-v3">${adminV3Heading('RESUMEN','Tu administración','Controla tu tienda desde un solo lugar.')}<div class="rs-v3-stats">${stats}</div>${adminV3Panel('Accesos rápidos','Cada tarea tiene su propia pantalla.',`<div class="rs-v3-shortcuts">${quick}</div>`)}${adminV3Panel('Registros recientes',pending+' clientes pendientes de revisión.',`<div class="rs-v3-form-actions"><button type="button" class="btn btn-primary" data-href="/admin/customers">Ir a clientes</button><button type="button" class="btn btn-outline" id="refreshCustomers">Actualizar avisos</button></div>`)}</div>`;
 }
 function adminV3Orders(){
- const search=`<form class="rs-v3-form rs-v3-searchform" id="adminOrderSearchForm"><label class="field">Buscar pedido<input name="q" type="search" value="${esc(S.admSearch)}" placeholder="Código RS-…"></label><div class="rs-v3-form-actions"><button class="btn btn-primary" type="submit">Buscar</button><button class="btn btn-outline" id="reloadAdminOrders" type="button">Actualizar</button></div></form>`;
- const list=S.adminOrders.map(o=>`<div class="rs-v3-order">${orderCard(o,true)}</div>`).join('');
- return `<div class="rs-v3">${adminV3Heading('PEDIDOS','Gestión de pedidos','Consulta cada solicitud, revisa el comprobante y actualiza su estado.')}${adminV3Panel('Pedidos recibidos · '+S.adminOrders.length,'Busca por código o actualiza la lista.',search+`<div class="rs-v3-list">${list||adminV3Blank('Todavía no hay pedidos con esos criterios.')}</div>`)}</div>`;
+ const all=(S.adminOrders||[]).slice().sort((a,b)=>new Date(b.created||0).getTime()-new Date(a.created||0).getTime());
+ const isPending=o=>o.status==='pending';
+ const awaiting=all.filter(o=>isPending(o)&&o.paymentStatus!=='paid');
+ const ready=all.filter(o=>isPending(o)&&o.paymentStatus==='paid');
+ const tabs=[['attention','Pendientes',all.filter(isPending).length],['unverified','Sin verificar',awaiting.length],['ready','Pago confirmado',ready.length],['completed','Completados',all.filter(o=>o.status==='completed').length],['rejected','Rechazados',all.filter(o=>o.status==='rejected').length],['all','Todos',all.length]];
+ const selected=S.admOrderFilter||'attention';
+ const filtered=all.filter(o=>selected==='attention'?isPending(o):selected==='unverified'?isPending(o)&&o.paymentStatus!=='paid':selected==='ready'?isPending(o)&&o.paymentStatus==='paid':selected==='all'||o.status===selected);
+ const heading=adminV3Heading('PEDIDOS','Bandeja de pedidos','Revisa cada pago, confirma la entrega y mantén las solicitudes organizadas.');
+ const search=`<form class="rs-order-v16-search" id="adminOrderSearchForm"><label class="field" for="adminOrderSearch">Buscar pedido, juego o ID<input id="adminOrderSearch" name="q" type="search" value="${esc(S.admSearch)}" placeholder="Código de pedido, juego o ID"></label><button type="submit" class="btn btn-primary">Buscar</button><button type="button" class="btn btn-outline" id="reloadAdminOrders">Actualizar</button></form>`;
+ const filters=`<nav class="rs-order-v16-filters" aria-label="Filtrar pedidos">${tabs.map(([key,label,count])=>`<button class="rs-order-v16-filter ${selected===key?'is-active':''}" type="button" data-order-filter="${key}" aria-pressed="${selected===key?'true':'false'}">${label}<span>${count}</span></button>`).join('')}</nav>`;
+ const list=filtered.map(o=>{
+  const isOpen=o.status==='pending',paid=o.paymentStatus==='paid',crypto=o.method==='usdt_bep20';
+  const datetime=new Date(o.created||0),dateText=Number.isNaN(datetime.getTime())?'Sin fecha':datetime.toLocaleString('es-ES',{dateStyle:'short',timeStyle:'short'});
+  const status=paid&&isOpen?'Pago confirmado · por entregar':isOpen?(crypto?'Esperando confirmación de USDT':'Pago pendiente de revisión'):statusName(o.status);
+  const steps=isOpen?`<div class="rs-order-v16-actions">
+   <button type="button" class="btn btn-primary btn-sm" data-detail="${esc(o.code)}" data-admin="1">${!paid&&o.receiptAvailable?'Revisar comprobante':'Ver detalles'}</button>
+   ${paid?`<button type="button" class="btn btn-outline btn-sm" data-admin-status="completed" data-code="${esc(o.code)}">Marcar entregado</button>`:''}
+   <button type="button" class="btn btn-red btn-sm" data-admin-status="rejected" data-code="${esc(o.code)}">Rechazar</button>
+  </div>`:`<div class="rs-order-v16-actions"><button type="button" class="btn btn-outline btn-sm" data-detail="${esc(o.code)}" data-admin="1">Ver detalles</button></div>`;
+  return `<article class="rs-order-v16-card">
+   <div class="rs-order-v16-top"><strong>${esc(o.code)}</strong><span class="rs-order-v16-state ${esc(o.status)}">${esc(status)}</span></div>
+   <div class="rs-order-v16-main"><h3>${esc(o.game)}</h3><p>${esc(o.offer)}</p></div>
+   <div class="rs-order-v16-data"><span><small>ID de jugador</small><b>${esc(o.playerId||'—')}</b></span><span><small>Importe</small><b>${money(o.amount)} ${esc(o.currency)}</b></span><span><small>Método</small><b>${esc(paymentName(o.method))}</b></span><span><small>Fecha</small><b>${esc(dateText)}</b></span></div>
+   <div class="rs-order-v16-receipt">${o.receiptAvailable?'Comprobante adjunto':'Sin comprobante'} · ${paid?'Pago verificado':'Aún sin verificar'}</div>
+   ${steps}
+  </article>`;
+ }).join('');
+ return `<div class="rs-v3 rs-orders-v16">${heading}
+  <div class="rs-orders-v16-summary"><span><strong>${all.filter(isPending).length}</strong><small>Por atender</small></span><span><strong>${awaiting.length}</strong><small>Sin verificar</small></span><span><strong>${ready.length}</strong><small>Por entregar</small></span></div>
+  <section class="rs-v3-panel rs-orders-v16-inbox"><div class="rs-orders-v16-panel-title"><div><h2>Todos tus pedidos</h2><p>Abre un pedido para revisar sus datos y su comprobante antes de confirmar el pago.</p></div></div>
+   ${search}${filters}<div class="rs-orders-v16-list">${list||`<div class="rs-v3-blank"><strong>No hay pedidos en esta sección</strong><p>Prueba otro filtro o actualiza la bandeja.</p></div>`}</div>
+  </section>
+ </div>`;
 }
+
 function adminV3Settings(){
  if(!PREVIEW&&!S.adminSettings)return `<div class="rs-v3">${adminV3Heading('NEGOCIO','Precios y tasas','Cargando datos protegidos de configuración…')}</div>`;
  const c={...(S.store.config||{}),...(S.adminSettings||{})};
@@ -532,7 +563,7 @@ function showDetail(code,admin){
  const date=new Date(o.created),dateText=Number.isNaN(date.getTime())?'—':date.toLocaleString('es-ES',{dateStyle:'medium',timeStyle:'short'});
  const targetRows=Object.entries(o.targetPayload||{}).filter(([k,v])=>k!=='player_id'&&String(v).length<150).map(([k,v])=>`<div class="order-modal-row"><span>${esc(k.replace(/_/g,' '))}</span><strong>${esc(v)}</strong></div>`).join('');
  const receipt=admin?(o.receiptAvailable?'<div id="adminReceiptView" class="order-modal-receipt">Cargando comprobante…</div>':'<div class="order-modal-receipt muted">Este pedido no tiene comprobante adjunto.</div>'):(o.receiptAvailable?'<div class="order-modal-receipt">Comprobante enviado y guardado de forma privada.</div>':'<div class="order-modal-receipt muted">Sin comprobante adjunto.</div>');
- const actions=admin&&o.status==='pending'?`<div class="order-modal-actions"><button class="btn btn-outline" data-href="/admin/fulfillment" type="button">Revisar pago y entrega</button>${o.paymentStatus==='paid'?'<button class="btn btn-primary" data-admin-status="completed" data-code="'+esc(o.code)+'" type="button">Marcar completado</button>':''}<button class="btn btn-red" data-admin-status="rejected" data-code="${esc(o.code)}" type="button">Rechazar pedido</button></div>`:'';
+ const actions=admin&&o.status==='pending'?`<div class="order-modal-actions"><button class="btn btn-outline" data-href="/admin/fulfillment" type="button">Gestión de entregas</button>${o.paymentStatus!=='paid'&&o.method!=='usdt_bep20'&&o.receiptAvailable?'<button class="btn btn-primary" data-verify-payment="'+esc(o.code)+'" type="button">Confirmar pago recibido</button>':''}${o.paymentStatus==='paid'?'<button class="btn btn-primary" data-admin-status="completed" data-code="'+esc(o.code)+'" type="button">Marcar completado</button>':''}<button class="btn btn-red" data-admin-status="rejected" data-code="${esc(o.code)}" type="button">Rechazar pedido</button></div>`:'';
  $('modal').innerHTML=`<section class="card modal-card order-modal-v2" role="dialog" aria-modal="true" aria-labelledby="orderDetailTitle">
   <header class="order-modal-v2-head"><div><span class="order-modal-kicker">DETALLE DEL PEDIDO</span><h2 id="orderDetailTitle">${esc(o.code)}</h2></div><button class="btn btn-ghost btn-sm" id="closeModal" type="button" aria-label="Cerrar detalle">Cerrar</button></header>
   <div class="order-modal-v2-scroll">
@@ -687,8 +718,9 @@ if(t.id==='refreshCustomers'){loadCustomers();return}
 if(t.id==='refreshFulfillments'){loadFulfillments();loadAdminOrders();return}
 if(t.dataset.editCustomer){const c=S.adminCustomers.find(c=>c.id===t.dataset.editCustomer);if(!c)return;$('modal').innerHTML=`<div class="card modal-card" role="dialog" aria-modal="true"><div class="modal-head"><h2>Editar cliente</h2><button class="btn btn-ghost btn-sm" id="closeModal">Cerrar</button></div><form id="adminCustomerEditForm" class="fields mt2"><input type="hidden" name="userId" value="${esc(c.id)}"><div class="field"><label>Nombre</label><input name="fullName" value="${esc(c.name)}" maxlength="90" required></div><div class="field"><label>Teléfono internacional</label><input name="phone" maxlength="19" value="${esc(c.phone)}" required></div><button class="btn btn-primary btn-wide" type="submit">Guardar cliente</button></form></div>`;return}
 if(t.dataset.editOffer){const o=S.adminAllOffers.find(o=>o.id===t.dataset.editOffer);if(!o){notify('Actualiza ofertas en ADM');return}$('modal').innerHTML=`<div class="card modal-card" role="dialog" aria-modal="true"><div class="modal-head"><h2>Editar oferta</h2><button class="btn btn-ghost btn-sm" id="closeModal">Cerrar</button></div><p>${esc(o.name)} · ${esc(o.provider_name)}</p><form id="adminOfferEditForm" class="fields mt2"><input type="hidden" name="id" value="${esc(o.id)}"><div class="field"><label>Ganancia en SM</label><input type="number" name="gainSm" min="0" step="0.01" required value="${esc(o.gain_sm)}"></div><p class="notice">Puedes ajustar la ganancia sin cambiar la visibilidad de la oferta en el catálogo.</p><button class="btn btn-primary btn-wide" type="submit">Guardar oferta en Supabase</button></form></div>`;return}
-if(t.dataset.verifyPayment){if(!confirm('¿Confirmas que recibiste y verificaste el pago del pedido '+t.dataset.verifyPayment+'?'))return;try{await adminAction('verify-payment',{code:t.dataset.verifyPayment,confirmedPayment:true});notify('Pago verificado. La solicitud ya puede pasar a entrega.');await loadAdminOrders();await loadFulfillments()}catch(e){notify(e.message)}return}if(t.dataset.fulfill){if(!confirm('¿Enviar la recarga de '+t.dataset.fulfill+' a Central One? El pago ya debe estar verificado. Esta operación puede consumir saldo real.'))return;try{const r=await adminAction('fulfill-order',{code:t.dataset.fulfill,paymentVerified:true});notify('Solicitud de entrega enviada. Estado: '+(r.providerStatus||'confirmada'));await loadFulfillments();await loadAdminOrders()}catch(e){notify(e.message)}return}
+if(t.dataset.verifyPayment){if(!confirm('¿Has comprobado el importe y los datos del comprobante del pedido '+t.dataset.verifyPayment+' y confirmado que el dinero llegó realmente?'))return;try{await adminAction('verify-payment',{code:t.dataset.verifyPayment,confirmedPayment:true});notify('Pago verificado. La solicitud ya puede pasar a entrega.');await loadAdminOrders();await loadFulfillments()}catch(e){notify(e.message)}return}if(t.dataset.fulfill){if(!confirm('¿Enviar la recarga de '+t.dataset.fulfill+' a Central One? El pago ya debe estar verificado. Esta operación puede consumir saldo real.'))return;try{const r=await adminAction('fulfill-order',{code:t.dataset.fulfill,paymentVerified:true});notify('Solicitud de entrega enviada. Estado: '+(r.providerStatus||'confirmada'));await loadFulfillments();await loadAdminOrders()}catch(e){notify(e.message)}return}
 if(t.dataset.reconcile){try{const r=await adminAction('reconcile-order',{orderId:t.dataset.reconcile});notify('Estado de entrega actualizado: '+r.providerStatus);await loadFulfillments();await loadAdminOrders()}catch(e){notify(e.message)}return}
+if(t.dataset.orderFilter){S.admOrderFilter=t.dataset.orderFilter;render();return}
 if(t.id==='reloadAdminOrders'){loadAdminOrders();return}
 if(t.id==='refreshPlans'){loadPlanRequests();return}
 if(t.dataset.approvePlan){planStatus(t.dataset.approvePlan,true);return}
