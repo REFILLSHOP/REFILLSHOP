@@ -85,7 +85,7 @@ function paymentTotalV6(){const amount=payAmount();return `<div class="payment-t
 const PAYMENT_LOGOS_V5={
  mobile:{src:assetSrc('saldo-movil-etecsa.webp'),fallback:'etecsa.svg',kind:'etecsa'},
  wallet:{src:assetSrc('mitransfer-wallet.webp'),fallback:'mitransfer.svg',kind:'mitransfer'},
- card:{src:assetSrc('transfermovil.svg'),fallback:'transfermovil.svg',kind:'transfermovil'},
+ card:{src:assetSrc('transfermovil-brand.png'),fallback:'transfermovil.svg',kind:'transfermovil'},
  usdt_bep20:{src:assetSrc('usdt-bep20.svg'),fallback:'usdt-bep20.svg',kind:'bep20'}
 };
 function paymentChoicesV5(){
