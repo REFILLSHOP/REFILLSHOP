@@ -64,7 +64,29 @@ function cartPage(){
  const rows=items.map(({g,o})=>{const available=!!S.store.salesEnabled&&o.purchasable&&o.inStock!==false;return '<article class="card cart-item"><div class="cart-item-art"><img src="'+esc(coverSrc(g))+'" alt="'+esc(g.name)+'"></div><div class="cart-item-main"><small>'+esc(g.name)+'</small><strong>'+esc(o.name)+'</strong>'+customerPrices(o)+(available?'':'<span class="muted small">Esta oferta ya no admite pedidos.</span>')+'</div><div class="cart-item-actions"><button class="btn btn-primary btn-sm" data-cart-buy="'+esc(o.id)+'" data-game="'+esc(g.id)+'" '+(available?'':'disabled')+'>Comprar</button><button class="btn btn-outline btn-sm" data-cart-remove="'+esc(o.id)+'">Quitar</button></div></article>'}).join('');
  return pagehead('TU COMPRA','Carrito de compra',items.length+' '+(items.length===1?'oferta guardada':'ofertas guardadas')+'. Cada recarga se tramita como un pedido independiente.')+'<div class="cart-list">'+rows+'</div><div class="cart-footer"><p class="muted">Cada artículo solicita su propio ID de jugador y comprobante para evitar mezclar cuentas o regiones.</p><button class="btn btn-ghost" id="clearCart" type="button">Vaciar carrito</button><button class="btn btn-outline" data-href="/catalogo">Seguir comprando</button></div>';
 }
-function steps(){return `<nav class="purchase-progress-v5 purchase-progress-v6" aria-label="Progreso de la compra">${['Datos','Pago y captura','Listo'].map((label,i)=>`<div class="purchase-progress-step ${S.step===i+1?'active':S.step>i+1?'complete':''}" ${S.step===i+1?'aria-current="step"':''}><span class="purchase-progress-index">${S.step>i+1?'✓':i+1}</span><span class="purchase-progress-label">${label}</span></div>`).join('')}</nav>`}
+function steps(){
+ const current=Math.min(3,Math.max(1,Number(S.step)||1));
+ const phases=[
+  {label:'Jugador',hint:'Datos de destino',glyph:'game'},
+  {label:'Pago',hint:'Pago y comprobante',glyph:'wallet'},
+  {label:'Solicitud',hint:'Estado del pedido',glyph:'check'}
+ ];
+ const filled=((current-1)/2)*100;
+ return `<section class="checkout-journey" aria-label="Progreso de compra" style="--journey-complete:${filled}%">
+  <div class="checkout-journey-header"><span class="checkout-journey-overline">TU COMPRA, PASO A PASO</span><span class="checkout-journey-count" aria-label="Paso ${current} de 3">${String(current).padStart(2,'0')} <span>/ 03</span></span></div>
+  <nav class="checkout-journey-track" aria-label="Etapas de tu pedido">
+   <div class="checkout-journey-line" aria-hidden="true"><span></span></div>
+   ${phases.map((phase,i)=>{
+     const position=i+1,state=position===current?'is-current':position<current?'is-complete':'is-upcoming';
+     const glyph=position<current?'check':phase.glyph;
+     return `<div class="checkout-journey-stage ${state}" ${position===current?'aria-current="step"':''}>
+      <span class="checkout-journey-icon" aria-hidden="true">${icon(glyph)}</span>
+      <span class="checkout-journey-caption"><strong>${phase.label}</strong><small>${phase.hint}</small></span>
+     </div>`;
+   }).join('')}
+  </nav>
+ </section>`;
+}
 function payAmount(){const {o}=selection();if(!o)return {amount:0,currency:'CUP'};if(S.payment==='usdt_bep20')return {amount:o.usdt,currency:'USDT'};return S.payment==='mobile'?{amount:o.sm,currency:'SM'}:{amount:S.payment==='card'?o.card:o.cup,currency:'CUP'}}
 function paymentName(id){return ({mobile:'ETECSA · Saldo móvil',wallet:'MiTransfer · Monedero',card:'Transfermóvil · CUP',usdt_bep20:'USDT · BEP-20'})[id]||id}
 function sumBox(){const {g,o}=selection();if(!g||!o)return '';const amt=payAmount();return `<aside class="card checkout-summary purchase-summary-v5"><div class="purchase-summary-top"><span class="caps">TU PEDIDO</span><strong>${amt.currency==='USDT'?usdt(amt.amount):money(amt.amount)} <small>${esc(amt.currency)}</small></strong></div><div class="purchase-summary-main"><div class="purchase-summary-cover"><img src="${esc(coverSrc(g))}" alt="${esc(g.name)}" decoding="async"></div><div><small>${esc(g.name)}</small><strong>${esc(o.name)}</strong></div></div><div class="purchase-summary-rows"><div><span>Cuenta / jugador</span><strong>${S.playerId?esc(S.playerId):'Pendiente'}</strong></div>${S.playerName?`<div><span>Nombre verificado</span><strong>${esc(S.playerName)}</strong></div>`:''}<div><span>Método</span><strong>${esc(paymentName(S.payment))}</strong></div><div><span>Estado</span><strong>${S.store.salesEnabled&&o.purchasable?'Disponible para solicitud':'No disponible'}</strong></div></div><p class="purchase-summary-note">El pedido se registra cuando envías la captura. Administración verificará el pago antes de autorizar la recarga.</p></aside>`}
