@@ -155,6 +155,7 @@ function resellerDepositPanel(){
  const d=S.walletDeposit,pending=d&&d.status==='pending';
  let h='<section class="card pad mt reseller-deposit"><div class="caps">SALDO DE REVENDEDOR</div><h2 class="section-title">Recargar con USDT BEP-20</h2>';
  h+='<p class="muted">Solo las transferencias USDT verificadas en BNB Smart Chain pueden acreditarse automáticamente. ETECSA, Transfermóvil y MiTransfer no recargan este saldo.</p>';
+ if(S.store?.config?.resellerWalletAutoEnabled!==true){h+='<div class="notice warn">Las recargas del monedero están temporalmente desactivadas mientras se termina la verificación. No envíes USDT a ninguna dirección por tu cuenta.</div>';return h+'</section>';}
  if(pending){
   h+='<div class="notice warn">Transfiere exclusivamente el importe exacto, mediante BEP-20. Los pagos enviados en otra red o con otro importe no se acreditan automáticamente.</div>';
   h+='<div class="wallet-display">'+esc(String(d.payableAmount))+' <small>USDT</small></div>';
