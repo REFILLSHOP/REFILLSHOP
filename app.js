@@ -659,6 +659,56 @@ async function adminAction(action,body){if(PREVIEW)throw Error('Sin backend en v
 async function doPlanRequest(){if(!S.user){route('/cuenta');notify('Inicia sesión antes de solicitar un plan.');return}if(!S.profile){route('/cuenta');return}if(!confirm('¿Enviar solicitud del plan por '+usdt(S.store.config.planPrice)+' USDT? No se realizará ningún cargo automático.'))return;try{const d=await api('/api/reseller/request',{method:'POST',body:{},auth:true});notify(d.message||'Solicitud registrada, pendiente de aprobación.')}catch(e){notify(e.message)}}
 async function planStatus(id,approve){if(!confirm(approve?'¿Verificaste de verdad el pago del plan antes de activarlo?':'¿Rechazar esta solicitud?'))return;try{await adminAction(approve?'approve-plan':'plan-reject',{requestId:Number(id),...(approve?{confirmedPayment:true}:{})});await loadPlanRequests();notify('Solicitud procesada.')}catch(e){notify(e.message)}}
 async function processForms(f){const form=f.id;
+if(form==='resellerWalletDepositForm'){
+ if(!S.user||PORTAL_MODE!=='reseller')return notify('Inicia sesión en el portal de revendedores.');
+ const button=f.querySelector('[type="submit"]');if(button)button.disabled=true;
+ try{
+  const file=f.elements.proof?.files?.[0]||null,proofData=file?await readReceipt(file):null;
+  const payload={currency:String(f.elements.currency.value),amount:Number(f.elements.amount.value),senderPhone:String(f.elements.senderPhone.value||'').trim(),txHash:String(f.elements.txHash.value||'').trim(),proofData};
+  const result=await api('/api/reseller/wallet/deposits',{method:'POST',auth:true,body:payload});
+  await loadProfile();render();notify('Solicitud de recarga enviada. El saldo se acreditará cuando administración verifique el pago.');
+ }catch(e){notify(e.message||'No se pudo enviar la solicitud.')}
+ finally{if(button?.isConnected)button.disabled=false}
+ return;
+}
+if(form==='resellerSubscribeForm'){
+ if(!S.user||PORTAL_MODE!=='reseller')return notify('Inicia sesión en el portal de revendedores.');
+ const tier=String(f.elements.tier.value),currency=String(f.elements.currency.value);
+ if(!confirm('¿Activar '+(tier==='level3'?'Level 3':'Level 2')+' descontando el pago de tu wallet en '+currency+'?'))return;
+ const button=f.querySelector('[type="submit"]');if(button)button.disabled=true;
+ try{
+  const result=await api('/api/reseller/subscribe',{method:'POST',auth:true,body:{tier,currency}});
+  await loadProfile();await loadResellerStorefront();render();
+  notify('Plan '+(tier==='level3'?'Level 3':'Level 2')+' activado correctamente.');
+ }catch(e){notify(e.message||'No se pudo activar el plan.')}
+ finally{if(button?.isConnected)button.disabled=false}
+ return;
+}
+if(form==='resellerOrderForm'){
+ if(!S.user||PORTAL_MODE!=='reseller')return notify('Inicia sesión en el portal de revendedores.');
+ const {o}=selection();if(!o)return notify('La oferta ya no está disponible.');
+ const schema=targetSchema(o),payload={};
+ let playerId='',zoneId='';
+ if(schema.length){
+  for(const field of schema){const value=String(f.elements['target_'+field.key]?.value||'').trim();if(!value||value.length>64)return notify('Completa '+targetFieldLabel(field));payload[field.key]=value;}
+  playerId=String(payload.player_id||payload.user_id||payload.service_user_id||Object.values(payload)[0]||'').slice(0,80);
+  zoneId=String(payload.zone_id||payload.server||'').slice(0,50);
+ }else{
+  playerId=String(f.elements.playerId?.value||'').trim();zoneId=String(f.elements.zoneId?.value||'').trim();
+  if(playerId.length<3)return notify('Introduce un ID de jugador válido.');
+  payload.player_id=playerId;if(zoneId)payload.zone_id=zoneId;
+ }
+ const currency=String(f.elements.currency.value);
+ if(!confirm('Se descontará el precio actualizado de tu wallet en '+currency+'. ¿Confirmar el pedido?'))return;
+ const button=f.querySelector('[type="submit"]');if(button)button.disabled=true;
+ try{
+  const result=await api('/api/reseller/orders',{method:'POST',auth:true,body:{offerId:o.id,clientRequestId:crypto.randomUUID(),playerId,zoneId,targetPayload:payload,currency}});
+  await loadProfile();await loadResellerOrders({quiet:true});render();notify('Pedido '+result.code+' registrado. El saldo fue descontado de tu wallet.');
+  route('/reseller/orders');
+ }catch(e){notify(e.message||'No se pudo crear el pedido.')}
+ finally{if(button?.isConnected)button.disabled=false}
+ return;
+}
 if(form==='walletDepositForm'){
  if(!S.user||!S.member)return notify('Disponible solo para revendedores activos.');
  const button=f.querySelector('[type="submit"]');if(button)button.disabled=true;
