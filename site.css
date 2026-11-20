@@ -2081,3 +2081,10 @@ body.admin-view .rs-adm-workspace-v24 :where(.admin-grid,.adm-editor-grid,.adm-g
  body .bottom-nav .ico .icon{width:19px;height:19px}
  body.auth-guest .bottom-nav{display:none!important}
 }
+
+
+/* V24 ADM full-width correction: old sidebar layout must not constrain new workspace. */
+body.admin-view main.wrap{display:block!important;width:calc(100% - 28px)!important;max-width:1360px!important;margin-inline:auto!important;grid-template-columns:none!important;padding-inline:0!important}
+body.admin-view main.wrap .rs-adm-v24{width:100%!important;max-width:100%!important;min-width:0!important}
+body.admin-view .rs-adm-workspace-v24 :where(.rs-v3,.rs-v3-panel,.rs-gv2-panel,.adm-editor-panel){width:100%;min-width:0;max-width:100%}
+@media(max-width:700px){body.admin-view main.wrap{width:calc(100% - 20px)!important}}
