@@ -1892,3 +1892,27 @@ body.portal-catalog .howto-grid{grid-template-columns:repeat(auto-fit,minmax(min
 @media(prefers-reduced-motion:reduce){
  body *,body *::before,body *::after{scroll-behavior:auto!important;transition-duration:.01ms!important;animation-duration:.01ms!important}
 }
+
+
+/* V20 final specificity fixes for earlier !important legacy rules */
+body .toasts{
+ position:fixed!important;inset:auto auto calc(90px + env(safe-area-inset-bottom)) 50%!important;
+ width:min(440px,calc(100vw - 28px))!important;max-width:calc(100vw - 28px)!important;
+ height:auto!important;min-height:0!important;display:block!important;
+ padding:0!important;transform:translateX(-50%)!important;pointer-events:none!important;
+}
+body .toasts .toast{width:100%!important;max-width:100%!important;pointer-events:auto!important}
+@media(max-width:760px){
+ body .wrap{width:calc(100% - 28px)!important;max-width:100%!important}
+ body .header-inner{width:calc(100% - 24px)!important}
+ body.shop-refresh .game-grid-v4,body.shop-refresh .offer-grid-v4{grid-template-columns:minmax(0,1fr)!important;gap:12px!important}
+ body .bottom-nav{grid-template-columns:repeat(var(--nav-count,5),minmax(0,1fr))!important}
+ body .toasts{bottom:calc(91px + env(safe-area-inset-bottom))!important}
+}
+@media(min-width:761px) and (max-width:1050px){
+ body.shop-refresh .game-grid-v4,body.shop-refresh .offer-grid-v4{grid-template-columns:repeat(2,minmax(0,1fr))!important}
+}
+@media(max-width:390px){
+ body .wrap{width:calc(100% - 22px)!important}
+ body .header-inner{width:calc(100% - 20px)!important}
+}
