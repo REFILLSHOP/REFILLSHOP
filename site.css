@@ -2176,3 +2176,44 @@ body.portal-reseller .rs12-account-strip{display:flex;align-items:center;justify
  .rs12-orders-toolbar{justify-content:stretch}
  .rs12-orders-toolbar .btn{flex:1}
 }
+
+
+/* Final responsive fixes: payment selector, compact empty admin panels, regions and game cards. */
+body.shop-refresh .payment-methods-v5{display:grid!important;grid-template-columns:repeat(2,minmax(0,1fr))!important;gap:12px!important;align-items:stretch!important}
+body.shop-refresh .payment-option-v5{display:flex!important;align-items:center!important;gap:12px!important;min-width:0!important;width:100%!important;min-height:82px!important;padding:12px!important;overflow:hidden!important}
+body.shop-refresh .payment-option-v5 input[type="radio"]{position:absolute!important;opacity:0!important;pointer-events:none!important;width:1px!important;height:1px!important;min-width:1px!important;max-width:1px!important;margin:0!important;clip-path:inset(50%)!important;appearance:none!important}
+body.shop-refresh .payment-option-v5 .payment-logo-v5{flex:0 0 58px!important;width:58px!important;height:58px!important;min-width:58px!important;margin:0!important}
+body.shop-refresh .payment-option-v5 .payment-copy-v5{display:flex!important;flex:1 1 auto!important;flex-direction:column!important;justify-content:center!important;gap:4px!important;min-width:0!important;overflow:hidden!important}
+body.shop-refresh .payment-option-v5 .payment-copy-v5 strong{display:block!important;max-width:100%!important;white-space:normal!important;overflow-wrap:anywhere!important;word-break:normal!important;font-size:13px!important;line-height:1.25!important}
+body.shop-refresh .payment-option-v5 .payment-copy-v5 small{display:block!important;max-width:100%!important;white-space:normal!important;overflow-wrap:anywhere!important;font-size:10px!important;line-height:1.35!important}
+body.shop-refresh .payment-option-v5 .payment-pick-v5{display:block!important;flex:0 0 14px!important;width:14px!important;height:14px!important;min-width:14px!important;margin-left:auto!important;border-radius:50%!important;border:2px solid #4688ad!important;background:transparent!important;box-shadow:none!important}
+body.shop-refresh .payment-option-v5.active .payment-pick-v5{border-color:#4bc6ff!important;background:#4bc6ff!important;box-shadow:inset 0 0 0 3px #0b2942!important}
+@media(max-width:760px){body.shop-refresh .payment-methods-v5{grid-template-columns:minmax(0,1fr)!important;gap:9px!important}body.shop-refresh .payment-option-v5{min-height:76px!important;padding:10px 12px!important}body.shop-refresh .payment-option-v5 .payment-logo-v5{flex-basis:54px!important;width:54px!important;height:54px!important;min-width:54px!important}body.shop-refresh .payment-option-v5 .payment-copy-v5 strong{font-size:14px!important}}
+/* Empty panels must collapse to their content; no forced blank height on phones. */
+body.admin-view .rs-v3,body.admin-view .rs-v3-panel,body.admin-view .rs-v3-list,body.admin-view .rs-v3-item{height:auto!important;min-height:0!important;align-content:start!important}
+body.admin-view .rs-v3-panel{padding:clamp(12px,2vw,20px)!important}
+body.admin-view .rs-v3-panel:empty,body.admin-view .rs-v3-list:empty{display:none!important}
+body.admin-view .rs-v3-panel .rs-v3-blank{min-height:0!important;height:auto!important;padding:14px!important}
+body.admin-view .rs-v3-panel .rs-v3-form-actions{margin-bottom:10px!important}
+body.admin-view .rs12-admin-item{height:auto!important;min-height:0!important}
+@media(max-width:760px){body.admin-view .rs-v3{gap:10px!important}body.admin-view .rs-v3-panel{padding:12px!important}body.admin-view .rs-v3-panel-head{margin-bottom:9px!important}body.admin-view .rs-v3-item{padding:12px!important}}
+/* Region selector shown after choosing a game in the search/catalog. */
+.rs-region-picker{display:flex;align-items:end;justify-content:space-between;gap:14px;max-width:540px;margin:0 0 16px;padding:13px 15px;border:1px solid #2b5a7d;border-radius:14px;background:linear-gradient(140deg,#0d2943,#071a2e)}
+.rs-region-picker label{display:grid;gap:6px;min-width:0;flex:1}
+.rs-region-picker label span{font-size:10px;letter-spacing:.13em;color:#8acbf1;font-weight:850}
+.rs-region-picker select{width:100%;min-height:42px;padding:8px 12px;border:1px solid #356b92;border-radius:10px;background:#071b2f;color:#effaff}
+.rs-region-picker small{font-size:10px;color:#9dbbd2;white-space:nowrap}
+/* Refined game cards: artwork-led cards with a clean, compact information panel. */
+body.shop-refresh .game-grid-v4{display:grid!important;grid-template-columns:repeat(2,minmax(0,1fr))!important;gap:15px!important;align-items:stretch!important}
+body.shop-refresh .game-card-v4{display:flex!important;flex-direction:column!important;align-items:stretch!important;min-width:0!important;min-height:0!important;overflow:hidden!important;border:1px solid #285578!important;border-radius:18px!important;background:linear-gradient(155deg,#0e2943,#06172a)!important;box-shadow:0 12px 26px #0003!important;transition:transform .18s,border-color .18s,box-shadow .18s!important}
+body.shop-refresh .game-card-v4:hover{transform:translateY(-2px);border-color:#4bb9fa!important;box-shadow:0 15px 30px #0005!important}
+body.shop-refresh .game-card-v4 .game-art-v4{display:grid!important;place-items:center!important;flex:0 0 auto!important;width:100%!important;height:clamp(125px,16vw,190px)!important;min-height:0!important;margin:0!important;border:0!important;border-bottom:1px solid #294d6b!important;border-radius:0!important;background:radial-gradient(ellipse at center,#1c4566,#0a1e32 76%)!important;overflow:hidden!important}
+body.shop-refresh .game-card-v4 .game-art-v4 img{display:block!important;width:100%!important;height:100%!important;max-width:100%!important;max-height:100%!important;object-fit:cover!important;object-position:center!important}
+body.shop-refresh .game-card-v4 .game-content-v4{display:flex!important;flex:1 1 auto!important;flex-direction:column!important;align-items:stretch!important;gap:8px!important;min-width:0!important;padding:14px!important}
+body.shop-refresh .game-card-v4 .game-category-v4{font-size:9px!important;letter-spacing:.1em!important;text-transform:uppercase!important}
+body.shop-refresh .game-card-v4 .game-content-v4 h3{font-size:clamp(15px,1.7vw,20px)!important;line-height:1.2!important;margin:0!important;overflow-wrap:anywhere!important}
+body.shop-refresh .game-card-v4 .game-content-v4 p{font-size:12px!important;margin:0!important;color:#b9d8ee!important}
+body.shop-refresh .game-card-v4 .game-content-v4>.btn{width:100%!important;min-height:39px!important;margin-top:auto!important}
+.orders-notification-row{display:flex;justify-content:flex-end;margin:0 0 12px}
+.state-pill.processing{color:#ffe1a3!important;background:#6b4b1322!important;border:1px solid #a9813f!important}
+@media(max-width:440px){body.shop-refresh .game-grid-v4{grid-template-columns:repeat(2,minmax(0,1fr))!important;gap:9px!important}body.shop-refresh .game-card-v4 .game-art-v4{height:112px!important}body.shop-refresh .game-card-v4 .game-content-v4{padding:10px!important;gap:7px!important}body.shop-refresh .game-card-v4 .game-content-v4 h3{font-size:14px!important}body.shop-refresh .game-card-v4 .game-content-v4 p{font-size:10px!important}body.shop-refresh .game-card-v4 .game-content-v4>.btn{font-size:10px!important;min-height:34px!important}.rs-region-picker{align-items:stretch;flex-direction:column}.rs-region-picker small{white-space:normal}}
