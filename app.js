@@ -1,6 +1,7 @@
 (()=>{'use strict';
 const PORTAL_MODE=window.RS_PORTAL_MODE==='reseller'?'reseller':'customer';
-const CATALOG_ONLY=PORTAL_MODE==='customer'&&location.hostname.toLowerCase().endsWith('.github.io');
+// Customer site keeps public catalog browsing and allows authenticated checkout of live offers.
+const CATALOG_ONLY=false;
 const PREVIEW=window.RS_PREVIEW===true;
 const SITE_BASE=typeof window.RS_BASE_PATH==='string'?window.RS_BASE_PATH:'/REFILLSHOP';
 const ASSET_ROOT=(SITE_BASE||'')+'/assets/';
