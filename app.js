@@ -23,7 +23,7 @@ function applyRememberPreference(remember){
 }
 const PREVIEW=window.RS_PREVIEW===true;
 const SITE_BASE=typeof window.RS_BASE_PATH==='string'?window.RS_BASE_PATH:'/REFILLSHOP';
-const ASSET_ROOT=(SITE_BASE||'')+'/assets/';
+const ASSET_ROOT=typeof window.RS_ASSET_ROOT==='string'?window.RS_ASSET_ROOT:(SITE_BASE||'')+'/assets/';
 const sitePath=path=>path===SITE_BASE||path===SITE_BASE+'/'?'/':SITE_BASE&&path.startsWith(SITE_BASE+'/')?path.slice(SITE_BASE.length):path;
 const BRAND=PREVIEW?(window.RS_PREVIEW_BRAND||ASSET_ROOT+'brand-wordmark.webp'):ASSET_ROOT+'brand-wordmark.webp';
 const BRAND_ICON=PREVIEW?(window.RS_PREVIEW_ICON||ASSET_ROOT+'refills-icon.png'):ASSET_ROOT+'refills-icon.png';
