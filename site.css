@@ -1960,3 +1960,23 @@ body .toasts .toast{width:100%!important;max-width:100%!important;pointer-events
  .purchase-four-labels>span{font-size:8px;padding-inline:2px}
  .admin-alert-actions-v22{grid-template-columns:minmax(0,1fr)}
 }
+
+
+/* V22.1 — live checkout tracking */
+.purchase-order-tracker-v22{margin:18px 0;padding:20px;border:1px solid #2d6288;border-radius:17px;background:linear-gradient(155deg,#0d2b47,#071828)}
+.purchase-order-head-v22{display:grid;gap:5px;text-align:left;margin-bottom:20px}
+.purchase-order-head-v22>span{font-size:10px;letter-spacing:.15em;font-weight:850;color:#88c7ee}
+.purchase-order-head-v22>strong{font-size:clamp(18px,2.5vw,23px);line-height:1.25;color:#f1faff}
+.purchase-order-milestones-v22{display:grid;grid-template-columns:repeat(4,minmax(0,1fr));gap:7px}
+.purchase-order-milestones-v22>div{display:grid;justify-items:center;align-content:start;gap:9px;text-align:center;color:#88a6bd;font-size:11px;line-height:1.25;position:relative}
+.purchase-order-milestones-v22>div i{width:19px;height:19px;border-radius:50%;border:2px solid #456981;background:#102b43;box-shadow:0 0 0 3px #0b233b}
+.purchase-order-milestones-v22>div.complete i{border-color:#4be1b6;background:#157e68}
+.purchase-order-milestones-v22>div.current{color:#eafaff;font-weight:800}
+.purchase-order-milestones-v22>div.current i{border-color:#74c8ff;background:#1474bc;box-shadow:0 0 0 3px #173b58}
+.purchase-order-tracker-v22>p{font-size:12px;color:#a7c5dc;line-height:1.6;margin:18px 0 0;text-align:left}
+@media(max-width:500px){
+ .purchase-order-tracker-v22{padding:15px 10px}
+ .purchase-order-milestones-v22{gap:3px}
+ .purchase-order-milestones-v22>div{font-size:9px;overflow-wrap:anywhere}
+ .purchase-order-milestones-v22>div i{width:16px;height:16px}
+}
