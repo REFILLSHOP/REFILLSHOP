@@ -1916,3 +1916,47 @@ body .toasts .toast{width:100%!important;max-width:100%!important;pointer-events
  body .wrap{width:calc(100% - 22px)!important}
  body .header-inner{width:calc(100% - 20px)!important}
 }
+
+
+/* V22 · four-step checkout and administrator inbox */
+.purchase-steps-v22{border-color:#386c9a!important;background:linear-gradient(130deg,#102841,#071323)!important;box-shadow:inset 0 1px 0 #ffffff0e,0 16px 40px #0003!important}
+.purchase-four-labels{display:grid;grid-template-columns:repeat(4,minmax(0,1fr));gap:8px;margin:16px 0 5px}
+.purchase-four-labels>span{display:flex;align-items:center;gap:8px;min-width:0;padding:9px 7px;border:1px solid #28455d;border-radius:10px;background:#0a2034;color:#87a6c0;font-weight:700;font-size:clamp(10px,1.14vw,12px);line-height:1.3}
+.purchase-four-labels b{width:21px;height:21px;flex:none;display:grid;place-items:center;border-radius:7px;background:#173d5d;color:#9fcdf0;font-size:11px}
+.purchase-four-labels>span.active{border-color:#55baff;background:#114a76;color:#f4faff}
+.purchase-four-labels>span.active b{background:#168ae3;color:white}
+.purchase-four-labels>span.done{border-color:#257d75;color:#b5eadd}
+.purchase-four-labels>span.done b{background:#105c50;color:#b5eadd}
+.purchase-stage-hint{color:#a6c9df;font-size:12px;line-height:1.45;margin:12px 0 0}
+.purchase-method-v22 .payment-methods-v5{margin:22px 0!important}
+.purchase-method-note-v22{display:flex;gap:9px;align-items:center;background:#102b43;border:1px solid #2e5873;border-radius:12px;padding:12px 14px;color:#b9daed;font-size:12px;line-height:1.5;margin:16px 0 22px}
+.purchase-method-note-v22 .icon{color:#60bfff}
+.purchase-selected-method-v22{display:flex;align-items:center;gap:12px;justify-content:space-between;flex-wrap:wrap;background:#09243b;border:1px solid #35698f;border-radius:14px;padding:13px 16px;margin:15px 0 18px}
+.purchase-selected-method-v22 span{font-size:10px;font-weight:800;letter-spacing:.11em;color:#83b7d9}
+.purchase-selected-method-v22 strong{color:#e9f8ff;font-size:15px;flex:1}
+.admin-alert-v22{display:flex;justify-content:space-between;align-items:center;flex-wrap:wrap;gap:17px;padding:19px 22px;margin:6px 0 22px;border:1px solid #2b5474;border-radius:19px;background:linear-gradient(135deg,#0c2941,#071a30);box-shadow:0 12px 30px #0002}
+.admin-alert-v22.has-pending{border-color:#cd974c;background:linear-gradient(120deg,#382b20,#102b43)}
+.admin-alert-v22>div:first-child{display:grid;gap:3px;min-width:0}
+.admin-alert-kicker-v22{font-size:10px;color:#85c5f2;letter-spacing:.14em;font-weight:850}
+.admin-alert-v22 strong{color:#f4faff;font-size:clamp(18px,2.5vw,25px)}
+.admin-alert-v22 small{color:#adc8dd;line-height:1.5;font-size:12px}
+.admin-alert-actions-v22{display:flex;flex-wrap:wrap;gap:9px;min-width:0}
+.admin-alert-actions-v22 .btn{min-width:145px;white-space:normal}
+@media(max-width:760px){
+ .purchase-four-labels{grid-template-columns:repeat(4,minmax(0,1fr));gap:5px}
+ .purchase-four-labels>span{flex-direction:column;align-items:center;text-align:center;justify-content:start;gap:5px;padding:8px 3px;font-size:9px;min-height:63px}
+ .purchase-four-labels b{width:20px;height:20px}
+ .purchase-steps-v22{padding:14px 10px!important}
+ .purchase-steps-v22 .checkout-track-head{gap:5px}
+ .purchase-steps-v22 .checkout-track-title strong{font-size:clamp(14px,4vw,18px)}
+ .purchase-stage-hint{font-size:11px;text-align:center}
+ .purchase-selected-method-v22{padding:11px}
+ .purchase-selected-method-v22 strong{flex:1 1 140px}
+ .admin-alert-v22{padding:14px;border-radius:14px}
+ .admin-alert-actions-v22{width:100%;display:grid;grid-template-columns:repeat(2,minmax(0,1fr))}
+ .admin-alert-actions-v22 .btn{width:100%;min-width:0;min-height:44px;font-size:11px;padding-inline:7px}
+}
+@media(max-width:355px){
+ .purchase-four-labels>span{font-size:8px;padding-inline:2px}
+ .admin-alert-actions-v22{grid-template-columns:minmax(0,1fr)}
+}
