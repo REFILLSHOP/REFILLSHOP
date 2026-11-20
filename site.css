@@ -1822,3 +1822,73 @@ body.shop-refresh .checkout-track-bottom>span:last-child{
  body.admin-view .rs-gv2-actions{width:100%!important}
  body.admin-view .adm-price-grid{grid-template-columns:minmax(0,1fr)!important}
 }
+
+
+/* V20 — layout consistency across phone, tablet, desktop and both storefront modes */
+html,body{width:100%;max-width:100%;overflow-x:clip}
+body :where(main,section,article,nav,header,footer,.card,.wrap,.game-grid,.offer-grid,.hero,.reseller-top,.auth-shell,.rs-admin-shell){min-width:0}
+body :where(h1,h2,h3,p,strong,small,.pagehead,.card,.offer-info-v4,.game-content-v4){overflow-wrap:anywhere}
+body :where(button,a,input,select,textarea){touch-action:manipulation}
+body :where(input,select,textarea){font-size:16px}
+body :where(button,.btn,[role="button"]):focus-visible,body a:focus-visible{outline:2px solid #9ce5ff;outline-offset:3px}
+body .game-grid-v4,body .offer-grid-v4{width:100%;min-width:0;max-width:100%;grid-template-columns:repeat(auto-fit,minmax(min(100%,290px),1fr));gap:clamp(12px,2vw,20px)}
+body .game-card-v4,body .offer-card-v4{min-width:0;max-width:100%;height:100%;margin:0}
+body .game-art-v4{width:100%;min-width:0;overflow:hidden}
+body .game-art-v4 img{width:100%;height:100%;object-fit:contain;object-position:center;background:#08192d}
+body .offer-head-v4,body .offer-content-v4,body .offer-info-v4{min-width:0;max-width:100%}
+body .offer-content-v4 .currency-grid{min-width:0;max-width:100%}
+body .offer-content-v4 .currency-box{min-width:0;overflow:hidden}
+body .offer-content-v4 .currency-box strong{font-variant-numeric:tabular-nums;overflow-wrap:anywhere}
+body .hero-next{min-width:0;max-width:100%;overflow:hidden}
+body .hero-copy,body .hero-side{min-width:0}
+body .reseller-top{min-width:0;grid-template-columns:repeat(auto-fit,minmax(min(100%,320px),1fr))}
+body .reseller-only-price{grid-template-columns:minmax(0,1fr)!important}
+body .search-field,body .search-field input{min-width:0;max-width:100%;width:100%}
+body .modal-card{width:min(100%,650px);max-width:100%;min-width:0}
+body .toasts{left:50%;right:auto;bottom:calc(84px + env(safe-area-inset-bottom));width:min(440px,calc(100vw - 28px));transform:translateX(-50%)}
+body .toasts .toast{width:100%;max-width:100%;margin:0}
+body.portal-catalog .header-tools>a[href*="/pedidos"],body.portal-catalog .header-tools>a[href*="/cuenta"]{display:none!important}
+body.portal-catalog .header-tools{justify-content:flex-end}
+body.portal-catalog .howto-grid{grid-template-columns:repeat(auto-fit,minmax(min(100%,150px),1fr))}
+@media(max-width:760px){
+ body .wrap{width:calc(100% - 28px);max-width:100%;margin-inline:auto}
+ body .header-inner{width:calc(100% - 24px);max-width:100%;min-width:0}
+ body .header-inner>*{min-width:0}
+ body .brand{min-width:0;max-width:100%;overflow:hidden}
+ body .hero-next{padding:clamp(16px,4vw,24px);border-radius:18px}
+ body .hero-next h1{font-size:clamp(1.65rem,7.3vw,2.4rem);line-height:1.1}
+ body .pagehead h1{font-size:clamp(1.55rem,6.5vw,2.25rem)}
+ body .game-grid-v4,body .offer-grid-v4{grid-template-columns:minmax(0,1fr);gap:12px}
+ body .game-card-v4 .game-art-v4{aspect-ratio:16/9;max-height:235px}
+ body .offer-card-v4 .offer-actions-v4{gap:8px}
+ body .offer-card-v4 .offer-actions-v4>*{min-width:0}
+ body .currency-box strong{font-size:clamp(12px,3.4vw,16px)!important}
+ body .bottom-nav{grid-template-columns:repeat(var(--nav-count,5),minmax(0,1fr));gap:0}
+ body.portal-catalog .bottom-nav{--nav-count:2}
+ body.portal-reseller .bottom-nav{--nav-count:3}
+ body .bottom-nav>a{min-width:0;max-width:100%;overflow:hidden;text-overflow:ellipsis}
+ body .main-content{padding-bottom:calc(105px + env(safe-area-inset-bottom))}
+ body .toasts{bottom:calc(91px + env(safe-area-inset-bottom))}
+ body.admin-view .main-content{padding-bottom:30px}
+}
+@media(max-width:390px){
+ body .wrap{width:calc(100% - 22px)}
+ body .header-inner{width:calc(100% - 20px)}
+ body .hero-next{padding:16px}
+ body .offer-head-v4{padding-inline:10px!important}
+ body .offer-content-v4{padding-inline:10px!important}
+ body .currency-grid{gap:5px!important}
+ body .currency-box{padding-inline:3px!important}
+ body .currency-box strong{font-size:clamp(10px,3.25vw,13px)!important}
+ body .offer-actions-v4 .btn{font-size:11px!important;white-space:normal}
+ body .bottom-nav>a{font-size:11px}
+ body.admin-view .rs-admin-shell{gap:10px}
+ body.admin-view .rs-admin-content{max-width:100%;overflow:hidden}
+}
+@media(min-width:761px) and (max-width:1050px){
+ body .game-grid-v4,body .offer-grid-v4{grid-template-columns:repeat(2,minmax(0,1fr))}
+ body .hero-next{grid-template-columns:repeat(2,minmax(0,1fr))}
+}
+@media(prefers-reduced-motion:reduce){
+ body *,body *::before,body *::after{scroll-behavior:auto!important;transition-duration:.01ms!important;animation-duration:.01ms!important}
+}
