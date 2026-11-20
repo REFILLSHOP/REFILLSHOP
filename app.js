@@ -191,29 +191,83 @@ function orderCard(o,admin=false){
 
 function orders(){if(!S.user&&!PREVIEW)return `${pagehead('MIS PEDIDOS','Inicia sesión para ver tus compras')}<button class="btn btn-primary" data-href="/cuenta">Continuar</button>`;let list=S.orders.filter(o=>(S.filter==='all'||o.status===S.filter)&&(!S.search||o.code.toLowerCase().includes(S.search.toLowerCase())||(o.game+' '+o.offer).toLowerCase().includes(S.search.toLowerCase())));return `${pagehead('SEGUIMIENTO','Mis pedidos','Revisa el estado de tus solicitudes y abre cada pedido para ver sus datos.') }<div class="order-filters">${[['all','Todos'],['pending','Pendientes'],['completed','Completados'],['rejected','Rechazados']].map(([k,v])=>`<button class="chip ${S.filter===k?'active':''}" data-filter="${k}">${v}</button>`).join('')}</div><label class="search-field mb"><span>${icon('search')}</span><input id="orderSearch" value="${esc(S.search)}" placeholder="Buscar por código o juego"></label>${list.length?`<div class="order-list">${list.map(x=>orderCard(x)).join('')}</div>`:`<div class="card empty"><h3>No hay pedidos en esta sección</h3><p>Los pedidos enviados desde tu cuenta aparecerán aquí automáticamente.</p><button class="btn btn-primary" data-href="/catalogo">Buscar juegos →</button></div>`}`}
 
-function resellerDepositPanel(){
- const d=S.walletDeposit,pending=d&&d.status==='pending';
- let h='<section class="card pad mt reseller-deposit"><div class="caps">SALDO DE REVENDEDOR</div><h2 class="section-title">Recargar con USDT BEP-20</h2>';
- h+='<p class="muted">Solo las transferencias USDT verificadas en BNB Smart Chain pueden acreditarse automáticamente. ETECSA, Transfermóvil y MiTransfer no recargan este saldo.</p>';
- if(S.store?.config?.resellerWalletAutoEnabled!==true){h+='<div class="notice warn">Las recargas del monedero están temporalmente desactivadas mientras se termina la verificación. No envíes USDT a ninguna dirección por tu cuenta.</div>';return h+'</section>';}
- if(pending){
-  h+='<div class="notice warn">Transfiere exclusivamente el importe exacto, mediante BEP-20. Los pagos enviados en otra red o con otro importe no se acreditan automáticamente.</div>';
-  h+='<div class="wallet-display">'+esc(String(d.payableAmount))+' <small>USDT</small></div>';
-  h+=recipient('DIRECCIÓN USDT · BEP-20',d.address);
-  h+='<p class="small muted">Se acreditarán '+usdt(d.amount)+' USDT. Solicitud válida hasta '+new Date(d.expiresAt).toLocaleString('es-ES')+'.</p>';
-  h+='<button type="button" class="btn btn-outline btn-wide" id="walletDepositCheck">Comprobar transferencia</button>';
-  h+='<form id="walletDepositVerifyForm" class="fields mt2"><div class="field"><label for="walletTxHash">Hash de la transferencia (opcional)</label><input id="walletTxHash" name="txHash" type="text" maxlength="66" pattern="0x[0-9a-fA-F]{64}" placeholder="0x..." required></div><button class="btn btn-primary btn-wide" type="submit">Verificar transacción</button></form>';
-  h+='<p class="tiny muted">La web también buscará automáticamente el pago si el servicio de consulta blockchain está disponible.</p>';
- }else{
-  if(d&&d.status==='confirmed')h+='<div class="notice">Tu última recarga se confirmó.</div>';
-  if(d&&d.status==='expired')h+='<div class="notice warn">La solicitud anterior venció. Si ya pagaste, contacta soporte antes de repetir.</div>';
-  h+='<form id="walletDepositForm" class="fields mt2"><div class="field"><label for="walletAmount">Importe a acreditar (USDT)</label><input id="walletAmount" name="amount" type="number" inputmode="decimal" min="1" max="1000" step="0.01" placeholder="10.00" required></div><button class="btn btn-primary btn-wide" type="submit">Generar solicitud segura</button></form>';
-  h+='<p class="tiny muted">No envíes fondos hasta recibir una solicitud válida, con su dirección y su importe exacto.</p>';
- }
- return h+'</section>';
+function resellerEquivalent(price){
+ const rate=Number(S.resellerRates?.buySmPerUsdt||350),cup=Number(S.resellerRates?.cupPerSm||3);
+ return {usdt:Number(price||0),sm:Math.ceil(Number(price||0)*rate),cup:Math.ceil(Number(price||0)*rate*cup)};
 }
-
-function resellerAccessDenied(){return `${pagehead('ACCESO RESTRINGIDO','Esta cuenta no tiene acceso de revendedor','El portal está reservado para cuentas con una membresía activa.')}<section class="card pad"><p class="muted">Si ya tienes un plan de revendedor, cierra sesión y vuelve a entrar con la cuenta correcta. Si necesitas activar el acceso, contacta con administración.</p><button class="btn btn-outline btn-wide" id="logout">Cerrar sesión</button></section>`} function reseller(){const active=S.member;const c=S.store.config;const samples=S.store.offers.slice(0,6);return `${pagehead('REVENDEDORES','Tu espacio de recargas','Consulta tus precios exclusivos y administra el saldo de tu cuenta.') }<div class="reseller-top"><section class="card pad" ${active?'':'hidden'}><div class="caps">WALLET DE REVENDEDOR</div><div class="wallet-display">${S.wallet===null?'—':usdt(S.wallet)} <small>USDT</small></div><p class="muted">${active?'Saldo asociado a tu cuenta. Solo el servidor puede modificarlo.':'El saldo se mostrará al activar tu cuenta revendedora.'}</p>${active?`<span class="state-pill completed">Plan activo hasta ${new Date(S.expiry).toLocaleDateString('es-ES')}</span>`:''}</section><section class="card pad"><div class="caps">ESTADO DE TU CUENTA</div><h2 class="section-title">Plan de revendedor activo</h2><p class="muted">Tu cuenta tiene acceso a los precios especiales. El saldo y las operaciones se verifican desde el servidor.</p><div class="wallet-display">Activo</div><p class="small muted">Vigente hasta ${S.expiry?new Date(S.expiry).toLocaleDateString('es-ES'):'—'}</p><button class="btn btn-ghost btn-wide" data-href="/catalogo">Ver catálogo</button></section></div>${active?resellerDepositPanel():''}<section class="mt"><div class="section-head"><div><div class="caps">VISTA PREVIA</div><h2>Precios para revendedores</h2></div></div>${samples.length?`<div class="price-preview">${samples.map(o=>{const g=game(o.gameId);return `<article class="card reseller-price"><img class="mini-cover" src="${esc(coverSrc(g||{id:'fallback',name:'Juego'}))}" data-cover-id="${esc(g?.id||'fallback')}" alt="${esc(g?.name||'Juego')}"><h3>${esc(g?.name||'Juego')}<br>${esc(o.name)}</h3><small>Precio final</small><strong>${usdt(o.resellerUsdt)} <small>USDT</small></strong></article>`}).join('')}</div>`:`<div class="card empty">Las ofertas se publicarán desde el ADM.</div>`}</section>`}
+function resellerTierCard(t){
+ const active=S.planTier===t.tier,eq=resellerEquivalent(t.priceUsdt);
+ return `<article class="rs12-tier-card ${active?'is-active':''}">
+  <div class="rs12-tier-top"><span>${esc(t.name)}</span><strong>${t.tier==='free'?'GRATIS':t.tier==='level2'?'7 DÍAS':'15 DÍAS'}</strong></div>
+  <div class="rs12-tier-markup">+${Number(t.markupPercent)}<small>% proveedor</small></div>
+  <div class="rs12-tier-price">${t.tier==='free'?'Sin costo':usdt(t.priceUsdt)+' USDT'}<small>${t.tier==='free'?'Sin vencimiento':money(eq.sm)+' SM · '+money(eq.cup)+' CUP'}</small></div>
+  <ul><li>Precios del proveedor con +${Number(t.markupPercent)}%</li><li>${t.refresh==='daily_mini'?'Mini actualización diaria':'Actualización diaria'} de precios</li><li>Wallet USDT, CUP y SM</li></ul>
+  ${active?'<span class="rs12-current-plan">Tu plan actual</span>':t.tier==='free'?'<span class="muted small">Incluido sin pagos</span>':`<button type="button" class="btn btn-primary btn-wide" data-subscribe-tier="${t.tier}">Activar ${esc(t.name)}</button>`}
+ </article>`;
+}
+function resellerDepositPanel(){
+ const i=S.walletInstructions||{},usdtInfo=i.USDT||{},cupInfo=i.CUP||{},smInfo=i.SM||{};
+ const rows=(S.resellerDeposits||[]).slice(0,8).map(d=>`<div class="rs12-deposit-row"><div><strong>${esc(d.currency)} · ${money(d.amount)}</strong><small>${new Date(d.createdAt).toLocaleString('es-ES')}</small></div><span class="state-pill ${d.status==='approved'?'completed':d.status==='rejected'?'rejected':'pending'}">${esc(d.status==='approved'?'Acreditado':d.status==='rejected'?'Rechazado':'En revisión')}</span></div>`).join('');
+ return `<section class="card pad rs12-wallet-panel">
+  <div class="rs12-section-heading"><div><span class="caps">WALLET MULTIMONEDA</span><h2 class="section-title">Recargar saldo</h2><p class="muted">Las recargas CUP, SM y USDT se acreditan después de que administración verifique el comprobante.</p></div></div>
+  <div class="rs12-wallet-balances">
+   <div><small>USDT</small><strong>${usdt(S.walletBalances?.USDT||0)}</strong></div>
+   <div><small>SALDO SM</small><strong>${money(S.walletBalances?.SM||0)}</strong></div>
+   <div><small>CUP</small><strong>${money(S.walletBalances?.CUP||0)}</strong></div>
+  </div>
+  <div class="rs12-wallet-instructions">
+   <article><strong>USDT · ${esc(usdtInfo.network||'BEP-20')}</strong><code>${esc(usdtInfo.address||'Dirección pendiente de configurar')}</code><small>Envía únicamente USDT por la red indicada. Administración verificará la transferencia.</small></article>
+   <article><strong>Transfermóvil · CUP</strong><code>${esc(cupInfo.destination||'Tarjeta pendiente de configurar')}</code><small>Transfiere el importe exacto en CUP.</small></article>
+   <article><strong>ETECSA · Saldo móvil</strong><code>${esc(smInfo.destination||'Número pendiente de configurar')}</code><small>Transfiere el importe exacto en SM e indica el número desde el que enviaste.</small></article>
+  </div>
+  <form id="resellerWalletDepositForm" class="fields rs12-wallet-form">
+   <div class="field"><label>Moneda que vas a recargar</label><select name="currency" required><option value="USDT">USDT · BEP-20</option><option value="CUP">CUP · Transfermóvil</option><option value="SM">SM · Saldo móvil ETECSA</option></select></div>
+   <div class="field"><label>Importe que deseas acreditar</label><input name="amount" type="number" min="0.01" step="0.01" required placeholder="Ej. 10"></div>
+   <div class="field"><label>Número desde el que transferiste (obligatorio para SM)</label><input name="senderPhone" type="tel" inputmode="tel" maxlength="20" placeholder="Tu número de origen"></div>
+   <div class="field"><label>Hash de la transferencia USDT (si corresponde)</label><input name="txHash" maxlength="66" placeholder="0x..."></div>
+   <div class="field"><label>Comprobante de pago · máximo 5 MB</label><input name="proof" type="file" accept="image/jpeg,image/png,image/webp"><small>JPG, PNG o WEBP. No exigimos resolución mínima.</small></div>
+   <button class="btn btn-primary btn-wide" type="submit">Enviar solicitud de recarga</button>
+  </form>
+  <div class="rs12-deposit-history"><h3>Mis recargas recientes</h3>${rows||'<p class="muted small">Todavía no has enviado solicitudes de recarga.</p>'}</div>
+ </section>`;
+}
+function reseller(){
+ const tiers=S.resellerTiers||[],active=tiers.find(t=>t.tier===S.planTier),date=S.expiry?new Date(S.expiry).toLocaleDateString('es-ES'):'Sin vencimiento';
+ const games=S.store?.games||[];
+ const updated=S.resellerRates?.pricesUpdatedAt?new Date(S.resellerRates.pricesUpdatedAt).toLocaleString('es-ES'):'Pendiente de primera sincronización';
+ return `${pagehead('PORTAL EXCLUSIVO','Centro de revendedores','Tus precios, suscripción y wallet en un solo lugar.')}
+ <section class="rs12-account-strip"><div><span class="caps">PLAN ACTUAL</span><h2>${esc(active?.name||'Suscripción Gratis')}</h2><p>Margen aplicado sobre el costo real del proveedor: <strong>+${Number(S.markupPercent||7)}%</strong></p></div><div class="rs12-account-expiry"><small>VIGENCIA</small><strong>${esc(date)}</strong></div></section>
+ ${resellerDepositPanel()}
+ <section class="rs12-plans-section"><div class="section-head"><div><span class="caps">TUS NIVELES</span><h2>Elige cómo quieres revender</h2><p class="muted">Las suscripciones pagadas se descuentan del saldo de tu wallet en la moneda que elijas.</p></div></div>
+ <div class="rs12-tier-grid">${tiers.map(resellerTierCard).join('')}</div>
+ <form id="resellerSubscribeForm" class="card pad rs12-subscribe-form"><div><span class="caps">RENOVAR O MEJORAR PLAN</span><h3>Confirmar suscripción</h3><p class="muted small">El precio se calcula con las tasas globales vigentes y se valida de nuevo en el servidor.</p></div>
+ <div class="field"><label>Plan</label><select name="tier" required><option value="level2">Level 2 · 0.80 USDT / 7 días</option><option value="level3">Level 3 · 1.50 USDT / 15 días</option></select></div>
+ <div class="field"><label>Pagar desde mi wallet</label><select name="currency" required><option value="USDT">USDT</option><option value="SM">Saldo SM</option><option value="CUP">CUP</option></select></div>
+ <button class="btn btn-primary" type="submit">Confirmar y activar plan</button></form>
+ <p class="rs12-price-updated">Última actualización de precios del proveedor: <strong>${esc(updated)}</strong>. Actualización automática diaria.</p></section>
+ <section class="rs12-games-section"><div class="section-head"><div><span class="caps">CATÁLOGO DE REVENTA</span><h2>Juegos disponibles</h2></div><button class="btn btn-outline btn-sm" data-href="/catalogo">Ver catálogo completo</button></div>${games.length?cards(games.slice(0,4)):'<div class="card empty">No hay juegos publicados en este momento.</div>'}</section>`;
+}
+function resellerBuyPage(){
+ const {g,o}=selection();if(!g||!o)return `${pagehead('COMPRA REVENDEDOR','Selecciona una oferta primero')}<button class="btn btn-primary" data-href="/catalogo">Volver al catálogo</button>`;
+ const amount=Number(o.resellerUsdt||0),eq=resellerEquivalent(amount);
+ return `${pagehead('PEDIDO CON WALLET','Confirmar recarga', 'El precio final se calcula según tu nivel y se descuenta del saldo seleccionado.')}
+ <form id="resellerOrderForm" class="card pad rs12-order-form">
+  <div class="rs12-order-product"><img src="${esc(coverSrc(g))}" alt="${esc(g.name)}"><div><small>${esc(g.name)}</small><strong>${esc(o.name)}</strong><span>Tu margen actual: +${Number(S.markupPercent||7)}%</span></div></div>
+  <div class="rs12-order-price"><div><small>PRECIO FINAL</small><strong>${usdt(amount)} USDT</strong></div><div><small>EQUIVALENTE SM</small><strong>${money(eq.sm)} SM</strong></div><div><small>EQUIVALENTE CUP</small><strong>${money(eq.cup)} CUP</strong></div></div>
+  <div class="rs12-player-fields"><span class="caps">DATOS DEL JUGADOR</span>${targetForm(o)}</div>
+  <div class="field"><label>Moneda para descontar de tu wallet</label><select name="currency" required><option value="USDT">USDT · ${usdt(amount)}</option><option value="SM">SM · ${money(eq.sm)}</option><option value="CUP">CUP · ${money(eq.cup)}</option></select></div>
+  <p class="muted small">La compra descontará el importe exacto de tu wallet. Si administración rechaza el pedido, el saldo se reembolsará automáticamente.</p>
+  <button class="btn btn-primary btn-wide" type="submit" ${o.inStock===false?'disabled':''}>Confirmar pedido</button>
+  <button class="btn btn-ghost btn-wide" type="button" data-href="/juegos/${encodeURIComponent(g.id)}">Volver a las ofertas</button>
+ </form>`;
+}
+function resellerOrdersPage(){
+ const rows=(S.resellerOrders||[]).map(o=>`<article class="card rs12-order-history-item"><div><span class="caps">PEDIDO ${esc(o.code)}</span><h3>${esc(o.game_name)} · ${esc(o.offer_name)}</h3><small>ID: ${esc(o.player_id)} · ${new Date(o.created_at).toLocaleString('es-ES')}</small></div><div class="rs12-order-history-total"><strong>${money(o.wallet_amount)} ${esc(o.wallet_currency)}</strong><span class="state-pill ${esc(o.status)}">${esc(o.status==='completed'?'Completado':o.status==='processing'?'Procesando':o.status==='rejected'?'Rechazado':'Pendiente de entrega')}</span></div></article>`).join('');
+ return `${pagehead('HISTORIAL','Mis pedidos de revendedor','Consulta las compras realizadas desde tu wallet y el estado de cada entrega.')}
+ <div class="rs12-orders-toolbar"><button class="btn btn-outline btn-sm" id="refreshResellerOrders">Actualizar pedidos</button><button class="btn btn-primary btn-sm" data-href="/catalogo">Nueva compra</button></div>
+ <div class="rs12-order-history">${rows||'<div class="card empty">Todavía no has realizado compras desde tu wallet.</div>'}</div>`;
+}
+function resellerAccessDenied(){return `${pagehead('ACCESO RESTRINGIDO','No se pudo activar tu cuenta','Vuelve a iniciar sesión para cargar tu plan gratuito.')}<section class="card pad"><p class="muted">Tu acceso al portal se configura automáticamente cuando entras con tu cuenta.</p><button class="btn btn-outline btn-wide" id="logout">Cerrar sesión</button></section>`}
 function manualContactUrl(phone,channel,name){
  const digits=String(phone||'').replace(/[^0-9]/g,'');
  if(digits.length<8||digits.length>15)return null;
