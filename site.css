@@ -1980,3 +1980,104 @@ body .toasts .toast{width:100%!important;max-width:100%!important;pointer-events
  .purchase-order-milestones-v22>div{font-size:9px;overflow-wrap:anywhere}
  .purchase-order-milestones-v22>div i{width:16px;height:16px}
 }
+
+
+/* Refills Shop V24 — new mobile-first purchase + horizontal administration. */
+body.shop-refresh .payment-option-v5{grid-template-columns:72px minmax(0,1fr) 16px!important;gap:12px!important}
+body.shop-refresh .payment-option-v5 input[type="radio"]{
+ position:absolute!important;inset:auto!important;width:1px!important;height:1px!important;
+ min-width:1px!important;flex:0 0 1px!important;opacity:0!important;
+ margin:0!important;padding:0!important;border:0!important;appearance:none!important;
+ clip-path:inset(50%)!important;overflow:hidden!important;pointer-events:none!important
+}
+body.shop-refresh .payment-option-v5:focus-within{outline:2px solid #75ccff;outline-offset:2px}
+body.shop-refresh .payment-option-v5 .payment-pick-v5{margin-left:auto!important;width:13px!important;height:13px!important;min-width:13px!important;border-radius:50%!important;background:#0d273e!important;border:2px solid #477d9c!important}
+body.shop-refresh .payment-option-v5.active .payment-pick-v5{background:#5dcfff!important;border-color:#5dcfff!important;box-shadow:0 0 0 4px #47b6f133!important}
+.rs-remember-v24{display:flex;align-items:center;gap:12px;padding:12px 14px;margin:14px 0;border:1px solid #315573;border-radius:13px;background:#0d253b;cursor:pointer;text-align:left}
+.rs-remember-v24 input{width:19px;height:19px;flex:none;accent-color:#35aaff}
+.rs-remember-v24 span{display:flex;flex-direction:column;min-width:0;gap:3px}
+.rs-remember-v24 strong{font-size:13px;color:#eff9ff}
+.rs-remember-v24 small{font-size:11px;color:#a9c6dc;line-height:1.35}
+/* Success page is deliberately separate from legacy completed-step cards. */
+body .rs-done-v24{display:grid;gap:18px;width:100%;min-width:0;max-width:100%;padding:clamp(4px,1vw,12px);box-sizing:border-box}
+.rs-done-hero-v24{display:flex;flex-direction:column;align-items:center;text-align:center;gap:10px;padding:clamp(18px,3vw,32px) 14px 20px}
+.rs-done-icon-v24{display:grid;place-items:center;width:66px;height:66px;border-radius:21px;border:1px solid #28b990;background:linear-gradient(140deg,#076b64,#0e3d53);color:#9cffdd;box-shadow:0 15px 40px #0ab18a20}
+.rs-done-icon-v24 svg{width:30px;height:30px}
+.rs-done-hero-v24>span{font-size:10px;font-weight:900;letter-spacing:.19em;color:#75dfc8}
+.rs-done-hero-v24>h2{font-size:clamp(22px,4vw,30px);margin:0;font-weight:900;line-height:1.16;color:#f4fcff}
+.rs-done-hero-v24>p{margin:0;max-width:480px;font-size:13px;line-height:1.6;color:#a8c8e0}
+.rs-done-summary-v24{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:12px}
+.rs-done-summary-v24>div{display:flex;flex-direction:column;align-items:flex-start;gap:10px;min-width:0;background:linear-gradient(145deg,#10314b,#07192e);border:1px solid #2c6489;border-radius:16px;padding:18px}
+.rs-done-summary-v24 small{font-size:10px;font-weight:800;letter-spacing:.12em;color:#92c2e6}
+.rs-done-summary-v24 strong{font-size:clamp(15px,2vw,22px);color:#f3fbff;overflow-wrap:anywhere;line-height:1.24}
+.rs-done-summary-v24 span{font-size:12px;color:#a9c8dd;line-height:1.5}
+.rs-done-actions-v24{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:10px}
+.rs-done-actions-v24>.btn{width:100%;min-height:48px;white-space:normal}
+.rs-done-v24 .purchase-order-tracker-v22{margin:0}
+body .rs-admin-contact-v24{display:block;min-width:0;overflow-wrap:anywhere;color:#9ed9f8}
+body .rs-admin-contact-v24 strong{font-weight:850;color:#e7f6ff}
+@media(max-width:620px){.rs-done-summary-v24{grid-template-columns:minmax(0,1fr)}.rs-done-actions-v24{grid-template-columns:minmax(0,1fr)}}
+/* Fully new horizontal ADM shell; existing form/business operations stay wired to backend. */
+body.admin-view .rs-adm-v24{width:100%;min-width:0;max-width:100%;display:grid;gap:16px;padding:5px 0 30px}
+body.admin-view .rs-adm-heading-v24{display:flex;align-items:center;justify-content:space-between;gap:18px;flex-wrap:wrap;padding:clamp(16px,2.5vw,25px);border:1px solid #2d587c;border-radius:20px;background:linear-gradient(120deg,#112c47,#07192e);box-shadow:0 12px 28px #0002}
+.rs-adm-heading-v24 small{color:#5bc4ff;letter-spacing:.16em;font-size:10px;font-weight:900}
+.rs-adm-heading-v24 h1{margin:5px 0;font-weight:900;line-height:1.15;font-size:clamp(23px,3vw,30px);color:#f2fbff}
+.rs-adm-heading-v24 p{margin:0;color:#a4c3dc;font-size:12px}
+.rs-adm-heading-actions-v24{display:flex;flex-wrap:wrap;gap:8px}
+body.admin-view .rs-adm-nav-v24{width:100%;display:flex;flex-wrap:nowrap;gap:8px;min-width:0;max-width:100%;padding:11px;border:1px solid #254c6d;border-radius:17px;background:#081a2e;overflow-x:auto;overflow-y:hidden;overscroll-behavior-x:contain;scrollbar-width:thin}
+body.admin-view .rs-adm-nav-v24 button{display:flex;align-items:center;justify-content:center;gap:7px;flex:0 0 auto;min-width:102px;min-height:44px;padding:9px 13px;background:#102a44;border:1px solid #295477;border-radius:11px;color:#b6d6ed;font-size:12px;font-weight:800;white-space:nowrap;cursor:pointer}
+body.admin-view .rs-adm-nav-v24 button .icon{width:15px;height:15px;flex:none}
+body.admin-view .rs-adm-nav-v24 button.active{background:#1369a7;border-color:#53baff;color:#fff;box-shadow:0 0 0 1px #5bc8ff33 inset}
+body.admin-view .rs-adm-nav-v24 button b{display:grid;place-items:center;min-width:20px;height:20px;padding:0 4px;border-radius:9px;background:#a83a45;color:#fff;font-size:10px}
+body.admin-view .rs-adm-workspace-v24{min-width:0;width:100%;max-width:100%;overflow:visible}
+.rs-adm-kpis-v24{display:grid;grid-template-columns:repeat(5,minmax(0,1fr));gap:10px;margin-bottom:15px}
+.rs-adm-kpi-v24{display:flex;flex-direction:column;gap:7px;min-width:0;padding:clamp(13px,2vw,19px);border:1px solid #2a5576;border-radius:16px;background:linear-gradient(130deg,#102c45,#091e33)}
+.rs-adm-kpi-v24 small{font-size:11px;color:#abd1e9;font-weight:800}
+.rs-adm-kpi-v24 strong{font-size:clamp(22px,3vw,32px);line-height:1.05;color:#f3fbff;font-variant-numeric:tabular-nums}
+.rs-adm-kpi-v24 span{font-size:10px;color:#86a9c4}
+.rs-adm-columns-v24{display:grid;grid-template-columns:minmax(0,1.75fr) minmax(260px,.75fr);gap:13px;align-items:start}
+.rs-adm-panel-v24{min-width:0;max-width:100%;padding:clamp(14px,2vw,22px);background:linear-gradient(145deg,#0f273f,#091b30);border:1px solid #295273;border-radius:17px}
+.rs-adm-panel-heading-v24{display:flex;align-items:center;justify-content:space-between;flex-wrap:wrap;gap:12px;margin-bottom:18px}
+.rs-adm-panel-heading-v24 small{font-size:10px;letter-spacing:.12em;font-weight:800;color:#77beee}
+.rs-adm-panel-heading-v24 h2{font-size:clamp(17px,2.4vw,22px);margin:4px 0;color:#f4fbff}
+.rs-adm-panel-heading-v24 p{font-size:12px;margin:0;color:#a1bdd5}
+.rs-adm-recent-v24,.rs-adm-orders-v24{display:grid;grid-template-columns:repeat(auto-fit,minmax(min(100%,320px),1fr));gap:12px}
+.rs-adm-recent-v24 .order-card-v2,.rs-adm-orders-v24 .order-card-v2{height:100%;margin:0;min-width:0;max-width:100%;padding:15px!important}
+.rs-adm-shortcuts-v24{display:grid;gap:9px}
+.rs-adm-shortcuts-v24 button{display:flex;align-items:center;justify-content:space-between;min-height:51px;padding:12px 14px;border-radius:12px;border:1px solid #2f5674;background:#0c2138;color:#e6f5ff;font-size:12px;font-weight:800;cursor:pointer;text-align:left}
+.rs-adm-shortcuts-v24 button:hover{border-color:#5db8f1;background:#123a5d}
+.rs-adm-shortcuts-v24 button span{font-size:18px;color:#6dcaff}
+.rs-adm-search-v24{display:flex;align-items:end;flex-wrap:wrap;gap:9px;margin:0 0 17px}
+.rs-adm-search-v24 label{display:grid;gap:5px;flex:1 1 210px}
+.rs-adm-search-v24 label span{font-size:11px;color:#b4d4e8}
+.rs-adm-search-v24 input{min-height:43px;width:100%;min-width:0;border-radius:10px;border:1px solid #366284;background:#061c30;color:#f1faff;padding:9px 12px}
+.rs-adm-search-v24 .btn{min-width:105px}
+/* Legacy admin section contents now occupy all columns horizontally */
+body.admin-view .rs-adm-workspace-v24 :where(.rs-v3,.admin-grid,.admin-workspace,.rs-gv2-panel,.rs-v3-panel){min-width:0;max-width:100%}
+body.admin-view .rs-adm-workspace-v24 .rs-v3-stats{grid-template-columns:repeat(auto-fit,minmax(min(100%,220px),1fr))}
+body.admin-view .rs-adm-workspace-v24 :where(.admin-grid,.adm-editor-grid,.adm-game-rows){grid-template-columns:repeat(auto-fit,minmax(min(100%,290px),1fr))}
+@media(max-width:1000px){.rs-adm-kpis-v24{grid-template-columns:repeat(3,minmax(0,1fr))}.rs-adm-columns-v24{grid-template-columns:minmax(0,1fr)}}
+@media(max-width:680px){
+ body.admin-view .rs-adm-v24{gap:11px}
+ body.admin-view .rs-adm-heading-v24{padding:14px}
+ .rs-adm-heading-actions-v24{width:100%;display:grid;grid-template-columns:repeat(2,minmax(0,1fr))}
+ .rs-adm-heading-actions-v24 .btn{min-width:0;width:100%;font-size:11px}
+ .rs-adm-kpis-v24{grid-template-columns:repeat(2,minmax(0,1fr));gap:8px}
+ .rs-adm-kpi-v24{padding:13px}
+ body.admin-view .rs-adm-nav-v24{padding:7px;border-radius:13px;gap:6px}
+ body.admin-view .rs-adm-nav-v24 button{min-width:93px;min-height:43px;padding:7px 10px;font-size:11px}
+ .rs-adm-panel-v24{padding:12px;border-radius:14px}
+ .rs-adm-recent-v24,.rs-adm-orders-v24{grid-template-columns:minmax(0,1fr)}
+ .rs-adm-search-v24{display:grid;grid-template-columns:repeat(2,minmax(0,1fr))}
+ .rs-adm-search-v24 label{grid-column:1/-1}
+ .rs-adm-search-v24 .btn{min-width:0}
+}
+/* Equal-spacing bottom nav in both portals, never overlapping checkout actions. */
+@media(max-width:760px){
+ body:not(.admin-view) .bottom-nav{display:grid!important;grid-template-columns:repeat(4,minmax(0,1fr))!important;align-items:stretch!important;gap:0!important;padding:7px 6px!important}
+ body.portal-reseller .bottom-nav{grid-template-columns:repeat(3,minmax(0,1fr))!important}
+ body .bottom-nav>a{display:flex!important;flex-direction:column!important;align-items:center!important;justify-content:center!important;gap:5px!important;flex:1 1 0!important;min-width:0!important;padding:7px 2px!important;text-align:center!important}
+ body .bottom-nav .ico{display:grid;place-items:center;margin:0 auto!important}
+ body .bottom-nav .ico .icon{width:19px;height:19px}
+ body.auth-guest .bottom-nav{display:none!important}
+}
