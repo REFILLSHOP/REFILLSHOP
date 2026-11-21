@@ -403,13 +403,68 @@ function downloadAdminCSV(name,rows){
  setTimeout(()=>URL.revokeObjectURL(a.href),2000);
  notify('Listado exportado a CSV.');
 }
-function adminV3Customers(){
- const pending=S.adminCustomers.filter(c=>c.reviewStatus==='pending').length;
- const confirmed=S.adminCustomers.filter(c=>c.reviewStatus==='confirmed').length;
- const rows=S.adminCustomers.slice().sort((a,b)=>Number(a.reviewStatus!=='pending')-Number(b.reviewStatus!=='pending')||Date.parse(b.createdAt||0)-Date.parse(a.createdAt||0)).map(c=>`<div class="rs-v3-customer">${adminCustomerCard(c)}</div>`).join('');
- const stats=`<div class="rs-v3-stats"><div class="rs-v3-stat"><div><small>Registrados</small><strong>${S.adminCustomers.length}</strong></div></div><div class="rs-v3-stat"><div><small>Pendientes</small><strong>${pending}</strong></div></div><div class="rs-v3-stat"><div><small>Confirmados</small><strong>${confirmed}</strong></div></div></div>`;
- return `<div class="rs-v3">${adminV3Heading('CLIENTES','Clientes y registros','Consulta cuentas y comunica novedades de manera manual.',`<button type="button" class="btn btn-outline" id="refreshCustomers">Actualizar</button><button type="button" class="btn btn-outline" id="exportAdminCustomers">Exportar CSV</button>`)}${stats}${adminV3Panel('Directorio de clientes','Los mensajes de WhatsApp o SMS se envían únicamente cuando tú los confirmas.',`<div class="rs-v3-list">${rows||adminV3Blank('Todavía no hay clientes registrados.')}</div>`)}</div>`;
+
+let adminCustomerStatusFilterV26='all';
+function normalizeCustomerSearchV26(value){
+ return String(value||'').normalize('NFD').replace(/[\u0300-\u036f]/g,'').toLocaleLowerCase().trim();
 }
+function updateCustomerListV26(){
+ const input=$('rsCustomerSearchV26'),search=normalizeCustomerSearchV26(input?.value||'');
+ const rows=[...document.querySelectorAll('#rsCustomerListV26 .rs-client-row-v26')];
+ let matching=0;
+ for(const row of rows){
+  const sameStatus=adminCustomerStatusFilterV26==='all'||row.dataset.rsClientStatus===adminCustomerStatusFilterV26;
+  const inText=normalizeCustomerSearchV26(row.dataset.rsClientSearch).includes(search);
+  const visible=sameStatus&&inText;
+  row.hidden=!visible;if(visible)matching++;
+ }
+ document.querySelectorAll('[data-rs-client-filter]').forEach(btn=>{
+  const active=btn.dataset.rsClientFilter===adminCustomerStatusFilterV26;
+  btn.classList.toggle('active',active);btn.setAttribute('aria-pressed',String(active));
+ });
+ const count=$('rsCustomerCountV26');if(count)count.textContent=matching+' de '+rows.length+' clientes';
+ const empty=$('rsCustomerEmptyV26');if(empty)empty.hidden=matching!==0;
+}
+document.addEventListener('input',event=>{
+ if(event.target?.id==='rsCustomerSearchV26')updateCustomerListV26();
+},true);
+document.addEventListener('click',event=>{
+ const filter=event.target?.closest?.('[data-rs-client-filter]');
+ if(filter){adminCustomerStatusFilterV26=filter.dataset.rsClientFilter;updateCustomerListV26();return}
+ const clear=event.target?.closest?.('#rsCustomerClearV26');
+ if(clear){const input=$('rsCustomerSearchV26');if(input){input.value='';updateCustomerListV26();input.focus()}}
+},true);
+function adminCustomerRowV26(c){
+ const phone=String(c.phone||'').trim(),state=c.reviewStatus||'pending';
+ const label=({pending:'Pendiente',contacted:'Contactado',confirmed:'Confirmado'})[state]||state;
+ const valid=/^\\+[1-9][0-9]{7,14}$/.test(phone);
+ const search=[c.name,c.phone,c.email,c.id].filter(Boolean).join(' ');
+ return `<article class="rs-client-row-v26" data-rs-client-status="${esc(state)}" data-rs-client-search="${esc(search)}">
+ <div class="rs-client-identity-v26"><div class="rs-client-shield-v26">${icon('shield')}</div><div class="rs-client-name-v26"><strong>${esc(c.name||'Sin nombre')}</strong><small>${esc(phone||'Sin teléfono')} · ${Number(c.orders||0)} pedidos</small></div><span class="rs-client-status-v26 status-${esc(state)}">${esc(label)}</span></div>
+ <div class="rs-client-actions-v26">
+  <button type="button" class="btn btn-primary btn-sm" data-customer-access="${esc(c.id)}">Cambiar contraseña</button>
+  <button type="button" class="btn btn-outline btn-sm" data-copy="${esc(phone)}" ${valid?'':'disabled'}>Copiar número</button>
+  <details class="rs-client-more-v26"><summary>Más acciones</summary><div class="rs-client-more-actions-v26">
+   <button type="button" class="btn btn-outline btn-sm" data-contact="whatsapp" data-customer-id="${esc(c.id)}" ${valid?'':'disabled'}>WhatsApp</button>
+   <button type="button" class="btn btn-outline btn-sm" data-contact="sms" data-customer-id="${esc(c.id)}" ${valid?'':'disabled'}>SMS</button>
+   ${state==='pending'?`<button type="button" class="btn btn-ghost btn-sm" data-review="contacted" data-customer-id="${esc(c.id)}">Marcar contactado</button>`:''}
+   ${state!=='confirmed'?`<button type="button" class="btn btn-outline btn-sm" data-review="confirmed" data-customer-id="${esc(c.id)}">Confirmar registro</button>`:''}
+   <button type="button" class="btn btn-ghost btn-sm" data-edit-customer="${esc(c.id)}">Editar perfil</button>
+  </div></details>
+ </div>
+ </article>`;
+}
+function adminV3Customers(){
+ const customers=S.adminCustomers||[];
+ const pending=customers.filter(c=>c.reviewStatus==='pending').length;
+ const confirmed=customers.filter(c=>c.reviewStatus==='confirmed').length;
+ const contacted=customers.filter(c=>c.reviewStatus==='contacted').length;
+ const rows=customers.slice().sort((a,b)=>Number(a.reviewStatus!=='pending')-Number(b.reviewStatus!=='pending')||Date.parse(b.createdAt||0)-Date.parse(a.createdAt||0)).map(adminCustomerRowV26).join('');
+ const controls=`<div class="rs-client-toolbar-v26"><label class="rs-client-search-v26"><span>${icon('search')}</span><input type="search" id="rsCustomerSearchV26" placeholder="Buscar nombre, número o ID" aria-label="Buscar clientes" autocomplete="off"><button id="rsCustomerClearV26" type="button" title="Limpiar búsqueda">Limpiar</button></label><div class="rs-client-filters-v26">${[['all','Todos',customers.length],['pending','Pendientes',pending],['contacted','Contactados',contacted],['confirmed','Confirmados',confirmed]].map(([k,t,n])=>`<button class="${adminCustomerStatusFilterV26===k?'active':''}" data-rs-client-filter="${k}" type="button" aria-pressed="${adminCustomerStatusFilterV26===k}">${t} <b>${n}</b></button>`).join('')}</div></div>`;
+ const stats=`<div class="rs-client-stats-v26"><div><span>Registrados</span><strong>${customers.length}</strong></div><div><span>Pendientes</span><strong>${pending}</strong></div><div><span>Confirmados</span><strong>${confirmed}</strong></div></div>`;
+ return `<div class="rs-v3 rs-customers-v26">${adminV3Heading('CLIENTES','Clientes y registros','Gestiona tus cuentas sin desplazamientos innecesarios.',`<button type="button" class="btn btn-outline" id="refreshCustomers">Actualizar</button><button type="button" class="btn btn-outline" id="exportAdminCustomers">Exportar CSV</button>`)}${stats}<section class="rs-client-directory-v26" aria-label="Directorio de clientes"><div class="rs-client-directory-head-v26"><h2>Directorio de clientes</h2><small id="rsCustomerCountV26">${customers.length} clientes</small></div>${controls}<div class="rs-client-list-v26" id="rsCustomerListV26">${rows}</div><p class="rs-client-empty-v26" id="rsCustomerEmptyV26" ${customers.length?'hidden':''}>No hay clientes que coincidan con esta búsqueda.</p></section></div>`;
+}
+
 function adminV3Fulfillments(){
  const pending=S.adminOrders.filter(o=>o.status==='pending');
  const items=pending.map(o=>{const f=S.adminFulfillments.find(f=>f.order_id===o.id),paid=o.paymentStatus==='paid',isCrypto=o.method==='usdt_bep20';const detail=f?'Estado proveedor: '+esc(f.status)+' · '+esc(f.provider_status||'sin confirmar'):isCrypto?(paid?'Pago USDT confirmado automáticamente':'Esperando confirmación BEP-20'):paid?'Pago verificado por administración. Pendiente de entrega.':'Pendiente de verificar el comprobante.';let actions='';if(f)actions=`<button class="btn btn-outline btn-sm" data-reconcile="${esc(o.id)}" type="button" ${!f.provider_order_id?'disabled':''}>Consultar estado</button>`;else if(!paid)actions=isCrypto?'<span class="rs-v3-help">Esperando pago BEP-20</span>':o.receiptAvailable?`<button class="btn btn-outline btn-sm" data-detail="${esc(o.code)}" data-admin="1" type="button">Ver comprobante</button><button class="btn btn-primary btn-sm" data-verify-payment="${esc(o.code)}" type="button">Verificar pago</button>`:'<span class="rs-v3-help">Sin comprobante</span>';else actions=`<button class="btn btn-primary btn-sm" data-fulfill="${esc(o.code)}" type="button" ${S.coOrdersEnabled&&S.coOrdersRead?'':'disabled'}>${S.coOrdersEnabled&&S.coOrdersRead?'Enviar recarga a Central One':'Pago verificado · compra del proveedor desactivada'}</button>`;return `<article class="rs-v3-item"><span class="rs-v3-product-mark">${icon('bag')}</span><div class="rs-v3-item-content"><strong>${esc(o.code)} · ${esc(o.game)}</strong><small>${esc(o.offer)} · ID: ${esc(o.playerId)} · ${money(o.amount)} ${esc(o.currency)}</small><small>${detail}</small></div><div class="rs-v3-item-actions">${actions}</div></article>`}).join('');
@@ -452,7 +507,6 @@ const ADMIN_LOCAL_LISTS={
  '/admin':'.rs-adm-recent-v24 > *',
  '/admin/orders':'.rs-adm-orders-v24 > *',
  '/admin/fulfillment':'.rs-v3-list > *',
- '/admin/customers':'.rs-v3-customer',
  '/admin/resellers':'.rs-v3-list > *',
  '/admin/games':'#rsGv2List > *',
  '/admin/offers':'.rs-v3-product',
