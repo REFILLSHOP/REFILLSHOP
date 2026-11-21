@@ -2371,3 +2371,61 @@ body.admin-view .rs-adm-workspace-v24 .rs-adm-quicksearch button{flex:0 0 auto!i
   body.admin-view .rs-v3-panel{padding:10px!important}
   body.admin-view .rs-adm-workspace-v24 .rs-adm-quicksearch{padding:6px 9px!important}
 }
+
+
+/* Refills Shop v28 · mejoras para clientes: catálogo, favoritos, soporte y cuenta */
+body:not(.admin-view) .rs-catalog-tools{width:100%;display:flex;flex-direction:column;gap:12px;min-width:0;margin:0 0 19px;padding:15px;border:1px solid #315575;border-radius:16px;background:linear-gradient(140deg,#0d2742,#08192d);box-shadow:0 9px 24px #01081624}
+body:not(.admin-view) .rs-catalog-tools .rs-catalog-search{display:flex;align-items:center;gap:10px;min-width:0;padding:5px 12px;border:1px solid #376a95;background:#061b31;border-radius:11px;color:#83cfff}
+body:not(.admin-view) .rs-catalog-tools .rs-catalog-search>span{flex:none;display:flex}
+body:not(.admin-view) .rs-catalog-tools .rs-catalog-search input{width:100%;flex:1;min-width:0;height:39px;min-height:39px;outline:0;border:0;box-shadow:none!important;background:transparent;color:#edf8ff;font-size:14px;padding:7px 1px}
+body:not(.admin-view) .rs-catalog-controls{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:10px}
+body:not(.admin-view) .rs-catalog-controls label{display:grid;gap:5px;min-width:0;font-size:11px;color:#a7cce5;font-weight:750}
+body:not(.admin-view) .rs-catalog-controls select{width:100%;height:41px;min-height:41px;min-width:0;padding:8px 12px;appearance:auto;background:#0a2139;border:1px solid #346488;border-radius:9px;color:#f1f9ff;font:inherit;font-size:13px}
+body:not(.admin-view) .rs-catalog-controls select option{background:#0a2139;color:#f1f9ff}
+body:not(.admin-view) .rs-catalog-chips{display:flex;gap:7px;flex-wrap:wrap;align-items:center;min-width:0}
+body:not(.admin-view) .rs-catalog-chips button{display:inline-flex;align-items:center;justify-content:center;gap:6px;min-height:34px;padding:7px 11px;border:1px solid #315d81;border-radius:9px;background:#0c2945;color:#c3e2f4;font-size:11px;font-weight:750;cursor:pointer}
+body:not(.admin-view) .rs-catalog-chips button.active{background:#135f93;border-color:#67c2ff;color:#fff}
+body:not(.admin-view) .rs-catalog-chips button.rs-catalog-clear{background:transparent;border-color:transparent;color:#a0c5df;text-decoration:underline;text-underline-offset:3px}
+body:not(.admin-view) .rs-catalog-chips button .icon{width:13px;height:13px}
+body:not(.admin-view) .rs-catalog-result-count{font-size:11px;line-height:1.4;color:#9abed7}
+body:not(.admin-view) .rs-game-titlebar{display:flex;justify-content:space-between;align-items:start;gap:8px;min-width:0}
+body:not(.admin-view) .rs-game-titlebar .game-category-v4{flex:1 1 auto;min-width:0;overflow-wrap:anywhere}
+body:not(.admin-view) .rs-favorite-btn{display:inline-flex;align-items:center;justify-content:center;gap:5px;min-height:30px;padding:5px 9px;background:#0a2845;color:#b1dcf5;border:1px solid #34678e;border-radius:9px;font-size:11px;font-weight:800;white-space:nowrap;cursor:pointer;flex:0 0 auto}
+body:not(.admin-view) .rs-favorite-btn:hover{border-color:#69b7f1;background:#0c395e}
+body:not(.admin-view) .rs-favorite-btn.is-active{background:#164b65;border-color:#65b7dd;color:#effaff}
+body:not(.admin-view) .rs-favorite-btn .icon{width:14px;height:14px}
+body:not(.admin-view) .rs-game-favorite-action{display:flex;justify-content:flex-start;align-items:center;margin:9px 0 14px}
+body:not(.admin-view) .rs-favorite-wide{min-height:37px;font-size:12px;padding:8px 12px}
+body:not(.admin-view) .rs-help-promo{display:flex;justify-content:space-between;align-items:center;flex-wrap:wrap;gap:16px;padding:clamp(16px,3vw,25px);margin-top:17px;border:1px solid #326d96;border-radius:18px;background:linear-gradient(125deg,#0e2a47,#091a30);box-shadow:0 8px 25px #01081633}
+body:not(.admin-view) .rs-help-promo>div:first-child{flex:1 1 280px;min-width:0}
+body:not(.admin-view) .rs-help-promo h2{font-size:clamp(17px,2.6vw,23px);color:#f0faff;margin:5px 0 7px}
+body:not(.admin-view) .rs-help-promo p{font-size:13px;color:#a1c2d9;line-height:1.55;margin:0;max-width:630px}
+body:not(.admin-view) .rs-help-promo-actions{display:flex;gap:8px;flex-wrap:wrap}
+body:not(.admin-view) .rs-help-promo-actions .btn{min-height:40px}
+body:not(.admin-view) .rs-help-faq{display:flex;flex-direction:column;gap:9px;margin:8px 0 4px}
+body:not(.admin-view) .rs-help-faq details{background:#0c2741;border:1px solid #315d81;border-radius:11px;padding:0 13px}
+body:not(.admin-view) .rs-help-faq summary{padding:14px 0;cursor:pointer;color:#e8f7ff;font-weight:750;font-size:13px;line-height:1.4}
+body:not(.admin-view) .rs-help-faq details[open]{border-color:#498eb7}
+body:not(.admin-view) .rs-help-faq p{font-size:12px;line-height:1.6;color:#b9d1e4;margin:0 0 14px}
+body:not(.admin-view) .rs-profile-quicklinks{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:8px;margin:13px 0}
+body:not(.admin-view) .rs-profile-quicklinks .btn{min-width:0;width:100%;min-height:41px;font-size:12px;white-space:normal}
+body:not(.admin-view) .order-card-v2-actions{display:flex;flex-wrap:wrap;gap:7px}
+body:not(.admin-view) .order-card-v2-actions .btn{flex:1 1 auto;min-width:0;padding:8px 11px;min-height:36px;font-size:11px;white-space:normal}
+body:not(.admin-view) .rs-order-modal-help{display:flex;gap:8px;flex-wrap:wrap;padding:13px 0 2px}
+body:not(.admin-view) .rs-order-modal-help .btn{flex:1 1 170px;min-width:0}
+@media(max-width:680px){
+ body:not(.admin-view) .rs-catalog-tools{padding:11px;gap:10px;border-radius:13px}
+ body:not(.admin-view) .rs-catalog-controls{grid-template-columns:repeat(2,minmax(0,1fr));gap:8px}
+ body:not(.admin-view) .rs-catalog-chips{gap:5px}
+ body:not(.admin-view) .rs-catalog-chips button{font-size:10px;min-height:33px;padding:6px 8px}
+ body:not(.admin-view) .rs-game-titlebar{align-items:center;gap:5px}
+ body:not(.admin-view) .rs-favorite-btn{font-size:10px;padding:5px 8px}
+ body:not(.admin-view) .rs-help-promo{padding:14px;gap:12px}
+ body:not(.admin-view) .rs-help-promo-actions{width:100%}
+ body:not(.admin-view) .rs-help-promo-actions .btn{flex:1 1 135px;min-width:0;white-space:normal}
+ body:not(.admin-view) .rs-profile-quicklinks{grid-template-columns:minmax(0,1fr)}
+}
+@media(max-width:360px){
+ body:not(.admin-view) .rs-catalog-controls{grid-template-columns:minmax(0,1fr)}
+ body:not(.admin-view) .rs-game-titlebar{flex-wrap:wrap}
+}
