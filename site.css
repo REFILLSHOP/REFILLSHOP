@@ -2329,3 +2329,45 @@ body.admin-view .rs-client-more-actions-v26 .btn{min-height:31px!important;font-
 body.admin-view .rs-client-empty-v26{padding:12px;border:1px dashed #365474;border-radius:10px;margin:0;color:#b5cce1;font-size:12px}
 @media(max-width:580px){body.admin-view .rs-client-directory-v26{padding:9px!important;gap:8px!important}body.admin-view .rs-client-stats-v26>div{padding:9px!important}body.admin-view .rs-client-row-v26{padding:9px!important}body.admin-view .rs-client-actions-v26>.btn{flex:1 1 auto}}
 @media(max-width:350px){body.admin-view .rs-client-stats-v26{grid-template-columns:repeat(2,minmax(0,1fr))!important}}
+
+
+/* V27 · Reparación GENERAL del ADM: corregir flex-basis horizontal usado como altura en móvil.
+   Aplica a entregas, precios, conexiones, ofertas, revendedores y demás paneles. */
+body.admin-view .rs-adm-workspace-v24{display:block!important;height:auto!important;min-height:0!important}
+body.admin-view .rs-v3{display:flex!important;flex-direction:column!important;align-items:stretch!important;justify-content:flex-start!important;gap:10px!important;height:auto!important;min-height:0!important}
+body.admin-view .rs-v3-panel,
+body.admin-view .rs-gv2-panel,
+body.admin-view .rs-adm-panel-v24{height:auto!important;min-height:0!important;max-height:none!important;align-self:stretch!important;justify-content:flex-start!important;align-content:start!important;margin-block:0!important}
+body.admin-view .rs-v3-panel-head,
+body.admin-view .rs-v3-heading,
+body.admin-view .rs-adm-panel-heading-v24,
+body.admin-view .rs-gv2-panel-head{height:auto!important;min-height:0!important;align-content:start!important;justify-content:space-between!important;margin-top:0!important}
+body.admin-view .rs-v3-panel-head>div{min-height:0!important}
+body.admin-view .rs-v3-panel>.rs-v3-list,
+body.admin-view .rs-v3-panel>.rs-v3-form,
+body.admin-view .rs-v3-panel>.rs-v3-form-actions,
+body.admin-view .rs-v3-panel>.rs-v3-blank{margin-top:8px!important;margin-bottom:0!important;min-height:0!important;max-height:none!important}
+body.admin-view .rs-v3-panel-head{gap:5px!important;margin-bottom:3px!important}
+body.admin-view .rs-v3-form-actions{gap:7px!important;margin-top:7px!important;margin-bottom:8px!important}
+body.admin-view .rs-v3-panel .rs-v3-blank{padding:10px!important}
+body.admin-view .rs-v3-item{min-height:0!important}
+body.admin-view .rs-adm-workspace-v24 .rs-adm-quicksearch{display:flex!important;gap:9px!important;padding:7px 11px!important;min-height:42px!important;margin:0 0 10px!important}
+body.admin-view .rs-adm-workspace-v24 .rs-adm-quicksearch label{display:flex!important;flex:0 0 18px!important;width:18px!important;height:auto!important;margin:0!important;padding:0!important;white-space:nowrap!important}
+body.admin-view .rs-adm-workspace-v24 .rs-adm-quicksearch input{flex:1 1 auto!important;min-width:0!important;max-width:100%!important;margin:0!important;padding:5px 2px!important;background:transparent!important;border:0!important;box-shadow:none!important;font-size:13px!important}
+body.admin-view .rs-adm-workspace-v24 .rs-adm-quicksearch button{flex:0 0 auto!important}
+@media(max-width:999px){
+  body.admin-view .rs-v3-panel-head>div{flex:0 0 auto!important;flex-basis:auto!important;min-height:0!important;width:100%!important;max-width:100%!important}
+  body.admin-view .rs-v3-panel-head{display:flex!important;flex-direction:column!important;align-items:stretch!important;gap:4px!important}
+  body.admin-view .rs-v3-panel-head> :not(div){flex:0 0 auto!important}
+  body.admin-view .rs-v3-heading>div{min-height:0!important;flex-basis:auto!important}
+  body.admin-view .rs-v3-panel{padding:11px!important}
+  body.admin-view .rs-gv2-panel{height:auto!important;min-height:0!important}
+}
+@media(max-width:620px){
+  body.admin-view .rs-v3-panel-head>div{width:100%!important}
+  body.admin-view .rs-v3-panel-head h2{font-size:16px!important;margin:0 0 3px!important}
+  body.admin-view .rs-v3-panel-head p{font-size:11px!important;line-height:1.4!important;margin:0!important}
+  body.admin-view .rs-v3-heading h1{margin:0 0 3px!important}
+  body.admin-view .rs-v3-panel{padding:10px!important}
+  body.admin-view .rs-adm-workspace-v24 .rs-adm-quicksearch{padding:6px 9px!important}
+}
