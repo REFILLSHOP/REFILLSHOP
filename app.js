@@ -437,7 +437,7 @@ document.addEventListener('click',event=>{
 function adminCustomerRowV26(c){
  const phone=String(c.phone||'').trim(),state=c.reviewStatus||'pending';
  const label=({pending:'Pendiente',contacted:'Contactado',confirmed:'Confirmado'})[state]||state;
- const valid=/^\\+[1-9][0-9]{7,14}$/.test(phone);
+ const valid=/^[+][1-9][0-9]{7,14}$/.test(phone);
  const search=[c.name,c.phone,c.email,c.id].filter(Boolean).join(' ');
  return `<article class="rs-client-row-v26" data-rs-client-status="${esc(state)}" data-rs-client-search="${esc(search)}">
  <div class="rs-client-identity-v26"><div class="rs-client-shield-v26">${icon('shield')}</div><div class="rs-client-name-v26"><strong>${esc(c.name||'Sin nombre')}</strong><small>${esc(phone||'Sin teléfono')} · ${Number(c.orders||0)} pedidos</small></div><span class="rs-client-status-v26 status-${esc(state)}">${esc(label)}</span></div>
