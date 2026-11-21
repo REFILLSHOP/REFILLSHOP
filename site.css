@@ -2285,3 +2285,47 @@ body.admin-view .rs-adm-workspace-v24 [hidden]{display:none!important}
  body.admin-view .admin-contact-buttons .btn{min-height:35px;padding:7px 9px}
  .rs-password-modal{margin:14px!important}
 }
+
+
+/* REFILLS SHOP v26 - directorio nuevo aislado: elimina el espacio vacío */
+body.admin-view .rs-customers-v26{display:flex!important;flex-direction:column!important;gap:10px!important;min-width:0;width:100%;height:auto!important;min-height:0!important}
+body.admin-view .rs-customers-v26>.rs-v3-heading{padding:4px 0!important;margin:0!important}
+body.admin-view .rs-client-stats-v26{display:grid!important;grid-template-columns:repeat(3,minmax(0,1fr))!important;gap:8px!important;margin:0!important}
+body.admin-view .rs-client-stats-v26>div{display:flex;flex-direction:column;gap:4px;min-width:0;padding:10px 12px;border:1px solid #305b7f;border-radius:12px;background:linear-gradient(125deg,#0b2b49,#071c34)}
+body.admin-view .rs-client-stats-v26 span{font-size:11px;color:#a8c9e1}
+body.admin-view .rs-client-stats-v26 strong{font-size:clamp(19px,3vw,25px);line-height:1.1;color:#effaff}
+body.admin-view .rs-client-directory-v26{display:flex!important;flex-direction:column!important;justify-content:flex-start!important;align-items:stretch!important;align-content:start!important;gap:9px!important;min-width:0!important;width:100%!important;height:auto!important;min-height:0!important;max-height:none!important;margin:0!important;padding:12px!important;position:static!important;transform:none!important;background:linear-gradient(150deg,#0b2239,#081a2d);border:1px solid #305b7c;border-radius:14px}
+body.admin-view .rs-client-directory-head-v26{display:flex!important;align-items:center;justify-content:space-between;gap:8px;min-height:0!important;height:auto!important;margin:0!important;padding:0!important}
+body.admin-view .rs-client-directory-head-v26 h2{font-size:16px;line-height:1.25;margin:0!important;color:#f3fbff}
+body.admin-view .rs-client-directory-head-v26 small{font-size:11px;color:#a9c6db;white-space:nowrap}
+body.admin-view .rs-client-toolbar-v26{display:flex!important;flex-direction:column!important;gap:7px!important;min-height:0!important;height:auto!important;margin:0!important;padding:0!important}
+body.admin-view .rs-client-search-v26{display:flex!important;align-items:center!important;gap:7px!important;width:100%;border:1px solid #355f85;background:#06192d;padding:4px 9px;border-radius:10px;color:#79c8ff}
+body.admin-view .rs-client-search-v26>span{display:flex;align-items:center}
+body.admin-view .rs-client-search-v26 input{flex:1;min-width:0;width:100%;height:35px!important;min-height:35px!important;background:transparent!important;border:0!important;box-shadow:none!important;color:#effaff!important;padding:3px 0!important;font-size:13px!important}
+body.admin-view .rs-client-search-v26 button{border:0;background:transparent;color:#94cfff;padding:6px 3px;cursor:pointer;font-size:11px}
+body.admin-view .rs-client-filters-v26{display:flex!important;gap:5px!important;overflow-x:auto!important;margin:0!important;padding:1px 0 3px!important}
+body.admin-view .rs-client-filters-v26 button{display:inline-flex;gap:5px;flex:0 0 auto;border:1px solid #2a5274;border-radius:9px;background:#0b2944;color:#c7dfef;font-size:11px;font-weight:750;padding:7px 9px;cursor:pointer}
+body.admin-view .rs-client-filters-v26 button.active{background:#13689f;border-color:#66c4ff;color:white}
+body.admin-view .rs-client-filters-v26 b{font-size:10px}
+body.admin-view .rs-client-list-v26{display:flex!important;flex-direction:column!important;gap:6px!important;min-width:0!important;width:100%!important;min-height:0!important;height:auto!important;max-height:none!important;position:static!important;margin:0!important;padding:0!important}
+body.admin-view .rs-client-row-v26{display:flex!important;flex-direction:column!important;gap:8px!important;align-items:stretch!important;min-height:0!important;height:auto!important;margin:0!important;padding:10px!important;border:1px solid #2b4f70;border-radius:10px;background:#091c31}
+body.admin-view .rs-client-row-v26[hidden],body.admin-view .rs-client-empty-v26[hidden]{display:none!important}
+body.admin-view .rs-client-identity-v26{display:flex;align-items:center;flex-wrap:wrap;gap:8px;min-width:0}
+body.admin-view .rs-client-shield-v26{display:grid;place-items:center;flex:0 0 29px;width:29px;height:29px;border-radius:9px;border:1px solid #386e9c;background:#133756;color:#8edcff}
+body.admin-view .rs-client-shield-v26 .icon{width:16px;height:16px}
+body.admin-view .rs-client-name-v26{display:flex;flex:1 1 145px;flex-direction:column;min-width:0;gap:3px}
+body.admin-view .rs-client-name-v26 strong{font-size:13px;color:#effaff;overflow-wrap:anywhere}
+body.admin-view .rs-client-name-v26 small{font-size:10px;color:#9abbd5;overflow-wrap:anywhere}
+body.admin-view .rs-client-status-v26{display:inline-flex;flex:0 0 auto;padding:5px 8px;border-radius:8px;border:1px solid #7a6526;background:#382b11;color:#ffd780;font-size:10px;font-weight:800}
+body.admin-view .rs-client-status-v26.status-confirmed{background:#10352d;border-color:#287f67;color:#9af5ce}
+body.admin-view .rs-client-status-v26.status-contacted{background:#102f4c;border-color:#23659c;color:#a0d9ff}
+body.admin-view .rs-client-actions-v26{display:flex!important;flex-wrap:wrap;gap:6px!important;align-items:center}
+body.admin-view .rs-client-actions-v26>.btn{min-height:32px!important;padding:6px 10px!important;font-size:11px!important}
+body.admin-view .rs-client-more-v26{flex:1 1 auto;min-width:0}
+body.admin-view .rs-client-more-v26>summary{display:inline-flex;justify-content:center;align-items:center;cursor:pointer;min-height:32px;border:1px solid #2d577a;border-radius:9px;background:#102b44;padding:6px 10px;font-size:11px;font-weight:700;color:#b8ddf3;list-style:none}
+body.admin-view .rs-client-more-v26>summary::-webkit-details-marker{display:none}
+body.admin-view .rs-client-more-actions-v26{display:flex;flex-wrap:wrap;gap:6px;padding:8px 0 0}
+body.admin-view .rs-client-more-actions-v26 .btn{min-height:31px!important;font-size:11px!important;padding:6px 9px!important}
+body.admin-view .rs-client-empty-v26{padding:12px;border:1px dashed #365474;border-radius:10px;margin:0;color:#b5cce1;font-size:12px}
+@media(max-width:580px){body.admin-view .rs-client-directory-v26{padding:9px!important;gap:8px!important}body.admin-view .rs-client-stats-v26>div{padding:9px!important}body.admin-view .rs-client-row-v26{padding:9px!important}body.admin-view .rs-client-actions-v26>.btn{flex:1 1 auto}}
+@media(max-width:350px){body.admin-view .rs-client-stats-v26{grid-template-columns:repeat(2,minmax(0,1fr))!important}}
