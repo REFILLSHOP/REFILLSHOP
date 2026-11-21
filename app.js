@@ -516,7 +516,7 @@ const ADMIN_LOCAL_LISTS={
 };
 function adminQuickSearchMarkup(){
  if(!ADMIN_LOCAL_LISTS[S.route])return '';
- return `<div class="rs-adm-quicksearch" role="search"><label for="rsAdmQuickSearch">${icon('search')}<span class="sr-only">Buscar en esta sección</span></label><input id="rsAdmQuickSearch" type="search" autocomplete="off" placeholder="Buscar en esta sección…" aria-label="Buscar en esta sección"><button type="button" id="rsAdmClearSearch" aria-label="Limpiar búsqueda">Limpiar</button><small id="rsAdmSearchCount" aria-live="polite"></small></div>`;
+ return `<div class="rs-adm-quicksearch" role="search"><label for="rsAdmQuickSearch" aria-hidden="true">${icon('search')}</label><input id="rsAdmQuickSearch" type="search" autocomplete="off" placeholder="Buscar pedidos, productos o clientes…" aria-label="Buscar en esta sección"><button type="button" id="rsAdmClearSearch" aria-label="Limpiar búsqueda">Limpiar</button><small id="rsAdmSearchCount" aria-live="polite"></small></div>`;
 }
 function filterAdminQuickSearch(){
  const input=$('rsAdmQuickSearch');if(!input)return;
