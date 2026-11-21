@@ -2217,3 +2217,30 @@ body.shop-refresh .game-card-v4 .game-content-v4>.btn{width:100%!important;min-h
 .orders-notification-row{display:flex;justify-content:flex-end;margin:0 0 12px}
 .state-pill.processing{color:#ffe1a3!important;background:#6b4b1322!important;border:1px solid #a9813f!important}
 @media(max-width:440px){body.shop-refresh .game-grid-v4{grid-template-columns:repeat(2,minmax(0,1fr))!important;gap:9px!important}body.shop-refresh .game-card-v4 .game-art-v4{height:112px!important}body.shop-refresh .game-card-v4 .game-content-v4{padding:10px!important;gap:7px!important}body.shop-refresh .game-card-v4 .game-content-v4 h3{font-size:14px!important}body.shop-refresh .game-card-v4 .game-content-v4 p{font-size:10px!important}body.shop-refresh .game-card-v4 .game-content-v4>.btn{font-size:10px!important;min-height:34px!important}.rs-region-picker{align-items:stretch;flex-direction:column}.rs-region-picker small{white-space:normal}}
+
+
+/* ADM compacto + búsqueda rápida 2026-11-21 */
+body.admin-view .main-content{padding-top:8px;padding-bottom:20px}
+body.admin-view .rs-adm-v24{gap:10px}
+body.admin-view .rs-adm-heading-v24{padding:12px 16px;margin-bottom:8px;gap:8px}
+body.admin-view .rs-adm-heading-v24 h1{margin:2px 0;font-size:clamp(20px,2.5vw,27px)}
+body.admin-view .rs-adm-heading-v24 p{margin:2px 0}
+body.admin-view .rs-adm-nav-v24{margin:6px 0 10px;gap:5px}
+body.admin-view .rs-adm-nav-v24 button{padding:9px 11px}
+body.admin-view .rs-adm-workspace-v24{gap:10px}
+body.admin-view .rs-v3{gap:10px}
+body.admin-view .rs-v3-heading{margin-bottom:8px;gap:10px;padding:10px 14px}
+body.admin-view .rs-v3-panel,body.admin-view .rs-adm-panel-v24{padding:12px 14px}
+body.admin-view .rs-v3-panel-head{margin-bottom:10px}
+body.admin-view .rs-v3-stats,body.admin-view .rs-adm-kpis-v24{gap:8px;margin-bottom:8px}
+body.admin-view .rs-v3-stat,body.admin-view .rs-adm-kpi-v24{padding:11px}
+body.admin-view .rs-v3-list{gap:7px}
+body.admin-view .rs-v3-item{padding:10px}
+body.admin-view .rs-v3-customer .admin-client{padding:10px;gap:9px}
+body.admin-view .rs-adm-quicksearch{display:flex;align-items:center;gap:9px;min-height:42px;padding:6px 10px;border:1px solid #284361;border-radius:12px;background:#0e1c30;margin:0 0 10px}
+body.admin-view .rs-adm-quicksearch label{display:flex;align-items:center;color:#75bcff}
+body.admin-view .rs-adm-quicksearch input{flex:1;min-width:0;border:0;outline:0;background:transparent;color:#eef6ff;padding:5px 2px;font:inherit}
+body.admin-view .rs-adm-quicksearch button{border:0;background:transparent;color:#8ebde8;cursor:pointer}
+body.admin-view .rs-adm-quicksearch small{color:#a7bad1;white-space:nowrap}
+body.admin-view .rs-adm-workspace-v24 [hidden]{display:none!important}
+@media(max-width:650px){body.admin-view .rs-adm-heading-v24{padding:10px 12px}body.admin-view .rs-v3-panel,body.admin-view .rs-adm-panel-v24{padding:10px}body.admin-view .rs-v3-heading{padding:10px}body.admin-view .rs-adm-quicksearch{margin-bottom:7px}}
