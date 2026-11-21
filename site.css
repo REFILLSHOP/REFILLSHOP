@@ -2244,3 +2244,44 @@ body.admin-view .rs-adm-quicksearch button{border:0;background:transparent;color
 body.admin-view .rs-adm-quicksearch small{color:#a7bad1;white-space:nowrap}
 body.admin-view .rs-adm-workspace-v24 [hidden]{display:none!important}
 @media(max-width:650px){body.admin-view .rs-adm-heading-v24{padding:10px 12px}body.admin-view .rs-v3-panel,body.admin-view .rs-adm-panel-v24{padding:10px}body.admin-view .rs-v3-heading{padding:10px}body.admin-view .rs-adm-quicksearch{margin-bottom:7px}}
+
+
+/* Refills Shop ADM herramientas reales: Noviembre 2026 */
+body.admin-view .rs-adm-v24{gap:8px!important}
+body.admin-view .rs-adm-heading-v24{padding:11px 14px!important;min-height:0!important}
+body.admin-view .rs-adm-heading-v24 h1{margin:0!important;line-height:1.2}
+body.admin-view .rs-adm-heading-v24 p{margin:2px 0 0!important}
+body.admin-view .rs-adm-nav-v24{gap:5px!important;margin:5px 0 9px!important}
+body.admin-view .rs-adm-nav-v24 button{padding:8px 10px!important;min-height:39px}
+body.admin-view .rs-adm-workspace-v24{gap:8px!important}
+body.admin-view .rs-v3-heading{padding:9px 12px!important;margin-bottom:8px!important}
+body.admin-view .rs-v3-panel,body.admin-view .rs-adm-panel-v24{padding:12px!important}
+body.admin-view .rs-v3-panel-head{margin-bottom:8px!important}
+body.admin-view .rs-v3-stats,body.admin-view .rs-adm-kpis-v24{margin:0 0 8px!important;gap:8px!important}
+body.admin-view .rs-v3-list{gap:6px!important}
+body.admin-view .rs-v3-item,body.admin-view .rs-v3-customer .admin-client{padding:10px!important;gap:9px}
+body.admin-view .rs-adm-quicksearch{position:relative;display:flex;align-items:center;gap:8px;min-height:46px;padding:6px 12px;background:#0b1d33;border:1px solid #2b547d;border-radius:12px;margin-bottom:10px}
+body.admin-view .rs-adm-quicksearch label{display:inline-flex;align-items:center;color:#69beff}
+body.admin-view .rs-adm-quicksearch input{min-width:0;flex:1;border:0;box-shadow:none;background:transparent;color:#f2f8ff;outline:0;font:inherit;padding:5px 0}
+body.admin-view .rs-adm-quicksearch button{border:0;background:transparent;color:#8fd1ff;font:inherit;font-size:13px;cursor:pointer;padding:5px}
+body.admin-view .rs-adm-quicksearch small{color:#afc8df;white-space:nowrap}
+body.admin-view .rs-adm-workspace-v24 [hidden]{display:none!important}
+.rs-password-modal{max-width:min(520px,calc(100vw - 28px));max-height:calc(100dvh - 28px);overflow:auto}
+.rs-password-tools{display:flex;flex-wrap:wrap;gap:9px;margin:-2px 0 10px}
+.rs-password-identity{display:flex;align-items:flex-start;gap:11px;line-height:1.4;padding:10px 12px;background:#0d2440;border:1px solid #31577e;border-radius:10px;font-size:13px}
+.rs-password-identity input{width:18px;height:18px;flex:0 0 18px;accent-color:#4ba5ff;margin:1px 0 0}
+.rs-account-security{margin:16px 0 9px;border:1px solid #2b4c6e;border-radius:12px;background:#0c213a;padding:13px}
+.rs-account-security summary{font-weight:700;color:#deefff;cursor:pointer}
+.rs-account-security form{margin-top:16px}
+@media(max-width:700px){
+ body.admin-view .main-content{padding:8px 9px 22px!important}
+ body.admin-view .rs-adm-heading-v24{padding:10px 11px!important;gap:7px}
+ body.admin-view .rs-adm-nav-v24{padding:2px!important}
+ body.admin-view .rs-adm-nav-v24 button{padding:8px!important}
+ body.admin-view .rs-v3-panel,body.admin-view .rs-adm-panel-v24{padding:10px!important}
+ body.admin-view .rs-adm-quicksearch{margin:3px 0 9px;padding:6px 10px}
+ body.admin-view .rs-v3-heading-actions,body.admin-view .rs-adm-search-v24{gap:6px;flex-wrap:wrap}
+ body.admin-view .admin-contact-buttons{display:flex;flex-wrap:wrap;gap:6px}
+ body.admin-view .admin-contact-buttons .btn{min-height:35px;padding:7px 9px}
+ .rs-password-modal{margin:14px!important}
+}
