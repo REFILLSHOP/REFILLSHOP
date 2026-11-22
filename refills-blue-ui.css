@@ -1,0 +1,265 @@
+/* REFILLS SHOP · Azul Nocturno | Visual layer only.
+   The existing homepage, app.js, Supabase, pricing, checkout and admin logic stay intact. */
+:root{
+  --bg:#060a18;--bg-deep:#040713;--surface:#0e1832;--surface-2:#132345;
+  --surface-3:#18325e;--line:#263f70;--line-bright:#4772b4;
+  --text:#f5f8ff;--muted:#a0b2d1;
+  --blue:#277dff;--blue-2:#64afff;--blue-3:#c2e4ff;--cyan:#4bd9fa;
+  --green:#3ad2b4;--amber:#ffca65;--red:#ff7d9b;
+  --radius:19px;--radius-sm:12px;
+}
+html{scroll-padding-top:80px}
+body:not(.admin-view){
+ color:#f5f8ff;
+ background:radial-gradient(ellipse 48vw 53vh at 89% 15%,rgba(39,94,197,.27),transparent 86%),
+ radial-gradient(ellipse 42vw 54vh at -11% 76%,rgba(27,87,180,.25),transparent 87%),
+ radial-gradient(ellipse 57vw 59vh at 56% 105%,rgba(25,68,152,.19),transparent 85%),
+ #070b1b;
+ background-attachment:fixed;
+}
+body:not(.admin-view)::before{
+ opacity:.48;
+ background:repeating-linear-gradient(119deg,transparent 0 67px,rgba(92,140,235,.05) 68px 70px,transparent 71px 122px);
+}
+body:not(.admin-view) .wrap{width:min(760px,calc(100% - 30px));max-width:100%}
+body:not(.admin-view) .main-content{padding-top:20px;padding-bottom:130px;min-height:calc(100dvh - 145px)}
+body:not(.admin-view) .header{
+ background:rgba(7,12,29,.92);
+ border-bottom:1px solid rgba(71,119,201,.27);
+ backdrop-filter:blur(13px)
+}
+body:not(.admin-view) .header-inner{min-height:63px}
+body:not(.admin-view) .brand-mark{width:42px;height:42px;border-radius:50%;background:#0e2144;border:1px solid #477ed3;box-shadow:0 0 0 3px #3a7ef20d}
+body:not(.admin-view) .brand-words{font-weight:900;letter-spacing:-.035em}
+body:not(.admin-view) .brand-words small{color:#79b6ff;letter-spacing:.12em}
+body:not(.admin-view) .header-action{background:#121d3c;border:1px solid #2d4f84;border-radius:50%}
+body:not(.admin-view) .balance-chip{background:#14274c;border:1px solid #365e9b}
+body:not(.admin-view) .topnav{display:none}
+body:not(.admin-view) .footer{background:transparent;border-top:1px solid #294575}
+body:not(.admin-view) .footer-grid-v11{gap:22px}
+body:not(.admin-view) .footer-bottom-v11{margin-bottom:8px}
+body:not(.admin-view) .footer-links-v11 a:hover{color:#8cc9ff}
+body:not(.admin-view) .btn{border-radius:12px;transition:filter .15s,transform .15s}
+body:not(.admin-view) .btn:active{transform:translateY(1px)}
+body:not(.admin-view) .btn-primary{background:linear-gradient(180deg,#5cafff 0%,#277dff 53%,#1365e2 100%);border:1px solid #82c0ff;color:white;box-shadow:0 5px 19px #0a69ff35}
+body:not(.admin-view) .btn-outline{background:#111b36;border-color:#375991;color:#d6e7ff}
+body:not(.admin-view) .btn-ghost{background:#0d1630;border-color:#2a4574;color:#bed5fa}
+body:not(.admin-view) .card,body:not(.admin-view) .panel,body:not(.admin-view) .rs-v3-panel{
+ background:linear-gradient(150deg,#172447,#0e1832 70%);
+ border-color:#34538a;border-radius:18px
+}
+body:not(.admin-view) input:not([type=checkbox]):not([type=radio]),
+body:not(.admin-view) select,body:not(.admin-view) textarea{
+ border-color:#355184;background:#0a1229;color:#f6faff;border-radius:12px
+}
+body:not(.admin-view) input:focus,body:not(.admin-view) select:focus,body:not(.admin-view) textarea:focus{border-color:#71b6ff;box-shadow:0 0 0 3px #348aff27}
+body:not(.admin-view) .chip,body:not(.admin-view) .pill{background:#111f40;border-color:#36578e;color:#bedcff}
+body:not(.admin-view) .chip.active,body:not(.admin-view) .pill.active{background:#1a68c9;border-color:#6cb2ff;color:white}
+/* The original Refills Shop home content is intentionally preserved. */
+body:not(.admin-view) .rs-bw-home,body:not(.admin-view) .rs-app-home,body:not(.admin-view) .rs-app-catalog{max-width:730px;margin-inline:auto}
+body:not(.admin-view) .rs-bw-kicker,body:not(.admin-view) .rs-app-overline{color:#83bdff}
+body:not(.admin-view) .rs-bw-greeting{padding:7px 3px 13px}
+body:not(.admin-view) .rs-bw-greeting h1{font-size:clamp(1.45rem,3.4vw,1.98rem)}
+body:not(.admin-view) .rs-bw-greeting p{color:#a9bcdc}
+body:not(.admin-view) .rs-bw-greeting-action{
+ background:#142449;border:1px solid #395fa2;color:#daecff;border-radius:999px
+}
+body:not(.admin-view) .rs-bw-main-feature{
+ min-height:224px;overflow:hidden;
+ background:radial-gradient(ellipse 360px 220px at 101% 70%,#1687ff45,transparent 76%),
+ linear-gradient(130deg,#1b3568,#0c1a38 72%,#0a1530);
+ border:1px solid #4067ac;border-radius:23px;box-shadow:0 12px 38px #02071828
+}
+body:not(.admin-view) .rs-bw-main-feature:before{
+ background:repeating-linear-gradient(126deg,transparent 0 51px,#ffffff06 52px 53px)
+}
+body:not(.admin-view) .rs-bw-feature-kicker{color:#96ceff}
+body:not(.admin-view) .rs-bw-feature-copy h2 span{color:#8accff}
+body:not(.admin-view) .rs-bw-feature-copy p{color:#c1d0e8}
+body:not(.admin-view) .rs-bw-orb{border:1px solid #6dbbff61;background:#2b78d924}
+body:not(.admin-view) .rs-bw-orb .icon{color:#99d3ff}
+body:not(.admin-view) .rs-bw-quick{gap:9px}
+body:not(.admin-view) .rs-bw-quick button{
+ min-height:75px;background:#142247;border:1px solid #324e80;border-radius:17px
+}
+body:not(.admin-view) .rs-bw-quick button:hover{background:#1a3261;border-color:#6da8ff}
+body:not(.admin-view) .rs-bw-quick button>span{border-radius:14px;background:#1c3568;border-color:#355fa0;color:#85c5ff}
+body:not(.admin-view) .rs-bw-quick button small{color:#a4badb}
+body:not(.admin-view) .rs-bw-search,body:not(.admin-view) .rs-app-search-launch{
+ background:#111b38;border:1px solid #3b5993;border-radius:15px
+}
+body:not(.admin-view) .rs-bw-search:hover,body:not(.admin-view) .rs-app-search-launch:hover{background:#192a52;border-color:#79b5ff}
+body:not(.admin-view) .rs-bw-heading h2,body:not(.admin-view) .rs-app-section-title h2{font-weight:900}
+body:not(.admin-view) .rs-bw-heading>button,body:not(.admin-view) .rs-app-text-button{color:#86c6ff}
+body:not(.admin-view) .rs-bw-more,body:not(.admin-view) .rs-app-view-more{
+ background:#132448;border-color:#3b5d99;color:#dbecff;border-radius:14px
+}
+body:not(.admin-view) .rs-bw-guide,body:not(.admin-view) .rs-app-help-mini{
+ background:#111b36;border:1px solid #34528a;border-radius:18px
+}
+body:not(.admin-view) .rs-bw-steps>div{background:#0b1630;border-color:#2b4679}
+body:not(.admin-view) .rs-bw-steps b{color:#7fbaff}
+/* Square artwork, clean cards, compact catalogue as in the references. */
+body:not(.admin-view) .game-grid-v4{
+ display:grid;grid-template-columns:repeat(4,minmax(0,1fr));gap:12px
+}
+body:not(.admin-view) .rs-bw-home .game-grid-v4{grid-template-columns:repeat(3,minmax(0,1fr))}
+body:not(.admin-view) .game-card-v4{
+ display:flex!important;flex-direction:column;align-items:stretch;gap:9px;
+ min-width:0;min-height:0;padding:8px!important;
+ background:linear-gradient(155deg,#162749,#101b36)!important;
+ border:1px solid #36558c!important;border-radius:19px!important;
+ cursor:pointer;overflow:hidden;box-shadow:none
+}
+body:not(.admin-view) .game-card-v4:hover{
+ background:#1b315a!important;border-color:#78b1ff!important;
+ transform:translateY(-2px)
+}
+body:not(.admin-view) .game-art-v4{
+ display:block;width:100%;height:auto;min-height:0;
+ aspect-ratio:1/1;overflow:hidden;border-radius:14px;background:#233965;grid-column:auto
+}
+body:not(.admin-view) .game-art-v4 img{display:block;width:100%;height:100%;object-fit:cover}
+body:not(.admin-view) .game-content-v4{
+ display:flex;flex-direction:column;align-items:stretch;flex:1;
+ gap:6px;grid-column:auto;min-height:0;padding:2px 3px 4px;text-align:center
+}
+body:not(.admin-view) .rs-game-titlebar{display:flex;justify-content:center;gap:6px;min-width:0}
+body:not(.admin-view) .game-category-v4{font-size:.64rem;color:#9db6dd;line-height:1.2}
+body:not(.admin-view) .rs-favorite-btn{width:25px;height:25px;background:#192b4f;border-color:#47689f;color:#9acbff}
+body:not(.admin-view) .rs-favorite-btn.is-active{color:#68d8fd;background:#1b5684}
+body:not(.admin-view) .game-content-v4 h3{
+ margin:0;font-size:.9rem;line-height:1.2;font-weight:850;overflow-wrap:anywhere
+}
+body:not(.admin-view) .game-content-v4 p{margin:0;font-size:.73rem;font-weight:800;color:#8ac8ff}
+body:not(.admin-view) .game-content-v4>.btn{
+ margin-top:auto;width:100%;min-height:34px;padding:8px 4px;font-size:.73rem;line-height:1.15
+}
+body:not(.admin-view) .rs-app-category-pill,
+body:not(.admin-view) .rs-catalog-chips button,
+body:not(.admin-view) .rs-game-product-tabs button{
+ background:#142247;border:1px solid #36548d;color:#bdd5ff;border-radius:999px
+}
+body:not(.admin-view) .rs-app-category-pill.active,
+body:not(.admin-view) .rs-catalog-chips button.active,
+body:not(.admin-view) .rs-game-product-tabs button.active{
+ color:white;background:#1b72e1;border-color:#7dbaff
+}
+body:not(.admin-view) .rs-app-kind-tabs button{background:#132243;border-color:#395992}
+body:not(.admin-view) .rs-app-kind-tabs button.active{background:#1c68c6;border-color:#75b1ff}
+body:not(.admin-view) .rs-catalog-tools{background:#101a36;border-color:#314e81;border-radius:18px}
+body:not(.admin-view) .rs-catalog-search{background:#080f25;border-color:#3b598d}
+body:not(.admin-view) .rs-game-identity>img{border-color:#6eabff;box-shadow:0 0 0 4px #246ffb19}
+body:not(.admin-view) .rs-region-picker{background:#101c3a;border-color:#39588c}
+body:not(.admin-view) .rs-game-back{color:#90c7ff}
+/* Offer tiles retain all REAL offer prices / stock and purchase actions. */
+body:not(.admin-view) .offer-grid-v4{grid-template-columns:repeat(2,minmax(0,1fr));gap:10px}
+body:not(.admin-view) .offer-card-v4{
+ background:linear-gradient(160deg,#172954,#101b39);border-color:#395891;
+ border-radius:17px;padding:12px;min-width:0
+}
+body:not(.admin-view) .offer-head-v4{border-color:#426298}
+body:not(.admin-view) .offer-icon-v4{background:#1c396b;border-radius:12px}
+body:not(.admin-view) .offer-info-v4 h3{font-weight:850}
+body:not(.admin-view) .offer-info-v4 small{color:#b0c4e2}
+body:not(.admin-view) .offer-eyebrow{color:#86c4ff}
+body:not(.admin-view) .currency-box{background:#0b1531;border-color:#2d487d}
+body:not(.admin-view) .currency-box small{color:#9ab0d2}
+body:not(.admin-view) .currency-box strong{color:#9dd1ff}
+body:not(.admin-view) .shop-offers-intro{background:#101e41;border-color:#345691}
+/* Orders, user account and full-page checkout remain distinct routes. */
+body:not(.admin-view) .auth-shell{max-width:530px;margin-inline:auto}
+body:not(.admin-view) .auth-content.auth-clean{
+ max-width:450px;margin-inline:auto;padding:26px;
+ background:linear-gradient(#111936,#111936) padding-box,
+ linear-gradient(140deg,#64c7ff,#2b65d4 49%,#4b8bed) border-box;
+ border:1px solid transparent;border-radius:24px;
+ box-shadow:0 20px 62px #01061466
+}
+body:not(.admin-view) .auth-clean h1 span{color:#75baff}
+body:not(.admin-view) .phone-auth-switch{background:#080f25;border-color:#304e83;border-radius:13px}
+body:not(.admin-view) .phone-auth-switch button.active{background:#1c396f;color:white}
+body:not(.admin-view) .auth-content .btn-primary{min-height:49px}
+body:not(.admin-view) .cart-item,body:not(.admin-view) .order-item,
+body:not(.admin-view) .purchase-main-v5,body:not(.admin-view) .checkout-track-v14{
+ background:#111d3c;border-color:#335386;border-radius:17px
+}
+body:not(.admin-view) .payment-option-v5{background:#142448;border-color:#385992}
+body:not(.admin-view) .payment-option-v5.active{background:#1c56a4;border-color:#81bdff}
+body:not(.admin-view) .purchase-four-labels .active b{background:#277dff}
+body:not(.admin-view) .modal-root:not(:empty){background:#020713d9}
+body:not(.admin-view) .modal-card{
+ background:#121d3b;border:1px solid #5278b3;border-radius:22px
+}
+body:not(.admin-view) .toasts{bottom:calc(90px + env(safe-area-inset-bottom))}
+body:not(.admin-view) .toast{background:#102b56;border-color:#518ad0;color:#eff7ff}
+/* Fixed centered navigation on desktop and mobile, with no lateral overflow. */
+body:not(.admin-view) .bottom-nav:not([style*="display: none"]){
+ display:flex!important;align-items:stretch;justify-content:space-between;
+ position:fixed;left:50%;transform:translateX(-50%);
+ bottom:calc(11px + env(safe-area-inset-bottom));z-index:85;
+ width:min(515px,calc(100% - 26px));height:69px;padding:6px;
+ gap:4px;border:1px solid #4165a1;border-radius:22px;
+ background:rgba(17,25,58,.96);
+ box-shadow:0 9px 35px #0009;
+ backdrop-filter:blur(14px)
+}
+body:not(.admin-view) .bottom-nav>a{
+ display:flex!important;flex:1;align-items:center;justify-content:center;
+ flex-direction:column;gap:4px;min-width:0;padding:5px 3px;
+ border-radius:16px;color:#a2b8dc;font-size:.69rem;font-weight:800;text-align:center
+}
+body:not(.admin-view) .bottom-nav>a.active{
+ background:linear-gradient(170deg,#4aa5ff,#226df1);color:#fff;
+ box-shadow:0 0 0 1px #8ac8ff47 inset
+}
+body:not(.admin-view) .bottom-nav .icon{width:20px;height:20px}
+body:not(.admin-view) .splash{background:#060b1c}
+body:not(.admin-view) .splash-v2-track{background:#1a2a52}
+body:not(.admin-view) .splash-v2-track:after{background:linear-gradient(90deg,#277dff,#5cd7ff)}
+/* Admin functionality and data aren't restyled structurally. */
+body.admin-view{background:#070c1b}
+body.admin-view .header{background:#09132a}
+body.admin-view .rs-adm-panel-v24,body.admin-view .rs-v3-panel{background:#111d36;border-color:#294774}
+body.admin-view .btn-primary{background:linear-gradient(125deg,#247afa,#419afc)}
+/* Mobile: comfortable margins, two-column product cards, no clipped right edge. */
+@media(max-width:800px){
+ body:not(.admin-view) .wrap{width:calc(100% - 28px)}
+ body:not(.admin-view) .footer{padding-bottom:70px}
+}
+@media(max-width:620px){
+ body:not(.admin-view){background-attachment:scroll}
+ body:not(.admin-view) .header-inner{min-height:59px}
+ body:not(.admin-view) .main-content{padding-top:14px;padding-bottom:116px}
+ body:not(.admin-view) .brand-mark{width:37px;height:37px}
+ body:not(.admin-view) .rs-bw-greeting h1{font-size:1.46rem}
+ body:not(.admin-view) .rs-bw-main-feature{min-height:204px;padding:21px 18px}
+ body:not(.admin-view) .rs-bw-feature-copy h2{font-size:clamp(1.76rem,6.6vw,2.4rem)}
+ body:not(.admin-view) .rs-bw-quick{gap:7px}
+ body:not(.admin-view) .rs-bw-quick button{min-height:82px}
+ body:not(.admin-view) .rs-bw-search{margin:13px 0 20px}
+ body:not(.admin-view) .game-grid-v4,body:not(.admin-view) .rs-bw-home .game-grid-v4{
+  grid-template-columns:repeat(2,minmax(0,1fr));gap:9px
+ }
+ body:not(.admin-view) .game-card-v4{padding:7px!important;border-radius:15px!important}
+ body:not(.admin-view) .game-art-v4{border-radius:11px}
+ body:not(.admin-view) .game-content-v4 h3{font-size:.84rem}
+ body:not(.admin-view) .game-content-v4>.btn{font-size:.68rem;min-height:32px}
+ body:not(.admin-view) .offer-grid-v4{gap:8px}
+ body:not(.admin-view) .offer-card-v4{padding:10px}
+ body:not(.admin-view) .auth-content.auth-clean{padding:21px}
+ body:not(.admin-view) .footer-grid-v11{grid-template-columns:1fr;gap:16px}
+ body:not(.admin-view) .bottom-nav:not([style*="display: none"]){height:67px}
+}
+@media(max-width:380px){
+ body:not(.admin-view) .wrap{width:calc(100% - 22px)}
+ body:not(.admin-view) .rs-bw-quick button strong{font-size:.68rem}
+ body:not(.admin-view) .rs-bw-quick button small{font-size:.57rem}
+ body:not(.admin-view) .game-content-v4 h3{font-size:.79rem}
+ body:not(.admin-view) .game-content-v4>.btn{font-size:.64rem}
+ body:not(.admin-view) .currency-box{padding:6px 2px}
+ body:not(.admin-view) .currency-box strong{font-size:.61rem}
+}
+@media(prefers-reduced-motion:reduce){
+ body:not(.admin-view) .game-card-v4:hover{transform:none}
+}
