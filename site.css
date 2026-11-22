@@ -2448,3 +2448,23 @@ body:not(.admin-view) .rs-order-modal-help .btn{flex:1 1 170px;min-width:0}
  .rs12-wallet-instructions code{overflow-wrap:anywhere;word-break:break-word}
  .rs12-account-expiry small{display:block;line-height:1.4}
 }
+
+
+/* Release hardening: mobile sizing, keyboard access and reduced motion. */
+html,body{width:100%;max-width:100%;overflow-x:clip}
+#app,.main-content,.card,.rs-v3,.rs12-tier-card{min-width:0}
+input,select,textarea{font-size:16px}
+:where(a,button,input,select,textarea):focus-visible{outline:2px solid #82d1ff;outline-offset:3px}
+@media(max-width:600px){
+ .wrap{width:calc(100% - 28px)}
+ .main-content{padding-top:12px}
+ .card.pad,.rs-v3-panel.pad{padding:clamp(12px,3.5vw,18px)}
+ .game-grid,.offer-grid,.rs12-tier-grid{grid-template-columns:minmax(0,1fr)}
+ .rs-v3-item,.rs12-admin-item{max-width:100%;overflow-wrap:anywhere}
+ .rs-v3-form,.rs12-subscribe-form,.rs12-wallet-form{min-width:0}
+ .btn,.field input,.field select,.field textarea{max-width:100%}
+}
+@media(prefers-reduced-motion:reduce){
+ html{scroll-behavior:auto}
+ *,*::before,*::after{animation-duration:.01ms!important;transition-duration:.01ms!important}
+}
