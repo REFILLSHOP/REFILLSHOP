@@ -17,7 +17,7 @@ const ROUTES=new Set(['inicio','catalogo','planes','billetera','pedidos','cuenta
 function routeURL(view,extra=''){return BASE+'/'+(view==='inicio'?'':view+'/')+(extra?'?'+extra:'')}
 function updateURL(view,extra='',replace=false){const url=routeURL(view,extra);if(replace)history.replaceState({view},'',url);else history.pushState({view},'',url)}
 function readURL(){
- const tail=location.pathname.startsWith(BASE)?location.pathname.slice(BASE.length).replace(new RegExp('^/+|/+
+ const tail=location.pathname.startsWith(BASE)?location.pathname.slice(BASE.length).split('/').filter(Boolean).join('/'):'';
  const page=tail.split('/')[0]||'inicio';
  S.view=ROUTES.has(page)?page:'inicio';
  const search=new URLSearchParams(location.search);
