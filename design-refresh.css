@@ -456,3 +456,34 @@ body.shop-refresh:not(.admin-view){
  background-attachment:fixed!important;
 }
 body.shop-refresh:not(.admin-view)::before{background:linear-gradient(132deg,transparent 0 31%,#b894ff14 39%,transparent 48%,transparent 64%,#bb85ff12 71%,transparent 78%)!important}
+
+/* Game identity and product-kind selection: native elements, no new dependencies. */
+body.shop-refresh:not(.admin-view) .rs-game-screen{margin:5px 0 17px}
+body.shop-refresh:not(.admin-view) .rs-game-back{display:inline-flex;align-items:center;gap:6px;border:0;background:transparent;color:#cbb6ff;padding:7px 1px;margin:0 0 11px;font-size:.87rem;font-weight:800}
+body.shop-refresh:not(.admin-view) .rs-game-identity{display:flex;align-items:center;gap:14px;min-width:0}
+body.shop-refresh:not(.admin-view) .rs-game-identity>img{width:75px;height:75px;min-width:75px;object-fit:cover;border-radius:100%;border:2px solid #9974e4;background:#241a4c;box-shadow:0 5px 14px #10082466}
+body.shop-refresh:not(.admin-view) .rs-game-identity>div{min-width:0}
+body.shop-refresh:not(.admin-view) .rs-game-identity span{color:#ae9ddb;font-size:.72rem;font-weight:830;letter-spacing:.09em;text-transform:uppercase}
+body.shop-refresh:not(.admin-view) .rs-game-identity h1{margin:2px 0 3px;color:#fff;font-size:clamp(1.55rem,4vw,2.35rem);font-weight:900;letter-spacing:-.045em;line-height:1.1;overflow-wrap:anywhere}
+body.shop-refresh:not(.admin-view) .rs-game-identity small{color:#b6a9d5;font-size:.8rem;display:block}
+body.shop-refresh:not(.admin-view) .rs-game-product-tabs{display:flex;align-items:center;gap:9px;max-width:100%;overflow-x:auto;scrollbar-width:none;padding:3px 0 12px;margin:11px 0 5px}
+body.shop-refresh:not(.admin-view) .rs-game-product-tabs::-webkit-scrollbar{display:none}
+body.shop-refresh:not(.admin-view) .rs-game-product-tabs button{flex:none;white-space:nowrap;display:inline-flex;gap:7px;align-items:center;justify-content:center;min-height:42px;padding:10px 17px;border:1px solid #6552a4;border-radius:100px;background:#241b50;color:#e0d6f1;font-size:.84rem;font-weight:850}
+body.shop-refresh:not(.admin-view) .rs-game-product-tabs button small{opacity:.8;font-size:.78rem}
+body.shop-refresh:not(.admin-view) .rs-game-product-tabs button.active{background:linear-gradient(#ffdd70,#ffbf33);color:#281e30;border-color:#ffe392;box-shadow:0 3px 13px #ffbd3228}
+body.shop-refresh:not(.admin-view) .profile-card{max-width:720px;margin:0 auto;padding:clamp(16px,3vw,27px)!important;background:#251c4f!important;border:1px solid #6452a3!important}
+body.shop-refresh:not(.admin-view) .profile-card .pagehead h1{font-size:clamp(1.8rem,4vw,2.4rem);color:#fff}
+body.shop-refresh:not(.admin-view) .profile-card .fields{border-radius:15px}
+body.shop-refresh:not(.admin-view) .rs-profile-quicklinks{display:grid;grid-template-columns:minmax(0,1fr);gap:0;border:1px solid #594b96;border-radius:16px;overflow:hidden;background:#1e1744;margin:20px 0 8px}
+body.shop-refresh:not(.admin-view) .rs-profile-quicklinks .btn{margin:0!important;display:flex!important;justify-content:space-between!important;align-items:center!important;width:100%!important;border:0!important;border-bottom:1px solid #463974!important;border-radius:0!important;min-height:53px!important;background:transparent!important;box-shadow:none!important;color:#e8ddff!important;text-align:left!important;font-size:.89rem!important;font-weight:800!important;padding:13px 16px!important}
+body.shop-refresh:not(.admin-view) .rs-profile-quicklinks .btn:last-child{border-bottom:0!important}
+body.shop-refresh:not(.admin-view) .rs-profile-quicklinks .btn:hover{background:#392866!important}
+body.shop-refresh:not(.admin-view) .rs-profile-quicklinks .icon{width:17px;height:17px;color:#ffda76}
+body.shop-refresh:not(.admin-view) .profile-card .rs-account-security{border:1px solid #594998;border-radius:14px;background:#201949;padding:10px 13px;margin-top:13px}
+body.shop-refresh:not(.admin-view) .profile-card .rs-account-security>summary{color:#d4c1f4;font-weight:800;cursor:pointer}
+@media(max-width:600px){
+ body.shop-refresh:not(.admin-view) .rs-game-identity>img{width:65px;height:65px;min-width:65px}
+ body.shop-refresh:not(.admin-view) .rs-game-identity h1{font-size:1.54rem}
+ body.shop-refresh:not(.admin-view) .rs-game-product-tabs button{min-height:40px;padding:8px 14px;font-size:.79rem}
+ body.shop-refresh:not(.admin-view) .rs-game-screen{margin-bottom:12px}
+}
