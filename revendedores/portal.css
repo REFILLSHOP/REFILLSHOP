@@ -19,3 +19,9 @@ body{background:radial-gradient(ellipse 55% 45% at 92% 0%,#16518a58,transparent 
 .game-count{padding:0;font-size:.78rem;grid-column:2;align-self:start}
 .game::after{content:'Ver ofertas';color:#a9d9f9;font-size:.78rem;font-weight:850;grid-column:3;grid-row:1 / span 2;white-space:nowrap}
 @media(max-width:540px){.game-list{grid-template-columns:1fr;gap:9px}.game{grid-template-columns:74px minmax(0,1fr) auto;min-height:85px;padding:8px 10px;gap:10px}.game img{width:74px;height:64px;border-radius:10px}.game-name{font-size:.91rem}.game-count{font-size:.7rem}.game::after{content:'›';font-size:1.4rem}}
+
+.order-controls{display:flex;align-items:center;gap:8px;flex-wrap:wrap;justify-content:flex-end}
+.pin-delivery{max-width:690px}
+.pin-delivery-code{margin:18px 0;border:1px dashed #67bdf0;border-radius:14px;background:#0b2038;padding:20px;word-break:break-all;text-align:center}
+.pin-delivery-code code{font-size:clamp(1.05rem,3.4vw,1.6rem);color:#e7f8ff;letter-spacing:.035em;font-weight:800;white-space:pre-wrap}
+@media(max-width:540px){.order-controls{flex-direction:column;align-items:end}.pin-delivery-code{padding:15px 10px}.pin-delivery-code code{font-size:1.04rem}}
