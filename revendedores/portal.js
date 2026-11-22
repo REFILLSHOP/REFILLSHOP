@@ -10,10 +10,10 @@ const integer=x=>Math.ceil(num(x)).toLocaleString('es-ES',{maximumFractionDigits
 const status=s=>({pending:'Pendiente',processing:'Procesando',completed:'Completado',approved:'Aprobado',rejected:'Rechazado',failed:'Fallido'})[String(s)]||String(s||'Pendiente');
 const date=s=>s?new Date(s).toLocaleDateString('es-ES',{year:'numeric',month:'short',day:'numeric'}):'Sin vencimiento';
 const timestamp=s=>s?new Date(s).toLocaleString('es-ES'):'—';
-const imageURL=s=>/^https:\/\//i.test(String(s||''))?String(s):'../assets/refills-icon.png';
-const S={client:null,user:null,profile:null,membership:null,wallet:{USDT:0,CUP:0,SM:0},rates:{buySmPerUsdt:0,cupPerSm:0},tiers:[],instructions:{},deposits:[],games:[],offers:[],orders:[],view:'inicio',authMode:'login',selectedGame:'',selectedOffer:'',search:'',tier:'level2',currency:'USDT',pendingPlanId:null,pendingOrderId:null,busy:false,ready:false};
+const imageURL=s=>/^https:\/\//i.test(String(s||''))?String(s):'/REFILLSHOP/assets/refills-icon.png';
+const S={client:null,user:null,profile:null,membership:null,wallet:{USDT:0,CUP:0,SM:0},rates:{buySmPerUsdt:0,cupPerSm:0},tiers:[],instructions:{},deposits:[],games:[],offers:[],orders:[],view:'inicio',authMode:'login',selectedGame:'',selectedOffer:'',pinOrder:'',pinValue:null,search:'',tier:'level2',currency:'USDT',pendingPlanId:null,pendingOrderId:null,busy:false,ready:false};
 const BASE='/REFILLSHOP/revendedores';
-const ROUTES=new Set(['inicio','catalogo','planes','billetera','pedidos','cuenta','juego','compra']);
+const ROUTES=new Set(['inicio','catalogo','planes','billetera','pedidos','cuenta','juego','compra','codigo']);
 function routeURL(view,extra=''){return BASE+'/'+(view==='inicio'?'':view+'/')+(extra?'?'+extra:'')}
 function updateURL(view,extra='',replace=false){const url=routeURL(view,extra);if(replace)history.replaceState({view},'',url);else history.pushState({view},'',url)}
 function readURL(){
@@ -23,6 +23,8 @@ function readURL(){
  const search=new URLSearchParams(location.search);
  S.selectedGame=search.get('game')||'';
  S.selectedOffer=search.get('offer')||'';
+ S.pinOrder=search.get('order')||'';
+ S.pinValue=null;
 }
 let notifyTimer=null;
 function notify(message,error=false){const el=$('notice');if(!el)return;el.textContent=String(message||'').slice(0,320);el.classList.toggle('error',error);el.hidden=false;clearTimeout(notifyTimer);notifyTimer=setTimeout(()=>{el.hidden=true},5400)}
@@ -72,16 +74,17 @@ function catalog(){
  return `<span class="eyebrow">OFERTAS DE REVENTA</span><h1 class="heading">Catálogo mayorista</h1><p class="sub">Ofertas y precios adaptados a tu suscripción. Selecciona el juego y revisa siempre el importe antes de comprar.</p>
  <form id="searchForm" class="form-actions" role="search"><input class="search" style="flex:1" name="search" type="search" placeholder="Buscar juego" value="${esc(S.search)}" aria-label="Buscar juego"><button class="ghost" type="submit">Buscar</button></form>
  <p class="dim tiny">Mostrando ${visible.length} de ${S.games.length} juegos · Margen de tu plan: +${num(S.membership?.markupPercent||7)}%</p>
- ${visible.length?`<div class="game-list">${visible.map(g=>{const count=S.offers.filter(o=>o.gameId===g.id&&o.inStock).length;return `<button class="game" data-game="${esc(g.id)}"><img src="${esc(imageURL(g.imageUrl))}" alt="" loading="lazy" onerror="this.onerror=null;this.src='../assets/refills-icon.png'"><span class="game-name">${esc(g.name)}</span><small class="game-count">${count} ofertas disponibles</small></button>`}).join('')}</div>`:'<div class="panel empty">No se encontraron juegos con esa búsqueda.</div>'}`;
+ ${visible.length?`<div class="game-list">${visible.map(g=>{const count=S.offers.filter(o=>o.gameId===g.id&&o.inStock).length;return `<button class="game" data-game="${esc(g.id)}"><img src="${esc(imageURL(g.imageUrl))}" alt="" loading="lazy" onerror="this.onerror=null;this.src='/REFILLSHOP/assets/refills-icon.png'"><span class="game-name">${esc(g.name)}</span><small class="game-count">${count} ofertas disponibles</small></button>`}).join('')}</div>`:'<div class="panel empty">No se encontraron juegos con esa búsqueda.</div>'}`;
 }
 function gamePage(){
  const g=S.games.find(g=>g.id===S.selectedGame);
  if(!g)return catalog();
  const offers=S.offers.filter(o=>o.gameId===g.id).sort((a,b)=>num(a.resellerUsdt)-num(b.resellerUsdt));
  return `<button class="back" data-view="catalogo">‹ Volver al catálogo</button><span class="eyebrow">PRECIOS PARA TU NIVEL</span><h1 class="heading">${esc(g.name)}</h1><p class="sub">${offers.length} ofertas · Precios finales en USDT, saldo móvil y CUP. Oferta sujeta a disponibilidad.</p>
- <div class="grid">${offers.map(o=>`<article class="panel offer"><div class="offer-info"><strong>${esc(o.name)}</strong><small>${esc(o.region||'Global')} · <span class="${o.inStock?'in-stock':'out-stock'}">${o.inStock?'Disponible':'Agotada'}</span></small><div class="price">${usdt(o.resellerUsdt)} USDT</div><div class="price-alt">${integer(o.resellerSm)} SM · ${integer(o.resellerCup)} CUP</div></div><button class="button" data-buy="${esc(o.id)}" ${o.inStock?'':'disabled'}>${o.inStock?'Comprar':'Agotada'}</button></article>`).join('')||'<div class="panel empty">Este juego no tiene ofertas activas para reventa.</div>'}</div>`;
+ <div class="grid">${offers.map(o=>`<article class="panel offer"><div class="offer-info"><strong>${esc(o.name)}</strong><small>${esc(o.region||'Global')} · ${o.kind==='pin'?'PIN digital · entrega manual':'Recarga directa'} · <span class="${o.inStock?'in-stock':'out-stock'}">${o.inStock?'Disponible':'Agotada'}</span></small><div class="price">${usdt(o.resellerUsdt)} USDT</div><div class="price-alt">${integer(o.resellerSm)} SM · ${integer(o.resellerCup)} CUP</div></div><button class="button" data-buy="${esc(o.id)}" ${o.inStock?'':'disabled'}>${o.inStock?'Comprar':'Agotada'}</button></article>`).join('')||'<div class="panel empty">Este juego no tiene ofertas activas para reventa.</div>'}</div>`;
 }
 function targetFields(o){
+ if(o?.kind==='pin')return '<div class="alert-note">PIN digital · No necesitas ID de jugador. Confirma la región y consulta el código una vez entregado.</div>';
  const schema=Array.isArray(o.targetSchema)?o.targetSchema:[];
  if(schema.length)return schema.map((x,i)=>{const key=String(x.key||'').slice(0,55);return `<label class="field">${esc(x.label||key||'Dato '+(i+1))}<input name="target_${esc(key)}" type="text" minlength="1" maxlength="64" required autocomplete="off"></label>`}).join('');
  return `<label class="field">ID del jugador<input name="playerId" type="text" minlength="3" maxlength="80" required autocomplete="off"></label><label class="field">Zona o servidor (si aplica)<input name="zoneId" type="text" maxlength="50" autocomplete="off"></label>`;
@@ -90,8 +93,8 @@ function checkout(){
  const o=S.offers.find(x=>x.id===S.selectedOffer),g=S.games.find(x=>x.id===o?.gameId);
  if(!o||!g||!o.inStock)return `<div class="panel pad"><h1>Oferta no disponible</h1><button class="ghost" data-view="catalogo">Volver al catálogo</button></div>`;
  return `<button class="back" data-game="${esc(g.id)}">‹ Volver a las ofertas</button><span class="eyebrow">COMPRA REVENDEDOR</span><h1 class="heading">Confirmar pedido</h1><p class="sub">${esc(g.name)} · ${esc(o.name)}</p>
- <div class="grid grid-2"><form id="orderForm" class="panel pad"><h2>Datos del jugador</h2>${targetFields(o)}<label class="field">Moneda a descontar<select name="currency" required><option value="USDT">USDT · ${usdt(o.resellerUsdt)}</option><option value="SM">SM · ${integer(o.resellerSm)}</option><option value="CUP">CUP · ${integer(o.resellerCup)}</option></select></label><label class="checks"><input name="accept" type="checkbox" required> Confirmo el ID, el juego y el importe del pedido.</label><button class="button full" type="submit">Comprar con mi saldo</button><p class="help">El servidor vuelve a calcular el precio y verifica tu saldo antes de descontarlo. No envíes transferencias fuera de la wallet.</p></form>
- <aside class="panel pad"><span class="eyebrow">RESUMEN</span><h2>${esc(o.name)}</h2><p class="dim">${esc(g.name)} · ${esc(o.region)}</p><div class="checkout-summary panel"><strong>${usdt(o.resellerUsdt)} USDT</strong><div class="dim">${integer(o.resellerSm)} SM · ${integer(o.resellerCup)} CUP</div></div><p class="dim tiny">Margen actual +${num(S.membership?.markupPercent||7)}%. Si administración rechaza el pedido, el saldo usado se reintegra según las reglas del servidor.</p><button class="ghost full" data-view="billetera">Ver mi wallet</button></aside></div>`;
+ <div class="grid grid-2"><form id="orderForm" class="panel pad"><h2>${o.kind==='pin'?'Entrega de código PIN':'Datos del jugador'}</h2>${targetFields(o)}<label class="field">Moneda a descontar<select name="currency" required><option value="USDT">USDT · ${usdt(o.resellerUsdt)}</option><option value="SM">SM · ${integer(o.resellerSm)}</option><option value="CUP">CUP · ${integer(o.resellerCup)}</option></select></label><label class="checks"><input name="accept" type="checkbox" required> Confirmo los datos, la región y el importe del pedido.</label><button class="button full" type="submit">Comprar con mi saldo</button><p class="help">El servidor vuelve a calcular el precio y verifica tu saldo antes de descontarlo. No envíes transferencias fuera de la wallet.</p></form>
+ <aside class="panel pad"><span class="eyebrow">RESUMEN</span><h2>${esc(o.name)}</h2><p class="dim">${esc(g.name)} · ${esc(o.region)}</p><div class="checkout-summary panel"><strong>${usdt(o.resellerUsdt)} USDT</strong>${o.kind==='pin'?'<div class="pill">PIN · Entrega manual verificada</div>':''}<div class="dim">${integer(o.resellerSm)} SM · ${integer(o.resellerCup)} CUP</div></div><p class="dim tiny">Margen actual +${num(S.membership?.markupPercent||7)}%. Si administración rechaza el pedido, el saldo usado se reintegra según las reglas del servidor.</p><button class="ghost full" data-view="billetera">Ver mi wallet</button></aside></div>`;
 }
 function instructions(currency){
  const i=S.instructions[currency]||{};
@@ -108,11 +111,16 @@ function wallet(){
 function ordersRows(rows){
  return rows?.length?rows.map(o=>{
  const code=o.code||'';const name=o.game_name||o.game||'Pedido';
- return `<div class="order-row"><div><b>${esc(code)}</b><small>${esc(name)} · ${esc(o.offer_name||o.offer||'')}</small><small>${timestamp(o.created_at||o.createdAt)} · ${esc(o.wallet_currency||o.walletCurrency||'USDT')} ${num(o.wallet_amount??o.walletAmount).toLocaleString('es-ES',{maximumFractionDigits:2})}</small></div><span class="status ${esc(o.status)}">${esc(status(o.status))}</span></div>`;
+ return `<div class="order-row"><div><b>${esc(code)}</b><small>${esc(name)} · ${esc(o.offer_name||o.offer||'')}</small><small>${timestamp(o.created_at||o.createdAt)} · ${esc(o.wallet_currency||o.walletCurrency||'USDT')} ${num(o.wallet_amount??o.walletAmount).toLocaleString('es-ES',{maximumFractionDigits:2})}</small></div><div class="order-controls">${o.kind==='pin'&&o.status==='completed'?`<button class="button small-button" type="button" data-pin-reveal="${esc(code)}">Ver PIN</button>`:''}<span class="status ${esc(o.status)}">${esc(status(o.status))}</span></div></div>`;
  }).join(''):'<div class="empty">Todavía no tienes pedidos registrados.</div>';
 }
 function orders(){return `<span class="eyebrow">SEGUIMIENTO</span><h1 class="heading">Mis pedidos</h1><p class="sub">Consulta las compras realizadas desde tu wallet. No repitas un pedido mientras esté pendiente sin comprobar su estado.</p>
  <button class="ghost small-button" id="refreshOrders">Actualizar pedidos</button><section class="panel pad section">${ordersRows(S.orders)}</section>`}
+function pinPage(){
+ if(!S.pinValue)return '<span class="eyebrow">ENTREGA SEGURA</span><h1 class="heading">Código PIN</h1><div class="panel empty">El código no está disponible todavía. Confirma que el pedido fue completado y actualiza Mis pedidos.</div><button class="ghost section" data-view="pedidos">Volver a mis pedidos</button>';
+ return `<span class="eyebrow">ENTREGA SEGURA</span><h1 class="heading">Tu código PIN</h1><p class="sub">Solo tú puedes consultar este código desde tu cuenta cuando la entrega está completada.</p><section class="panel pad pin-delivery"><small>Pedido ${esc(S.pinOrder)}</small><div class="pin-delivery-code"><code>${esc(S.pinValue)}</code></div><button class="button" data-copy="${esc(S.pinValue)}">Copiar PIN</button><p class="help">No compartas tu código. Comprueba la región del producto antes de canjearlo.</p></section><button class="ghost section" data-view="pedidos">Mis pedidos</button>`;
+}
+async function fetchPin(code){const d=await req('rs12-reseller','/pin/reveal?code='+encodeURIComponent(code));S.pinValue=d.pin;S.pinOrder=code;}
 function account(){
  const p=S.profile||{};
  return `<span class="eyebrow">ACCESO INDEPENDIENTE</span><h1 class="heading">Mi cuenta de revendedor</h1><p class="sub">Esta página tiene un inicio de sesión separado de la tienda para clientes. Tu perfil y tus operaciones se validan con los servicios protegidos de Refills Shop.</p>
@@ -137,7 +145,7 @@ function render(){
  $('memberChip').hidden=!authed;
  if(authed)$('memberChip').textContent=S.tiers.find(t=>t.tier===S.membership?.planTier)?.name||'Plan Gratis';
  $('portalNav').innerHTML=authed?[['inicio','Inicio'],['catalogo','Ofertas'],['planes','Planes'],['billetera','Wallet'],['pedidos','Pedidos'],['cuenta','Mi cuenta']].map(([v,label])=>`<button class="nav-button ${S.view===v||v==='catalogo'&&['juego','compra'].includes(S.view)?'active':''}" data-view="${v}">${label}</button>`).join(''):'';
- $('content').innerHTML=!authed?auth():(S.view==='inicio'?home():S.view==='catalogo'?catalog():S.view==='juego'?gamePage():S.view==='compra'?checkout():S.view==='planes'?plans():S.view==='billetera'?wallet():S.view==='pedidos'?orders():account());
+ $('content').innerHTML=!authed?auth():(S.view==='inicio'?home():S.view==='catalogo'?catalog():S.view==='juego'?gamePage():S.view==='compra'?checkout():S.view==='planes'?plans():S.view==='billetera'?wallet():S.view==='pedidos'?orders():S.view==='codigo'?pinPage():account());
 }
 async function go(view){if(!ROUTES.has(view))return;S.view=view;updateURL(view);S.search='';if(view==='pedidos'){loading('Buscando tus pedidos');try{await loadOrders()}catch(e){fail(e)}}render();scrollTo({top:0,behavior:'instant'})}
 async function readProof(file){
@@ -173,7 +181,8 @@ async function handleForm(f){
    const o=S.offers.find(x=>x.id===S.selectedOffer);if(!o||!o.inStock)throw Error('La oferta ya no está disponible.');
    const targetPayload={};let playerId='',zoneId='';
    const schema=Array.isArray(o.targetSchema)?o.targetSchema:[];
-   if(schema.length){
+   if(o.kind==='pin'){playerId='PIN';targetPayload.product_type='pin'}
+   else if(schema.length){
     for(const x of schema){const v=String(f.elements['target_'+x.key]?.value||'').trim();if(!v||v.length>64)throw Error('Revisa el dato '+String(x.label||x.key));targetPayload[x.key]=v}
     playerId=String(targetPayload.player_id||targetPayload.user_id||targetPayload.service_user_id||Object.values(targetPayload)[0]||'').slice(0,80);
     zoneId=String(targetPayload.zone_id||targetPayload.server||'').slice(0,50);
@@ -215,6 +224,9 @@ document.addEventListener('click',async e=>{
  if(b.dataset.game){S.selectedGame=b.dataset.game;S.view='juego';updateURL('juego','game='+encodeURIComponent(S.selectedGame));render();scrollTo(0,0);return}
  if(b.dataset.buy){S.selectedOffer=b.dataset.buy;S.pendingOrderId=null;S.view='compra';updateURL('compra','offer='+encodeURIComponent(S.selectedOffer));render();scrollTo(0,0);return}
  if(b.dataset.plan){S.tier=b.dataset.plan;S.view='planes';updateURL('planes');render();document.getElementById('planForm')?.scrollIntoView({behavior:'smooth',block:'center'});return}
+ if(b.dataset.pinReveal){
+  try{await fetchPin(b.dataset.pinReveal);S.view='codigo';updateURL('codigo','order='+encodeURIComponent(S.pinOrder));render();scrollTo(0,0);}catch(err){fail(err)}return;
+ }
  if(b.dataset.copy){try{await navigator.clipboard.writeText(b.dataset.copy);notify('Copiado.')}catch{notify('Mantén pulsado el dato para copiarlo.',true)}return}
  if(b.id==='refreshOrders'){try{await loadOrders();render();notify('Pedidos actualizados.')}catch(err){fail(err)}return}
 });
@@ -226,11 +238,11 @@ async function start(){
   S.client=window.supabase.createClient(bootstrap.supabaseUrl||SB,bootstrap.publishableKey||PUB,{auth:{persistSession:true,autoRefreshToken:true,detectSessionInUrl:true,storageKey:'refills-pro-reseller-auth-v1'}});
   const {data}=await S.client.auth.getUser();S.user=data?.user||null;
   S.ready=true;
-  if(S.user){await hydrate();await loadOrders().catch(()=>{});}
+  if(S.user){await hydrate();await loadOrders().catch(()=>{});if(S.view==='codigo'&&S.pinOrder)await fetchPin(S.pinOrder).catch(fail);}
   render();
   S.client.auth.onAuthStateChange((event,session)=>{if(event==='SIGNED_OUT'&&S.user){S.user=null;S.profile=null;render()}else if(event==='SIGNED_IN'&&session?.user?.id!==S.user?.id){S.user=session.user;setTimeout(()=>{hydrate().then(()=>render()).catch(fail)},0)}});
  }catch(e){$('content').innerHTML=`<div class="panel pad" style="max-width:620px;margin:40px auto"><h1>No se pudo conectar</h1><p>${esc(e.message)}</p><button class="button" id="retryPortal">Reintentar</button></div>`;document.getElementById('retryPortal').onclick=start;}
 }
-window.addEventListener('popstate',()=>{readURL();if(S.user&&S.view==='pedidos')loadOrders().then(render).catch(fail);else render()});
+window.addEventListener('popstate',()=>{readURL();if(S.user&&S.view==='pedidos')loadOrders().then(render).catch(fail);else if(S.user&&S.view==='codigo'&&S.pinOrder)fetchPin(S.pinOrder).then(render).catch(fail);else render()});
 void start();
 })();
