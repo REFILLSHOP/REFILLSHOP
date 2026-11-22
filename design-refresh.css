@@ -447,3 +447,12 @@ body.admin-view .rs-v3-panel{border-color:#514681!important}
  body.shop-refresh:not(.admin-view) .bottom-nav a{font-size:.57rem!important}
 }
 @media(prefers-reduced-motion:reduce){body.shop-refresh:not(.admin-view) .game-card-v4:hover{transform:none!important}}
+
+/* Ensure the warm violet background is not superseded by legacy !important backgrounds. */
+body.shop-refresh:not(.admin-view){
+ background:radial-gradient(ellipse 45vw 56vh at 94% -5%,#51329b77,transparent 79%),
+ radial-gradient(ellipse 45vw 45vh at -5% 65%,#432a8c6b,transparent 84%),
+ linear-gradient(145deg,#0c0a26 0%,#121032 40%,#1a103c 73%,#0c0a27 100%)!important;
+ background-attachment:fixed!important;
+}
+body.shop-refresh:not(.admin-view)::before{background:linear-gradient(132deg,transparent 0 31%,#b894ff14 39%,transparent 48%,transparent 64%,#bb85ff12 71%,transparent 78%)!important}
