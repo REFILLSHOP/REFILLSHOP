@@ -1,0 +1,20 @@
+/* REFILLS PRO · Azul Nocturno — aesthetic-only compatibility overlay */
+:root{--bg:#060a18;--panel:#111c38;--panel2:#18294e;--line:#2e4a7a;--line2:#4b74ad;--text:#f5f8ff;--muted:#a1b6d4;--blue:#277dff;--sky:#80beff;--cyan:#58d8ff}
+body{background:radial-gradient(ellipse 46vw 46vh at 98% 12%,#266cdf42,transparent 85%),radial-gradient(ellipse 44vw 52vh at -9% 70%,#2659bf38,transparent 88%),#070b1b}
+.ambient{background:repeating-linear-gradient(119deg,transparent 0 65px,#74aeff07 66px 67px)}
+.shell{width:min(860px,calc(100% - 30px))}
+.main{max-width:810px}
+.masthead{background:#09122adf;border-color:#2b497c;backdrop-filter:blur(12px)}
+.brand-logo{border-radius:50%;background:#132951;border-color:#5789d4}
+.brand-type em{color:#80c2ff}
+.brand-type small{color:#8bbfff}
+.member-chip,.pill{background:#183361;border-color:#456aa3;color:#daedff}
+.nav-button{border-radius:12px}
+.nav-button.active,.nav-button:hover{background:#1a65c5;border-color:#7dafff}
+.panel{background:linear-gradient(145deg,#18294b,#101a37 70%);border-color:#36558b;border-radius:18px}
+.button{background:linear-gradient(160deg,#63acff,#246df0);border-color:#86c0ff;border-radius:12px;box-shadow:0 6px 20px #216ff832}
+.ghost{background:#111e3b;border-color:#395c95}
+.field input,.field select,.field textarea,.search{background:#090f25;border-color:#375689;border-radius:12px}
+.eyebrow{color:#8ac4ff}
+.foot{border-color:#2b4779}
+@media(max-width:640px){body{background-attachment:scroll}.shell{width:calc(100% - 26px)}.main{padding-bottom:86px}}
