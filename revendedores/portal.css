@@ -2,3 +2,20 @@
 @media(max-width:800px){.hero,.auth-wrap{grid-template-columns:1fr}.grid-3{grid-template-columns:repeat(2,minmax(0,1fr))}.game-list{grid-template-columns:repeat(2,minmax(0,1fr))}.auth-wrap{margin-top:12px}.auth-intro{padding:22px}.auth-intro h1{margin:6px 0}.hero-side{min-height:170px}}
 @media(max-width:540px){body{font-size:14px}.shell{width:calc(100% - 28px)}.main{padding-top:17px}.masthead{min-height:68px}.brand-logo{width:39px;height:39px}.brand-logo img{width:30px;height:30px}.brand-type strong{font-size:1rem}.brand-type small{font-size:.5rem;letter-spacing:.11em}.member-chip{font-size:.67rem;padding:5px 7px}.head-right{flex-wrap:wrap;justify-content:end}.head-right .small-button{font-size:.7rem}.portal-nav{gap:3px;padding:10px 0}.nav-button{padding:9px 10px;font-size:.77rem}.pad{padding:16px}.grid-3,.grid-2,.two{grid-template-columns:1fr}.balance-grid{grid-template-columns:repeat(3,minmax(0,1fr));gap:7px}.balance-card{padding:10px}.balance-card strong{font-size:1rem}.balance-card span{font-size:.69rem}.game-list{grid-template-columns:repeat(2,minmax(0,1fr));gap:10px}.game img{height:115px}.game-name{font-size:.91rem;padding:10px 10px 0}.game-count{font-size:.69rem;padding:4px 10px 10px}.tier{min-height:0}.offer{flex-direction:column}.offer .button{width:100%}.order-row{align-items:flex-start}.order-row .status{max-width:95px;text-align:center;white-space:normal}.auth-card{padding:19px}.auth-intro{padding:21px}.actions .button,.actions .ghost{flex:1;min-width:125px}.foot{font-size:.63rem}.heading{margin-top:4px}}
 @media(prefers-reduced-motion:reduce){*,*::before,*::after{scroll-behavior:auto!important;animation:none!important;transition:none!important}}
+
+/* v20261122: shared Refills Shop blue-black texture; compact horizontal game rows */
+:root{--bg:#070e1b;--panel:#101d31;--panel2:#152942;--stroke:#2b4260;--txt:#eff7ff;--muted:#a5b8d4;--cyan:#70d9ff;--blue:#4b9bff}
+body{background:radial-gradient(ellipse 55% 45% at 92% 0%,#16518a58,transparent 68%),radial-gradient(ellipse 55% 48% at 0% 42%,#0b35515a,transparent 72%),#070e1b}
+.ambient{background:repeating-linear-gradient(128deg,transparent 0 33px,#dcefff05 34px 35px,transparent 36px 49px)}
+.panel{background:linear-gradient(145deg,#172b42f4,#0d192bed);border-color:#2e4562}
+.masthead{border-color:#2b4260b0;background:#081428bc;backdrop-filter:blur(12px)}
+.hero-intro,.auth-intro{background:radial-gradient(ellipse at 85% 0%,#2a69ad6b,transparent 52%),repeating-linear-gradient(125deg,transparent 0 34px,#ffffff06 35px 37px),linear-gradient(140deg,#18344f,#0c1b31)}
+.portal-nav{background:#081428f5}
+.game-list{display:grid;grid-template-columns:1fr;gap:10px}
+.game{display:grid;grid-template-columns:96px minmax(0,1fr) auto;gap:15px;align-items:center;min-height:100px;padding:10px 14px;text-align:left;border-radius:15px;background:linear-gradient(135deg,#172f4c,#0d1d33);transition:background .2s,border-color .2s}
+.game:hover,.game:focus-visible{border-color:#6baadf;background:linear-gradient(135deg,#204367,#102944)}
+.game img{width:96px;height:78px;border-radius:12px;object-fit:cover;grid-row:1 / span 2}
+.game-name{padding:0;font-size:1.02rem;line-height:1.3;overflow-wrap:anywhere}
+.game-count{padding:0;font-size:.78rem;grid-column:2;align-self:start}
+.game::after{content:'Ver ofertas';color:#a9d9f9;font-size:.78rem;font-weight:850;grid-column:3;grid-row:1 / span 2;white-space:nowrap}
+@media(max-width:540px){.game-list{grid-template-columns:1fr;gap:9px}.game{grid-template-columns:74px minmax(0,1fr) auto;min-height:85px;padding:8px 10px;gap:10px}.game img{width:74px;height:64px;border-radius:10px}.game-name{font-size:.91rem}.game-count{font-size:.7rem}.game::after{content:'›';font-size:1.4rem}}
