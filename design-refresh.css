@@ -1,0 +1,189 @@
+/* Refills Shop / UI App 2026-11-22
+   Visual redesign only. Existing route handling, Supabase, payments and admin actions remain intact.
+   Mobile-first, original Refills color palette. No third-party UI libraries or assets. */
+:root{--rs-ui-ink:#f4f7ff;--rs-ui-muted:#9aaac3;--rs-ui-paper:#081120;--rs-ui-surface:#101e33;--rs-ui-raised:#152741;--rs-ui-line:#2b4162;--rs-ui-blue:#519dff;--rs-ui-blue-bright:#7ad2ff;--rs-ui-radius:19px}
+html{scroll-padding-top:88px}
+body{font-family:system-ui,-apple-system,"Segoe UI",Roboto,Arial,sans-serif;line-height:1.48;color:var(--rs-ui-ink)}
+body.shop-refresh:not(.admin-view){background:radial-gradient(ellipse 420px 400px at 105% 2%,#173c6455,transparent),linear-gradient(180deg,#071021 0%,#091423 46%,#08111e 100%);background-attachment:fixed}
+body.shop-refresh:not(.admin-view)::before{content:"";position:fixed;inset:0;z-index:-1;pointer-events:none;background:repeating-linear-gradient(140deg,transparent 0 61px,#dcecff03 62px 63px);opacity:.6}
+body.shop-refresh:not(.admin-view) .wrap{width:calc(100% - 30px);max-width:980px}
+body.shop-refresh:not(.admin-view) #app{width:100%;max-width:920px;margin-inline:auto}
+body.shop-refresh:not(.admin-view) .header{border-bottom:1px solid #334769b0;background:#090f20e8;backdrop-filter:blur(13px)}
+body.shop-refresh:not(.admin-view) .header-inner{min-height:65px;display:flex;justify-content:space-between;gap:14px}
+body.shop-refresh:not(.admin-view) .brand{gap:9px}
+body.shop-refresh:not(.admin-view) .brand-mark{width:43px;height:43px;border-radius:13px;box-shadow:none;border-color:#3e6890;background:#153358}
+body.shop-refresh:not(.admin-view) .brand-words{font-size:1.13rem;line-height:1}
+body.shop-refresh:not(.admin-view) .brand-words small{font-size:.59rem;letter-spacing:.30em;margin-top:5px}
+body.shop-refresh:not(.admin-view) .header-tools{display:flex;gap:8px;align-items:center}
+body.shop-refresh:not(.admin-view) .header-action{height:38px;min-width:38px;border-radius:12px;border:1px solid #284461;background:#14243d}
+body.shop-refresh:not(.admin-view) .topnav{padding:9px 0;gap:5px}
+body.shop-refresh:not(.admin-view) .navlink{padding:8px 13px;border-radius:12px;font-size:.85rem}
+body.shop-refresh:not(.admin-view) .navlink.active{background:#183d65;border-color:#3e6c9b}
+body.shop-refresh:not(.admin-view) .main-content{padding-top:15px;padding-bottom:100px;min-height:68vh}
+body.shop-refresh:not(.admin-view) .card,body.shop-refresh:not(.admin-view) .panel{border-color:var(--rs-ui-line);box-shadow:none}
+body.shop-refresh:not(.admin-view) .btn{border-radius:12px;min-height:40px;padding:9px 14px;font-size:.84rem}
+body.shop-refresh:not(.admin-view) .btn-primary{background:linear-gradient(115deg,#2876dc,#398bfa)!important;border-color:#4b91e8!important;color:#fff!important;box-shadow:none!important}
+body.shop-refresh:not(.admin-view) .btn-outline{background:#14243d;border-color:#345476;color:#e8f4ff}
+body.shop-refresh:not(.admin-view) .btn-ghost{background:#121f34;border-color:#273f5d;color:#bdd4ec}
+body.shop-refresh:not(.admin-view) .btn:hover{filter:brightness(1.12)}
+body.shop-refresh:not(.admin-view) input:not([type="checkbox"]):not([type="radio"]):not([type="file"]),body.shop-refresh:not(.admin-view) select,body.shop-refresh:not(.admin-view) textarea{border-radius:12px;border:1px solid #35506b;background:#0d1b30;color:#f5faff}
+body.shop-refresh:not(.admin-view) :is(button,a,input,select,textarea):focus-visible{outline:2px solid #80d4ff;outline-offset:2px}
+body.shop-refresh:not(.admin-view) .pagehead{margin:0 0 16px}
+body.shop-refresh:not(.admin-view) .pagehead h1{font-size:clamp(1.45rem,3vw,2.2rem);font-weight:850;letter-spacing:-.04em}
+body.shop-refresh:not(.admin-view) .pagehead p{font-size:.89rem;color:#9cacca}
+body.shop-refresh:not(.admin-view) .route-trail{font-size:.7rem;letter-spacing:.07em;opacity:.72;margin-bottom:12px}
+
+/* Home / reference-inspired compact storefront composition */
+.rs-app-home{max-width:810px;margin:0 auto}
+.rs-app-welcome{position:relative;isolation:isolate;overflow:hidden;border:1px solid #3d5c85;border-radius:23px;display:flex;min-height:200px;padding:clamp(21px,3.6vw,32px);background:radial-gradient(ellipse 300px 250px at 87% 60%,#1f68b77c,transparent 72%),linear-gradient(120deg,#172d4b 0%,#0d1a30 65%,#0b1a31 100%)}
+.rs-app-welcome:before{content:"";position:absolute;z-index:-1;inset:0;background:repeating-linear-gradient(125deg,transparent 0 42px,#ffffff06 43px 44px);pointer-events:none}
+.rs-app-welcome-text{position:relative;z-index:1;max-width:590px;min-width:0}
+.rs-app-overline{display:inline-flex;align-items:center;gap:7px;font-size:.69rem;font-weight:850;letter-spacing:.15em;color:#91cbff;text-transform:uppercase}
+.rs-app-overline .icon{height:15px;width:15px}
+.rs-app-welcome h1{font-size:clamp(1.9rem,4.4vw,2.85rem);line-height:1.07;letter-spacing:-.048em;font-weight:850;margin:13px 0 12px;max-width:540px}
+.rs-app-welcome h1 span{color:#8cceff}
+.rs-app-welcome p{font-size:.9rem;line-height:1.52;color:#b4c8df;margin:0;max-width:495px}
+.rs-app-welcome-art{flex:1;display:grid;place-items:center;min-width:0;position:relative}
+.rs-app-welcome-art span{display:grid;place-items:center;width:132px;height:132px;border:1px solid #88c9ff33;border-radius:35px;background:#5a9ff117;transform:rotate(-12deg)}
+.rs-app-welcome-art .icon{height:65px;width:65px;color:#8ac9ff;transform:rotate(12deg)}
+.rs-app-welcome-art i{display:block;position:absolute;width:240px;height:240px;border-radius:100%;border:1px solid #5caffc21;pointer-events:none}
+.rs-app-search-launch{width:100%;display:flex;gap:12px;align-items:center;padding:15px 17px;margin:14px 0 18px;min-height:59px;border-radius:17px;border:1px solid #496a90;color:#aebfd5;text-align:left;background:#15253c;box-shadow:0 6px 25px #0002;cursor:pointer}
+.rs-app-search-launch:hover,.rs-app-search-launch:focus-visible{border-color:#79b5ee;background:#19324e}
+.rs-app-search-launch .icon{width:20px;height:20px;flex:none;color:#80c8fb}
+.rs-app-search-launch span{flex:1;font-weight:650;font-size:.9rem;min-width:0}
+.rs-app-search-launch .icon:last-child{width:16px;height:16px}
+.rs-app-section-title{display:flex;align-items:end;justify-content:space-between;gap:12px;margin-bottom:12px}
+.rs-app-section-title h2{font-size:1.18rem;line-height:1.15;letter-spacing:-.025em;margin:0;font-weight:850}
+.rs-app-section-title>span{font-size:.77rem;color:#93adc6}
+.rs-app-category-scroll{display:flex;align-items:center;gap:8px;overflow-x:auto;overscroll-behavior-x:contain;scrollbar-width:none;padding:2px 0 6px;max-width:100%}
+.rs-app-category-scroll::-webkit-scrollbar{display:none}
+.rs-app-category-pill{white-space:nowrap;flex:none;padding:9px 15px;border-radius:999px;border:1px solid #38536e;background:#13233b;color:#bad1e7;font-size:.82rem;line-height:1.1;font-weight:750;cursor:pointer;min-height:37px}
+.rs-app-category-pill:hover{border-color:#6ea9e4}
+.rs-app-category-pill.active{color:#fff;background:#275b92;border-color:#76b0e5}
+.rs-app-categories{margin:0 0 15px}
+.rs-app-promise{display:flex;align-items:center;gap:8px;flex-wrap:wrap;padding:10px 0 18px;border-bottom:1px solid #2d4160;color:#acc5df;font-size:.76rem;font-weight:650}
+.rs-app-promise span{display:inline-flex;align-items:center;gap:7px;background:#14263c;border-radius:100px;padding:7px 12px}
+.rs-app-promise .icon{width:15px;height:15px;color:#7ebeed}
+.rs-app-featured{margin-top:21px}
+.rs-app-text-button{display:flex;gap:5px;align-items:center;border:0;background:none;color:#85c6ff;padding:7px 1px;font-size:.82rem;font-weight:800;white-space:nowrap}
+.rs-app-text-button .icon{width:16px;height:16px}
+.rs-app-view-more{width:100%;display:flex;align-items:center;justify-content:center;gap:8px;border:1px solid #3b5878;border-radius:14px;background:#142844;color:#cce8ff;margin-top:11px;padding:12px;font-size:.86rem;font-weight:800}
+.rs-app-view-more .icon{width:16px;height:16px}
+.rs-app-help-mini{margin:22px 0 0;border:1px solid #304765;background:#0f1d32;border-radius:17px;padding:16px;display:flex;align-items:center;justify-content:space-between;gap:15px}
+.rs-app-help-mini strong{display:block;font-size:.91rem}
+.rs-app-help-mini p{font-size:.8rem;color:#acbed5;margin:5px 0 0}
+.rs-app-help-mini .btn{white-space:nowrap}
+body.shop-refresh:not(.admin-view) .rs-app-home .game-grid-v4{display:grid!important;grid-template-columns:repeat(2,minmax(0,1fr))!important;gap:10px!important}
+body.shop-refresh:not(.admin-view) .rs-app-home .game-card-v4{background:#14243a!important;min-width:0;border-radius:15px!important}
+
+/* Catalog: search + tabs + compact horizontal products */
+.rs-app-catalog{max-width:810px;margin:0 auto}
+.rs-app-catalog-title{margin:5px 0 16px}
+.rs-app-catalog-title h1{font-size:clamp(1.7rem,4vw,2.2rem);font-weight:850;letter-spacing:-.045em;line-height:1.1;margin:7px 0}
+.rs-app-catalog-title p{margin:0;color:#aabdd4;font-size:.88rem}
+.rs-app-category-filter{margin:7px 0 10px}
+body.shop-refresh:not(.admin-view) .rs-catalog-tools{border:1px solid #314d6b;border-radius:17px;background:#102039;padding:13px;margin:0 0 13px;box-shadow:none}
+body.shop-refresh:not(.admin-view) .rs-catalog-search{display:flex;align-items:center;gap:9px;padding:3px 11px;min-height:47px;background:#0a192d;border:1px solid #385877;border-radius:12px}
+body.shop-refresh:not(.admin-view) .rs-catalog-search>span{color:#89c7f7}
+body.shop-refresh:not(.admin-view) .rs-catalog-search input{background:transparent!important;border:0!important;min-height:38px!important;padding:8px 2px!important;box-shadow:none!important;outline:none!important;font-size:.88rem}
+body.shop-refresh:not(.admin-view) .rs-catalog-controls{gap:9px;margin:10px 0 7px}
+body.shop-refresh:not(.admin-view) .rs-catalog-controls label{font-size:.71rem;color:#a0b9d3}
+body.shop-refresh:not(.admin-view) .rs-catalog-controls select{font-size:.8rem;min-height:34px;padding:5px 8px;background:#0c2035!important}
+body.shop-refresh:not(.admin-view) .rs-catalog-chips{gap:6px}
+body.shop-refresh:not(.admin-view) .rs-catalog-chips button{border:1px solid #385476;border-radius:100px;background:#142941;min-height:31px;padding:6px 10px;font-size:.74rem;color:#c1d6ec}
+body.shop-refresh:not(.admin-view) .rs-catalog-chips button.active{background:#245783;color:#fff;border-color:#6eabdf}
+body.shop-refresh:not(.admin-view) .rs-catalog-result-count{font-size:.73rem;color:#86a6c4}
+body.shop-refresh:not(.admin-view) .rs-app-catalog .game-grid-v4{display:grid!important;grid-template-columns:repeat(2,minmax(0,1fr))!important;gap:10px!important}
+body.shop-refresh:not(.admin-view) .rs-app-catalog .game-card-v4{border-radius:15px!important;background:#14263c!important;min-width:0!important}
+body.shop-refresh:not(.admin-view) .game-grid-v4 .game-card-v4{min-height:100px!important;padding:10px!important;grid-template-columns:86px minmax(0,1fr)!important;gap:12px!important;cursor:pointer}
+body.shop-refresh:not(.admin-view) .game-grid-v4 .game-card-v4 .game-art-v4{width:86px!important;height:80px!important;border-radius:12px!important}
+body.shop-refresh:not(.admin-view) .game-grid-v4 .game-card-v4 .game-content-v4{grid-template-columns:minmax(0,1fr) auto!important;gap:3px 6px!important}
+body.shop-refresh:not(.admin-view) .game-grid-v4 .game-card-v4 .game-content-v4 h3{font-size:.96rem!important;font-weight:850!important;line-height:1.22!important}
+body.shop-refresh:not(.admin-view) .game-grid-v4 .game-card-v4 .game-content-v4 p{font-size:.72rem!important}
+body.shop-refresh:not(.admin-view) .game-grid-v4 .game-card-v4 .game-content-v4>.btn{font-size:.69rem!important;min-height:31px!important;padding:6px 8px!important;border-radius:9px!important;white-space:nowrap}
+body.shop-refresh:not(.admin-view) .game-grid-v4 .game-card-v4 .game-category-v4{font-size:.66rem!important;color:#9eb8d5!important}
+
+/* Offer screens keep the price and purchase CTA accessible */
+body.shop-refresh:not(.admin-view) .offer-grid-v4{gap:13px;grid-template-columns:repeat(2,minmax(0,1fr))}
+body.shop-refresh:not(.admin-view) .offer-card-v4{border-radius:18px!important;background:#12243b!important;border:1px solid #314e6d!important;padding:14px!important;overflow:hidden}
+body.shop-refresh:not(.admin-view) .offer-head-v4{align-items:center;gap:12px}
+body.shop-refresh:not(.admin-view) .offer-icon-v4{border-radius:12px;overflow:hidden}
+body.shop-refresh:not(.admin-view) .offer-info-v4 h3{font-size:1.01rem;line-height:1.25}
+body.shop-refresh:not(.admin-view) .currency-grid{gap:8px}
+body.shop-refresh:not(.admin-view) .currency-box{background:#0b1c30;border:1px solid #2e4765;border-radius:11px;padding:9px;min-width:0}
+body.shop-refresh:not(.admin-view) .currency-box small{font-size:.66rem}
+body.shop-refresh:not(.admin-view) .currency-box strong{font-size:.99rem}
+body.shop-refresh:not(.admin-view) .offer-actions-v4{gap:8px}
+body.shop-refresh:not(.admin-view) .shop-offers-intro{font-size:.88rem;padding:11px 14px;border:1px solid #2a4b70;border-radius:13px;background:#132942}
+body.shop-refresh:not(.admin-view) :is(.checkout-form,.order-card,.profile-card,.auth-shell,.purchase-main-v5,.checkout-summary,.legal-block){border-radius:18px}
+body.shop-refresh:not(.admin-view) .order-card-v2{background:#112239;border:1px solid #304d69;padding:15px}
+body.shop-refresh:not(.admin-view) .order-card-v2-actions{gap:7px}
+body.shop-refresh:not(.admin-view) .purchase-form-actions-v5{gap:10px}
+body.shop-refresh:not(.admin-view) .footer-v11{background:#08121f;border-top:1px solid #203952}
+
+/* Administration retains full desktop width; compact, readable mobile cards */
+body.admin-view{background:#07111f;color:#eef5ff}
+body.admin-view .wrap{max-width:1250px}
+body.admin-view .header{background:#081428ec;border-color:#243f5e}
+body.admin-view .rs-v3{font-size:.92rem;gap:13px}
+body.admin-view :is(.rs-v3-panel,.rs-v3-card,.rs-v3-stat,.rs-v3-item){border-radius:15px!important;box-shadow:none!important;background:#102239!important;border-color:#294b68!important}
+body.admin-view .rs-v3-item{gap:12px}
+body.admin-view .rs-v3-heading h1{font-size:clamp(1.4rem,3vw,2.1rem);letter-spacing:-.04em}
+body.admin-view .rs-v3 .btn{min-height:36px;border-radius:10px;padding:7px 11px;box-shadow:none}
+body.admin-view .rs-v3 input,body.admin-view .rs-v3 select,body.admin-view .rs-v3 textarea{border-radius:10px;background:#091a2d;border:1px solid #38546f}
+body.admin-view .rs-v3 .field{font-size:.82rem}
+body.admin-view .rs-v3 .rs-v3-product-price strong{font-size:.9rem}
+
+/* Mobile app shell */
+@media(max-width:800px){
+ body.shop-refresh:not(.admin-view) .topnav{display:none!important}
+ body.shop-refresh:not(.admin-view) .main-content{padding-bottom:115px}
+ body.shop-refresh:not(.admin-view) .bottom-nav{display:flex!important;position:fixed;bottom:calc(9px + env(safe-area-inset-bottom));left:50%;transform:translateX(-50%);width:min(480px,calc(100% - 24px));height:63px;z-index:66;padding:6px;background:#142238f2;border:1px solid #416082;border-radius:19px;box-shadow:0 18px 50px #0008;backdrop-filter:blur(20px);gap:3px}
+ body.shop-refresh:not(.admin-view) .bottom-nav a{flex:1;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:3px;min-width:0;min-height:49px;padding:5px 2px;color:#98b0cf;font-size:.65rem;font-weight:750;border-radius:14px;line-height:1.05}
+ body.shop-refresh:not(.admin-view) .bottom-nav a.active{background:#245287;color:#fff}
+ body.shop-refresh:not(.admin-view) .bottom-nav .ico{display:grid;place-items:center;height:19px}
+ body.shop-refresh:not(.admin-view) .bottom-nav .ico .icon{width:19px;height:19px}
+}
+@media(max-width:650px){
+ body.shop-refresh:not(.admin-view) .wrap{width:calc(100% - 26px)}
+ body.shop-refresh:not(.admin-view) .header-inner{min-height:61px}
+ body.shop-refresh:not(.admin-view) .brand-mark{width:37px;height:37px;border-radius:11px}
+ body.shop-refresh:not(.admin-view) .brand-mark img{width:28px;height:28px}
+ body.shop-refresh:not(.admin-view) .brand-words{font-size:1.03rem}
+ body.shop-refresh:not(.admin-view) .brand-words small{font-size:.53rem}
+ body.shop-refresh:not(.admin-view) .header-action{height:36px;min-width:36px}
+ body.shop-refresh:not(.admin-view) .main-content{padding-top:14px}
+ .rs-app-welcome{min-height:180px;padding:20px;border-radius:19px}
+ .rs-app-welcome h1{font-size:clamp(1.75rem,7.4vw,2.2rem);margin:11px 0}
+ .rs-app-welcome p{font-size:.82rem;max-width:300px}
+ .rs-app-welcome-art{position:absolute;right:-10px;top:15px;opacity:.21;z-index:0}
+ .rs-app-welcome-art span{width:135px;height:135px}
+ .rs-app-welcome-art .icon{width:68px;height:68px}
+ .rs-app-search-launch{min-height:53px;padding:12px 14px;border-radius:14px;margin:12px 0 16px}
+ .rs-app-promise{gap:5px;font-size:.69rem;padding:7px 0 14px}
+ .rs-app-promise span{padding:6px 9px}
+ .rs-app-section-title h2{font-size:1.08rem}
+ body.shop-refresh:not(.admin-view) .rs-app-home .game-grid-v4,body.shop-refresh:not(.admin-view) .rs-app-catalog .game-grid-v4{grid-template-columns:minmax(0,1fr)!important;gap:8px!important}
+ body.shop-refresh:not(.admin-view) .game-grid-v4 .game-card-v4{grid-template-columns:75px minmax(0,1fr)!important;min-height:88px!important;gap:11px!important;padding:8px 10px!important}
+ body.shop-refresh:not(.admin-view) .game-grid-v4 .game-card-v4 .game-art-v4{width:75px!important;height:68px!important;border-radius:10px!important}
+ body.shop-refresh:not(.admin-view) .game-grid-v4 .game-card-v4 .game-content-v4 h3{font-size:.95rem!important}
+ body.shop-refresh:not(.admin-view) .game-grid-v4 .game-card-v4 .game-content-v4>.btn{min-width:78px!important}
+ body.shop-refresh:not(.admin-view) .offer-grid-v4{grid-template-columns:minmax(0,1fr)!important}
+ body.shop-refresh:not(.admin-view) .offer-card-v4{padding:13px!important}
+ body.shop-refresh:not(.admin-view) .rs-catalog-controls{grid-template-columns:repeat(2,minmax(0,1fr))}
+ .rs-app-help-mini{align-items:flex-start}
+ .rs-app-help-mini .btn{font-size:.75rem!important;padding:8px 10px!important}
+ body.admin-view .wrap{width:calc(100% - 24px)}
+ body.admin-view .main-content{padding-top:10px}
+}
+@media(max-width:360px){
+ .rs-app-welcome{padding:16px}
+ .rs-app-welcome h1{font-size:1.66rem}
+ .rs-app-promise{flex-wrap:wrap}
+ .rs-app-help-mini{flex-direction:column}
+ body.shop-refresh:not(.admin-view) .game-grid-v4 .game-card-v4 .game-content-v4>.btn{font-size:.67rem!important;min-width:0!important}
+}
+@media(prefers-reduced-motion:reduce){
+ html{scroll-behavior:auto!important}
+ body.shop-refresh:not(.admin-view) :is(.rs-app-search-launch,.rs-app-category-pill,.btn){animation:none!important;transition:none!important}
+}
