@@ -11,7 +11,7 @@ const status=s=>({pending:'Pendiente',processing:'Procesando',completed:'Complet
 const date=s=>s?new Date(s).toLocaleDateString('es-ES',{year:'numeric',month:'short',day:'numeric'}):'Sin vencimiento';
 const timestamp=s=>s?new Date(s).toLocaleString('es-ES'):'—';
 const imageURL=s=>/^https:\/\//i.test(String(s||''))?String(s):'/REFILLSHOP/assets/refills-icon.png';
-const S={client:null,user:null,profile:null,membership:null,wallet:{USDT:0,CUP:0,SM:0},rates:{buySmPerUsdt:0,cupPerSm:0},tiers:[],instructions:{},deposits:[],games:[],offers:[],orders:[],view:'inicio',authMode:'login',selectedGame:'',selectedOffer:'',pinOrder:'',pinValue:null,search:'',tier:'level2',currency:'USDT',pendingPlanId:null,pendingOrderId:null,busy:false,ready:false};
+const S={client:null,user:null,profile:null,membership:null,wallet:{USDT:0,CUP:0,SM:0},rates:{buySmPerUsdt:0,cupPerSm:0},tiers:[],instructions:{},deposits:[],games:[],offers:[],orders:[],view:'inicio',authMode:'login',selectedGame:'',selectedOffer:'',pinOrder:'',pinValue:null,search:'',kindFilter:'all',tier:'level2',currency:'USDT',pendingPlanId:null,pendingOrderId:null,busy:false,ready:false};
 const BASE='/REFILLSHOP/revendedores';
 const ROUTES=new Set(['inicio','catalogo','planes','billetera','pedidos','cuenta','juego','compra','codigo']);
 function routeURL(view,extra=''){return BASE+'/'+(view==='inicio'?'':view+'/')+(extra?'?'+extra:'')}
@@ -25,6 +25,7 @@ function readURL(){
  S.selectedOffer=search.get('offer')||'';
  S.pinOrder=search.get('order')||'';
  S.pinValue=null;
+ S.kindFilter=search.get('tipo')==='pin'?'pin':'all';
 }
 let notifyTimer=null;
 function notify(message,error=false){const el=$('notice');if(!el)return;el.textContent=String(message||'').slice(0,320);el.classList.toggle('error',error);el.hidden=false;clearTimeout(notifyTimer);notifyTimer=setTimeout(()=>{el.hidden=true},5400)}
@@ -78,16 +79,16 @@ function plans(){
 }
 function catalog(){
  const q=S.search.toLocaleLowerCase('es');
- const visible=S.games.filter(g=>g.name.toLocaleLowerCase('es').includes(q));
+ const visible=S.games.filter(g=>g.name.toLocaleLowerCase('es').includes(q)&&(S.kindFilter==='all'||S.offers.some(o=>o.gameId===g.id&&o.kind==='pin')));
  return `<header class="rs-pro-app-title"><span class="eyebrow">REFILLS PRO · JUEGOS</span><h1 class="heading">Explora tus recargas</h1><p class="sub">Todos los precios se ajustan a tu plan y se verifican al comprar.</p></header>
- <form id="searchForm" class="form-actions" role="search"><input class="search" style="flex:1" name="search" type="search" placeholder="Buscar juego" value="${esc(S.search)}" aria-label="Buscar juego"><button class="ghost" type="submit">Buscar</button></form>
+ <div class="rs-pro-kind-tabs"><button class="${S.kindFilter==='all'?'active':''}" type="button" data-pro-kind="all">Todos los productos</button><button class="${S.kindFilter==='pin'?'active':''}" type="button" data-pro-kind="pin">Códigos PIN</button></div><form id="searchForm" class="form-actions" role="search"><input class="search" style="flex:1" name="search" type="search" placeholder="Buscar juego" value="${esc(S.search)}" aria-label="Buscar juego"><button class="ghost" type="submit">Buscar</button></form>
  <p class="dim tiny">Mostrando ${visible.length} de ${S.games.length} juegos · Margen de tu plan: +${num(S.membership?.markupPercent||7)}%</p>
- ${visible.length?`<div class="game-list">${visible.map(g=>{const count=S.offers.filter(o=>o.gameId===g.id&&o.inStock).length;return `<button class="game" data-game="${esc(g.id)}"><img src="${esc(imageURL(g.imageUrl))}" alt="" loading="lazy" onerror="this.onerror=null;this.src='/REFILLSHOP/assets/refills-icon.png'"><span class="game-name">${esc(g.name)}</span><small class="game-count">${count} ofertas disponibles</small></button>`}).join('')}</div>`:'<div class="panel empty">No se encontraron juegos con esa búsqueda.</div>'}`;
+ ${visible.length?`<div class="game-list">${visible.map(g=>{const count=S.offers.filter(o=>o.gameId===g.id&&o.inStock&&(S.kindFilter!=='pin'||o.kind==='pin')).length;return `<button class="game" data-game="${esc(g.id)}"><img src="${esc(imageURL(g.imageUrl))}" alt="" loading="lazy" onerror="this.onerror=null;this.src='/REFILLSHOP/assets/refills-icon.png'"><span class="game-name">${esc(g.name)}</span><small class="game-count">${count} ofertas disponibles</small></button>`}).join('')}</div>`:'<div class="panel empty">No se encontraron juegos con esa búsqueda.</div>'}`;
 }
 function gamePage(){
  const g=S.games.find(g=>g.id===S.selectedGame);
  if(!g)return catalog();
- const offers=S.offers.filter(o=>o.gameId===g.id).sort((a,b)=>num(a.resellerUsdt)-num(b.resellerUsdt));
+ const offers=S.offers.filter(o=>o.gameId===g.id&&(S.kindFilter!=='pin'||o.kind==='pin')).sort((a,b)=>num(a.resellerUsdt)-num(b.resellerUsdt));
  return `<button class="back" data-view="catalogo">‹ Volver al catálogo</button><span class="eyebrow">PRECIOS PARA TU NIVEL</span><h1 class="heading">${esc(g.name)}</h1><p class="sub">${offers.length} ofertas · Precios finales en USDT, saldo móvil y CUP. Oferta sujeta a disponibilidad.</p>
  <div class="grid">${offers.map(o=>`<article class="panel offer"><div class="offer-info"><strong>${esc(o.name)}</strong><small>${esc(o.region||'Global')} · ${o.kind==='pin'?'PIN digital · entrega manual':'Recarga directa'} · <span class="${o.inStock?'in-stock':'out-stock'}">${o.inStock?'Disponible':'Agotada'}</span></small><div class="price">${usdt(o.resellerUsdt)} USDT</div><div class="price-alt">${integer(o.resellerSm)} SM · ${integer(o.resellerCup)} CUP</div></div><button class="button" data-buy="${esc(o.id)}" ${o.inStock?'':'disabled'}>${o.inStock?'Comprar':'Agotada'}</button></article>`).join('')||'<div class="panel empty">Este juego no tiene ofertas activas para reventa.</div>'}</div>`;
 }
@@ -243,6 +244,11 @@ document.addEventListener('click',async e=>{
  if(b.id==='signout'||b.id==='accountSignout')return void signout();
  if(b.dataset.auth){S.authMode=b.dataset.auth;render();return}
  if(b.dataset.view)return void go(b.dataset.view);
+ if(b.dataset.proKind){
+  S.kindFilter=b.dataset.proKind==='pin'?'pin':'all';
+  updateURL('catalogo',S.kindFilter==='pin'?'tipo=pin':'',true);
+  S.view='catalogo';render();return;
+ }
  if(b.dataset.game){S.selectedGame=b.dataset.game;S.view='juego';updateURL('juego','game='+encodeURIComponent(S.selectedGame));render();scrollTo(0,0);return}
  if(b.dataset.buy){S.selectedOffer=b.dataset.buy;S.pendingOrderId=null;S.view='compra';updateURL('compra','offer='+encodeURIComponent(S.selectedOffer));render();scrollTo(0,0);return}
  if(b.dataset.plan){S.tier=b.dataset.plan;S.view='planes';updateURL('planes');render();document.getElementById('planForm')?.scrollIntoView({behavior:'smooth',block:'center'});return}
