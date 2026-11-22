@@ -12,6 +12,18 @@ const date=s=>s?new Date(s).toLocaleDateString('es-ES',{year:'numeric',month:'sh
 const timestamp=s=>s?new Date(s).toLocaleString('es-ES'):'—';
 const imageURL=s=>/^https:\/\//i.test(String(s||''))?String(s):'../assets/refills-icon.png';
 const S={client:null,user:null,profile:null,membership:null,wallet:{USDT:0,CUP:0,SM:0},rates:{buySmPerUsdt:0,cupPerSm:0},tiers:[],instructions:{},deposits:[],games:[],offers:[],orders:[],view:'inicio',authMode:'login',selectedGame:'',selectedOffer:'',search:'',tier:'level2',currency:'USDT',pendingPlanId:null,pendingOrderId:null,busy:false,ready:false};
+const BASE='/REFILLSHOP/revendedores';
+const ROUTES=new Set(['inicio','catalogo','planes','billetera','pedidos','cuenta','juego','compra']);
+function routeURL(view,extra=''){return BASE+'/'+(view==='inicio'?'':view+'/')+(extra?'?'+extra:'')}
+function updateURL(view,extra='',replace=false){const url=routeURL(view,extra);if(replace)history.replaceState({view},'',url);else history.pushState({view},'',url)}
+function readURL(){
+ const tail=location.pathname.startsWith(BASE)?location.pathname.slice(BASE.length).replace(/^\\/+|\\/+$/g,''):'';
+ const page=tail.split('/')[0]||'inicio';
+ S.view=ROUTES.has(page)?page:'inicio';
+ const search=new URLSearchParams(location.search);
+ S.selectedGame=search.get('game')||'';
+ S.selectedOffer=search.get('offer')||'';
+}
 let notifyTimer=null;
 function notify(message,error=false){const el=$('notice');if(!el)return;el.textContent=String(message||'').slice(0,320);el.classList.toggle('error',error);el.hidden=false;clearTimeout(notifyTimer);notifyTimer=setTimeout(()=>{el.hidden=true},5400)}
 function fail(e){notify(String(e?.message||'No fue posible completar la operación.'),true)}
@@ -127,14 +139,14 @@ function render(){
  $('portalNav').innerHTML=authed?[['inicio','Inicio'],['catalogo','Ofertas'],['planes','Planes'],['billetera','Wallet'],['pedidos','Pedidos'],['cuenta','Mi cuenta']].map(([v,label])=>`<button class="nav-button ${S.view===v||v==='catalogo'&&['juego','compra'].includes(S.view)?'active':''}" data-view="${v}">${label}</button>`).join(''):'';
  $('content').innerHTML=!authed?auth():(S.view==='inicio'?home():S.view==='catalogo'?catalog():S.view==='juego'?gamePage():S.view==='compra'?checkout():S.view==='planes'?plans():S.view==='billetera'?wallet():S.view==='pedidos'?orders():account());
 }
-async function go(view){S.view=view;S.search='';if(view==='pedidos'){loading('Buscando tus pedidos');try{await loadOrders()}catch(e){fail(e)}}render();scrollTo({top:0,behavior:'instant'})}
+async function go(view){if(!ROUTES.has(view))return;S.view=view;updateURL(view);S.search='';if(view==='pedidos'){loading('Buscando tus pedidos');try{await loadOrders()}catch(e){fail(e)}}render();scrollTo({top:0,behavior:'instant'})}
 async function readProof(file){
  if(!file)return null;
  if(file.size>5*1024*1024)throw Error('La imagen no puede superar 5 MB.');
  if(!['image/jpeg','image/png','image/webp'].includes(file.type))throw Error('Utiliza imágenes JPG, PNG o WEBP.');
  return new Promise((resolve,reject)=>{const r=new FileReader();r.onload=()=>resolve(r.result);r.onerror=()=>reject(Error('No se pudo leer el comprobante.'));r.readAsDataURL(file)});
 }
-async function signout(){try{await S.client?.auth.signOut()}catch(e){fail(e)}S.user=null;S.profile=null;S.membership=null;S.wallet={USDT:0,CUP:0,SM:0};S.view='inicio';render()}
+async function signout(){try{await S.client?.auth.signOut()}catch(e){fail(e)}S.user=null;S.profile=null;S.membership=null;S.wallet={USDT:0,CUP:0,SM:0};S.view='inicio';updateURL('inicio');render()}
 async function handleForm(f){
  if(S.busy)return;
  const id=f.id,button=f.querySelector('[type="submit"]');S.busy=true;if(button)button.disabled=true;
@@ -148,7 +160,7 @@ async function handleForm(f){
    }
    const {data,error}=await S.client.auth.signInWithPassword({email:alias(p),password});
    if(error)throw Error('No se pudo iniciar sesión. Comprueba el teléfono y la contraseña.');
-   S.user=data.user;loading('Preparando tu cuenta de revendedor');await hydrate();S.view='inicio';await loadOrders().catch(()=>{});render();notify('Acceso correcto. Bienvenido a Refills Pro.');
+   S.user=data.user;loading('Preparando tu cuenta de revendedor');await hydrate();S.view='inicio';updateURL('inicio');await loadOrders().catch(()=>{});render();notify('Acceso correcto. Bienvenido a Refills Pro.');
   }else if(id==='planForm'){
    const tier=f.elements.tier.value,currency=f.elements.currency.value,t=S.tiers.find(t=>t.tier===tier);
    if(!t)throw Error('Selecciona un plan disponible.');
@@ -171,7 +183,7 @@ async function handleForm(f){
    if(!confirm('¿Confirmas la compra y el descuento desde tu wallet en '+currency+'?'))return;
    S.pendingOrderId ||=crypto.randomUUID();
    const data=await req('rs12-reseller','/orders',{method:'POST',body:{offerId:o.id,clientRequestId:S.pendingOrderId,playerId,zoneId,targetPayload,currency}});
-   S.pendingOrderId=null;await hydrate();await loadOrders();S.view='pedidos';render();notify('Pedido '+String(data.code||data.order?.code||'')+' registrado. Consulta su estado.');
+   S.pendingOrderId=null;await hydrate();await loadOrders();S.view='pedidos';updateURL('pedidos');render();notify('Pedido '+String(data.code||data.order?.code||'')+' registrado. Consulta su estado.');
   }else if(id==='depositForm'){
    const currency=f.elements.currency.value,amount=Number(f.elements.amount.value),txHash=String(f.elements.txHash.value||'').trim(),senderPhone=String(f.elements.senderPhone.value||'').trim();
    if(!Number.isFinite(amount)||amount<=0||(currency!=='USDT'&&!Number.isInteger(amount)))throw Error('Revisa el importe. CUP y SM requieren valores enteros.');
@@ -200,13 +212,14 @@ document.addEventListener('click',async e=>{
  if(b.id==='signout'||b.id==='accountSignout')return void signout();
  if(b.dataset.auth){S.authMode=b.dataset.auth;render();return}
  if(b.dataset.view)return void go(b.dataset.view);
- if(b.dataset.game){S.selectedGame=b.dataset.game;S.view='juego';render();scrollTo(0,0);return}
- if(b.dataset.buy){S.selectedOffer=b.dataset.buy;S.pendingOrderId=null;S.view='compra';render();scrollTo(0,0);return}
- if(b.dataset.plan){S.tier=b.dataset.plan;S.view='planes';render();document.getElementById('planForm')?.scrollIntoView({behavior:'smooth',block:'center'});return}
+ if(b.dataset.game){S.selectedGame=b.dataset.game;S.view='juego';updateURL('juego','game='+encodeURIComponent(S.selectedGame));render();scrollTo(0,0);return}
+ if(b.dataset.buy){S.selectedOffer=b.dataset.buy;S.pendingOrderId=null;S.view='compra';updateURL('compra','offer='+encodeURIComponent(S.selectedOffer));render();scrollTo(0,0);return}
+ if(b.dataset.plan){S.tier=b.dataset.plan;S.view='planes';updateURL('planes');render();document.getElementById('planForm')?.scrollIntoView({behavior:'smooth',block:'center'});return}
  if(b.dataset.copy){try{await navigator.clipboard.writeText(b.dataset.copy);notify('Copiado.')}catch{notify('Mantén pulsado el dato para copiarlo.',true)}return}
  if(b.id==='refreshOrders'){try{await loadOrders();render();notify('Pedidos actualizados.')}catch(err){fail(err)}return}
 });
 async function start(){
+ readURL();
  try{
   const bootstrap=await req('rs10-api','/bootstrap',{auth:false});
   if(!window.supabase?.createClient)throw Error('No fue posible cargar el acceso seguro.');
@@ -218,5 +231,6 @@ async function start(){
   S.client.auth.onAuthStateChange((event,session)=>{if(event==='SIGNED_OUT'&&S.user){S.user=null;S.profile=null;render()}else if(event==='SIGNED_IN'&&session?.user?.id!==S.user?.id){S.user=session.user;setTimeout(()=>{hydrate().then(()=>render()).catch(fail)},0)}});
  }catch(e){$('content').innerHTML=`<div class="panel pad" style="max-width:620px;margin:40px auto"><h1>No se pudo conectar</h1><p>${esc(e.message)}</p><button class="button" id="retryPortal">Reintentar</button></div>`;document.getElementById('retryPortal').onclick=start;}
 }
+window.addEventListener('popstate',()=>{readURL();if(S.user&&S.view==='pedidos')loadOrders().then(render).catch(fail);else render()});
 void start();
 })();
