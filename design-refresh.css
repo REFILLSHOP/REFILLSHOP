@@ -187,3 +187,26 @@ body.admin-view .rs-v3 .rs-v3-product-price strong{font-size:.9rem}
  html{scroll-behavior:auto!important}
  body.shop-refresh:not(.admin-view) :is(.rs-app-search-launch,.rs-app-category-pill,.btn){animation:none!important;transition:none!important}
 }
+
+/* Clean account access flow: compact, readable on a narrow phone */
+body.shop-refresh:not(.admin-view) .auth-shell{display:flex;align-items:center;justify-content:center;width:100%;min-height:calc(100dvh - 210px);padding:26px 0 52px;background:transparent}
+body.shop-refresh:not(.admin-view) .auth-content.auth-clean{max-width:470px;width:min(100%,470px);margin:0 auto;background:linear-gradient(160deg,#172d46,#101e32);border:1px solid #375674;border-radius:22px;box-shadow:0 14px 38px #0003;padding:clamp(19px,4vw,30px)}
+body.shop-refresh:not(.admin-view) .auth-clean h1{font-size:clamp(1.8rem,4.3vw,2.3rem);font-weight:850;line-height:1.13;letter-spacing:-.045em;margin:12px 0 8px}
+body.shop-refresh:not(.admin-view) .auth-clean h1 span{color:#8ccfff}
+body.shop-refresh:not(.admin-view) .auth-clean .auth-lead{font-size:.84rem;color:#aac0d6;line-height:1.52}
+body.shop-refresh:not(.admin-view) .phone-auth-switch{display:grid;grid-template-columns:1fr 1fr;gap:7px;padding:4px;background:#0c1b30;border:1px solid #355370;border-radius:14px;margin:18px 0}
+body.shop-refresh:not(.admin-view) .phone-auth-switch button{min-height:39px;border:1px solid transparent;border-radius:11px;background:transparent;color:#b4c9dd;font-size:.84rem;font-weight:800}
+body.shop-refresh:not(.admin-view) .phone-auth-switch button.active{background:#285d92;border-color:#4c83b9;color:#fff}
+body.shop-refresh:not(.admin-view) .phone-auth-form{gap:11px}
+body.shop-refresh:not(.admin-view) .phone-auth-form .field{margin:0 0 10px}
+body.shop-refresh:not(.admin-view) .phone-auth-form .field label{font-size:.79rem;color:#cee1f4;font-weight:730}
+body.shop-refresh:not(.admin-view) .phone-auth-form input:not([type="checkbox"]),body.shop-refresh:not(.admin-view) .phone-auth-form select{min-height:43px;background:#0a192d;border-radius:11px}
+body.shop-refresh:not(.admin-view) .rs-remember-v24{font-size:.8rem;color:#b8cadc}
+body.shop-refresh:not(.admin-view) .auth-guest-entry{border-top:1px solid #2c4968;margin-top:17px;padding-top:16px}
+body.shop-refresh:not(.admin-view) .auth-guest-entry p{color:#a4b8d1;font-size:.73rem;line-height:1.5}
+body.shop-refresh:not(.admin-view) .auth-hint{font-size:.76rem;color:#acbed4}
+body.admin-view .profile-card{border-radius:18px;border:1px solid #395978;background:#12243b}
+@media(max-width:650px){
+ body.shop-refresh:not(.admin-view) .auth-shell{padding:9px 0 80px;min-height:auto}
+ body.shop-refresh:not(.admin-view) .auth-content.auth-clean{padding:19px;border-radius:18px}
+}
