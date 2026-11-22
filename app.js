@@ -113,22 +113,19 @@ function cards(games){
  }).join('')}</div>`;
 }
 function home(){
- const featured=(S.store?.games||[]).filter(g=>g.featured).sort((a,b)=>(a.sortOrder||0)-(b.sortOrder||0));
- const list=(featured.length?featured:S.store?.games||[]).slice(0,3);
- const pinGames=(S.store?.games||[]).filter(g=>offers(g.id).some(o=>o.kind==='pin')).slice(0,4);
- const categories=[...new Set((S.store?.games||[]).map(g=>String(g.tag||'').trim()).filter(Boolean))].sort((a,b)=>a.localeCompare(b,'es')).slice(0,5);
- return `<div class="rs-app-home">
- <section class="rs-app-account-band"><div class="rs-app-account-copy"><span class="rs-app-account-status">${S.user?'TU ESPACIO REFILLS':'BIENVENIDO A REFILLS SHOP'}</span><strong>${S.user?'Hola, '+esc(String(S.profile?.fullName||'').trim().split(' ')[0]||'cliente'):'Recargas para tus juegos'}</strong><small>${S.user?'Consulta tus compras y los datos de tu cuenta.':'Explora juegos y revisa precios sin registrarte.'}</small></div><button type="button" class="rs-app-account-action" data-href="${S.user?'/pedidos':'/cuenta'}">${S.user?'Mis pedidos':'Entrar'} ${icon('arrow')}</button></section>
- <section class="rs-app-welcome">
-  <div class="rs-app-welcome-text"><span class="rs-app-overline">${icon('shield')} REFILLS SHOP · CUBA</span><h1>Tu próximo juego.<br><span>Tu próxima recarga.</span></h1><p>Elige un juego, compara ofertas y sigue tus pedidos desde un solo lugar.</p></div>
-  <div class="rs-app-welcome-art" aria-hidden="true"><span>${icon('game')}</span><i></i></div>
- </section>
- <button type="button" class="rs-app-search-launch" data-href="/catalogo" aria-label="Buscar un juego o un código">${icon('search')}<span>Buscar un juego, recarga o código...</span>${icon('arrow')}</button>
- <section class="rs-app-categories" aria-label="Explorar por categoría"><div class="rs-app-section-title"><h2>Explorar por categoría</h2><span>${(S.store?.games||[]).length} juegos</span></div><div class="rs-app-category-scroll"><button type="button" data-app-category="all" class="rs-app-category-pill active">Todos</button>${categories.map(k=>`<button type="button" data-app-category="${esc(k)}" class="rs-app-category-pill">${esc(k)}</button>`).join('')}</div></section>
- <div class="rs-app-promise"><span>${icon('wallet')} Precios en SM, CUP y USDT</span><span>${icon('shield')} Pedidos con seguimiento</span></div>
- ${pinGames.length?`<section class="rs-app-pins"><div class="rs-app-section-title"><h2>Códigos digitales</h2><button type="button" class="rs-app-text-button" data-href="/codigos">Ver códigos ${icon('arrow')}</button></div><div class="rs-app-pin-strip">${pinGames.map(g=>`<button type="button" data-href="/juegos/${encodeURIComponent(g.id)}" class="rs-app-pin-item"><img src="${esc(coverSrc(g))}" alt="" loading="lazy" decoding="async"><span>${esc(g.name)}</span></button>`).join('')}</div></section>`:''}
- <section class="rs-app-featured"><div class="rs-app-section-title"><div><span class="rs-app-overline">SELECCIÓN REFILLS</span><h2>Juegos destacados</h2></div><button class="rs-app-text-button" type="button" data-href="/catalogo">Ver todos ${icon('arrow')}</button></div>${cards(list)}<button class="rs-app-view-more" type="button" data-href="/catalogo">Explorar catálogo completo ${icon('arrow')}</button></section>
- <section class="rs-app-help-mini"><div><strong>¿Es tu primera compra?</strong><p>Selecciona un juego y revisa las instrucciones de pago antes de transferir.</p></div><button type="button" class="btn btn-outline" data-href="/contacto">Ver ayuda ${icon('arrow')}</button></section>
+ const games=S.store?.games||[];
+ const featured=games.filter(g=>g.featured).sort((a,b)=>(a.sortOrder||0)-(b.sortOrder||0));
+ const picks=(featured.length?featured:games).slice(0,3);
+ const categories=[...new Set(games.map(g=>String(g.tag||'').trim()).filter(Boolean))].sort((a,b)=>a.localeCompare(b,'es')).slice(0,5);
+ const customer=String(S.profile?.fullName||'').trim().split(' ')[0]||'cliente';
+ return `<div class="rs-bw-home">
+  <section class="rs-bw-greeting"><div><span class="rs-bw-kicker">REFILLS SHOP · CUBA</span><h1>${S.user?'Hola, '+esc(customer):'Bienvenido a Refills'}</h1><p>${S.user?'Todas tus compras en un mismo lugar.':'Recargas y códigos para tus juegos favoritos.'}</p></div><button type="button" class="rs-bw-greeting-action" data-href="${S.user?'/pedidos':'/cuenta'}">${S.user?'Mis pedidos':'Entrar'} ${icon('arrow')}</button></section>
+  <section class="rs-bw-main-feature"><div class="rs-bw-feature-copy"><span class="rs-bw-feature-kicker">${icon('shield')} TIENDA DIGITAL</span><h2>Tu juego.<br><span>Tu próxima victoria.</span></h2><p>Encuentra el producto, consulta sus precios en SM, CUP o USDT y sigue tu pedido con tranquilidad.</p><div class="rs-bw-feature-actions"><button class="btn btn-primary" type="button" data-href="/catalogo">Explorar recargas ${icon('arrow')}</button><button class="btn btn-outline" type="button" data-href="/codigos">Códigos PIN</button></div></div><div class="rs-bw-feature-visual" aria-hidden="true"><div class="rs-bw-orb"><span>${icon('game')}</span></div></div></section>
+  <section class="rs-bw-quick" aria-label="Accesos principales"><button type="button" data-href="/catalogo"><span>${icon('game')}</span><strong>Recargas</strong><small>Juegos y ofertas</small></button><button type="button" data-href="/codigos"><span>${icon('shield')}</span><strong>Códigos PIN</strong><small>Productos digitales</small></button><button type="button" data-href="/pedidos"><span>${icon('bag')}</span><strong>Mis pedidos</strong><small>Seguimiento</small></button></section>
+  <button type="button" class="rs-bw-search" data-href="/catalogo">${icon('search')}<span>¿Qué juego estás buscando?</span>${icon('arrow')}</button>
+  <section class="rs-bw-games"><div class="rs-bw-heading"><div><span class="rs-bw-kicker">SELECCIÓN REFILLS</span><h2>Juegos destacados</h2></div><button type="button" data-href="/catalogo">Todos los juegos ${icon('arrow')}</button></div>${cards(picks)}<button class="rs-bw-more" data-href="/catalogo">Ver catálogo completo ${icon('arrow')}</button></section>
+  <section class="rs-bw-categories"><div class="rs-bw-heading"><h2>Explora por categoría</h2><span>${games.length} juegos en catálogo</span></div><div class="rs-app-category-scroll"><button type="button" data-app-category="all" class="rs-app-category-pill active">Todas</button>${categories.map(k=>`<button type="button" data-app-category="${esc(k)}" class="rs-app-category-pill">${esc(k)}</button>`).join('')}</div></section>
+  <section class="rs-bw-guide"><h2>Comprar es sencillo</h2><div class="rs-bw-steps"><div><b>01</b><strong>Elige una oferta</strong><span>Selecciona el juego y la región.</span></div><div><b>02</b><strong>Revisa tu pago</strong><span>Usa únicamente los datos indicados por la tienda.</span></div><div><b>03</b><strong>Sigue tu pedido</strong><span>Consulta su estado después de enviar la solicitud.</span></div></div><button type="button" class="btn btn-outline" data-href="/contacto">Ayuda y soporte ${icon('arrow')}</button></section>
  </div>`;
 }
 function catalog(){
