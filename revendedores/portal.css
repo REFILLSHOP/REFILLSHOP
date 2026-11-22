@@ -25,3 +25,162 @@ body{background:radial-gradient(ellipse 55% 45% at 92% 0%,#16518a58,transparent 
 .pin-delivery-code{margin:18px 0;border:1px dashed #67bdf0;border-radius:14px;background:#0b2038;padding:20px;word-break:break-all;text-align:center}
 .pin-delivery-code code{font-size:clamp(1.05rem,3.4vw,1.6rem);color:#e7f8ff;letter-spacing:.035em;font-weight:800;white-space:pre-wrap}
 @media(max-width:540px){.order-controls{flex-direction:column;align-items:end}.pin-delivery-code{padding:15px 10px}.pin-delivery-code code{font-size:1.04rem}}
+
+/* Refills Pro 2026-11-22 — mobile app-inspired companion to customer design.
+   Standalone routes, shared visual language; no changes to server or wallet logic. */
+:root{--bg:#071020;--panel:#12233b;--panel2:#182a45;--stroke:#2c4563;--txt:#f2f7ff;--muted:#a3b7d0;--cyan:#81ccff;--blue:#418cee;--radius:19px;font-family:system-ui,-apple-system,"Segoe UI",Roboto,Arial,sans-serif}
+body{background:radial-gradient(ellipse 420px 380px at 110% 0%,#143a665a,transparent 75%),linear-gradient(180deg,#071020,#08121f);background-attachment:fixed;color:#f1f7ff;line-height:1.5}
+.ambient{background:repeating-linear-gradient(140deg,transparent 0 62px,#c6e9ff04 63px 64px);opacity:.7}
+.shell{width:calc(100% - 30px);max-width:980px}
+.masthead{position:sticky;top:0;z-index:32;min-height:68px;padding:12px 0;background:#071222e9;backdrop-filter:blur(14px);border-color:#2b4261}
+.brand-logo{width:42px;height:42px;border-radius:13px;background:linear-gradient(140deg,#194c80,#102e53);border-color:#47769e}
+.brand-logo img{width:32px;height:32px}
+.brand-type strong{font-size:1.16rem;letter-spacing:-.01em}
+.brand-type small{letter-spacing:.16em;color:#9ac3e5}
+.head-right{gap:8px}
+.member-chip{padding:6px 10px;border-color:#4573a6;background:#153455;color:#a3d5ff}
+.portal-nav{border:0;position:relative;top:0;padding:11px 0;gap:5px;background:transparent}
+.nav-button{font-size:.85rem;min-height:39px;padding:9px 13px;border-radius:13px}
+.nav-button.active{border-color:#4a83b9;background:#1e466f}
+.main{padding:15px 0 98px;max-width:900px;width:100%;margin-inline:auto}
+.panel{border-color:#2d4563;background:#112138;border-radius:18px;box-shadow:none}
+.pad{padding:18px}
+.eyebrow{color:#8ccaff;font-size:.7rem;letter-spacing:.14em}
+.heading{font-size:clamp(1.65rem,3.8vw,2.25rem);letter-spacing:-.047em;font-weight:850}
+.sub{color:#aabbd0;font-size:.89rem;line-height:1.5}
+.button,.ghost,.danger{border-radius:12px;min-height:41px;font-size:.84rem;padding:10px 14px;box-shadow:none}
+.button{background:linear-gradient(125deg,#2877de,#398af4);border-color:#4b98e7;color:#fff}
+.ghost{background:#132942;border-color:#385877;color:#d2e9fd}
+.button:hover,.ghost:hover{filter:brightness(1.11)}
+.field input,.field select,.field textarea,.search{background:#0b1b30;border-color:#36516e;min-height:43px}
+.section{margin-top:25px}
+.foot{background:transparent;padding-bottom:28px;border-color:#29415e}
+
+/* Companion app home */
+.rs-pro-home{max-width:800px;margin:auto}
+.rs-pro-welcome{min-height:200px;padding:clamp(22px,3.8vw,32px);background:radial-gradient(ellipse 330px 280px at 90% 48%,#2461a77a,transparent 75%),repeating-linear-gradient(125deg,transparent 0 45px,#ffffff05 46px 47px),linear-gradient(115deg,#172e4b,#0d1c32);border-color:#416184;display:flex;gap:20px;align-items:center;position:relative;overflow:hidden}
+.rs-pro-welcome-main{position:relative;z-index:2;min-width:0;max-width:590px}
+.rs-pro-welcome h1{font-size:clamp(1.95rem,4.5vw,2.8rem);line-height:1.07;letter-spacing:-.048em;margin:12px 0 10px;font-weight:850}
+.rs-pro-welcome h1 em{font-style:normal;color:#8bcaff}
+.rs-pro-welcome p{color:#b3c6df;font-size:.9rem;max-width:520px;margin:0 0 15px}
+.rs-pro-welcome-art{display:grid;place-items:center;flex:1;min-width:90px}
+.rs-pro-welcome-art span{width:116px;height:116px;display:grid;place-items:center;border:1px solid #7dc8ff42;background:#599cfc15;border-radius:30px;font-size:4.2rem;line-height:1;font-weight:950;color:#a5d7ff;transform:rotate(-11deg)}
+.rs-pro-welcome .pill{background:#183e66;border-color:#5a8ebf;color:#e3f4ff;font-size:.73rem}
+.rs-pro-search-launch{min-height:56px;width:100%;display:flex;align-items:center;gap:13px;border:1px solid #45688d;border-radius:16px;background:#14263e;color:#b6cce2;padding:12px 16px;margin:13px 0 15px;text-align:left;font-weight:650;font-size:.88rem}
+.rs-pro-search-launch:hover{border-color:#8acaff;background:#1a3453}
+.rs-pro-search-launch>span:nth-child(2){flex:1}
+.rs-pro-search-launch>b{font-size:1.45rem;line-height:1;color:#88c9f8}
+.rs-pro-search-icon{display:block;width:17px;height:17px;border:2px solid #86c7fc;border-radius:50%;position:relative;flex:none}
+.rs-pro-search-icon:after{content:"";position:absolute;right:-6px;bottom:-4px;width:8px;height:2px;transform:rotate(46deg);background:#86c7fc;border-radius:2px}
+.rs-pro-shortcuts{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:9px;margin:0 0 22px}
+.rs-pro-shortcuts button{min-width:0;min-height:75px;border:1px solid #365a7d;background:#132943;border-radius:15px;color:#e8f5ff;display:flex;flex-direction:column;align-items:start;justify-content:center;gap:6px;padding:12px 14px;text-align:left;font-size:.94rem;font-weight:800}
+.rs-pro-shortcuts button:hover{border-color:#72b9ee;background:#193d5d}
+.rs-pro-shortcuts button small{font-size:.71rem;white-space:normal;color:#9db8d4;font-weight:500}
+.rs-pro-section-title{display:flex;justify-content:space-between;align-items:center;gap:12px;margin:0 0 11px}
+.rs-pro-section-title h2{font-size:1.14rem;letter-spacing:-.025em;margin:0;font-weight:850}
+.rs-pro-section-title button{border:0;background:transparent;color:#91d2ff;font-size:.81rem;font-weight:800;white-space:nowrap}
+.rs-pro-home .balance-grid{margin:0;grid-template-columns:repeat(3,minmax(0,1fr));gap:9px}
+.rs-pro-home .balance-card{padding:14px}
+.rs-pro-home .balance-card strong{font-size:1.3rem}
+.rs-pro-home .game-list{grid-template-columns:repeat(2,minmax(0,1fr));gap:9px}
+.rs-pro-home .game{min-height:95px;grid-template-columns:76px minmax(0,1fr) auto;gap:10px;padding:9px 12px;border-radius:14px}
+.rs-pro-home .game img{width:76px;height:70px;border-radius:10px}
+.rs-pro-home .game-name{font-size:.88rem}
+.rs-pro-home .game-count{font-size:.7rem}
+.rs-pro-home .game:after{content:'›';font-size:1.3rem}
+.rs-pro-home .order-row{font-size:.86rem}
+.rs-pro-app-title{margin:0 0 15px}
+.rs-pro-app-title .heading{margin:8px 0}
+.rs-pro-app-title .sub{margin:0 0 9px}
+.rs-pro-home .section{margin-top:22px}
+
+/* Simple product finder; cards stay horizontal with art on the left */
+.game-list{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:10px}
+.game{grid-template-columns:82px minmax(0,1fr) auto;min-height:96px;padding:10px 12px;gap:11px;border:1px solid #345472;background:linear-gradient(120deg,#152b45,#101f36);border-radius:15px}
+.game:hover,.game:focus-visible{background:#1a3a5d;border-color:#72b5ed}
+.game img{width:82px;height:70px;border-radius:11px}
+.game-name{font-size:.92rem;font-weight:850;padding:0}
+.game-count{font-size:.72rem;padding:0}
+.game:after{content:'›';font-size:1.3rem}
+.form-actions{margin:0 0 13px}
+#searchForm{display:flex;align-items:center;gap:8px;padding:9px;border:1px solid #324c6c;background:#13243c;border-radius:15px}
+#searchForm .search{margin:0;border-radius:10px;padding:10px 13px;min-height:42px;background:#09182b}
+#searchForm .ghost{min-height:42px}
+.offer{border-radius:15px;padding:14px;background:#12243b}
+.offer-info strong{font-size:.96rem}
+.offer .price{font-size:1.12rem}
+.offer .price-alt{font-size:.74rem}
+.checkout-summary{background:#0d2036}
+.tier{padding:17px;min-height:220px;gap:10px}
+.tier.active{border-color:#72b7f0}
+.tier-price{font-size:1.52rem}
+.status{font-size:.7rem}
+
+/* Login resembles a small utility app, not a promotional full-bleed page */
+.auth-wrap{max-width:880px;gap:12px;margin-top:24px}
+.auth-intro{padding:clamp(21px,4vw,29px);border-color:#3c6284}
+.auth-intro h1{font-size:clamp(1.8rem,4vw,2.75rem);margin:9px 0 4px}
+.auth-intro h2{font-size:1.06rem;font-weight:750}
+.auth-intro p{font-size:.87rem}
+.auth-card{padding:20px}
+.auth-card h2{font-size:1.32rem;margin:10px 0}
+.auth-tabs button{border-radius:100px;font-size:.84rem}
+.auth-tabs button.active{background:#255e96;border-color:#6399ca}
+.authentication-note{font-size:.76rem}
+
+/* Standalone navigation: top on desktop, dock on phones */
+.rs-pro-dock[hidden]{display:none!important}
+.rs-pro-dock{display:none}
+@media(max-width:800px){
+ .shell{max-width:680px}
+ .masthead{min-height:63px}
+ .portal-nav{display:none!important}
+ .main{padding:16px 0 calc(110px + env(safe-area-inset-bottom))}
+ .rs-pro-dock:not([hidden]){position:fixed;z-index:70;left:50%;transform:translateX(-50%);bottom:calc(9px + env(safe-area-inset-bottom));display:flex;gap:3px;padding:6px;width:min(480px,calc(100% - 24px));height:64px;border:1px solid #46658a;border-radius:19px;background:#14253df2;backdrop-filter:blur(18px);box-shadow:0 16px 45px #0009}
+ .rs-pro-dock-item{display:flex;align-items:center;justify-content:center;flex-direction:column;flex:1;gap:4px;min-width:0;background:transparent;border:0;color:#a0b7d2;border-radius:13px;font-size:.65rem;font-weight:750;line-height:1}
+ .rs-pro-dock-item svg{display:block;flex:none}
+ .rs-pro-dock-item.active{background:#24598e;color:#fff}
+ .rs-pro-welcome{min-height:187px;padding:22px}
+ .rs-pro-welcome-art{position:absolute;right:8px;top:12px;opacity:.2}
+ .rs-pro-welcome p{max-width:380px}
+ .game-list,.rs-pro-home .game-list{grid-template-columns:minmax(0,1fr)}
+}
+@media(max-width:540px){
+ .shell{width:calc(100% - 26px)}
+ .masthead{padding:10px 0}
+ .brand-logo{width:37px;height:37px;border-radius:11px}
+ .brand-logo img{width:27px;height:27px}
+ .brand-type strong{font-size:1.04rem}
+ .brand-type small{font-size:.53rem;letter-spacing:.11em}
+ .head-right .small-button{min-height:31px;padding:5px 8px;font-size:.69rem}
+ .member-chip{font-size:.68rem;padding:5px 8px}
+ .rs-pro-welcome{padding:19px;min-height:175px}
+ .rs-pro-welcome h1{font-size:clamp(1.7rem,7.5vw,2.1rem)}
+ .rs-pro-welcome p{font-size:.8rem}
+ .rs-pro-welcome .pill{font-size:.67rem;padding:5px 8px}
+ .rs-pro-search-launch{min-height:52px;margin:12px 0}
+ .rs-pro-shortcuts{gap:7px}
+ .rs-pro-shortcuts button{padding:10px 9px;min-height:67px;font-size:.79rem}
+ .rs-pro-shortcuts button small{font-size:.66rem}
+ .rs-pro-home .balance-card{padding:10px}
+ .rs-pro-home .balance-card strong{font-size:1rem}
+ .rs-pro-home .game{grid-template-columns:70px minmax(0,1fr) auto;gap:9px;min-height:85px;padding:8px 10px}
+ .rs-pro-home .game img,.game img{width:70px;height:65px}
+ .game-list{grid-template-columns:minmax(0,1fr)}
+ .game{grid-template-columns:70px minmax(0,1fr) auto;gap:9px;min-height:85px;padding:8px 10px}
+ .game-name{font-size:.88rem}
+ .rs-pro-section-title h2{font-size:1.05rem}
+ .auth-wrap{margin-top:8px;gap:10px}
+ .auth-intro{padding:20px}
+ .auth-intro h1{margin:7px 0}
+ .auth-intro .stats{gap:6px}
+ .auth-intro .stat{padding:9px 12px;min-width:0;flex:1}
+ .auth-intro .stat strong{font-size:.91rem}
+ .auth-card{padding:17px}
+ .grid-3,.grid-2,.two{grid-template-columns:minmax(0,1fr)}
+ .rs-pro-home .balance-grid{grid-template-columns:repeat(3,minmax(0,1fr))}
+ .order-controls{flex-wrap:wrap}
+ .foot{padding-bottom:15px}
+}
+@media(max-width:360px){.rs-pro-shortcuts button small{font-size:.59rem}.rs-pro-shortcuts button{font-size:.76rem}.rs-pro-welcome h1{font-size:1.62rem}}
+@media(prefers-reduced-motion:reduce){*,*::before,*::after{scroll-behavior:auto!important;animation:none!important;transition:none!important}}
