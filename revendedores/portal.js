@@ -55,10 +55,18 @@ async function reload(){loading('Actualizando tus datos');try{await hydrate();if
 function balanceSummary(){return `<div class="grid grid-3 balance-grid">${[['USDT',usdt(S.wallet.USDT)],['SALDO SM',integer(S.wallet.SM)],['CUP',integer(S.wallet.CUP)]].map(([name,value])=>`<div class="panel balance-card"><span>${name}</span><strong>${value}</strong></div>`).join('')}</div>`}
 function sectionHead(title,action=''){return `<div class="section-head"><h2>${title}</h2>${action}</div>`}
 function home(){
- const t=S.tiers.find(x=>x.tier===S.membership?.planTier),offers=S.offers.filter(x=>x.inStock),days=S.membership?.expiresAt?Math.max(0,Math.ceil((new Date(S.membership.expiresAt)-Date.now())/86400000)):null;
- return `<div class="hero"><section class="panel hero-intro"><span class="eyebrow">TU NEGOCIO, TU ESPACIO</span><h1 class="heading">Tu centro de <span style="color:#73cfff">reventas.</span></h1><p>Catálogo a precios de tu nivel, wallet y seguimiento de pedidos. Todo desde este portal independiente.</p><div class="tag-row"><span class="pill">${esc(t?.name||'Plan Gratis')}</span><span class="pill">Margen +${num(S.membership?.markupPercent||7)}%</span></div><div class="actions"><button class="button" data-view="catalogo">Explorar ofertas</button><button class="ghost" data-view="billetera">Recargar saldo</button></div></section><section class="panel hero-side"><div><span class="eyebrow">TU SUSCRIPCIÓN</span><span class="big">${days===null?'Gratis':days+' días'}</span><p class="dim tiny">${days===null?'Sin fecha de caducidad':days===0?'Revisa si tu plan ya ha vencido':'Vence el '+esc(date(S.membership.expiresAt))}</p></div><div><span class="eyebrow">OFERTAS DISPONIBLES</span><span class="big">${offers.length}</span><p class="dim tiny">Los precios se calculan para tu nivel en el servidor.</p></div></section></div>${balanceSummary()}
- <section class="section">${sectionHead('Accesos rápidos')}<div class="grid grid-3">${[['planes','Planes y renovaciones','Dos suscripciones de 15 días'],['catalogo','Catálogo mayorista','Precios adaptados a tu nivel'],['pedidos','Mis pedidos','Consulta el estado de las compras']].map(([v,t,d])=>`<button data-view="${v}" class="panel pad" style="text-align:left;color:inherit;cursor:pointer"><b>${t}</b><div class="dim tiny">${d}</div></button>`).join('')}</div></section>
- <section class="section">${sectionHead('Pedidos recientes','<button class="ghost small-button" data-view="pedidos">Ver todos</button>')}<div class="panel pad">${ordersRows(S.orders.slice(0,3))}</div></section>`;
+ const tier=S.tiers.find(x=>x.tier===S.membership?.planTier),offers=S.offers.filter(x=>x.inStock);
+ const days=S.membership?.expiresAt?Math.max(0,Math.ceil((new Date(S.membership.expiresAt)-Date.now())/86400000)):null;
+ const featured=(S.games||[]).filter(g=>g.featured).slice(0,3);
+ const games=(featured.length?featured:S.games).slice(0,3);
+ return `<div class="rs-pro-home">
+ <section class="rs-pro-welcome panel"><div class="rs-pro-welcome-main"><span class="eyebrow">REFILLS PRO · PORTAL EXCLUSIVO</span><h1>Recargas para<br><em>tu negocio.</em></h1><p>Consulta tus precios, compra con wallet y revisa pedidos en un solo espacio.</p><div class="tag-row"><span class="pill">${esc(tier?.name||'Plan Gratis')}</span><span class="pill">${days===null?'Sin vencimiento':days+' días restantes'}</span></div></div><div class="rs-pro-welcome-art" aria-hidden="true"><span>R</span></div></section>
+ <button class="rs-pro-search-launch" type="button" data-view="catalogo"><span class="rs-pro-search-icon" aria-hidden="true"></span><span>Buscar juego o código digital...</span><b>›</b></button>
+ <div class="rs-pro-shortcuts"><button type="button" data-view="catalogo">Ofertas<small>${offers.length} disponibles</small></button><button type="button" data-view="planes">Mi plan<small>Level 2 y Level 3</small></button><button type="button" data-view="billetera">Recargar<small>USDT, SM y CUP</small></button></div>
+ <div class="rs-pro-section-title"><h2>Saldo de mi wallet</h2><button type="button" data-view="billetera">Gestionar saldo ›</button></div>${balanceSummary()}
+ <section class="section"><div class="rs-pro-section-title"><h2>Juegos destacados</h2><button type="button" data-view="catalogo">Ver catálogo ›</button></div><div class="game-list rs-pro-featured">${games.map(g=>{const count=S.offers.filter(o=>o.gameId===g.id&&o.inStock).length;return `<button class="game" type="button" data-game="${esc(g.id)}"><img src="${esc(imageURL(g.imageUrl))}" alt="" loading="lazy" onerror="this.onerror=null;this.src='/REFILLSHOP/assets/refills-icon.png'"><span class="game-name">${esc(g.name)}</span><small class="game-count">${count} ofertas disponibles</small></button>`}).join('')}</div></section>
+ <section class="section"><div class="rs-pro-section-title"><h2>Mis pedidos recientes</h2><button type="button" data-view="pedidos">Ver todos ›</button></div><div class="panel pad">${ordersRows(S.orders.slice(0,3))}</div></section>
+ </div>`;
 }
 function plans(){
  const markup=S.membership?.markupPercent||7;
@@ -71,7 +79,7 @@ function plans(){
 function catalog(){
  const q=S.search.toLocaleLowerCase('es');
  const visible=S.games.filter(g=>g.name.toLocaleLowerCase('es').includes(q));
- return `<span class="eyebrow">OFERTAS DE REVENTA</span><h1 class="heading">Catálogo mayorista</h1><p class="sub">Ofertas y precios adaptados a tu suscripción. Selecciona el juego y revisa siempre el importe antes de comprar.</p>
+ return `<header class="rs-pro-app-title"><span class="eyebrow">REFILLS PRO · JUEGOS</span><h1 class="heading">Explora tus recargas</h1><p class="sub">Todos los precios se ajustan a tu plan y se verifican al comprar.</p></header>
  <form id="searchForm" class="form-actions" role="search"><input class="search" style="flex:1" name="search" type="search" placeholder="Buscar juego" value="${esc(S.search)}" aria-label="Buscar juego"><button class="ghost" type="submit">Buscar</button></form>
  <p class="dim tiny">Mostrando ${visible.length} de ${S.games.length} juegos · Margen de tu plan: +${num(S.membership?.markupPercent||7)}%</p>
  ${visible.length?`<div class="game-list">${visible.map(g=>{const count=S.offers.filter(o=>o.gameId===g.id&&o.inStock).length;return `<button class="game" data-game="${esc(g.id)}"><img src="${esc(imageURL(g.imageUrl))}" alt="" loading="lazy" onerror="this.onerror=null;this.src='/REFILLSHOP/assets/refills-icon.png'"><span class="game-name">${esc(g.name)}</span><small class="game-count">${count} ofertas disponibles</small></button>`}).join('')}</div>`:'<div class="panel empty">No se encontraron juegos con esa búsqueda.</div>'}`;
@@ -145,6 +153,20 @@ function render(){
  $('memberChip').hidden=!authed;
  if(authed)$('memberChip').textContent=S.tiers.find(t=>t.tier===S.membership?.planTier)?.name||'Plan Gratis';
  $('portalNav').innerHTML=authed?[['inicio','Inicio'],['catalogo','Ofertas'],['planes','Planes'],['billetera','Wallet'],['pedidos','Pedidos'],['cuenta','Mi cuenta']].map(([v,label])=>`<button class="nav-button ${S.view===v||v==='catalogo'&&['juego','compra'].includes(S.view)?'active':''}" data-view="${v}">${label}</button>`).join(''):'';
+ const dock=$('portalDock');
+ if(dock){
+  dock.hidden=!authed;
+  const tabs=[['inicio','Inicio'],['catalogo','Juegos'],['billetera','Wallet'],['pedidos','Pedidos'],['cuenta','Cuenta']];
+  const paths={
+   inicio:'<path d="m3 10 9-7 9 7v10H3z"/><path d="M9 20v-6h6v6"/>',
+   catalogo:'<rect x="3" y="3" width="7" height="7" rx="1"/><rect x="14" y="3" width="7" height="7" rx="1"/><rect x="3" y="14" width="7" height="7" rx="1"/><rect x="14" y="14" width="7" height="7" rx="1"/>',
+   billetera:'<rect x="3" y="6" width="18" height="14" rx="3"/><path d="M15 11h6v5h-6a2.5 2.5 0 0 1 0-5z"/>',
+   pedidos:'<path d="M6 4h12v16H6z"/><path d="M9 9h6M9 13h6M9 17h4"/>',
+   cuenta:'<circle cx="12" cy="8" r="4"/><path d="M4.5 21c0-5 3-7 7.5-7s7.5 2 7.5 7"/>'
+  };
+  dock.innerHTML=authed?tabs.map(([v,label])=>`<button type="button" class="rs-pro-dock-item ${S.view===v||(v==='catalogo'&&['juego','compra'].includes(S.view))?'active':''}" data-view="${v}"><svg width="20" height="20" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" stroke-width="1.8" aria-hidden="true">${paths[v]}</svg><span>${label}</span></button>`).join(''):'';
+ }
+
  $('content').innerHTML=!authed?auth():(S.view==='inicio'?home():S.view==='catalogo'?catalog():S.view==='juego'?gamePage():S.view==='compra'?checkout():S.view==='planes'?plans():S.view==='billetera'?wallet():S.view==='pedidos'?orders():S.view==='codigo'?pinPage():account());
 }
 async function go(view){if(!ROUTES.has(view))return;S.view=view;updateURL(view);S.search='';if(view==='pedidos'){loading('Buscando tus pedidos');try{await loadOrders()}catch(e){fail(e)}}render();scrollTo({top:0,behavior:'instant'})}
@@ -231,6 +253,7 @@ document.addEventListener('click',async e=>{
  if(b.id==='refreshOrders'){try{await loadOrders();render();notify('Pedidos actualizados.')}catch(err){fail(err)}return}
 });
 async function start(){
+ if(!$('portalDock'))document.body.insertAdjacentHTML('beforeend','<nav class="rs-pro-dock" id="portalDock" hidden aria-label="Navegación móvil de revendedores"></nav>');
  readURL();
  try{
   const bootstrap=await req('rs10-api','/bootstrap',{auth:false});
