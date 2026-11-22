@@ -184,3 +184,113 @@ body{background:radial-gradient(ellipse 420px 380px at 110% 0%,#143a665a,transpa
 }
 @media(max-width:360px){.rs-pro-shortcuts button small{font-size:.59rem}.rs-pro-shortcuts button{font-size:.76rem}.rs-pro-welcome h1{font-size:1.62rem}}
 @media(prefers-reduced-motion:reduce){*,*::before,*::after{scroll-behavior:auto!important;animation:none!important;transition:none!important}}
+
+/* REFILLS PRO · AURORA EDITION: coordinated with clients' amethyst / blue / amber theme */
+:root{
+ --bg:#0d0b27;--panel:#241b4b;--panel2:#302463;--stroke:#594795;
+ --txt:#f7f2ff;--muted:#baadde;--cyan:#c5adff;--blue:#8766e9;
+ --good:#5bdeb5;--warn:#ffd260;--bad:#ff90a8;--radius:19px;
+ font-family:system-ui,-apple-system,"Segoe UI",Roboto,Arial,sans-serif;
+}
+body{
+ background:radial-gradient(ellipse 40vw 50vh at 100% -8%,#5733a069,transparent 81%),
+ radial-gradient(ellipse 35vw 50vh at -12% 73%,#3f29875a,transparent 78%),
+ linear-gradient(145deg,#0e0b2b,#151034 64%,#0c0a27);
+ color:#f6f3ff;background-attachment:fixed;
+}
+.ambient{background:linear-gradient(126deg,transparent 0 35%,#b080ff0b 41%,transparent 48%,transparent 68%,#ad6aff0a 73%,transparent 78%);opacity:1}
+.masthead{background:#161030f0;border-color:#594792}
+.brand-logo{background:linear-gradient(135deg,#4b2d9a,#231949);border-color:#8a6aca}
+.brand-type em{color:#ffda6a}
+.brand-type small{color:#baa8f1}
+.member-chip{background:#322365;border-color:#7862b5;color:#e8ddff}
+.portal-nav{background:transparent}
+.nav-button{color:#c8bce7}
+.nav-button.active{background:#432c7a;border-color:#976ee7;color:#fff}
+.panel{background:linear-gradient(145deg,#291f56,#1e1945);border-color:#5c4c95}
+.eyebrow{color:#cab1ff}
+.heading{color:#fff}
+.heading span{color:#ffda73!important}
+.sub,.dim{color:#c5bae0}
+.button{
+ background:linear-gradient(180deg,#ffe07a,#ffc538 55%,#f5ac15)!important;
+ color:#261d2b!important;border:1px solid #ffe59b!important;
+ box-shadow:0 3px 0 #ce8510,0 5px 17px #e7a31c24!important;
+ font-weight:900!important;
+}
+.ghost{background:#312456;border-color:#66549e;color:#e6ddf5}
+.danger{background:#51253a;border-color:#ae5b74;color:#ffdfeb}
+.button:hover{filter:brightness(1.05)}
+button:focus-visible,a:focus-visible,input:focus-visible,select:focus-visible{outline:2px solid #eacaff;outline-offset:2px}
+input,select,textarea{accent-color:#ffca44}
+.field input,.field select,.field textarea,.search{
+ background:#181237!important;border-color:#594990!important;color:#f7f1ff;
+}
+.field input:focus,.field select:focus,.field textarea:focus,.search:focus{border-color:#c6a6ff!important;outline-color:#9c75eb}
+.pill{background:#3a2972;border-color:#7461b9;color:#eddcff}
+.rs-pro-welcome{background:radial-gradient(ellipse at 85% 30%,#6845b579,transparent 66%),repeating-linear-gradient(125deg,transparent 0 39px,#ffffff07 41px 42px),linear-gradient(125deg,#31236b,#1a1445);border-color:#6b57b4}
+.rs-pro-welcome h1 em{color:#ffdb69}
+.rs-pro-welcome p{color:#d3c4e8}
+.rs-pro-welcome-art span{background:#7d57cf22;border-color:#af8ffe;color:#f4deff}
+.rs-pro-welcome .pill{background:#3b276f;border-color:#836bc3}
+.rs-pro-search-launch{background:#241a4e;border-color:#6955a5;color:#c8bae9}
+.rs-pro-search-launch:hover{background:#36265e;border-color:#af91fc}
+.rs-pro-search-icon{border-color:#e0baff}
+.rs-pro-search-icon:after{background:#e0baff}
+.rs-pro-search-launch>b{color:#ffd677}
+.rs-pro-shortcuts button{background:#261c52;border-color:#62519f;color:#fff}
+.rs-pro-shortcuts button:hover{border-color:#c8a2ff;background:#342265}
+.rs-pro-shortcuts button small{color:#bbaedb}
+.rs-pro-section-title button{color:#ffcf64}
+.rs-pro-home .balance-card{background:#261e50;border-color:#6453a0}
+.rs-pro-home .balance-card span{color:#bfafe4}
+.rs-pro-home .balance-card strong{color:#ffe085}
+.rs-pro-home .game,.game{background:linear-gradient(125deg,#30235e,#21194a);border-color:#6952aa}
+.rs-pro-home .game:hover,.game:hover,.game:focus-visible{background:#3c2a75;border-color:#b18cf5}
+.game img{border:1px solid #7962b3}
+.game-count{color:#e6c673}
+.game:after{color:#ffdb79}
+#searchForm{background:#211947;border-color:#65509c}
+#searchForm .search{background:#161135!important}
+.offer{background:linear-gradient(120deg,#322364,#211848);border-color:#634fa0}
+.offer .price{color:#ffe28c}
+.offer-info small,.price-alt{color:#bdaedb}
+.offer .in-stock{color:#67e3b8}
+.tier{background:linear-gradient(155deg,#2c225c,#211844)}
+.tier.active{border:2px solid #e6b455;box-shadow:0 0 0 2px #ffda8e13}
+.tier-price{color:#ffe088}
+.tier .eyebrow{color:#c8b0f6}
+.balance-card strong{color:#ffe088}
+.checkout-summary{background:#171234!important;border-color:#6c55a7}
+.payment-instructions{background:#1b1640;border-color:#9164ba}
+.alert-note{border-color:#f3c15c;background:#684b2336;color:#f0d7a8}
+.rs-pro-app-title .heading{color:#fff}
+.rs-pro-kind-tabs{display:grid;grid-template-columns:1fr 1fr;gap:9px;margin-bottom:12px}
+.rs-pro-kind-tabs button{min-height:43px;padding:9px;border-radius:13px;border:1px solid #6e58a7;background:#2b2157;color:#d9c9f1;font-size:.84rem;font-weight:800}
+.rs-pro-kind-tabs button.active{background:linear-gradient(#ffde76,#ffba2f);color:#281b2c;border-color:#ffe38a;box-shadow:0 4px 13px #f5b62b32}
+.order-row,.deposit-row{border-color:#4b3a84}
+.status{background:#281c55;border-color:#7560b1;color:#e9d8ff}
+.status.completed,.status.approved{color:#6ce6bb}
+.status.rejected,.status.failed{color:#ff9baf}
+.pin-delivery-code{background:#18143a;border-color:#ab8ef1}
+.pin-delivery-code code{color:#ffe184}
+.auth-intro{background:radial-gradient(ellipse at 90% 0%,#7b53c159,transparent 65%),linear-gradient(145deg,#322364,#1e1846);border-color:#6651a6}
+.auth-intro p{color:#c9bce7}
+.auth-card{background:#271d54;border-color:#6755a2}
+.auth-tabs button{background:#1a143a;border-color:#6754a2;color:#c4b4e3}
+.auth-tabs button.active{background:#553b97;border-color:#a17adf;color:#fff}
+.stat{background:#271e50;border-color:#6654a2}
+.stat strong{color:#ffda6c}
+.authentication-note{color:#c1b4da}
+.foot{border-color:#433574;color:#ac9fc8}
+.rs-pro-dock:not([hidden]){background:#21194bea;border:1px solid #7762b4;border-top:2px solid #ad77dc;box-shadow:0 14px 45px #0009}
+.rs-pro-dock-item{color:#c5b9df}
+.rs-pro-dock-item.active{background:linear-gradient(#ffde76,#ffc139);color:#281c26;border-radius:14px;box-shadow:0 3px 16px #f7b62b30}
+.notice{background:#2b215a;border-color:#a48cde}
+.notice.error{background:#53283f;border-color:#d8889e}
+@media(max-width:650px){
+ .game-list{grid-template-columns:minmax(0,1fr)}
+ .rs-pro-home .game-list{grid-template-columns:minmax(0,1fr)}
+ .rs-pro-kind-tabs button{font-size:.78rem}
+ .offer .button{width:100%}
+}
