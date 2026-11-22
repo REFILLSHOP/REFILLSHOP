@@ -2429,3 +2429,22 @@ body:not(.admin-view) .rs-order-modal-help .btn{flex:1 1 170px;min-width:0}
  body:not(.admin-view) .rs-catalog-controls{grid-template-columns:minmax(0,1fr)}
  body:not(.admin-view) .rs-game-titlebar{flex-wrap:wrap}
 }
+
+
+/* Release 2026-11-22: readable compact mobile administration and reseller screens. */
+@media(max-width:720px){
+ html,body{width:100%;max-width:100%;overflow-x:clip}
+ .wrap{width:calc(100% - 24px);margin-left:auto;margin-right:auto}
+ .main-content,body.admin-view .rs-adm-workspace-v24,body.admin-view .rs-v3{max-width:100%;min-width:0}
+ body.admin-view .rs-v3-item{padding:12px;border-radius:12px;min-width:0}
+ body.admin-view .rs-v3-item-actions{display:flex;flex-wrap:wrap;gap:8px}
+ body.admin-view .rs-v3-item-actions .btn{flex:1 1 125px;min-width:0;white-space:normal}
+ body.admin-view .rs-v3-panel{min-width:0;max-width:100%}
+ body.admin-view .rs-v3-inline-fields{grid-template-columns:minmax(0,1fr);gap:10px}
+ body.admin-view .rs-adm-quicksearch input{width:100%;min-width:0}
+ .rs12-tier-grid{grid-template-columns:minmax(0,1fr)}
+ .rs12-tier-card,.rs12-subscribe-form,.rs12-account-strip>*{min-width:0;max-width:100%}
+ .rs12-wallet-balances>*,.rs12-wallet-instructions>*{min-width:0}
+ .rs12-wallet-instructions code{overflow-wrap:anywhere;word-break:break-word}
+ .rs12-account-expiry small{display:block;line-height:1.4}
+}
