@@ -1,0 +1,26 @@
+{
+  "name": "Refills Shop | Recargas y productos digitales",
+  "short_name": "Refills Shop",
+  "description": "Refills Shop: recargas de juegos y productos digitales para Cuba.",
+  "id": "/REFILLSHOP/",
+  "start_url": "/REFILLSHOP/",
+  "scope": "/REFILLSHOP/",
+  "display": "standalone",
+  "background_color": "#030916",
+  "theme_color": "#030918",
+  "lang": "es",
+  "icons": [
+    {
+      "src": "/REFILLSHOP/assets/refills-icon-192.png",
+      "sizes": "192x192",
+      "type": "image/png",
+      "purpose": "any"
+    },
+    {
+      "src": "/REFILLSHOP/assets/refills-icon.png",
+      "sizes": "512x512",
+      "type": "image/png",
+      "purpose": "any"
+    }
+  ]
+}
