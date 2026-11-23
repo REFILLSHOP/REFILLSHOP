@@ -151,3 +151,26 @@
  .rs-pro-selected-method{flex-wrap:wrap}
 }
 @media(prefers-reduced-motion:reduce){.rs-pro-deposit-method{transition:none!important}}
+
+
+/* Organización de precios por juego y región. */
+.rs-tier-preview-game{border:1px solid rgba(92,153,237,.24);border-radius:14px;padding:12px;margin:0 0 12px;background:rgba(4,18,42,.55)}
+.rs-tier-preview-game>header{display:flex;justify-content:space-between;align-items:center;gap:10px;padding:3px 2px 10px;border-bottom:1px solid rgba(92,153,237,.2)}
+.rs-tier-preview-game>header strong{font-size:14px;color:#e4f2ff}
+.rs-tier-preview-game>header small{font-size:10px;color:#8eb6dd}
+.rs-tier-preview-region{padding-top:10px}
+.rs-tier-preview-region h3{font-size:11px;letter-spacing:.08em;text-transform:uppercase;color:#7dc8ff;margin:0 0 7px}
+.rs-tier-preview-region .rs-tier-offer{margin-bottom:7px}
+.rs-tier-preview-region .rs-tier-offer:last-child{margin-bottom:0}
+.rs-plan-preview-filters{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:10px}
+.rs-pro-activation-note{margin:14px 0;border-color:rgba(61,174,255,.42);background:linear-gradient(140deg,rgba(11,52,99,.6),rgba(6,17,42,.9))}
+.rs-pro-activation-note strong{display:block;color:#dff1ff;font-size:15px}
+.rs-pro-activation-note p{color:#a8c7e6;line-height:1.55;font-size:12px;margin:7px 0 12px}
+.rs-pro-activation-note .button{min-height:40px}
+.payment-confirm-number{display:grid;gap:6px;margin-top:10px;padding-top:10px;border-top:1px solid var(--stroke)}
+.payment-confirm-number small{font-size:10px;letter-spacing:.08em;color:var(--muted);font-weight:800}
+.payment-confirm-number code{font-size:14px;font-weight:800;overflow-wrap:anywhere}
+@media(max-width:800px){
+ .rs-plan-preview-filters{grid-template-columns:minmax(0,1fr)}
+ .rs-tier-preview-game{padding:9px}
+}
