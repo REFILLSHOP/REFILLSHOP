@@ -263,3 +263,97 @@ body.admin-view .btn-primary{background:linear-gradient(125deg,#247afa,#419afc)}
 @media(prefers-reduced-motion:reduce){
  body:not(.admin-view) .game-card-v4:hover{transform:none}
 }
+
+/* REFILLS SHOP · Horizontal game offers and live payment selection */
+body.shop-refresh .offer-grid-v4{
+ display:grid!important;grid-template-columns:minmax(0,1fr)!important;gap:11px!important;
+}
+body.shop-refresh .offer-card-v4{
+ display:grid!important;grid-template-columns:82px minmax(0,1fr) minmax(205px,250px);
+ align-items:center;gap:14px;width:100%;max-width:100%;min-width:0;
+ padding:13px 15px!important;border-radius:17px!important;
+ background:linear-gradient(105deg,#101a35 0%,#101a36 54%,#0b142b 100%)!important;
+ border:1px solid #2b4d8c!important;box-shadow:0 10px 28px #02071855;
+}
+body.shop-refresh .offer-head-v4{display:contents!important;padding:0!important;min-height:0!important}
+body.shop-refresh .offer-icon-v4{
+ grid-column:1;grid-row:1;display:grid;place-items:center;
+ width:82px;height:82px;min-width:0;flex:none;border-radius:15px;
+ background:#0a1530;border:1px solid #34558f;overflow:hidden;
+}
+body.shop-refresh .offer-icon-v4 img{width:100%;height:100%;object-fit:contain!important;object-position:center}
+body.shop-refresh .offer-info-v4{grid-column:2;grid-row:1;min-width:0;max-width:100%;padding:0!important}
+body.shop-refresh .offer-info-v4 .offer-eyebrow{display:block;color:#69baff;font-size:9px;letter-spacing:.12em;font-weight:900}
+body.shop-refresh .offer-info-v4 h3{margin:6px 0;font-size:clamp(14px,1.6vw,18px);line-height:1.25;overflow-wrap:anywhere;color:#f4f7ff}
+body.shop-refresh .offer-info-v4 small{display:block;color:#a2b5d7;font-size:11px;line-height:1.4}
+body.shop-refresh .offer-content-v4{
+ grid-column:3;grid-row:1;display:flex!important;flex-direction:column!important;
+ justify-content:center;align-items:stretch;gap:9px;min-width:0;max-width:100%;
+ padding:0!important;border:0!important;
+}
+body.shop-refresh .offer-selected-payment-v1{
+ display:flex;flex-direction:column;gap:7px;min-width:0;padding:9px 11px;
+ border:1px solid #2e4d85;border-radius:12px;
+ background:linear-gradient(145deg,#0a1732,#101e42);
+}
+body.shop-refresh .offer-payment-method-v1{display:flex;align-items:center;gap:8px;min-width:0}
+body.shop-refresh .offer-payment-method-v1 img{width:29px;height:29px;flex:none;object-fit:contain;border-radius:8px;background:#fff;padding:2px}
+body.shop-refresh .offer-payment-method-v1 span{display:flex;flex-direction:column;gap:2px;min-width:0}
+body.shop-refresh .offer-payment-method-v1 small,.offer-payment-amount-v1 small{font-size:8px;letter-spacing:.09em;font-weight:900;color:#8ea8d4}
+body.shop-refresh .offer-payment-method-v1 strong{font-size:10px;line-height:1.2;color:#dceaff;overflow-wrap:anywhere}
+body.shop-refresh .offer-payment-amount-v1{display:flex;align-items:baseline;justify-content:space-between;gap:6px;min-width:0}
+body.shop-refresh .offer-payment-amount-v1 strong{font-size:20px;line-height:1.1;font-weight:950;color:#fff;white-space:nowrap}
+body.shop-refresh .offer-payment-amount-v1 em{font-size:9px;font-style:normal;color:#9bb6e7}
+body.shop-refresh .offer-actions-v4{display:grid!important;grid-template-columns:repeat(2,minmax(0,1fr));gap:7px;min-width:0}
+body.shop-refresh .offer-actions-v4 .btn{width:100%;min-width:0;min-height:36px;padding:7px 8px;font-size:11px;white-space:normal;line-height:1.2}
+body.shop-refresh .catalog-payment-selector-v1{
+ margin:14px 0 16px;padding:14px;border:1px solid #2d4b83;border-radius:16px;
+ background:linear-gradient(145deg,#111d3c,#0b142c);
+}
+body.shop-refresh .catalog-payment-heading{display:flex;align-items:baseline;justify-content:space-between;gap:10px;flex-wrap:wrap;margin-bottom:10px}
+body.shop-refresh .catalog-payment-heading strong{font-size:14px;color:#f3f7ff}
+body.shop-refresh .catalog-payment-heading small{font-size:10px;color:#91a8d5}
+body.shop-refresh .catalog-payment-selector-v1 .payment-methods-v5{
+ display:grid!important;grid-template-columns:repeat(4,minmax(0,1fr));gap:8px!important;margin:0!important;
+}
+body.shop-refresh .catalog-payment-selector-v1 .payment-option-v5{
+ min-height:64px!important;padding:8px 10px!important;gap:8px!important;border-radius:11px!important;
+ background:#0a1530!important;border-color:#304b83!important;
+}
+body.shop-refresh .catalog-payment-selector-v1 .payment-option-v5:has(input:checked){
+ background:linear-gradient(135deg,#174f9c,#102a60)!important;border-color:#78bfff!important;
+ box-shadow:inset 3px 0 #63b5ff,0 0 15px #1e73d044;
+}
+body.shop-refresh .catalog-payment-selector-v1 .payment-logo-v5{width:32px!important;height:32px!important;min-width:32px!important;flex:0 0 32px!important}
+body.shop-refresh .catalog-payment-selector-v1 .payment-copy-v5 strong{font-size:10px!important}
+body.shop-refresh .catalog-payment-selector-v1 .payment-copy-v5 small{font-size:8px!important}
+@media(max-width:720px){
+ body.shop-refresh .offer-grid-v4{grid-template-columns:minmax(0,1fr)!important;gap:9px!important}
+ body.shop-refresh .offer-card-v4{
+  grid-template-columns:54px minmax(0,1fr) minmax(112px,126px);
+  gap:8px;padding:9px!important;border-radius:14px!important;
+ }
+ body.shop-refresh .offer-icon-v4{width:54px;height:54px;border-radius:11px}
+ body.shop-refresh .offer-info-v4 .offer-eyebrow{font-size:7px;letter-spacing:.08em}
+ body.shop-refresh .offer-info-v4 h3{font-size:12px;line-height:1.22;margin:4px 0}
+ body.shop-refresh .offer-info-v4 small{font-size:8px;line-height:1.25}
+ body.shop-refresh .offer-content-v4{gap:6px}
+ body.shop-refresh .offer-selected-payment-v1{gap:5px;padding:6px 7px;border-radius:9px}
+ body.shop-refresh .offer-payment-method-v1{gap:5px}
+ body.shop-refresh .offer-payment-method-v1 img{width:21px;height:21px;border-radius:6px}
+ body.shop-refresh .offer-payment-method-v1 small,.offer-payment-amount-v1 small{font-size:6px;letter-spacing:.06em}
+ body.shop-refresh .offer-payment-method-v1 strong{font-size:8px;line-height:1.15}
+ body.shop-refresh .offer-payment-amount-v1 strong{font-size:15px}
+ body.shop-refresh .offer-payment-amount-v1 em{font-size:7px}
+ body.shop-refresh .offer-actions-v4{grid-template-columns:minmax(0,1fr);gap:4px}
+ body.shop-refresh .offer-actions-v4 .btn{min-height:27px;padding:5px 6px;font-size:9px;border-radius:8px}
+ body.shop-refresh .catalog-payment-selector-v1{padding:10px;margin:10px 0 12px;border-radius:13px}
+ body.shop-refresh .catalog-payment-heading{margin-bottom:8px}
+ body.shop-refresh .catalog-payment-heading strong{font-size:12px}
+ body.shop-refresh .catalog-payment-heading small{font-size:8px}
+ body.shop-refresh .catalog-payment-selector-v1 .payment-methods-v5{grid-template-columns:repeat(2,minmax(0,1fr));gap:6px!important}
+ body.shop-refresh .catalog-payment-selector-v1 .payment-option-v5{min-height:53px!important;padding:6px!important;gap:6px!important}
+ body.shop-refresh .catalog-payment-selector-v1 .payment-logo-v5{width:25px!important;height:25px!important;min-width:25px!important;flex:0 0 25px!important}
+ body.shop-refresh .catalog-payment-selector-v1 .payment-copy-v5 strong{font-size:9px!important}
+ body.shop-refresh .catalog-payment-selector-v1 .payment-copy-v5 small{font-size:7px!important}
+}
