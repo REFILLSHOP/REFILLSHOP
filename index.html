@@ -1146,7 +1146,54 @@ button,a,input,select{touch-action:manipulation}
 .rs-wallet-deposit-ui #wallet-deposit-preview{overflow-wrap:anywhere;word-break:break-word}
 @media(min-width:900px){.modal:has(.rs-wallet-deposit-ui){width:min(100%,650px);max-height:min(88vh,960px)}}
 @media(max-width:620px){.rs-wallet-deposit-ui{gap:12px}.rs-wallet-deposit-ui .rs-pay-dest-value{flex-wrap:wrap}.rs-wallet-deposit-ui .rs-pay-dest-value code{flex-basis:100%}.rs-wallet-deposit-ui .rs-checkout-total{padding:15px}}
-</style></head>
+</style><style id="rs-desktop-adaptation-v20">
+/* Refills Shop · balanced real desktop layout. Tablet/mobile styles stay untouched. */
+@media(min-width:1024px){
+ .shell{max-width:1360px;width:calc(100% - 32px);padding-left:30px;padding-right:30px}
+ .top-inner{max-width:1360px;width:calc(100% - 32px);padding-left:30px;padding-right:30px;min-height:84px}
+ .top-links{min-width:0;flex-wrap:wrap;justify-content:center}
+ .top-link{font-size:12px;padding:10px 10px;white-space:nowrap;min-height:40px}
+ .hero-grid{grid-template-columns:minmax(0,1.35fr) minmax(300px,.8fr);gap:20px}
+ .catalog-top,.profile-page-v4{min-width:0}
+ .catalog-grid{grid-template-columns:repeat(5,minmax(0,1fr));gap:17px}
+ .catalog-grid .product{min-width:0}
+ .catalog-grid .product:hover{transform:translateY(-3px)}
+ .detail-layout{grid-template-columns:minmax(0,1fr) minmax(305px,350px);gap:22px;align-items:start}
+ .detail-layout>*,.profile-layout-v4>*,.hero-grid>*{min-width:0}
+ .offers-grid{grid-template-columns:repeat(3,minmax(0,1fr));gap:14px}
+ .home-balance-v6{padding:30px 36px}
+ .profile-layout-v4{grid-template-columns:minmax(0,1fr) minmax(0,1.15fr);gap:20px}
+ .section-head{min-width:0}
+ .modal:has(.rs-checkout-simple){width:min(100%,680px);max-height:min(90dvh,940px)}
+ .rs-checkout-simple{max-width:640px}
+ .rs-checkout-total,.rs-pay-destination{border-radius:16px}
+ .rs-checkout-inputs{grid-template-columns:minmax(0,1fr)}
+}
+@media(min-width:1440px){
+ .shell{max-width:1500px;width:calc(100% - 64px);padding-left:42px;padding-right:42px}
+ .top-inner{max-width:1500px;width:calc(100% - 64px);padding-left:42px;padding-right:42px}
+ .catalog-grid{grid-template-columns:repeat(6,minmax(0,1fr));gap:18px}
+ .detail-layout{grid-template-columns:minmax(0,1fr) 380px;gap:25px}
+ .offers-grid{grid-template-columns:repeat(4,minmax(0,1fr))}
+ .hero-grid{grid-template-columns:minmax(0,1.5fr) minmax(325px,.7fr)}
+ .profile-layout-v4{grid-template-columns:minmax(0,1fr) minmax(0,1.3fr)}
+}
+@media(min-width:1024px) and (max-width:1230px){
+ .top-link{padding:8px 7px;font-size:11px;gap:5px}
+ .brandname{font-size:20px}
+ .top-inner{gap:10px}
+ .catalog-grid{grid-template-columns:repeat(4,minmax(0,1fr))}
+}
+@media(min-width:851px) and (max-width:1023px){
+ .top-inner{gap:9px}
+ .top-links{flex-wrap:wrap;justify-content:center}
+ .top-link{padding:7px 7px;font-size:11px}
+ .brandname{font-size:19px}
+ .catalog-grid{grid-template-columns:repeat(4,minmax(0,1fr))}
+ .detail-layout{grid-template-columns:minmax(0,1fr) 285px}
+}
+</style>
+</head>
 <body>
 <div id="app-loader" role="status" aria-label="Cargando Refills Shop">
  <div class="app-loader-glow"></div>
