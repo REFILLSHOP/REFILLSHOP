@@ -404,11 +404,19 @@ function drawOrders(){
     (o.paymentStatus==='paid'&&['rejected','failed'].includes(o.status)?'<button class="btn ghost small" data-action="refund-order" data-code="'+esc(o.code)+'">Registrar reembolso</button>':'')+
     '<button class="btn ghost small" data-action="copy-order-brief" data-id="'+esc(o.id)+'">Copiar resumen</button>'+
     (String(o.customerPhone||'').replace(/\D/g,'').length>=8?'<button class="btn ghost small" data-action="send-order-brief" data-id="'+esc(o.id)+'">WhatsApp</button>':'');
-   return '<article class="record rs-admin-compact-record"><div class="rs-admin-order-top"><div class="rs-admin-order-identity"><span>'+esc(o.code)+'</span><h3>'+esc(o.game||'Recarga')+'</h3><p>'+esc(o.offer||'')+'</p></div>'+status(o.status)+'</div>'+
-    '<div class="rs-admin-compact-details"><span>'+esc(o.customerName||'Cliente')+' · '+esc(o.playerId||'PIN')+'</span><strong>'+money(o.amount)+' '+esc(o.currency||'')+'</strong></div>'+
-    '<div class="rs-admin-order-payment">'+pay+'<span>'+esc(paymentMethodLabel(o.method))+'</span><small>'+date(o.created)+'</small></div>'+
-    '<div class="row-actions rs-admin-order-buttons">'+actions+'</div>'+
-    '<details class="rs-admin-order-extra"><summary>Más datos de este pedido</summary><div class="rs-admin-order-extra-inner"><div><span>Teléfono</span><strong>'+esc(o.customerPhone||'—')+'</strong></div><div><span>Destino</span><strong>'+esc(o.playerId||'—')+'</strong></div>'+paymentInfo+'</div></details></article>';
+   return '<article class="record rs-admin-horizontal-order">'+
+    '<div class="rs-hor-row">'+
+    '<div class="rs-hor-primary"><span class="rs-hor-code">'+esc(o.code||'Pedido')+'</span><strong>'+esc(o.game||'Recarga')+'</strong><small title="'+esc(o.offer||'')+'">'+esc(o.offer||'')+'</small></div>'+
+    '<div class="rs-hor-customer"><span>'+esc(o.customerName||'Cliente')+'</span><small>ID: '+esc(o.playerId||'PIN')+'</small></div>'+
+    '<div class="rs-hor-money"><strong>'+money(o.amount)+' '+esc(o.currency||'')+'</strong><small>'+esc(paymentMethodLabel(o.method))+'</small></div>'+
+    '<div class="rs-hor-state">'+status(o.status)+pay+'</div>'+
+    '<button type="button" class="btn secondary small rs-hor-toggle" data-action="toggle-order-row" data-id="'+esc(o.id)+'" aria-expanded="false" aria-label="Ver acciones del pedido '+esc(o.code||'')+'">Gestionar <span aria-hidden="true">⌄</span></button>'+
+    '</div>'+
+    '<div class="rs-hor-expanded" hidden>'+
+    '<div class="rs-hor-extra-line"><span><b>Cliente:</b> '+esc(o.customerName||'Cliente')+'</span><span><b>Teléfono:</b> '+esc(o.customerPhone||'—')+'</span><span><b>Destino:</b> '+esc(o.playerId||'—')+'</span><span><b>Fecha:</b> '+date(o.created)+'</span></div>'+
+    (paymentInfo?'<div class="rs-hor-extra-payment">'+paymentInfo+'</div>':'')+
+    '<div class="row-actions rs-hor-action-buttons">'+actions+'</div>'+
+    '</div></article>';
   }).join('')+'</div>':empty('No hay pedidos en este filtro','Selecciona Todos o actualiza para consultar el historial.'))+
   '</section>';
 }
@@ -569,6 +577,14 @@ async function runAction(action,el){
  if(action==='bulk-apply')return withBusy(async()=>{const args=bulkArgs();if(!modalConfirm('¿Actualizar SOLO '+args.region+' con ganancia '+args.marginPercent+' %?'))return;await applyExistingMargin(args);await load('offers')});
  if(action==='bulk-import')return withBusy(async()=>{const args=bulkArgs();await importFamilyOffers(args)});
  if(action==='close-modal')return closeModal();
+ if(action==='toggle-order-row'){
+  const item=el.closest('.rs-admin-horizontal-order');
+  const extra=item?.querySelector('.rs-hor-expanded');
+  if(!extra)return;
+  extra.hidden=!extra.hidden;
+  el.setAttribute('aria-expanded',String(!extra.hidden));
+  return;
+ }
  if(action==='admin-order-filter'){S.orderFilter=el.dataset.filter||'all';return drawOrders();}
  if(action==='copy-order-brief'||action==='send-order-brief'){
   const o=(S.cache.orders?.orders||[]).find(row=>row.id===id);if(!o)return flash('Pedido no encontrado',true);
