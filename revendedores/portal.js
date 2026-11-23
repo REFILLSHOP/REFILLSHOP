@@ -122,7 +122,20 @@ async function showTierReadOnlyPreview(tier){
   const data=await req('rs12-reseller','/offers/preview?tier='+encodeURIComponent(tier));
   if(!document.getElementById('rsTierReadOnlyPreview'))return;
   const offers=Array.isArray(data.offers)?data.offers:[];
-  const body=offers.length?'<div class="rs-tier-offer-list">'+offers.slice(0,150).map(o=>'<article class="rs-tier-offer"><div><strong>'+esc(o.name)+'</strong><small>'+esc(o.game)+' · '+esc(o.region||'Global')+' · '+esc(proOfferCategory(o))+'</small></div><div><strong>'+usdt(o.usdt)+' USDT</strong><small>'+integer(o.sm)+' SM · '+integer(o.cup)+' CUP</small></div></article>').join('')+'</div>':'<div class="rs-preview-empty">Todavía no hay ofertas publicadas. Se mostrarán aquí cuando el administrador publique productos reales.</div>';
+  const byGame=new Map();
+  for(const o of offers.slice(0,150)){
+   const game=String(o.game||'Otros juegos'),region=String(o.region||'Global');
+   if(!byGame.has(game))byGame.set(game,new Map());
+   const regions=byGame.get(game);if(!regions.has(region))regions.set(region,[]);
+   regions.get(region).push(o);
+  }
+  const grouped=[...byGame.entries()].sort((a,b)=>a[0].localeCompare(b[0],'es')).map(([game,regions])=>
+   '<section class="rs-tier-preview-game"><header><strong>'+esc(game)+'</strong><small>'+[...regions.values()].reduce((n,list)=>n+list.length,0)+' ofertas</small></header>'+
+   [...regions.entries()].sort((a,b)=>a[0].localeCompare(b[0],'es')).map(([region,list])=>
+    '<div class="rs-tier-preview-region"><h3>'+esc(region)+'</h3>'+list.map(o=>'<article class="rs-tier-offer"><div><strong>'+esc(o.name)+'</strong><small>'+esc(proOfferCategory(o))+'</small></div><div><strong>'+usdt(o.usdt)+' USDT</strong><small>'+integer(o.sm)+' SM · '+integer(o.cup)+' CUP</small></div></article>').join('')+'</div>'
+   ).join('')+'</section>'
+  ).join('');
+  const body=offers.length?'<div class="rs-tier-offer-list">'+grouped+'</div>':'<div class="rs-preview-empty">Todavía no hay ofertas publicadas. Se mostrarán aquí cuando el administrador publique productos reales.</div>';
   modal.querySelector('.rs-price-sheet').innerHTML='<div class="rs-price-grabber"></div><div class="rs-price-heading"><div><span class="eyebrow">SOLO VISTA PREVIA</span><h2>'+esc(name)+'</h2><p>Sin activar suscripción ni realizar compras</p></div><button type="button" data-close-tier-preview aria-label="Cerrar">×</button></div>'+body+'<p class="dim tiny">Precios orientativos del catálogo activo. No puedes comprar desde esta pantalla.</p>';
  }catch(err){
   if(!document.getElementById('rsTierReadOnlyPreview'))return;
