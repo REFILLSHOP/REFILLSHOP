@@ -5,6 +5,13 @@
 <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
 <meta name="theme-color" content="#030918">
 <meta name="description" content="Refills Shop: catálogo de recargas y productos digitales con diseño azul y negro.">
+<link rel="manifest" href="/REFILLSHOP/manifest.webmanifest">
+<link rel="icon" type="image/png" href="/REFILLSHOP/assets/refills-icon.png">
+<link rel="apple-touch-icon" href="/REFILLSHOP/assets/refills-icon.png">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-title" content="Refills Shop">
+<meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+<meta name="application-name" content="Refills Shop">
 <title>Refills Shop | Recargas y productos digitales</title>
 <style>
 :root{--bg:#030916;--bg2:#06112a;--surface:#0a1732;--surface2:#0c1c3c;--surface3:#102452;--stroke:rgba(80,137,242,.26);--stroke2:rgba(98,163,255,.46);--blue:#237bff;--cyan:#46d1ff;--pale:#b9e9ff;--text:#f1f6ff;--muted:#98abd0;--green:#35ddb6;--warn:#ffbe68;--rad:23px;--shadow:0 14px 36px rgba(0,0,0,.25)}
@@ -1320,6 +1327,15 @@ body.rs-auth-screen .bottom-nav,body.rs-auth-screen #mobile-cart-shortcut{displa
 .rs-preview-region-group .rs-preview-offer:last-child{margin-bottom:0}
 .rs-cup-confirm-caption{display:block;color:#9db9d9;font-size:11px;line-height:1.4}
 @media(max-width:620px){.rs-preview-game-group{padding:9px}.rs-preview-game-heading strong{font-size:13px}}
+</style><style id="refills-final-pwa-and-wallet">
+.home-balance-actions{grid-template-columns:repeat(3,minmax(0,1fr));gap:9px}
+.home-balance-actions .btn{min-width:0;min-height:66px;padding:10px 6px;display:flex;flex-direction:column;justify-content:center;gap:6px;text-align:center;line-height:1.18;font-size:13px;white-space:normal;overflow-wrap:anywhere;border-radius:16px}
+.home-balance-actions .btn span{display:block;max-width:100%}
+.home-balance-actions .btn .svg{width:20px;height:20px}
+.rs-install-entry{display:flex;align-items:center;justify-content:center;gap:9px;width:100%;min-height:42px;margin:11px 0 0;border:1px solid rgba(83,155,246,.36);border-radius:13px;background:rgba(18,68,143,.17);color:#c0e4ff;font-size:12px;font-weight:800}
+.rs-install-entry:hover{border-color:#59b8ff;background:rgba(24,87,172,.3)}
+@media(max-width:620px){.home-balance-actions{gap:7px}.home-balance-actions .btn{min-height:61px;padding:8px 4px;font-size:10.5px;border-radius:14px}.home-balance-actions .btn .svg{width:18px;height:18px}}
+@media(max-width:350px){.home-balance-actions .btn{font-size:9.5px}.home-balance-actions{gap:5px}}
 </style></head>
 <body>
 <div id="app-loader" role="status" aria-label="Cargando Refills Shop">
@@ -1864,12 +1880,14 @@ function home(){
   </div>
   <div class="home-balance-amount">${usdtBalance.toFixed(2)} <small>USDT</small></div>
   <div class="home-balance-actions">
-   ${hasPlan?`<button class="btn primary" data-action="home-wallet-deposit">${I('plus')} Depositar</button><button class="btn secondary" data-action="home-wallet-movements">${I('file')} Movimientos</button>`:`<button class="btn primary" data-action="nav" data-page="revendedores">${I('wallet')} Activar un plan de revendedor</button>`}
+   <button class="btn primary" data-action="home-wallet-deposit">${I('plus')} <span>Depositar</span></button>
+   <button class="btn secondary" data-action="home-wallet-movements">${I('file')} <span>Movimientos</span></button>
+   <button class="btn secondary" data-action="nav" data-page="revendedores">${I('wallet')} <span>Cuenta revendedor</span></button>
   </div>
-  ${!hasPlan?`<p class="home-wallet-hint">El monedero y sus movimientos están disponibles para revendedores con un plan activo.</p>`:''}
-  ${hasPlan?`<button class="home-reseller-link" data-action="nav" data-page="revendedores">${I('wallet','tiny')} Abrir panel de revendedores ${I('arrow','tiny')}</button>`:''}
+  ${!hasPlan?`<p class="home-wallet-hint">Activa tu plan Gratis, Level 2 o Level 3 para utilizar el monedero.</p>`:''}
  </section>`;
  return `${walletHero}
+ <button type="button" class="rs-install-entry" data-action="install-refills" aria-label="Instalar Refills Shop en este dispositivo">${I('plus','tiny')} Instalar Refills Shop en mi teléfono</button>
  <div class="notice-grid"><button class="notice" data-action="modal" data-modal="news"><span class="notice-icon">${I('spark')}</span><span><strong>Ofertas y novedades</strong><small>Descubre recargas y productos</small></span>${I('arrow','tiny arrow')}</button><button class="notice" data-action="modal" data-modal="help"><span class="notice-icon">${I('headset')}</span><span><strong>Centro de ayuda</strong><small>Conoce cómo funciona la tienda</small></span>${I('arrow','tiny arrow')}</button></div>
  ${sectionMini('Móvil, internet y más',['nauta','cubacel','vpn','sms'],'recargas')}
  ${sectionMini('Juegos disponibles',ITEMS.filter(g=>g.category==='juegos').sort((a,b)=>Number(b.featured)-Number(a.featured)||a.sortOrder-b.sortOrder||a.name.localeCompare(b.name)).slice(0,4).map(g=>g.id),'recargas')}
@@ -1941,13 +1959,18 @@ function catalog(isGift=false){
 }
 
 function offerGroup(o){
- const name=String(o?.title||o?.name||'').toLowerCase();
- if(String(o?.kind||'').toLowerCase()==='pin'||/\bpin\b|c[oó]digo\s+pin|key\s+digital/.test(name))return 'pin';
- if(/tarjeta|membres[ií]a|membership|semanal|mensual|weekly|monthly|suscripci[oó]n/.test(name))return 'membresias';
- if(/pase|pass|temporada|season|battle\s*pass|elite\s*pass/.test(name))return 'pases';
- if(/gift.?card|voucher|regalo|card\s+digital/.test(name))return 'membresias';
- if(/fragmentos?|cofres?|cajas?|chests?|crates?|objetos?|items?|materiales?|piezas?|skins?|cosm[eé]ticos?|loot|emotes?|gestos?|coleccionables?|evo\s*(?:gun|weapon|arma)|arma\s*evo/i.test(name))return 'coleccionables';
- return 'recargas';
+ const name=String(o?.title||o?.name||'').normalize('NFD').replace(/[\u0300-\u036f]/g,'').toLowerCase();
+ const kind=String(o?.kind||'').toLowerCase();
+ // La clasificación tiene prioridad explícita: las recargas son únicamente moneda virtual.
+ if(kind==='pin'||/\bpin\b|codigo\s+pin|key\s+digital|gift.?card|voucher|tarjeta\s+de\s+regalo/.test(name))return 'pin';
+ // Los paquetes para subir niveles son pases, incluso si no incluyen la palabra "pase".
+ if(/\bpase\b|\bpass\b|\bseason\b|temporada|booyah|battle.?pass|strike.?pass|twilight.?pass|level[\s-]*up|subida\s+de\s+nivel|mejora\s+de\s+nivel|paquete\s+de\s+nivel|pase\s+de\s+nivel|acceso\s+evo|\bnivel\s*\d+/.test(name))return 'pases';
+ if(/membresia|membership|semanal|mensual|weekly|monthly|suscripcion|starlight|\bvip\b|\bprime\b/.test(name))return 'membresias';
+ if(/fragment|cofre|\bcaja(?:s)?\b|chest|crate|\blucky\s+bag\b|\bsafe\b|pre.?order|skin|cosmetic|\bloot\b|\bemote\b|\bgesto\b|\bobjeto\b|\bmaterial\b|\bitem\b|coleccionable|\bdeal\b|arma\s*evo/.test(name))return 'coleccionables';
+ // Monedas recargables: diamantes, oro, Robux, BC, FC Points, plata y similares.
+ if(/\bdiamonds?\b|\bdiamantes?\b|\bgold\b|\boro\b|\brobux\b|\bbc\b|\bsilver\b|\bplata\b|\bcoins?\b|\bmonedas?\b|\bgems?\b|\bgemas?\b|\bpoints?\b|\bpuntos?\b|\bfc\s*points\b|\buc\b|\bcp\b|\bcredits?\b|\bcreditos?\b|\bcristales?\b|\btokens?\b|\bcash\b|\bjewels?\b/.test(name))return 'recargas';
+ // Ante ofertas ambiguas no mezclar productos especiales con las monedas.
+ return 'coleccionables';
 }
 const OFFER_TABS=[['recargas','Recargas'],['pases','Pases'],['membresias','Membresías'],['pin','PIN'],['coleccionables','Coleccionables']];
 
@@ -2223,6 +2246,15 @@ function modal(){
  let html='';const g=itemBy(s.detailId),o=g?.offers[s.selected]||g?.offers[0],p=o?currentPrice(o):null;
  const total=p?{...p,amount:p.amount*s.qty}:null;
  switch(s.modal){
+ case 'install-guide':{
+  const ios=/iPad|iPhone|iPod/.test(navigator.userAgent);
+  html=modalTitle('Instalar Refills Shop','Accede a la tienda como una aplicación, con su icono en tu pantalla de inicio')+
+   '<div class="card panel" style="line-height:1.7;max-width:490px"><p>'+
+   (ios?'En Safari toca <strong>Compartir</strong>, elige <strong>Añadir a pantalla de inicio</strong> y confirma.':
+        'Abre el menú <strong>⋮</strong> de tu navegador y selecciona <strong>Instalar aplicación</strong> o <strong>Añadir a pantalla de inicio</strong>.')+
+   '</p><p class="helper">No necesitas descargar un APK. Las compras y la cuenta seguirán necesitando conexión a internet.</p></div>';
+  break;
+ }
  case 'reseller-preview':{
   const tier=s.resellerPreviewTier||'free',name=tier==='level2'?'Level 2':tier==='level3'?'Level 3':'Gratis';
   const data=s.resellerPreview,items=Array.isArray(data?.offers)?data.offers:[];
@@ -2391,6 +2423,17 @@ case 'checkout':
  if(s.modal==='checkout'&&s.payment==='balance')modalRoot.querySelector('.rs-payment-deadline')?.remove();
  if(s.modal==='checkout'||s.modal==='usdt-wallet-pay')startCheckoutCountdown();else if(rsCheckoutClockTimer){clearInterval(rsCheckoutClockTimer);rsCheckoutClockTimer=null}
 }
+let rsDeferredInstall=null;
+function requestRefillsInstallation(){
+ if(window.matchMedia('(display-mode: standalone)').matches||navigator.standalone===true){toast('Refills Shop ya está instalada en este dispositivo.');return}
+ if(rsDeferredInstall){const prompt=rsDeferredInstall;rsDeferredInstall=null;void Promise.resolve(prompt.prompt()).catch(()=>{s.modal='install-guide';modal()});return;}
+ s.modal='install-guide';modal();
+}
+window.addEventListener('beforeinstallprompt',event=>{event.preventDefault();rsDeferredInstall=event;});
+window.addEventListener('appinstalled',()=>{rsDeferredInstall=null;toast('Refills Shop instalada correctamente.');});
+if('serviceWorker' in navigator&&location.protocol==='https:'){
+ window.addEventListener('load',()=>{navigator.serviceWorker.register('/REFILLSHOP/sw.js',{scope:'/REFILLSHOP/'}).catch(error=>console.warn('PWA Refills Shop:',error?.message||error));},{once:true});
+}
 function render(scroll=false){document.body.classList.toggle('rs-auth-screen',s.page==='login'&&!s.user);headerNav();
 if(s.page==='detalle')main.innerHTML=detail();
 else if(s.page==='inicio')main.innerHTML=home();
@@ -2448,7 +2491,8 @@ case 'reseller-preview':void openResellerPlanPreview(b.dataset.tier);break;
 case 'reseller-deposit-submit':void submitResellerDeposit();break;
 
 case 'nav':navigate(b.dataset.page);break;case 'modal-nav':navigate(b.dataset.page);break;
-case 'home-wallet-deposit':openDepositCheckout();break;case 'home-wallet-movements':s.modal='reseller-ledger';modal();break;
+case 'home-wallet-deposit':if(resellerHasPlan())openDepositCheckout();else{s.modal='wallet';modal()}break;
+case 'install-refills':requestRefillsInstallation();break;case 'home-wallet-movements':s.modal='reseller-ledger';modal();break;
 case 'wallet-select-currency':{s.resellerDepositCurrency=b.dataset.currency;s.resellerDepositStage='details';modal();break;}
 case 'wallet-change-currency':{s.resellerDepositStage='methods';modal();break;}
 case 'wallet-copy-confirmation':{const val=String(s.resellerPortal?.paymentInstructions?.CUP?.confirmationPhone||s.paymentConfig.cupConfirmPhone||'').trim();if(!val){toast('Falta el número de confirmación de CUP');break;}void navigator.clipboard?.writeText(val).then(()=>toast('Número de confirmación copiado'),()=>toast('Mantén pulsado el número para copiarlo'));break;}
