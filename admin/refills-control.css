@@ -361,3 +361,33 @@ body::before{content:"";position:fixed;inset:0;pointer-events:none;z-index:0;opa
  .rs-hor-primary strong{font-size:12px}.rs-hor-money strong{font-size:11px}
  .rs-hor-toggle{max-width:86px;font-size:9.5px;padding:6px!important}
 }
+
+/* Refills Shop v44 — vista horizontal compacta también en móviles pequeños */
+.rs-admin-order-simple .toolbar{display:flex;flex-direction:row;align-items:center;gap:8px;min-width:0}
+.rs-admin-order-simple .toolbar input{min-width:0;flex:1}
+.rs-admin-order-simple .toolbar .btn{flex:0 0 auto;white-space:nowrap}
+.rs-admin-horizontal-order .rs-hor-expanded:focus-within{outline:1px solid rgba(74,151,255,.48)}
+@media(max-width:700px){
+ .rs-admin-order-simple{padding:12px!important}
+ .rs-admin-order-simple>.panel-head{margin-bottom:7px}
+ .rs-admin-orders-summary{margin-bottom:9px}
+ .rs-admin-order-tabs{margin-bottom:9px;padding-bottom:3px}
+ .rs-admin-order-simple .toolbar{margin-bottom:10px}
+ .rs-admin-order-simple .toolbar input{font-size:12px;padding:9px}
+ .rs-admin-order-simple .toolbar .btn{padding:9px 8px;font-size:10px}
+ .rs-admin-order-list{gap:6px}
+ .rs-hor-row{grid-template-columns:minmax(0,1.38fr) minmax(0,.90fr) 76px;grid-template-rows:minmax(28px,auto) auto;column-gap:7px;row-gap:1px;min-height:66px;padding:7px 9px}
+ .rs-hor-primary{grid-column:1;grid-row:1/3;justify-content:center}
+ .rs-hor-primary strong{font-size:12px}
+ .rs-hor-primary .rs-hor-code{font-size:9px}
+ .rs-hor-primary small{font-size:9px}
+ .rs-hor-customer{display:none}
+ .rs-hor-money{grid-column:2;grid-row:1;align-items:flex-end;justify-content:flex-end;gap:2px}
+ .rs-hor-money strong{font-size:12px}
+ .rs-hor-money small{font-size:9px}
+ .rs-hor-state{grid-column:2;grid-row:2;align-items:flex-end;justify-content:flex-end;gap:0}
+ .rs-hor-state .pill{font-size:9px;white-space:nowrap;max-width:100%;text-overflow:ellipsis;overflow:hidden}
+ .rs-hor-state .rs-admin-paid,.rs-hor-state .rs-admin-unpaid{display:none}
+ .rs-hor-toggle{grid-column:3;grid-row:1/3;width:76px;max-width:76px;min-width:0;min-height:34px;font-size:9px;padding:6px!important}
+}
+@media(max-width:370px){.rs-hor-row{grid-template-columns:minmax(0,1.28fr) minmax(0,.9fr) 68px;column-gap:5px;padding:6px}.rs-hor-toggle{width:68px;max-width:68px;font-size:8.5px}.rs-hor-money strong{font-size:10.5px}}
