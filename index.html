@@ -1692,7 +1692,7 @@ function catalogueFamilyCards(items){
   const key=g.category==='juegos'?gameFamilyKey(g):g.id;
   if(seen.has(key))continue;seen.add(key);
   const choices=gameRegionOptions(g);
-  if(g.category!=='juegos'||choices.length<=1){result.push(card(g));continue}
+  if(g.category!=='juegos'){result.push(card(g));continue}
   result.push('<article class="product product-horizontal product-clickable rs-family-card" data-action="open-item" data-id="'+esc(g.id)+'" role="button" tabindex="0" aria-label="Elegir región de '+esc(gameFamilyName(g))+'">'
   +'<div class="product-cover"><img loading="lazy" decoding="async" src="'+photo(g)+'" alt="'+esc(gameFamilyName(g))+'"></div>'
   +'<div class="product-info"><strong class="product-name">'+esc(gameFamilyName(g))+'</strong><div class="product-kind">'+choices.length+' regiones disponibles</div><div class="product-desc">Selecciona la región de tu cuenta antes de comprar.</div></div>'
@@ -2092,7 +2092,7 @@ function navigate(page){
  s.modal=null;if(page!=='detalle')s.search='';s.filter='todos';s.showFavs=false;s.page=page;render(true);history.replaceState(null,'','#'+page);if(page==='inicio')void loadRecentTopups();
  if(page==='revendedores'&&!s.resellerPortal)void loadResellerPortal(false,true);
 }
-function openDetail(id){let g=itemBy(id);if(!g)return;const regions=gameRegionOptions(g);if(g.category==='juegos'&&regions.length>1){s.regionPickGame=id;s.modal='region-picker';modal();return}openRegionGame(id,regions[0]?.region||'')}
+function openDetail(id){let g=itemBy(id);if(!g)return;const regions=gameRegionOptions(g);if(g.category==='juegos'&&regions.length){s.regionPickGame=id;s.modal='region-picker';modal();return}openRegionGame(id,regions[0]?.region||'')}
 function toast(t){const root=document.getElementById('toast-root');root.innerHTML=`<div class="toast">${esc(t)}</div>`;clearTimeout(toast.timer);toast.timer=setTimeout(()=>root.innerHTML='',2800)}
 function changePayment(p){
  if(!PAYMENT_METHODS[p])return;
