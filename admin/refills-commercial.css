@@ -1,0 +1,34 @@
+/* Refills OS — ofertas masivas, métodos de pago y estados */
+.rs-bulk-panel{position:relative;overflow:hidden;border-color:#356fa9;background:radial-gradient(ellipse at 92% 0%,rgba(27,132,239,.15),transparent 48%),linear-gradient(135deg,#11284f,#09172e)}
+.rs-bulk-panel::before{content:"";pointer-events:none;position:absolute;width:210px;height:210px;border:1px solid rgba(98,164,255,.12);border-radius:50%;right:-95px;top:-130px}
+.rs-bulk-panel>.panel-head{position:relative;z-index:1}
+.rs-bulk-panel .panel-head h2{margin:6px 0;font-size:18px}
+.rs-bulk-panel .panel-head small{line-height:1.4}
+.rs-bulk-preview{justify-content:center;min-height:100px;gap:5px}
+.rs-bulk-preview strong{font-size:23px;color:#86daff;font-family:Manrope,'DM Sans',sans-serif}
+.rs-bulk-preview span{font-size:10px;color:#a7cbe9;line-height:1.45}
+.rs-bulk-actions{margin-top:16px}
+.rs-bulk-actions .btn{min-height:43px}
+#bulk-progress{font-size:11px;line-height:1.5}
+.rs-payment-control{border-color:#2e5e8f}
+.rs-payment-method-row{display:flex;align-items:center;justify-content:space-between;gap:10px;padding:12px 2px;border-bottom:1px solid rgba(107,166,226,.15)}
+.rs-payment-method-row>div{display:flex;flex-direction:column;gap:4px;min-width:0}
+.rs-payment-method-row strong{font-size:12px;color:#e2f1ff}
+.rs-payment-method-row small{font-size:10px;color:#91add1;line-height:1.4}
+.rs-payment-method-row .pill{flex:0 0 auto;white-space:nowrap}
+.pill.refund{background:rgba(128,71,192,.18);border-color:rgba(174,111,235,.48);color:#e2c4ff}
+.pill.info{background:rgba(43,132,215,.17);border-color:rgba(87,160,231,.38);color:#a9d9ff}
+#bulk-game,#bulk-family,#bulk-margin{font-size:12px}
+@media(max-width:740px){
+.rs-bulk-panel .form-grid{grid-template-columns:1fr;gap:11px}
+.rs-bulk-panel{padding:15px}
+.rs-bulk-panel .panel-head h2{font-size:16px}
+.rs-bulk-actions{display:grid;grid-template-columns:1fr;gap:8px}
+.rs-bulk-actions .btn{width:100%;min-height:42px}
+.rs-payment-control{padding:14px}
+.rs-payment-method-row{align-items:flex-start}
+.rs-payment-method-row .pill{margin-top:2px;font-size:8px;padding:5px 7px}
+.rs-bulk-preview{min-height:83px}
+.rs-bulk-preview strong{font-size:21px}
+}
+@media(prefers-reduced-motion:reduce){.rs-bulk-panel,.rs-payment-control{animation:none!important}}
