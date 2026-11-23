@@ -84,3 +84,78 @@
 .pill.info{background:#0f3557;border-color:#276d99;color:#94daff}
 @media(max-width:740px){.rs-admin-order-card{padding:12px;gap:11px}.rs-order-head h3{font-size:12px}.rs-order-meta{grid-template-columns:repeat(2,minmax(0,1fr))}.rs-order-meta>div:last-child{grid-column:1/-1}.rs-admin-order-card .row-actions .btn{flex:1 1 auto;white-space:normal}.rs-reference strong{font-size:12px}}
 @media(max-width:360px){.rs-order-meta{grid-template-columns:1fr}.rs-order-meta>div:last-child{grid-column:auto}}
+
+
+/* Refills OS · desktop dashboard optimized for wide monitors and laptops */
+@media(min-width:741px){
+ .console{align-items:start}
+ .sidebar{overflow:hidden}
+ .sidebar nav{min-height:0;overflow-y:auto;overflow-x:hidden;scrollbar-width:thin;scrollbar-color:#285684 transparent;overscroll-behavior:contain}
+ .main-col{min-width:0;width:100%}
+ .main-content{width:100%;min-width:0;max-width:1720px;padding-bottom:64px}
+ #admin-view{min-width:0}
+ #admin-view>.grid,#admin-view>.split,#admin-view>.surface,#admin-view>section{min-width:0}
+ #admin-view .surface,#admin-view .record,#admin-view .section{min-width:0}
+ #admin-view .record .record-main{min-width:0;overflow-wrap:anywhere}
+ #admin-view .record .record-main>div{min-width:0}
+ #admin-view .toolbar{gap:12px}
+ #admin-view .toolbar input{flex:2 1 220px}
+ #admin-view .form-grid{align-items:start}
+ .view-heading{align-items:center}
+ .view-heading>div:first-child{min-width:0}
+ .view-heading h1{font-size:clamp(26px,2.4vw,39px)}
+ .admin-topbar{width:100%}
+}
+@media(min-width:741px) and (max-width:1024px){
+ .console{grid-template-columns:190px minmax(0,1fr)}
+ .sidebar{padding:20px 10px 15px}
+ .side-item{padding:10px 9px;gap:8px;font-size:10px}
+ .sidebar .brand{font-size:12px;margin:0 4px 9px}
+ .main-content{padding:21px 18px 52px}
+ .admin-topbar{height:66px;padding:0 18px}
+ .view-heading{gap:9px;margin-bottom:20px}
+ .grid.four,.grid.three{grid-template-columns:repeat(2,minmax(0,1fr))}
+ .split{grid-template-columns:1fr}
+ .section{padding:18px}
+ .metric{padding:16px;min-height:119px}
+ .metric b{font-size:28px}
+ .record{gap:10px;padding:12px}
+ .quick-grid{grid-template-columns:repeat(2,minmax(0,1fr))}
+ .toolbar .btn{min-height:39px}
+}
+@media(min-width:1025px) and (max-width:1340px){
+ .console{grid-template-columns:222px minmax(0,1fr)}
+ .sidebar{padding:24px 12px 16px}
+ .side-item{padding:12px 10px;gap:10px}
+ .main-content{padding:26px 25px 60px}
+ .admin-topbar{padding:0 25px}
+ .grid.four{grid-template-columns:repeat(2,minmax(0,1fr))}
+ .grid.three{grid-template-columns:repeat(3,minmax(0,1fr))}
+ .split{grid-template-columns:1fr}
+}
+@media(min-width:1341px){
+ .console{grid-template-columns:265px minmax(0,1fr)}
+ .main-content{padding:35px clamp(28px,3.1vw,54px) 80px}
+ .admin-topbar{padding-inline:clamp(28px,3.1vw,54px)}
+ .grid.four{grid-template-columns:repeat(4,minmax(0,1fr))}
+ .grid.three{grid-template-columns:repeat(3,minmax(0,1fr))}
+ .split{grid-template-columns:minmax(0,1.05fr) minmax(0,.95fr);gap:20px}
+ .grid.two{gap:18px}
+ .grid.three,.grid.four{gap:18px}
+ .section{padding:24px}
+ .quick-grid{gap:13px}
+ .quick-card{min-height:118px;padding:19px}
+ .metric{min-height:146px}
+}
+@media(min-width:1800px){
+ .console{grid-template-columns:292px minmax(0,1fr)}
+ .main-content{max-width:1840px}
+ .sidebar{padding-left:24px;padding-right:22px}
+ .side-item{font-size:13px}
+}
+@media(min-width:741px){
+ .rs-admin-order-card .rs-order-head{align-items:center}
+ .rs-admin-order-card .rs-order-meta{grid-template-columns:repeat(3,minmax(0,1fr))}
+ .rs-reference>strong{word-break:break-word}
+ .modal-window{max-width:min(740px,90vw)}
+}
