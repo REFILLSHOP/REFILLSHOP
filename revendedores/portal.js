@@ -11,7 +11,7 @@ const status=s=>({pending:'Pendiente',processing:'Procesando',completed:'Complet
 const date=s=>s?new Date(s).toLocaleDateString('es-ES',{year:'numeric',month:'short',day:'numeric'}):'Sin vencimiento';
 const timestamp=s=>s?new Date(s).toLocaleString('es-ES'):'—';
 const imageURL=s=>/^https:\/\//i.test(String(s||''))?String(s):'/REFILLSHOP/assets/refills-icon.png';
-const S={client:null,user:null,profile:null,membership:null,rememberSession:true,bootstrap:null,wallet:{USDT:0,CUP:0,SM:0},rates:{buySmPerUsdt:0,cupPerSm:0},tiers:[],instructions:{},deposits:[],games:[],offers:[],orders:[],view:'inicio',authMode:'login',selectedGame:'',selectedOffer:'',pinOrder:'',pinValue:null,search:'',kindFilter:'all',tier:'level2',currency:'USDT',pendingPlanId:null,pendingOrderId:null,busy:false,ready:false};
+const S={client:null,user:null,profile:null,membership:null,rememberSession:true,bootstrap:null,wallet:{USDT:0,CUP:0,SM:0},rates:{buySmPerUsdt:0,cupPerSm:0},tiers:[],instructions:{},deposits:[],games:[],offers:[],orders:[],view:'inicio',authMode:'login',selectedGame:'',selectedOffer:'',pinOrder:'',pinValue:null,search:'',kindFilter:'recargas',tier:'level2',currency:'USDT',pendingPlanId:null,pendingOrderId:null,busy:false,ready:false};
 const BASE='/REFILLSHOP/revendedores';
 const ROUTES=new Set(['inicio','catalogo','planes','billetera','pedidos','cuenta','juego','compra','codigo']);
 function routeURL(view,extra=''){return BASE+'/'+(view==='inicio'?'':view+'/')+(extra?'?'+extra:'')}
@@ -25,7 +25,7 @@ function readURL(){
  S.selectedOffer=search.get('offer')||'';
  S.pinOrder=search.get('order')||'';
  S.pinValue=null;
- S.kindFilter=['recargas','pases','tarjetas','pin'].includes(search.get('tipo'))?search.get('tipo'):'all';
+ S.kindFilter=['recargas','pases','membresias','pin'].includes(search.get('tipo'))?search.get('tipo'):'recargas';
 }
 let notifyTimer=null;
 function notify(message,error=false){const el=$('notice');if(!el)return;el.textContent=String(message||'').slice(0,320);el.classList.toggle('error',error);el.hidden=false;clearTimeout(notifyTimer);notifyTimer=setTimeout(()=>{el.hidden=true},5400)}
@@ -90,22 +90,23 @@ function plans(){
 function proOfferCategory(o){
  const name=String(o?.name||'').toLowerCase();
  if(o?.kind==='pin'||/\bpin\b|c[oó]digo\s+pin/.test(name))return 'pin';
- if(/pase|pass|weekly|monthly|semanal|mensual|temporada|season|membres[ií]a/.test(name))return 'pases';
- if(/tarjeta|gift.?card|voucher|regalo|card\s+digital/.test(name))return 'tarjetas';
+ if(/tarjeta|membres[ií]a|membership|semanal|mensual|weekly|monthly|suscripci[oó]n/.test(name))return 'membresias';
+ if(/pase|pass|temporada|season|battle.?pass/.test(name))return 'pases';
+ if(/gift.?card|voucher|regalo|card\s+digital/.test(name))return 'membresias';
  return 'recargas';
 }
-const PRO_OFFER_GROUPS=[['all','Todas'],['recargas','Recargas'],['pases','Pases'],['tarjetas','Tarjetas'],['pin','PIN']];
+const PRO_OFFER_GROUPS=[['recargas','Recargas'],['pases','Pases'],['membresias','Membresías'],['pin','PIN']];
 function catalog(){
  const q=S.search.toLocaleLowerCase('es');
  const visible=S.games.filter(g=>g.name.toLocaleLowerCase('es').includes(q)&&(S.kindFilter==='all'||S.offers.some(o=>o.gameId===g.id&&proOfferCategory(o)===S.kindFilter)));
  return `<header class="rs-pro-app-title"><span class="eyebrow">REFILLS PRO · JUEGOS</span><h1 class="heading">Explora tus recargas</h1><p class="sub">Todos los precios se ajustan a tu plan y se verifican al comprar.</p></header>
  <div class="rs-pro-kind-tabs">${PRO_OFFER_GROUPS.map(([id,label])=>`<button class="${S.kindFilter===id?'active':''}" type="button" data-pro-kind="${id}">${label}</button>`).join('')}</div><form id="searchForm" class="form-actions" role="search"><input class="search" style="flex:1" name="search" type="search" placeholder="Buscar juego" value="${esc(S.search)}" aria-label="Buscar juego"><button class="ghost" type="submit">Buscar</button></form>
  <p class="dim tiny">Mostrando ${visible.length} de ${S.games.length} juegos · Precios finales para tu suscripción</p>
- ${visible.length?`<div class="game-list">${visible.map(g=>{const count=S.offers.filter(o=>o.gameId===g.id&&o.inStock&&(S.kindFilter==='all'||proOfferCategory(o)===S.kindFilter)).length;return `<button class="game" data-game="${esc(g.id)}"><img src="${esc(imageURL(g.imageUrl))}" alt="" loading="lazy" onerror="this.onerror=null;this.src='/REFILLSHOP/assets/refills-icon.png'"><span class="game-name">${esc(g.name)}</span><small class="game-count">${count} ofertas disponibles</small></button>`}).join('')}</div>`:'<div class="panel empty">No se encontraron juegos con esa búsqueda.</div>'}`;
+ ${visible.length?`<div class="game-list">${visible.map(g=>{const count=S.offers.filter(o=>o.gameId===g.id&&o.inStock&&(proOfferCategory(o)===S.kindFilter)).length;return `<button class="game" data-game="${esc(g.id)}"><img src="${esc(imageURL(g.imageUrl))}" alt="" loading="lazy" onerror="this.onerror=null;this.src='/REFILLSHOP/assets/refills-icon.png'"><span class="game-name">${esc(g.name)}</span><small class="game-count">${count} ofertas disponibles</small></button>`}).join('')}</div>`:'<div class="panel empty">No se encontraron juegos con esa búsqueda.</div>'}`;
 }
 function gamePage(){
  const g=S.games.find(g=>g.id===S.selectedGame);if(!g)return catalog();
- const offers=S.offers.filter(o=>o.gameId===g.id&&(S.kindFilter==='all'||proOfferCategory(o)===S.kindFilter)).sort((a,b)=>num(a.resellerUsdt)-num(b.resellerUsdt));
+ const offers=S.offers.filter(o=>o.gameId===g.id&&(proOfferCategory(o)===S.kindFilter)).sort((a,b)=>num(a.resellerUsdt)-num(b.resellerUsdt));
  return '<button class="back" data-view="catalogo">‹ Volver al catálogo</button><span class="eyebrow">TUS PRECIOS DE COMPRA</span><h1 class="heading">'+esc(g.name)+'</h1><p class="sub">Toca Vista previa para consultar el importe final en USDT, SM y CUP antes de comprar.</p>' +
  '<div class="grid rs-offer-previews">'+(offers.map(o=>'<article class="panel offer rs-price-preview-card"><div class="offer-info"><strong>'+esc(o.name)+'</strong><small>'+esc(o.region||'Global')+' · '+(o.kind==='pin'?'PIN digital':'Recarga directa')+' · '+(o.inStock?'Disponible':'Agotada')+'</small><div class="price">'+usdt(o.resellerUsdt)+' USDT</div><span class="rs-price-hint">Precio final para tu plan</span></div><div class="rs-price-actions"><button class="ghost" data-preview-offer="'+esc(o.id)+'">Vista previa</button><button class="button" data-buy="'+esc(o.id)+'" '+(o.inStock?'':'disabled')+'>'+(o.inStock?'Comprar':'Agotada')+'</button></div></article>').join('')||'<div class="panel empty">Todavía no hay ofertas activas para este juego.</div>')+'</div>';
 }
@@ -296,8 +297,8 @@ document.addEventListener('click',async e=>{
  if(b.dataset.auth){S.authMode=b.dataset.auth;render();return}
  if(b.dataset.view)return void go(b.dataset.view);
  if(b.dataset.proKind){
-  S.kindFilter=PRO_OFFER_GROUPS.some(x=>x[0]===b.dataset.proKind)?b.dataset.proKind:'all';
-  updateURL('catalogo',S.kindFilter!=='all'?'tipo='+encodeURIComponent(S.kindFilter):'',true);
+  S.kindFilter=PRO_OFFER_GROUPS.some(x=>x[0]===b.dataset.proKind)?b.dataset.proKind:'recargas';
+  updateURL('catalogo','tipo='+encodeURIComponent(S.kindFilter),true);
   S.view='catalogo';render();return;
  }
  if(b.hasAttribute('data-close-tier-preview')){document.getElementById('rsTierReadOnlyPreview')?.remove();return}
