@@ -5,3 +5,62 @@
 @media(max-width:740px){.auth-shell{grid-template-columns:1fr;gap:10px;padding:30px 0}.auth-story{padding:0}.auth-story .eyebrow{margin-top:28px}.auth-story h1{font-size:37px;margin:10px 0}.auth-story p{font-size:12px}.auth-feature{display:none}.auth-card{padding:20px;margin:15px 0 20px}.console{display:block;padding-bottom:20px}.sidebar{position:relative;top:auto;height:auto;background:#08152a;padding:12px 12px 9px;gap:9px;border-right:0;border-bottom:1px solid #254263}.sidebar .brand{margin:0}.sidebar .brand-emblem{width:38px;height:38px}.sidebar-section,.sidebar-end{display:none}.sidebar nav{display:flex;gap:6px;overflow-x:auto;scrollbar-width:none;padding:3px 0 6px}.sidebar nav::-webkit-scrollbar{display:none}.side-item{flex:0 0 auto;padding:9px 11px;min-height:43px;font-size:10px;gap:7px}.side-item svg{width:15px;height:15px}.side-count{display:none}.admin-topbar{position:sticky;top:0;height:57px;padding:0 13px}.topbar-brand{display:flex;font-size:12px}.crumb{display:none}.status-connected{padding:5px 7px;font-size:8px}.top-actions{gap:5px}.icon-button{width:31px;height:31px}.main-content{padding:19px 12px 40px}.view-heading{margin-bottom:17px}.view-heading h1{font-size:26px}.view-heading p{font-size:10px}.view-heading .eyebrow{font-size:8px}.heading-actions .btn{padding:8px 10px}.grid.two,.grid.three{grid-template-columns:1fr}.grid.four{grid-template-columns:repeat(2,minmax(0,1fr));gap:9px}.metric{padding:13px;min-height:112px}.metric b{font-size:23px;margin:8px 0}.metric-title{font-size:9px}.metric-icon{width:27px;height:27px}.metric small{font-size:8px}.section{padding:14px}.section h2{font-size:15px}.quick-card{padding:12px}.quick-card b{font-size:11px}.quick-card small{font-size:9px}.record{grid-template-columns:1fr;gap:12px;padding:12px}.record .row-actions{justify-content:flex-start}.record .record-main{gap:9px}.record h3{font-size:12px}.form-grid{grid-template-columns:1fr}.form-grid .wide{grid-column:auto}.panel-head{align-items:flex-start}.live-strip{flex-direction:column;align-items:stretch}.modal-root{align-items:flex-end;padding:0 10px}.modal-window{width:100%;max-height:90dvh;border-radius:22px 22px 0 0;padding:17px 15px calc(25px + env(safe-area-inset-bottom,0px));animation:rise .23s ease-out}.toast{bottom:calc(12px + env(safe-area-inset-bottom,0px))}.form-actions .btn{flex:1 1 auto}.toolbar input,.toolbar select{flex-basis:140px}}
 @keyframes rise{from{transform:translateY(25px);opacity:.6}to{transform:translateY(0);opacity:1}}
 @media(prefers-reduced-motion:reduce){*,*::before,*::after{animation:none!important;transition:none!important}}
+
+
+/* Refills OS — cabecera móvil, transiciones suaves y acceso cómodo */
+.remember-option{display:flex!important;flex-direction:row!important;align-items:center;gap:10px;padding:11px 12px;border:1px solid #2c4c74;border-radius:12px;background:#0b1d39;cursor:pointer}
+.remember-option input{width:17px;min-width:17px;height:17px;min-height:17px;margin:0;accent-color:#48bfff}
+.remember-option span{display:flex;flex-direction:column;gap:2px}
+.remember-option strong{font-size:11px;color:#e5f3ff}
+.remember-option small{font-size:9px;color:#8ba9ce;font-weight:500}
+@media(hover:hover){
+ .surface,.record,.quick-card,.btn,.icon-button,.side-item{transition:transform .17s ease,border-color .17s ease,background-color .17s ease,box-shadow .17s ease}
+ .quick-card:hover,.record:hover{border-color:#3d79b0}
+ .quick-card:hover{transform:translateY(-2px)}
+ .btn:hover,.icon-button:hover{transform:translateY(-1px)}
+}
+#admin-view>.grid,#admin-view>.split,#admin-view>.surface,#admin-view>section{animation:rsAdminIn .22s ease-out both}
+@keyframes rsAdminIn{from{opacity:0;transform:translateY(5px)}to{opacity:1;transform:translateY(0)}}
+#admin-view .list>.record{content-visibility:auto;contain-intrinsic-size:76px}
+.loading{position:relative;overflow:hidden}
+.loading:after{content:"";position:absolute;inset:0;transform:translateX(-100%);background:linear-gradient(100deg,transparent,rgba(112,184,255,.08),transparent);animation:rsShimmer 1.6s ease-in-out infinite}
+@keyframes rsShimmer{to{transform:translateX(100%)}}
+@media(max-width:740px){
+ .console{display:flex;flex-direction:column;min-height:100dvh;padding-bottom:calc(14px + env(safe-area-inset-bottom,0px))}
+ .sidebar,.main-col{display:contents}
+ .sidebar .brand,.sidebar-section,.sidebar-end{display:none!important}
+ .admin-topbar{order:0;position:sticky;top:0;z-index:70;height:62px;min-height:62px;padding:0 12px;gap:8px;justify-content:space-between;background:rgba(6,16,35,.97);border-bottom:1px solid #2b4d76;box-shadow:0 7px 24px #0003}
+ .topbar-brand{display:flex;flex:0 0 auto;gap:7px;font-size:11px}
+ .topbar-brand img{width:27px;height:27px}
+ .topbar-brand strong{font-size:11px;letter-spacing:-.02em}
+ .crumb{display:block;min-width:0;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;font-size:0;letter-spacing:0;color:#7da5ce}
+ .crumb span{display:none}
+ .crumb strong{font-size:10px;color:#c6e4ff}
+ .top-actions{gap:5px;flex:0 0 auto}
+ .status-connected{display:none}
+ .icon-button{width:32px;height:32px;border-radius:9px;font-size:15px}
+ .sidebar nav{order:1;position:sticky;top:62px;z-index:65;display:flex;align-items:center;gap:6px;overflow-x:auto;overflow-y:hidden;scrollbar-width:none;padding:8px 11px 9px;margin:0;background:rgba(8,21,44,.98);border-bottom:1px solid #27466b;box-shadow:0 8px 20px #0002;overscroll-behavior-x:contain}
+ .sidebar nav::-webkit-scrollbar{display:none}
+ .side-item{flex:0 0 auto;width:auto;min-height:39px;gap:7px;padding:8px 10px;border-radius:10px;font-size:10px;white-space:nowrap}
+ .side-item svg{width:15px;height:15px}
+ .side-item.active{box-shadow:inset 0 -2px #50bdfd}
+ .main-content{order:2;width:100%;padding:18px 12px 38px}
+ .view-heading{align-items:flex-start}
+ .view-heading h1{font-size:25px}
+ .view-heading p{max-width:46ch;line-height:1.45}
+ .heading-actions .btn{min-height:33px}
+ .record .row-actions .btn{min-height:33px}
+}
+@media(max-width:390px){
+ .admin-topbar{padding:0 9px;gap:6px}
+ .topbar-brand{font-size:10px;gap:5px}
+ .topbar-brand img{width:25px;height:25px}
+ .crumb strong{font-size:9px}
+ .sidebar nav{padding-left:9px;padding-right:9px}
+ .side-item{padding:8px 9px;font-size:9px}
+ .main-content{padding-left:10px;padding-right:10px}
+}
+@media(prefers-reduced-motion:reduce){
+ #admin-view>.grid,#admin-view>.split,#admin-view>.surface,#admin-view>section,.loading:after{animation:none!important}
+ .surface,.record,.quick-card,.btn,.icon-button,.side-item{transition:none!important}
+}
