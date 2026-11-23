@@ -28,7 +28,7 @@ jobs:
         with:
           gradle-version: '8.10.2'
       - name: Add official Refills Shop brand icon
-        run: cp assets/refills-icon.png android/app/src/main/res/drawable/refills_brand.png
+        run: mkdir -p android/app/src/main/res/drawable && cp assets/refills-icon.png android/app/src/main/res/drawable/refills_brand.png
       - name: Build installable APK
         run: gradle -p android :app:assembleDebug --no-daemon
       - name: Publish APK artifact
