@@ -1,5 +1,5 @@
 // Refills Shop PWA. Solo guarda recursos públicos: nunca pedidos, sesiones, pagos ni saldos.
-const CACHE='refills-shop-pwa-shell-v4';
+const CACHE='refills-shop-pwa-shell-v5';
 const ROOT='/REFILLSHOP/';
 const OFFLINE=ROOT+'offline.html';
 const STATIC=[OFFLINE,ROOT+'manifest.webmanifest',ROOT+'assets/refills-app-192.png',ROOT+'assets/refills-app-512.png',ROOT+'assets/refills-app-maskable-512.png'];
@@ -45,4 +45,22 @@ self.addEventListener('fetch',event=>{
    return res;
   })());
  }
+});
+
+/* Una notificación solo se puede generar cuando la web está activa;
+   si ya existe, al tocarla se abre la sección que corresponde. */
+self.addEventListener('notificationclick',event=>{
+ event.notification.close();
+ const raw=String(event.notification?.data?.url||'/REFILLSHOP/');
+ const url=new URL(raw,self.location.origin);
+ if(url.origin!==self.location.origin||!url.pathname.startsWith('/REFILLSHOP/'))return;
+ event.waitUntil((async()=>{
+  const windows=await self.clients.matchAll({type:'window',includeUncontrolled:true});
+  const existing=windows.find(client=>client.url.startsWith(self.location.origin+'/REFILLSHOP/'));
+  if(existing){
+   if(typeof existing.navigate==='function')await existing.navigate(url.href).catch(()=>{});
+   return existing.focus();
+  }
+  return self.clients.openWindow(url.href);
+ })());
 });
