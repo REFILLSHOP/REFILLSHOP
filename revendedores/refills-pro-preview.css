@@ -78,3 +78,76 @@
 .rs-tier-offer>div:last-child{flex:none;text-align:right}
 .rs-tier-offer>div:last-child strong{color:#86dcff}
 @media(max-width:480px){.rs-tier-offer{align-items:flex-start;flex-direction:column}.rs-tier-offer>div:last-child{text-align:left}.rs-tier-offer-list{max-height:59dvh}}
+
+
+/* Refills Pro: unified deposit/payment flow + responsive PC workspace */
+.rs-pro-wallet-layout{align-items:start;gap:16px}
+.rs-pro-wallet-main{min-width:0}
+.rs-pro-wallet-history{min-width:0}
+.rs-pro-section-head{display:flex;align-items:center;gap:12px;justify-content:space-between;flex-wrap:wrap;margin-bottom:17px}
+.rs-pro-section-head h2{margin:0}
+.rs-pro-payflow{display:grid;gap:14px;min-width:0}
+.rs-pro-checkout-total{display:grid;gap:5px;padding:19px;border:1px solid #32669c;border-radius:15px;background:radial-gradient(ellipse at 94% 0,#2164b83d,transparent 60%),linear-gradient(130deg,#0f345e,#0b2040)}
+.rs-pro-checkout-total>small{color:#a2c9ed;font-size:10px;letter-spacing:.09em;font-weight:850}
+.rs-pro-checkout-total>strong{font-size:clamp(28px,3vw,34px);line-height:1.24;color:#ecf8ff;letter-spacing:-.04em;font-weight:900;overflow-wrap:anywhere}
+.rs-pro-checkout-total em{font-size:15px;font-style:normal;color:#93d7ff;letter-spacing:0}
+.rs-pro-checkout-total p{margin:0;font-size:11px;color:#a3c4df;line-height:1.55}
+.rs-pro-choice-heading{display:grid;gap:4px;padding:5px 2px}
+.rs-pro-choice-heading strong{font-size:13px;color:#e9f7ff}
+.rs-pro-choice-heading small{font-size:11px;color:#9dbbd7}
+.rs-pro-deposit-methods{display:grid;gap:9px}
+.rs-pro-deposit-method{display:flex;align-items:center;gap:12px;width:100%;min-width:0;min-height:69px;padding:13px;background:#0a1e3b;border:1px solid #325679;border-radius:14px;color:#e9f5ff;text-align:left;cursor:pointer}
+.rs-pro-deposit-method:hover:not(:disabled){background:#123461;border-color:#73caff}
+.rs-pro-deposit-method:disabled{opacity:.49;cursor:not-allowed}
+.rs-pro-deposit-method>.rs-pro-deposit-method-copy{min-width:0;display:grid;gap:3px;flex:1}
+.rs-pro-deposit-method strong{font-size:13px;overflow-wrap:anywhere}
+.rs-pro-deposit-method small{font-size:11px;color:#94badb;line-height:1.5}
+.rs-pro-deposit-method>b{font-size:25px;color:#8bcfff;line-height:1}
+.rs-pro-method-mark{display:grid;place-items:center;flex:0 0 43px;width:43px;height:43px;border:1px solid #3172ac;border-radius:12px;background:linear-gradient(125deg,#1c639f,#12365f);color:#cbecff;font-size:12px;font-weight:900}
+.rs-pro-pay-notice{margin:0;padding:12px;border-radius:12px;border:1px solid #325c7e;background:#0b2745;color:#9cc8e9;font-size:11px;line-height:1.5}
+.rs-pro-selected-method{display:flex;align-items:center;justify-content:space-between;gap:10px;background:#0a2040;border:1px solid #305478;padding:9px 12px;border-radius:13px}
+.rs-pro-selected-method>div{display:flex;align-items:center;gap:11px;min-width:0}
+.rs-pro-selected-method strong{font-size:12px;color:#e9f7ff;overflow-wrap:anywhere}
+.rs-pro-checkout-destination{padding:15px;background:linear-gradient(125deg,#0e2d52,#0b1e38);border:1px solid #376b9b;border-radius:15px;min-width:0}
+.rs-pro-checkout-overline{display:flex;align-items:center;justify-content:space-between;gap:8px;flex-wrap:wrap;margin-bottom:10px}
+.rs-pro-checkout-overline small,.rs-pro-checkout-overline span{font-size:10px;color:#95c8f0;font-weight:850;letter-spacing:.05em}
+.rs-pro-checkout-overline span{border:1px solid #4081aa;border-radius:99px;padding:4px 7px}
+.rs-pro-checkout-destination .payment-instructions{padding:0;border:0;background:none;box-shadow:none;margin:0}
+.rs-pro-checkout-destination .payment-instructions code{max-width:100%;overflow-wrap:anywhere;word-break:break-word}
+.rs-pro-checkout-form{display:grid;gap:11px;padding:15px;background:#0c2240;border:1px solid #2e557c;border-radius:14px;min-width:0}
+.rs-pro-checkout-form .field{margin:0;min-width:0}
+.rs-pro-checkout-form input{min-width:0;width:100%}
+.rs-pro-checkout-form input[type=file]{height:auto;padding-block:11px}
+.rs-pro-checkout-form .help{margin:0;line-height:1.5}
+.rs-pro-checkout-form .button{min-height:47px}
+@media(min-width:1024px){
+ .shell{width:min(1320px,calc(100% - 64px));max-width:1320px}
+ .main{max-width:1280px;padding:25px 0 65px}
+ .masthead{min-height:78px}
+ .portal-nav{gap:10px}
+ .nav-button{font-size:13px;padding:10px 16px}
+ .rs-pro-home .game-list{grid-template-columns:repeat(3,minmax(0,1fr))}
+ .grid.grid-3{gap:18px}
+ .rs-pro-wallet-layout{grid-template-columns:minmax(0,1.23fr) minmax(300px,.77fr);gap:22px}
+ .rs-pro-wallet-main,.rs-pro-wallet-history{padding:23px}
+ .rs-pro-offer-grid,.rs-offer-previews{grid-template-columns:repeat(3,minmax(0,1fr))}
+}
+@media(min-width:1450px){
+ .shell{width:min(1450px,calc(100% - 80px));max-width:1450px}
+ .main{max-width:1410px}
+ .rs-pro-wallet-layout{grid-template-columns:minmax(0,1.3fr) minmax(330px,.7fr)}
+}
+@media(min-width:801px) and (max-width:1023px){
+ .shell{width:min(960px,calc(100% - 40px));max-width:960px}
+ .main{max-width:920px}
+ .rs-pro-wallet-layout{grid-template-columns:minmax(0,1.2fr) minmax(240px,.8fr)}
+}
+@media(max-width:800px){
+ .rs-pro-wallet-layout{grid-template-columns:1fr}
+ .rs-pro-wallet-main{padding:15px}
+ .rs-pro-wallet-history{padding:15px}
+ .rs-pro-deposit-method{padding:11px;min-height:65px}
+ .rs-pro-checkout-total{padding:15px}
+ .rs-pro-selected-method{flex-wrap:wrap}
+}
+@media(prefers-reduced-motion:reduce){.rs-pro-deposit-method{transition:none!important}}
