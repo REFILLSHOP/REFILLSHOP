@@ -186,6 +186,12 @@ function rsTrackReseller(orders=[],deposits=[],wallet=null,plan=''){
    }
   }
   if(last.plan&&next.plan&&last.plan!==next.plan&&shown<4)rsAddNotice('membership','Plan de revendedor actualizado','Tu cuenta ahora tiene el plan '+next.plan+'.','message');
+  const grew=Object.keys(next.wallet||{}).filter(currency=>{
+   const before=Number(last.wallet?.[currency]);
+   const after=Number(next.wallet[currency]);
+   return Number.isFinite(before)&&before>=0&&Number.isFinite(after)&&after-before>.01;
+  });
+  if(grew.length&&shown===0)rsAddNotice('wallet','Saldo de la wallet actualizado','Tienes saldo nuevo en '+grew.slice(0,3).join(', ')+'.','message');
  }
  rsNotice.resellerState=next;rsNotice.resellerReady=true;rsSaveNotices();
 }
@@ -194,15 +200,20 @@ async function rsPollResellerEvents(){
  const uid=s.user.id;
  rsNotice.pollReseller=(async()=>{
   try{
-   const [orders,deposits]=await Promise.all([
+   const [orders,deposits,portal]=await Promise.all([
     edgeRequest('rs12-reseller','/orders',{auth:true}),
-    edgeRequest('rs12-reseller','/wallet/deposits',{auth:true})
+    edgeRequest('rs12-reseller','/wallet/deposits',{auth:true}),
+    edgeRequest('rs12-reseller','/portal',{auth:true})
    ]);
    if(s.user?.id!==uid)return;
    const items=Array.isArray(orders?.orders)?orders.orders:[];
    const funds=Array.isArray(deposits?.deposits)?deposits.deposits:[];
+   const tier=String(portal?.membership?.planTier||'free');
+   const plan=tier==='level2'?'Level 2':tier==='level3'?'Level 3':'Gratis';
+   const wallet=portal?.wallet||s.reseller?.wallet||{};
+   s.reseller={...s.reseller,plan,wallet:{USDT:Number(wallet.USDT||0),CUP:Number(wallet.CUP||0),SM:Number(wallet.SM||0)}};
    s.resellerOrders=items;s.resellerDeposits=funds;
-   rsTrackReseller(items,funds,s.reseller?.wallet,s.reseller?.plan);
+   rsTrackReseller(items,funds,s.reseller.wallet,plan);
    if(s.page==='revendedores'&&!s.modal)render();
   }catch(error){console.warn('Avisos mayoristas:',error?.message||error)}
  })().finally(()=>{rsNotice.pollReseller=null});
@@ -242,6 +253,23 @@ function rsNotificationModal(){
     return '<article class="rs-notify-item '+(isNew?'unread':'')+'"><div class="rs-notify-symbol">'+I(n.kind==='completed'?'check':n.kind==='warning'?'info':n.kind==='wallet'?'wallet':n.kind==='payment'?'credit':n.kind==='offer_new'?'plus':'bell','tiny')+'</div><div class="rs-notify-item-copy"><div class="rs-notify-item-top"><span>'+esc(n.category)+'</span><small>'+esc(formatShopDateTime(n.ts))+'</small></div><strong>'+esc(n.title)+'</strong><p>'+esc(n.detail)+'</p>'+(link?'<button type="button" data-action="rs-notice-open" data-page="'+link+'">Ver '+(link==='pedidos'?'pedido':'cuenta')+' '+I('arrow','tiny')+'</button>':'')+'</div></article>';
    }).join('')+'</div>':'<div class="rs-notify-empty">'+I('bell')+'<h3>No hay avisos todavía</h3><p>Los cambios de la tienda y de tus pedidos aparecerán aquí.</p></div>')+
   '</section>';
+}
+function rsMeasureFPS(){
+ const el=document.getElementById('rs-fps-result');
+ if(!el)return;
+ if(document.visibilityState!=='visible'){el.textContent='Abre la app en primer plano para medir la fluidez.';return}
+ el.textContent='Midiendo durante 2 segundos…';
+ const start=performance.now();let count=0,prev=0,missed=0;
+ const frame=t=>{
+  if(document.visibilityState!=='visible')return;
+  if(prev>0&&t-prev>34)missed++;
+  prev=t;count++;
+  if(t-start<2000){requestAnimationFrame(frame);return}
+  const rate=Math.round((count-1)*1000/Math.max(1,t-start));
+  const target=document.getElementById('rs-fps-result');
+  if(target)target.textContent='Pantalla: ~'+rate+' FPS observados · '+missed+' pausas de más de 34 ms. No se pueden forzar 90 Hz en pantallas de 60 Hz.';
+ };
+ requestAnimationFrame(frame);
 }
 function rsApplyPerformancePreference(){
  document.body.classList.toggle('rs-lite-motion',rsNotice.smoothMode);
@@ -1002,7 +1030,8 @@ function profile(){
     <button class="setting" data-action="nav" data-page="revendedores"><span class="set-icon">${I('wallet')}</span><span class="set-copy"><strong>Planes de revendedor</strong><small>Consulta Gratis, Level 2 y Level 3.</small></span>${I('arrow','tiny')}</button>
     ${activePlan?`<button class="setting" data-action="modal" data-modal="wallet"><span class="set-icon">${I('wallet')}</span><span class="set-copy"><strong>Mi wallet</strong><small>Depositar y consultar tus saldos.</small></span>${I('arrow','tiny')}</button>`:''}
     ${s.role==='admin'?`<a class="setting" href="/REFILLSHOP/admin/"><span class="set-icon">${I('shield')}</span><span class="set-copy"><strong>Panel de administración</strong><small>Administrar juegos, precios y pedidos</small></span>${I('arrow','tiny')}</a>`:''}
-    <button class="setting" data-action="modal" data-modal="alerts"><span class="set-icon">${I('bell')}</span><span class="set-copy"><strong>Notificaciones</strong><small>Avisos sobre compras y pedidos.</small></span>${I('arrow','tiny')}</button>
+    <button class="setting" data-action="modal" data-modal="alerts"><span class="set-icon">${I('bell')}</span><span class="set-copy"><strong>Notificaciones y sonidos</strong><small>Recargas, pagos, wallet y novedades del catálogo.</small></span>${I('arrow','tiny')}</button>
+    <button class="setting" data-action="rs-test-fps"><span class="set-icon">${I('settings')}</span><span class="set-copy"><strong>Medir fluidez</strong><small id="rs-fps-result">Comprueba cuántos fotogramas muestra este teléfono.</small></span>${I('arrow','tiny')}</button>
     <button class="setting" data-action="modal" data-modal="help"><span class="set-icon">${I('headset')}</span><span class="set-copy"><strong>Ayuda y soporte</strong><small>Información del proceso de compra.</small></span>${I('arrow','tiny')}</button>
     <button class="setting" data-action="auth-logout"><span class="set-icon">${I('shield')}</span><span class="set-copy"><strong>Cerrar sesión</strong><small>Salir de tu cuenta en este dispositivo.</small></span>${I('arrow','tiny')}</button>
    </section>
@@ -1440,6 +1469,7 @@ case 'rs-notice-system':void rsRequestSystemNotices();break;
 case 'rs-notice-refresh':void Promise.allSettled([loadCustomerOrders(),loadPublicChanges(true),rsPollResellerEvents()]).then(()=>{if(s.modal==='alerts')modal();toast('Avisos actualizados')});break;
 case 'rs-notice-smooth':rsNotice.smoothMode=!rsNotice.smoothMode;save('smooth_mode',rsNotice.smoothMode);rsApplyPerformancePreference();modal();break;
 case 'rs-notice-open':s.modal=null;navigate(b.dataset.page==='revendedores'?'revendedores':'pedidos');break;
+case 'rs-test-fps':rsMeasureFPS();break;
 case 'close':case 'backdrop':s.modal=null;modal();break;
 case 'fav':{let idx=s.favorites.indexOf(b.dataset.id);if(idx>=0)s.favorites.splice(idx,1);else s.favorites.push(b.dataset.id);save('favs',s.favorites);if(s.page==='perfil'||s.showFavs)render();else{b.classList.toggle('active');b.title=idx>=0?'Añadir a favoritos':'Eliminar de favoritos'}toast(idx>=0?'Eliminado de favoritos':'Guardado en favoritos');break;}
 case 'only-favs':s.showFavs=!s.showFavs;render();break;
