@@ -5,9 +5,9 @@
 <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
 <meta name="theme-color" content="#030918">
 <meta name="description" content="Refills Shop: catálogo de recargas y productos digitales con diseño azul y negro.">
-<link rel="manifest" href="/REFILLSHOP/manifest.webmanifest?v=20261123-install-fix-v4">
-<link rel="icon" type="image/png" sizes="512x512" href="/REFILLSHOP/assets/refills-app-512.png">
-<link rel="apple-touch-icon" sizes="192x192" href="/REFILLSHOP/assets/refills-app-192.png">
+<link rel="manifest" href="/REFILLSHOP/manifest.webmanifest?v=cart-splash-v50">
+<link rel="icon" type="image/png" sizes="512x512" href="/REFILLSHOP/assets/refills-app-512.png?v=round-v5">
+<link rel="apple-touch-icon" sizes="192x192" href="/REFILLSHOP/assets/refills-app-192.png?v=round-v5">
 <meta name="apple-mobile-web-app-capable" content="yes">
 <meta name="apple-mobile-web-app-title" content="Refills Shop">
 <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
@@ -2635,7 +2635,7 @@ function requestRefillsInstallation(){
 window.addEventListener('beforeinstallprompt',event=>{event.preventDefault();rsDeferredInstall=event;});
 window.addEventListener('appinstalled',()=>{rsDeferredInstall=null;toast('Refills Shop instalada correctamente.');});
 if('serviceWorker' in navigator&&location.protocol==='https:'){
- const registerRefillsWorker=()=>navigator.serviceWorker.register('/REFILLSHOP/sw.js?v=3',{scope:'/REFILLSHOP/',updateViaCache:'none'}).catch(error=>console.warn('PWA Refills Shop:',error?.message||error));
+ const registerRefillsWorker=()=>navigator.serviceWorker.register('/REFILLSHOP/sw.js?v=4',{scope:'/REFILLSHOP/',updateViaCache:'none'}).catch(error=>console.warn('PWA Refills Shop:',error?.message||error));
  if(document.readyState==='complete')void registerRefillsWorker();
  else window.addEventListener('load',()=>{void registerRefillsWorker()},{once:true});
 }
