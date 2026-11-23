@@ -161,8 +161,16 @@ function adminOrderAlertPanel(){
  +'<p class="footer-caption">'+(canNotify?(Notification.permission==='denied'?'Permisos bloqueados: actívalos en los ajustes del navegador.':enabled?'Notificaciones permitidas en este dispositivo.':'Pulsa Activar para solicitar permiso al navegador.'):'Este navegador no admite notificaciones de página.')+' Las alertas del sistema necesitan que este panel siga abierto; no son notificaciones push con la web cerrada.</p>'
  +'<div class="rs-urgent-orders" id="rs-admin-pending-list"><h3>Los últimos pendientes</h3>'+(pending.length?pending.map(o=>'<div class="rs-urgent-order"><div><strong>'+esc(o.game||'Recarga')+'</strong><small>'+esc(o.offer||'Oferta')+' · '+esc(o.code||'')+' · '+date(o.createdAt)+'</small></div>'+status(o.status)+'</div>').join(''):'<p class="footer-caption">Por ahora no hay pedidos pendientes nuevos.</p>')+'</div><button class="btn secondary small" type="button" data-page="orders">Revisar pedidos</button></section><div class="spacing"></div>';
 }
-function adminSaveSeen(ids){try{localStorage.setItem(ADMIN_SEEN_ORDERS,JSON.stringify(ids.slice(0,80)))}catch{}}
-function adminReadSeen(){try{const x=JSON.parse(localStorage.getItem(ADMIN_SEEN_ORDERS)||'null');return Array.isArray(x)?x:null}catch{return null}}
+function adminSaveSeen(ids){try{localStorage.setItem(ADMIN_SEEN_ORDERS,JSON.stringify({at:Date.now(),ids:ids.slice(0,80)}))}catch{}}
+function adminReadSeen(){
+ try{
+  const x=JSON.parse(localStorage.getItem(ADMIN_SEEN_ORDERS)||'null');
+  if(!x||!Array.isArray(x.ids)||!Number.isFinite(Number(x.at))||Date.now()-Number(x.at)>=86400000){
+   localStorage.removeItem(ADMIN_SEEN_ORDERS);return null;
+  }
+  return x.ids.filter(v=>typeof v==='string').slice(0,80);
+ }catch{try{localStorage.removeItem(ADMIN_SEEN_ORDERS)}catch{}return null}
+}
 async function adminPollOrders(visibleStatus=false){
  if(!S.user||S.orderAlertBusy)return;
  S.orderAlertBusy=true;
