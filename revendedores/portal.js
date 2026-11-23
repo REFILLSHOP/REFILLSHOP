@@ -89,8 +89,16 @@ function gamePage(){
  const g=S.games.find(g=>g.id===S.selectedGame);
  if(!g)return catalog();
  const offers=S.offers.filter(o=>o.gameId===g.id&&(S.kindFilter!=='pin'||o.kind==='pin')).sort((a,b)=>num(a.resellerUsdt)-num(b.resellerUsdt));
- return `<button class="back" data-view="catalogo">‹ Volver al catálogo</button><span class="eyebrow">PRECIOS PARA TU NIVEL</span><h1 class="heading">${esc(g.name)}</h1><p class="sub">${offers.length} ofertas · Precios finales en USDT, saldo móvil y CUP. Oferta sujeta a disponibilidad.</p>
- <div class="grid">${offers.map(o=>`<article class="panel offer"><div class="offer-info"><strong>${esc(o.name)}</strong><small>${esc(o.region||'Global')} · ${o.kind==='pin'?'PIN digital · entrega manual':'Recarga directa'} · <span class="${o.inStock?'in-stock':'out-stock'}">${o.inStock?'Disponible':'Agotada'}</span></small><div class="price">${usdt(o.resellerUsdt)} USDT</div><div class="price-alt">${integer(o.resellerSm)} SM · ${integer(o.resellerCup)} CUP</div></div><button class="button" data-buy="${esc(o.id)}" ${o.inStock?'':'disabled'}>${o.inStock?'Comprar':'Agotada'}</button></article>`).join('')||'<div class="panel empty">Este juego no tiene ofertas activas para reventa.</div>'}</div>`;
+ const currency=['USDT','SM','CUP'].includes(S.currency)?S.currency:'USDT';
+ const priceFor=o=>currency==='SM'?integer(o.resellerSm)+' SM':currency==='CUP'?integer(o.resellerCup)+' CUP':usdt(o.resellerUsdt)+' USDT';
+ const currencyOptions=['USDT','SM','CUP'].map(c=>'<option value="'+c+'" '+(currency===c?'selected':'')+'>'+c+'</option>').join('');
+ return `<button class="back" data-view="catalogo">‹ Volver al catálogo</button><span class="eyebrow">PRECIOS PARA TU NIVEL</span><h1 class="heading">${esc(g.name)}</h1><p class="sub">${offers.length} ofertas · Precios ajustados a tu plan y validados por el servidor.</p>
+ <div class="reseller-offer-toolbar"><label for="resellerOfferCurrency">Moneda de tu wallet</label><select id="resellerOfferCurrency">${currencyOptions}</select></div>
+ <div class="reseller-offer-list">${offers.map(o=>`<article class="panel reseller-offer-row">
+  <div class="reseller-offer-art"><img src="${esc(imageURL(g.imageUrl))}" alt="${esc(g.name)}" loading="lazy"></div>
+  <div class="reseller-offer-info"><span class="eyebrow">${o.kind==='pin'?'PIN / CÓDIGO DIGITAL':'RECARGA DIRECTA'}</span><strong>${esc(o.name)}</strong><small>${esc(o.region||'Global')} · <span class="${o.inStock?'in-stock':'out-stock'}">${o.inStock?'Disponible':'Agotada'}</span></small></div>
+  <div class="reseller-offer-purchase"><small>WALLET · ${currency}</small><strong>${priceFor(o)}</strong><button class="button" data-buy="${esc(o.id)}" ${o.inStock?'':'disabled'}>${o.inStock?'Comprar':'Agotada'}</button></div>
+ </article>`).join('')||'<div class="panel empty">Este juego no tiene ofertas activas para reventa.</div>'}</div>`;
 }
 function targetFields(o){
  if(o?.kind==='pin')return '<div class="alert-note">PIN digital · No necesitas ID de jugador. Confirma la región y consulta el código una vez entregado.</div>';
@@ -102,7 +110,7 @@ function checkout(){
  const o=S.offers.find(x=>x.id===S.selectedOffer),g=S.games.find(x=>x.id===o?.gameId);
  if(!o||!g||!o.inStock)return `<div class="panel pad"><h1>Oferta no disponible</h1><button class="ghost" data-view="catalogo">Volver al catálogo</button></div>`;
  return `<button class="back" data-game="${esc(g.id)}">‹ Volver a las ofertas</button><span class="eyebrow">COMPRA REVENDEDOR</span><h1 class="heading">Confirmar pedido</h1><p class="sub">${esc(g.name)} · ${esc(o.name)}</p>
- <div class="grid grid-2"><form id="orderForm" class="panel pad"><h2>${o.kind==='pin'?'Entrega de código PIN':'Datos del jugador'}</h2>${targetFields(o)}<label class="field">Moneda a descontar<select name="currency" required><option value="USDT">USDT · ${usdt(o.resellerUsdt)}</option><option value="SM">SM · ${integer(o.resellerSm)}</option><option value="CUP">CUP · ${integer(o.resellerCup)}</option></select></label><label class="checks"><input name="accept" type="checkbox" required> Confirmo los datos, la región y el importe del pedido.</label><button class="button full" type="submit">Comprar con mi saldo</button><p class="help">El servidor vuelve a calcular el precio y verifica tu saldo antes de descontarlo. No envíes transferencias fuera de la wallet.</p></form>
+ <div class="grid grid-2"><form id="orderForm" class="panel pad"><h2>${o.kind==='pin'?'Entrega de código PIN':'Datos del jugador'}</h2>${targetFields(o)}<label class="field">Moneda a descontar<select name="currency" required><option value="USDT" ${S.currency==='USDT'?'selected':''}>USDT · ${usdt(o.resellerUsdt)}</option><option value="SM" ${S.currency==='SM'?'selected':''}>SM · ${integer(o.resellerSm)}</option><option value="CUP" ${S.currency==='CUP'?'selected':''}>CUP · ${integer(o.resellerCup)}</option></select></label><label class="checks"><input name="accept" type="checkbox" required> Confirmo los datos, la región y el importe del pedido.</label><button class="button full" type="submit">Comprar con mi saldo</button><p class="help">El servidor vuelve a calcular el precio y verifica tu saldo antes de descontarlo. No envíes transferencias fuera de la wallet.</p></form>
  <aside class="panel pad"><span class="eyebrow">RESUMEN</span><h2>${esc(o.name)}</h2><p class="dim">${esc(g.name)} · ${esc(o.region)}</p><div class="checkout-summary panel"><strong>${usdt(o.resellerUsdt)} USDT</strong>${o.kind==='pin'?'<div class="pill">PIN · Entrega manual verificada</div>':''}<div class="dim">${integer(o.resellerSm)} SM · ${integer(o.resellerCup)} CUP</div></div><p class="dim tiny">Margen actual +${num(S.membership?.markupPercent||7)}%. Si administración rechaza el pedido, el saldo usado se reintegra según las reglas del servidor.</p><button class="ghost full" data-view="billetera">Ver mi wallet</button></aside></div>`;
 }
 function instructions(currency){
@@ -238,7 +246,7 @@ async function handleForm(f){
  finally{S.busy=false;if(button?.isConnected)button.disabled=false}
 }
 document.addEventListener('submit',e=>{if(e.target instanceof HTMLFormElement){e.preventDefault();void handleForm(e.target)}});
-document.addEventListener('change',e=>{if(e.target.id==='depositCurrency'){$('paymentDetails').innerHTML=instructions(e.target.value)}});
+document.addEventListener('change',e=>{if(e.target.id==='depositCurrency'){$('paymentDetails').innerHTML=instructions(e.target.value)}if(e.target.id==='resellerOfferCurrency'){if(['USDT','SM','CUP'].includes(e.target.value)){S.currency=e.target.value;render()}}if(e.target.name==='currency'&&['USDT','SM','CUP'].includes(e.target.value))S.currency=e.target.value});
 document.addEventListener('click',async e=>{
  const b=e.target.closest('button');if(!b||b.disabled)return;
  if(b.id==='signout'||b.id==='accountSignout')return void signout();
