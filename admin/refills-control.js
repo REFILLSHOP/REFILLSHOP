@@ -192,7 +192,7 @@ async function adminPollOrders(visibleStatus=false){
   if(added.length)flash('Llegaron '+added.length+' pedidos nuevos. Revisa Pedidos.');
   const current=oldState!==orders.map(o=>o.id+':'+o.status).join(',');
   if(S.page==='overview'&&$('rs-admin-order-alert-box'))$('rs-admin-order-alert-box').innerHTML=adminOrderAlertPanel();
-  if(S.page==='orders'&&current&&!S.busy){const currentOrders=await request('/admin/orders');S.cache.orders=currentOrders;drawOrders()}
+  if(S.page==='orders'&&!S.busy&&(current||Date.now()-Number(S.lastOrdersAutoRefresh||0)>30000)&&document.activeElement?.id!=='filter-orders'){const currentOrders=await request('/admin/orders');S.cache.orders=currentOrders;S.lastOrdersAutoRefresh=Date.now();drawOrders()}
   else if(S.page==='orders'){const el=$('rs-admin-pending-number');if(el)el.textContent=String(S.orderAlerts.pendingCount)}
   if(visibleStatus)flash('Pedidos sincronizados: '+S.orderAlerts.pendingCount+' pendientes.');
  }catch(error){if(visibleStatus)guarded(error);else console.warn('Avisos:',error?.message||error)}
@@ -361,38 +361,56 @@ function renderCoResults(){
 function paymentMethodLabel(method){
  return ({mobile:'Saldo móvil ETECSA',wallet:'MiTransfer (teléfono)',card:'Transfermóvil (CUP)',usdt_wallet:'USDT BEP-20',usdt_bep20:'Pasarela USDT'})[method]||method||'Sin método';
 }
+function adminOrderMessage(o){
+ if(!o)return '';
+ return ['REFILLS SHOP · RESUMEN DEL PEDIDO','Pedido: '+(o.code||'—'),
+  'Juego: '+(o.game||'Recarga'),'Paquete: '+(o.offer||'—'),
+  'ID / destino: '+(o.playerId||'—'),'Importe: '+money(o.amount)+' '+(o.currency||''),
+  'Pago: '+paymentMethodLabel(o.method),'Estado: '+({'pending':'Pendiente','processing':'En proceso','completed':'Completado','rejected':'Rechazado','failed':'Fallido','refunded':'Reembolsado'}[o.status]||o.status||'Pendiente'),
+  'https://refillshop.github.io/REFILLSHOP/'].join('\n');
+}
 function drawOrders(){
- const rawOrders=S.cache.orders?.orders||[];
- const weights={pending:0,processing:1,uploading:2,completed:3,failed:4,rejected:4,refunded:5};
- const orders=[...rawOrders].sort((a,b)=>(weights[a.status]??6)-(weights[b.status]??6)||new Date(b.created)-new Date(a.created));
- const pending=orders.filter(o=>o.status==='pending'),processing=orders.filter(o=>o.status==='processing'),failed=orders.filter(o=>['failed','rejected'].includes(o.status)),refundReview=orders.filter(o=>['rejected','failed'].includes(o.status)&&o.paymentStatus==='paid'&&!o.refundReference);
- $('admin-view').innerHTML='<div id="rs-admin-order-alert-box">'+adminOrderAlertPanel()+'</div><div class="grid three">'
-  +metric('PEDIDOS RECIENTES',orders.length,'Hasta 150 movimientos','orders')
-  +metric('POR REVISAR',pending.length+processing.length,processing.length+' enviados al proveedor · consultar su entrega','shield')
-  +metric('FALLIDOS',failed.length,'Comprobar incidencias','alert')
-  +'</div><div class="spacing"></div>'
-  +(refundReview.length?'<section class="surface section" style="border-color:#9b6545;background:linear-gradient(145deg,#38251f,#151b2c);margin-bottom:14px" role="status"><h2>Revisar '+refundReview.length+' pedido(s) pagados y rechazados</h2><p>Estos pedidos todavía no tienen una referencia de reembolso registrada. Comprueba si se devolvió el dinero antes de cerrar la incidencia. No realices un segundo envío al proveedor.</p></section>':'')
-  +'<section class="surface section"><div class="panel-head"><div><h2>Revisión de pagos</h2><small>Verifica cada ingreso en la cuenta antes de aprobar la compra; la referencia del cliente no es confirmación del banco.</small></div>'+ico('payments')+'</div>'
-  +'<div class="toolbar"><input type="search" id="filter-orders" placeholder="Código, juego, teléfono o referencia…" value="'+esc(S.search)+'"><button type="button" class="btn secondary" data-action="refresh">Actualizar ↻</button></div>'
-  +(orders.length?'<div class="list">'+orders.map(o=>{
-   const card=o.method==='card'||o.method==='wallet',sm=o.method==='mobile',isCrypto=o.method==='usdt_wallet'||o.method==='usdt_bep20';
-   const paymentInfo=card?'<div class="rs-reference"><span>REFERENCIA DECLARADA</span><strong>'+esc(o.paymentReference||'Sin referencia')+'</strong><small>'+esc(o.method==='wallet'?'Comprueba que la transferencia llegó al teléfono MiTransfer.':'Comprueba el ingreso real en la cuenta CUP receptora.')+'</small></div>':
-    sm?'<div class="rs-reference"><span>NÚMERO QUE ENVIÓ SALDO</span><strong>'+esc(o.sourcePhone||'Sin número')+'</strong><small>Revisa la captura y el saldo móvil recibido.</small></div>':
-    isCrypto?'<div class="rs-reference"><span>HASH EN BLOCKCHAIN</span><strong class="code-hint">'+esc(o.paymentTxHash||'Pendiente de envío')+'</strong><small>Los pagos USDT solo se comprueban mediante la verificación del servidor.</small></div>':'';
-   return '<article class="record rs-admin-order-card"><div class="rs-order-head"><div><span class="tag">PEDIDO '+esc(o.code)+'</span><h3>'+esc(o.game||'Recarga')+' · '+esc(o.offer||'')+'</h3><small>'+esc(o.customerName||'Cliente')+' · '+esc(o.customerPhone||'')+' · '+date(o.created)+'</small></div>'+status(o.status)+'</div>'
-   +'<div class="grid three rs-order-meta"><div><span class="tag">DESTINO</span><strong>'+esc(o.playerId||'PIN')+'</strong></div><div><span class="tag">IMPORTE</span><strong>'+money(o.amount)+' '+esc(o.currency)+'</strong></div><div><span class="tag">MÉTODO</span><strong>'+esc(paymentMethodLabel(o.method))+'</strong></div></div>'
-   +paymentInfo
-   +'<div class="rs-payment-status">Estado del cobro: '+status(o.paymentStatus)+'</div>'
-   +'<div class="row-actions">'+(o.receiptAvailable?'<button class="btn ghost small" data-action="receipt" data-code="'+esc(o.code)+'">'+ico('eye')+' Captura</button>':'')
-   +(!isCrypto&&o.paymentStatus!=='paid'&&o.status==='pending'?'<button class="btn secondary small" data-action="verify-payment" data-code="'+esc(o.code)+'">Confirmar ingreso real</button>':'')
-   +(o.paymentStatus==='paid'&&o.status==='pending'&&o.kind==='topup'?'<button class="btn primary small" data-action="fulfill" data-code="'+esc(o.code)+'">Enviar a Central One</button>':'')
-   +(o.paymentStatus==='paid'&&o.status==='processing'&&o.kind==='topup'?'<button class="btn secondary small" data-action="reconcile-order" data-id="'+esc(o.id)+'">Consultar estado del proveedor</button>':'')
-   +(o.kind==='pin'&&o.paymentStatus==='paid'?'<button class="btn primary small" data-action="assign-pin" data-code="'+esc(o.code)+'">Entregar PIN</button>':'')
-   +(o.status==='pending'?'<button class="btn danger small" data-action="reject-order" data-code="'+esc(o.code)+'">Rechazar</button>':'')
-   +(o.paymentStatus==='paid'&&o.status!=='refunded'?'<button class="btn ghost small" data-action="refund-order" data-code="'+esc(o.code)+'">Registrar reembolso</button>':'')
-   +'</div></article>';
-  }).join('')+'</div>':empty('No hay pedidos','Los pedidos aparecerán aquí cuando los clientes compren.'))
-  +'</section>';
+ const orders=[...(S.cache.orders?.orders||[])].sort((a,b)=>({'pending':0,'processing':1,'partially_completed':1,'uploading':2,'completed':3,'failed':4,'rejected':4,'refunded':5}[a.status]??6)-({'pending':0,'processing':1,'partially_completed':1,'uploading':2,'completed':3,'failed':4,'rejected':4,'refunded':5}[b.status]??6)||new Date(b.created)-new Date(a.created));
+ const pending=orders.filter(o=>o.status==='pending');
+ const processing=orders.filter(o=>['processing','partially_completed'].includes(o.status));
+ const complete=orders.filter(o=>o.status==='completed');
+ const failed=orders.filter(o=>['failed','rejected','refunded'].includes(o.status));
+ const refundReview=orders.filter(o=>['rejected','failed'].includes(o.status)&&o.paymentStatus==='paid'&&!o.refundReference);
+ const filter=S.orderFilter||'all';
+ const filtered=orders.filter(o=>filter==='all'||(filter==='active'&&['pending','processing','partially_completed'].includes(o.status))||(filter==='completed'&&o.status==='completed')||(filter==='failed'&&['failed','rejected','refunded'].includes(o.status)));
+ const tabs=[['all','Todos',orders.length],['active','Por atender',pending.length+processing.length],['completed','Completados',complete.length],['failed','Incidencias',failed.length]];
+ $('admin-view').innerHTML=
+  '<div id="rs-admin-order-alert-box">'+adminOrderAlertPanel()+'</div>'+
+  '<section class="surface section rs-admin-order-simple"><div class="panel-head"><div><h2>Pedidos</h2><small>Pago y entrega por separado. Central One actualiza sus entregas automáticamente.</small></div>'+ico('orders')+'</div>'+
+  '<div class="rs-admin-orders-summary"><span><strong>'+pending.length+'</strong> por verificar</span><span><strong>'+processing.length+'</strong> en proveedor</span><span><strong>'+complete.length+'</strong> entregados</span></div>'+
+  (refundReview.length?'<div class="rs-admin-order-warning" role="alert">'+refundReview.length+' pedido(s) pagados y fallidos requieren revisar el reembolso. No vuelvas a enviar la compra.</div>':'')+
+  '<div class="rs-admin-order-tabs">'+tabs.map(t=>'<button type="button" class="'+(filter===t[0]?'active':'')+'" data-action="admin-order-filter" data-filter="'+t[0]+'">'+t[1]+' <b>'+t[2]+'</b></button>').join('')+'</div>'+
+  '<div class="toolbar"><input type="search" id="filter-orders" placeholder="Buscar pedido, juego, teléfono…" value="'+esc(S.search)+'"><button class="btn secondary small" data-action="refresh">Actualizar ↻</button></div>'+
+  (filtered.length?'<div class="list rs-admin-order-list">'+filtered.map(o=>{
+   const isCrypto=o.method==='usdt_wallet'||o.method==='usdt_bep20';
+   const card=o.method==='card'||o.method==='wallet';
+   const sm=o.method==='mobile';
+   const pay=o.paymentStatus==='paid'?'<span class="rs-admin-paid">Pago confirmado</span>':'<span class="rs-admin-unpaid">Pago sin confirmar</span>';
+   const paymentInfo=card?'<div><span>Referencia</span><strong>'+esc(o.paymentReference||'Sin referencia')+'</strong></div>':
+    sm?'<div><span>Línea de origen</span><strong>'+esc(o.sourcePhone||'No informada')+'</strong></div>':
+    isCrypto?'<div><span>Hash blockchain</span><strong class="code-hint">'+esc(o.paymentTxHash||'Pendiente')+'</strong></div>':'';
+   const actions=
+    (o.receiptAvailable?'<button class="btn ghost small" data-action="receipt" data-code="'+esc(o.code)+'">'+ico('eye')+' Captura</button>':'')+
+    (!isCrypto&&o.paymentStatus!=='paid'&&o.status==='pending'?'<button class="btn secondary small" data-action="verify-payment" data-code="'+esc(o.code)+'">Confirmar cobro</button>':'')+
+    (o.paymentStatus==='paid'&&o.status==='pending'&&o.kind==='topup'?'<button class="btn primary small" data-action="fulfill" data-code="'+esc(o.code)+'">Entregar con Central One</button>':'')+
+    (o.paymentStatus==='paid'&&['processing','partially_completed'].includes(o.status)&&o.kind==='topup'?'<button class="btn secondary small" data-action="reconcile-order" data-id="'+esc(o.id)+'">Revisar proveedor</button>':'')+
+    (o.kind==='pin'&&o.paymentStatus==='paid'&&o.status!=='completed'?'<button class="btn primary small" data-action="assign-pin" data-code="'+esc(o.code)+'">Entregar PIN</button>':'')+
+    (o.status==='pending'?'<button class="btn danger small" data-action="reject-order" data-code="'+esc(o.code)+'">Rechazar</button>':'')+
+    (o.paymentStatus==='paid'&&['rejected','failed'].includes(o.status)?'<button class="btn ghost small" data-action="refund-order" data-code="'+esc(o.code)+'">Registrar reembolso</button>':'')+
+    '<button class="btn ghost small" data-action="copy-order-brief" data-id="'+esc(o.id)+'">Copiar resumen</button>'+
+    (String(o.customerPhone||'').replace(/\D/g,'').length>=8?'<button class="btn ghost small" data-action="send-order-brief" data-id="'+esc(o.id)+'">WhatsApp</button>':'');
+   return '<article class="record rs-admin-compact-record"><div class="rs-admin-order-top"><div class="rs-admin-order-identity"><span>'+esc(o.code)+'</span><h3>'+esc(o.game||'Recarga')+'</h3><p>'+esc(o.offer||'')+'</p></div>'+status(o.status)+'</div>'+
+    '<div class="rs-admin-compact-details"><span>'+esc(o.customerName||'Cliente')+' · '+esc(o.playerId||'PIN')+'</span><strong>'+money(o.amount)+' '+esc(o.currency||'')+'</strong></div>'+
+    '<div class="rs-admin-order-payment">'+pay+'<span>'+esc(paymentMethodLabel(o.method))+'</span><small>'+date(o.created)+'</small></div>'+
+    '<div class="row-actions rs-admin-order-buttons">'+actions+'</div>'+
+    '<details class="rs-admin-order-extra"><summary>Más datos de este pedido</summary><div class="rs-admin-order-extra-inner"><div><span>Teléfono</span><strong>'+esc(o.customerPhone||'—')+'</strong></div><div><span>Destino</span><strong>'+esc(o.playerId||'—')+'</strong></div>'+paymentInfo+'</div></details></article>';
+  }).join('')+'</div>':empty('No hay pedidos en este filtro','Selecciona Todos o actualiza para consultar el historial.'))+
+  '</section>';
 }
 function drawCustomers(){
  const list=S.cache.customers||[];
@@ -551,6 +569,15 @@ async function runAction(action,el){
  if(action==='bulk-apply')return withBusy(async()=>{const args=bulkArgs();if(!modalConfirm('¿Actualizar SOLO '+args.region+' con ganancia '+args.marginPercent+' %?'))return;await applyExistingMargin(args);await load('offers')});
  if(action==='bulk-import')return withBusy(async()=>{const args=bulkArgs();await importFamilyOffers(args)});
  if(action==='close-modal')return closeModal();
+ if(action==='admin-order-filter'){S.orderFilter=event.target.closest('[data-action]')?.dataset.filter||'all';return drawOrders();}
+ if(action==='copy-order-brief'||action==='send-order-brief'){
+  const o=(S.cache.orders?.orders||[]).find(row=>row.id===id);if(!o)return flash('Pedido no encontrado',true);
+  const message=adminOrderMessage(o);
+  if(action==='copy-order-brief')return navigator.clipboard.writeText(message).then(()=>flash('Resumen copiado.'),()=>flash('No se pudo copiar.',true));
+  const phone=String(o.customerPhone||'').replace(/\D/g,'');
+  if(phone.length<8)return flash('El cliente no tiene un número de WhatsApp válido.',true);
+  window.open('https://wa.me/'+phone+'?text='+encodeURIComponent(message),'_blank','noopener,noreferrer');return;
+ }
  if(action==='refresh')return load();
  if(action==='mode-centralone'||action==='mode-manual'){S.offerMode=action.split('-')[1];return drawOffers()}
  if(action==='save-game')return submitGameChanges();
