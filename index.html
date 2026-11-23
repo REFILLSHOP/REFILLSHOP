@@ -1622,6 +1622,7 @@ async function submitResellerDeposit(){
  const file=document.getElementById('wallet-proof')?.files?.[0]||null;
  const button=document.querySelector('[data-action="reseller-deposit-submit"]');
  if(!Number.isFinite(amount)||amount<=0){toast('Introduce un importe válido.');return}
+ if(s.resellerPortal?.membership?.activationRequired){const sm=Number(s.resellerPortal.rates?.buySmPerUsdt||0),cup=Number(s.resellerPortal.rates?.cupPerSm||0),equiv=currency==='USDT'?amount:currency==='SM'?amount/sm:amount/(sm*cup);if(!Number.isFinite(equiv)||equiv<5){toast('El primer depósito debe ser equivalente a 5.00 USDT o más.');return}}
  if(currency!=='USDT'&&!Number.isInteger(amount)){toast('Los importes en CUP y saldo móvil deben ser números enteros.');return}
  if(currency==='USDT'&&!txHash&&!file){toast('Adjunta el comprobante o introduce el hash USDT BEP-20.');return}
  if(currency!=='USDT'&&!file){toast('Adjunta el comprobante de pago.');return}
@@ -2298,16 +2299,18 @@ case 'checkout':
   break;
  }
  case 'wallet':{
-  if(!resellerHasPlan()){
+  if(!resellerHasPlan()&&!s.resellerPortal?.membership?.activationRequired){
    html=modalTitle('Wallet de revendedor','Activa un plan para utilizar la wallet')+
     '<div class="empty"><p>La billetera y sus recargas están disponibles para revendedores con un plan activo.</p><button class="btn primary" data-action="modal-nav" data-page="revendedores">Ver planes</button></div>';
    break;
   }
   const settings=s.resellerPortal?.paymentInstructions||{};
+  const activationRequired=!!s.resellerPortal?.membership?.activationRequired;
+  const smRate=Number(s.resellerPortal?.rates?.buySmPerUsdt||0),cupRate=Number(s.resellerPortal?.rates?.cupPerSm||0);
   let currency=['USDT','CUP','SM'].includes(s.resellerDepositCurrency)?s.resellerDepositCurrency:'USDT';
   const options={
    USDT:{title:'USDT · BEP-20',subtitle:'Hash de transacción o captura · Revisión de ingreso',name:'Wallet receptora · USDT BEP-20',recipient:String(settings.USDT?.address||''),network:String(settings.USDT?.network||'BEP-20'),visual:paymentVisual('usdt'),note:'Envía únicamente USDT por la red indicada. Introduce el hash o adjunta una captura. El abono se realizará tras verificar el ingreso.'},
-   CUP:{title:'CUP · Transfermóvil',subtitle:'Captura del comprobante · Revisión manual',name:'Tarjeta receptora · Transfermóvil',recipient:String(settings.CUP?.destination||''),confirmPhone:String(settings.CUP?.confirmationPhone||s.paymentConfig.cupConfirmPhone||''),network:'CUP',visual:paymentVisual('cup'),note:'Transfiere el importe exacto a la tarjeta, comprueba el número de confirmación y adjunta una captura JPG, PNG o WEBP. No se acredita la wallet sin verificar el ingreso.'},
+   CUP:{title:'CUP · Transfermóvil',subtitle:'Captura del comprobante · Revisión manual',name:'Tarjeta receptora · Transfermóvil',recipient:String(settings.CUP?.destination||''),confirmPhone:String(settings.CUP?.confirmPhone||settings.CUP?.confirmationPhone||s.paymentConfig.cupConfirmPhone||''),network:'CUP',visual:paymentVisual('cup'),note:'Transfiere el importe exacto a la tarjeta, comprueba el número de confirmación y adjunta una captura JPG, PNG o WEBP. No se acredita la wallet sin verificar el ingreso.'},
    SM:{title:'Saldo móvil ETECSA',subtitle:'Captura y número de origen · Revisión manual',name:'Número receptor · Saldo móvil',recipient:String(settings.SM?.destination||''),network:'SM',visual:paymentVisual('sm'),note:'Envía el saldo a la línea indicada, adjunta una captura e introduce el número desde el que realizaste la transferencia.'}
   };
   let current=options[currency];
@@ -2325,13 +2328,13 @@ case 'checkout':
     '<div class="rs-wallet-review-note">Las solicitudes se acreditan solamente después de verificar la transferencia. No compartas datos de tu cuenta con terceros.</div></div>';
    break;
   }
-  const balance=Number(s.reseller.wallet?.USDT||0);
-  html=modalTitle('Depositar en wallet','Datos para transferir y enviar comprobante')+
+  const balance=Number(s.reseller.wallet?.USDT||0),minimumDeposit=currency==='USDT'?5:currency==='SM'?Math.ceil(5*smRate):Math.ceil(5*smRate*cupRate);
+  html=modalTitle('Depositar en wallet',activationRequired?'Activa Gratis con un depósito verificado':'Datos para transferir y enviar comprobante')+
    '<div class="rs-checkout-simple rs-wallet-deposit-ui"><div class="rs-checkout-total"><div><span>IMPORTE A DEPOSITAR</span><strong id="wallet-deposit-preview">0.00 <small>'+currency+'</small></strong></div><div><small>Saldo actual: '+balance.toFixed(2)+' USDT</small><small>La acreditación no es instantánea: se verificará el pago primero.</small></div></div>'+
    '<div class="rs-checkout-method"><span>'+current.visual+'<strong>'+esc(current.title)+'</strong></span><button type="button" class="btn ghost small" data-action="wallet-change-currency">Cambiar</button></div>'+
    '<div class="rs-checkout-inputs rs-wallet-amount-field"><label class="sheet-label" for="wallet-amount">¿Cuánto deseas depositar? ('+currency+')</label>'+
-    '<input id="wallet-amount" class="field" type="number" inputmode="decimal" min="'+(currency==='USDT'?'0.01':'1')+'" step="'+(currency==='USDT'?'0.01':'1')+'" autocomplete="off" placeholder="'+(currency==='USDT'?'Ejemplo: 5.00':'Ejemplo: 500')+'" required>'+
-    '<small>Envía exactamente el importe que indicas aquí.</small><input id="wallet-currency" type="hidden" value="'+currency+'"></div>'+
+    '<input id="wallet-amount" class="field" type="number" inputmode="decimal" min="'+(activationRequired?minimumDeposit:(currency==='USDT'?'0.01':'1'))+'" step="'+(currency==='USDT'?'0.01':'1')+'" autocomplete="off" placeholder="'+(activationRequired?minimumDeposit.toLocaleString('es-ES'):(currency==='USDT'?'Ejemplo: 5.00':'Ejemplo: 500'))+'" required>'+
+    '<small>'+(activationRequired?'Para activar Gratis, deposita al menos '+minimumDeposit.toLocaleString('es-ES')+' '+currency+' (equivalente a 5 USDT). Se activa cuando administración apruebe el ingreso.':'Envía exactamente el importe que indicas aquí.')+'</small><input id="wallet-currency" type="hidden" value="'+currency+'"></div>'+
    '<section class="rs-pay-destination"><div class="rs-pay-dest-head"><span>DATOS PARA PAGAR</span><span class="rs-pay-dest-mode">EN REVISIÓN</span></div>'+
     '<h3>'+esc(current.name)+'</h3>'+
     '<div class="rs-pay-dest-value">'+(current.recipient?
@@ -2522,8 +2525,8 @@ function resellerPage(){
  if(s.resellerLoading&&!s.resellerPortal)return `<div class="catalog-top"><div class="eyebrow">REFILLS SHOP / MAYORISTAS</div><h1 class="page-title">Portal de revendedores</h1><div class="card panel reseller-v7-empty">Cargando tus planes, wallet y datos de la cuenta…</div></div>`;
  const p=s.resellerPortal;
  if(!p)return `<div class="catalog-top"><div class="eyebrow">REFILLS SHOP / MAYORISTAS</div><h1 class="page-title">Portal de revendedores</h1><p class="page-lead">Consulta los tres planes y activa el que mejor se adapte a tu negocio.</p><div class="card panel reseller-v7-empty">No se pudo cargar el portal. <button class="btn primary" data-action="reseller-refresh">Reintentar</button></div></div>`;
- const membership=p.membership||{},tier=String(membership.planTier||'free');
- const currentPlan=tier==='level2'?'Level 2':tier==='level3'?'Level 3':'Gratis';
+ const membership=p.membership||{},activationRequired=membership.activationRequired===true||!membership.planTier,tier=String(membership.planTier||'free');
+ const currentPlan=activationRequired?'Activación pendiente':tier==='level2'?'Level 2':tier==='level3'?'Level 3':'Gratis';
  const currentMargin=Number(membership.markupPercent||7);
  const expires=membership.expiresAt?new Date(membership.expiresAt):null;
  const daysLeft=expires?Math.max(0,Math.ceil((expires.getTime()-Date.now())/86400000)):null;
@@ -2535,7 +2538,7 @@ function resellerPage(){
   <div class="reseller-v7-head"><div><div class="eyebrow">PORTAL INDEPENDIENTE / REVENDEDORES</div><h1 class="page-title">Panel de revendedores</h1><p class="page-lead">Tus planes, precios mayoristas y wallet en un solo lugar.</p></div><button class="reseller-v7-refresh" data-action="reseller-refresh">${I('arrow','tiny')} Actualizar</button></div>
   <section class="card wallet-hero" style="margin-top:16px">
    <span class="wallet-text">TU PLAN ACTUAL</span><div class="wallet-number" style="font-size:clamp(30px,5vw,42px)">${esc(currentPlan)}</div>
-   <div class="muted">Precios finales disponibles en tu catálogo de revendedor${expires?` · Vence ${expires.toLocaleDateString('es-ES')} · ${daysLeft} días restantes`:' · Sin vencimiento'}</div>
+   <div class="muted">${activationRequired?'Para activar el plan Gratis realiza un depósito mínimo equivalente a 5.00 USDT. Se activa cuando administración verifique el ingreso.':`Precios finales disponibles en tu catálogo de revendedor${expires?` · Vence ${expires.toLocaleDateString('es-ES')} · ${daysLeft} días restantes`:' · Sin vencimiento'}`}</div>
    <div class="wallet-controls"><button class="btn primary" data-action="modal" data-modal="wallet">${I('plus','tiny')} Recargar wallet</button><button class="btn secondary" data-action="modal" data-modal="reseller-ledger">${I('file','tiny')} Movimientos</button></div>
   </section>
   <div class="section-head"><h2>Mi wallet</h2><span class="muted small">Saldos reales de tu cuenta</span></div>
@@ -2547,7 +2550,7 @@ function resellerPage(){
   <div class="section-head"><h2>Elige tu plan</h2><span class="muted small">Consulta una vista previa de los precios finales</span></div>
   <div class="reseller-v7-actions"><label class="muted small" for="reseller-currency">Pagar suscripción con</label><select id="reseller-currency" aria-label="Moneda para pagar el plan"><option value="USDT" ${s.resellerCurrency==='USDT'?'selected':''}>USDT</option><option value="CUP" ${s.resellerCurrency==='CUP'?'selected':''}>CUP</option><option value="SM" ${s.resellerCurrency==='SM'?'selected':''}>Saldo móvil (SM)</option></select></div>
   <div class="reseller-v7-plans">${plans.map(plan=>{
-   const isCurrent=plan.tier===tier,isFree=plan.tier==='free';
+   const isCurrent=!!membership.planTier&&plan.tier===tier,isFree=plan.tier==='free';
    const priceLabel=isFree?'Gratis':`${plan.priceUsdt.toFixed(2)} USDT · ${smRate?Math.ceil(plan.priceUsdt*smRate):'—'} SM · ${smRate&&cupRate?Math.ceil(plan.priceUsdt*smRate*cupRate):'—'} CUP`;
    const duration=isFree?'Sin vencimiento':`${plan.days} días`;
    const update=plan.refresh==='daily_mini'?'Actualización diaria ligera':'Actualización diaria';
@@ -2557,7 +2560,7 @@ function resellerPage(){
    return `<article class="reseller-v7-plan ${isCurrent?'current':''}">
     <div class="plan-kicker">${isCurrent?'TU PLAN ACTUAL':'PLAN DE REVENDEDOR'}</div><h3>${esc(plan.name)}</h3>
     <div class="plan-margin">${examplePrice!==null?`${examplePrice.toFixed(2)} USDT`:'Sin ofertas'}</div><div class="muted small">VISTA PREVIA${example?` · ${esc(example.name)}`:' · Publica una oferta para ver precios'}</div><p>${priceLabel} · ${duration}<br>${update}</p>
-    ${isCurrent?(isFree?`<span class="current-pill">Activo</span>`:`<button class="btn secondary" data-action="reseller-subscribe" data-tier="${esc(plan.tier)}">Renovar ${esc(plan.name)}</button>`):blockedLower?`<button class="btn secondary" disabled>Requiere bajar de nivel al vencer</button>`:isFree?`<span class="muted small">Plan gratuito</span>`:`<button class="btn primary" data-action="reseller-subscribe" data-tier="${esc(plan.tier)}">Activar ${esc(plan.name)}</button>`}
+    ${isCurrent?(isFree?`<span class="current-pill">Activo</span>`:`<button class="btn secondary" data-action="reseller-subscribe" data-tier="${esc(plan.tier)}">Renovar ${esc(plan.name)}</button>`):blockedLower?`<button class="btn secondary" disabled>Requiere bajar de nivel al vencer</button>`:isFree&&activationRequired?`<button class="btn primary" data-action="modal" data-modal="wallet">Depositar 5 USDT para activar</button>`:isFree?`<span class="muted small">Disponible al cumplir el requisito de activación</span>`:`<button class="btn primary" data-action="reseller-subscribe" data-tier="${esc(plan.tier)}">Activar ${esc(plan.name)}</button>`}
     <button type="button" class="btn ghost rs-plan-preview-btn" data-action="reseller-preview" data-tier="${esc(plan.tier)}">${I('eye','tiny')} Ver todas las ofertas de ${esc(plan.name)}</button>
    </article>`;
   }).join('')}</div>
