@@ -1123,6 +1123,29 @@ button,a,input,select{touch-action:manipulation}
 .top-actions{gap:5px!important}
 .top-actions .icon-btn{width:34px!important;height:34px!important;min-width:34px!important}
 }
+</style><style id="rs-unified-wallet-deposit-v19">
+.rs-wallet-deposit-ui{max-width:650px}
+.rs-wallet-deposit-ui .rs-checkout-total{padding:19px}
+.rs-wallet-deposit-ui .rs-checkout-total strong small{font-size:.42em;color:#a1d5ff;letter-spacing:normal;white-space:nowrap}
+.rs-wallet-stage-head{display:flex;flex-direction:column;gap:5px;padding:5px 2px}
+.rs-wallet-stage-head strong{font-size:13px;color:#e7f7ff}
+.rs-wallet-stage-head small{font-size:11px;color:#8cb6dc}
+.rs-wallet-method .payment-choice-copy{min-width:0}
+.rs-wallet-method .payment-choice-copy>strong{font-size:12px;line-height:1.4}
+.rs-wallet-method .payment-choice-copy>small{font-size:10px;line-height:1.5}
+.rs-wallet-method .payment-choice-icon{display:flex;align-items:center;justify-content:center;width:40px;height:40px}
+.rs-wallet-method .payment-method-logo{max-width:34px;max-height:34px;object-fit:contain}
+.rs-wallet-method .payment-method-symbol{display:grid;place-items:center;min-width:34px;min-height:34px}
+.rs-wallet-method .payment-choice-arrow{display:grid;place-items:center;color:#83c8fa}
+.rs-wallet-review-note{padding:12px 14px;border:1px solid #325d7e;background:rgba(9,34,64,.64);border-radius:12px;font-size:11px;color:#9bbedd;line-height:1.55}
+.rs-wallet-amount-field,.rs-wallet-evidence{min-width:0}
+.rs-wallet-network{font-size:10px;letter-spacing:.08em;color:#96d5ff;font-weight:800}
+.rs-wallet-missing{font-size:12px;color:#ffc7c7}
+.rs-wallet-deposit-ui .rs-checkout-method{flex-wrap:wrap}
+.rs-wallet-deposit-ui .rs-pay-destination{width:100%}
+.rs-wallet-deposit-ui #wallet-deposit-preview{overflow-wrap:anywhere;word-break:break-word}
+@media(min-width:900px){.modal:has(.rs-wallet-deposit-ui){width:min(100%,650px);max-height:min(88vh,960px)}}
+@media(max-width:620px){.rs-wallet-deposit-ui{gap:12px}.rs-wallet-deposit-ui .rs-pay-dest-value{flex-wrap:wrap}.rs-wallet-deposit-ui .rs-pay-dest-value code{flex-basis:100%}.rs-wallet-deposit-ui .rs-checkout-total{padding:15px}}
 </style></head>
 <body>
 <div id="app-loader" role="status" aria-label="Cargando Refills Shop">
@@ -1190,7 +1213,7 @@ const icons={inicio:'home',recargas:'game',gift:'gift',pedidos:'file',perfil:'us
 const getStored=(key,fallback)=>{try{return JSON.parse(localStorage.getItem('refills_shop_'+key)??localStorage.getItem('refills_mock_'+key))??fallback}catch{return fallback}};
 const save=(key,data)=>{try{localStorage.setItem('refills_shop_'+key,JSON.stringify(data))}catch{}};
 /* El catálogo antiguo guardado en localStorage no se reintroduce. */
-const s={page:'inicio',authMode:'login',authBusy:false,authError:'',rememberSession:(()=>{try{return localStorage.getItem('refills_shop_remember_session')!=='false'}catch{return true}})(),afterAuthPage:'inicio',authSession:null,profile:null,member:false,resellerPortal:null,resellerLoading:false,wholesalePrices:{},resellerOrders:[],resellerDeposits:[],resellerCurrency:'USDT',resellerDepositCurrency:'USDT',detailId:null,search:'',filter:'todos',offerGroup:'recargas',regionChoice:null,playerTargets:{},playerCheck:null,resellerPreview:null,resellerPreviewTier:'free',sort:'name',payment:'cup',selected:0,player:'',checkoutSession:null,qty:1,modal:null,usdtPayment:null,recentTopups:[],recentTopupsLoaded:false,changes:[],changesLoaded:false,changesLastSeen:getStored('changesSeen',0),changesLastToast:0, nickname:getStored('nickname','Invitado'),favorites:getStored('favs',[]),orders:[],cart:getStored('cart',[]),showFavs:false,selectedOrder:null, role:(window.REFILLS_SESSION&&window.REFILLS_SESSION.role)||'guest', user:(window.REFILLS_SESSION&&window.REFILLS_SESSION.user)||null,
+const s={page:'inicio',authMode:'login',authBusy:false,authError:'',rememberSession:(()=>{try{return localStorage.getItem('refills_shop_remember_session')!=='false'}catch{return true}})(),afterAuthPage:'inicio',authSession:null,profile:null,member:false,resellerPortal:null,resellerLoading:false,wholesalePrices:{},resellerOrders:[],resellerDeposits:[],resellerCurrency:'USDT',resellerDepositCurrency:'USDT',resellerDepositStage:'methods',detailId:null,search:'',filter:'todos',offerGroup:'recargas',regionChoice:null,playerTargets:{},playerCheck:null,resellerPreview:null,resellerPreviewTier:'free',sort:'name',payment:'cup',selected:0,player:'',checkoutSession:null,qty:1,modal:null,usdtPayment:null,recentTopups:[],recentTopupsLoaded:false,changes:[],changesLoaded:false,changesLastSeen:getStored('changesSeen',0),changesLastToast:0, nickname:getStored('nickname','Invitado'),favorites:getStored('favs',[]),orders:[],cart:getStored('cart',[]),showFavs:false,selectedOrder:null, role:(window.REFILLS_SESSION&&window.REFILLS_SESSION.role)||'guest', user:(window.REFILLS_SESSION&&window.REFILLS_SESSION.user)||null,
 rates:getStored('rates',{usdtSm:300,smCup:3,gainSM:0}), adminTab:'resumen',
 adminOrders:getStored('adminOrders',[]), reseller:getStored('reseller',{plan:null,wallet:{USDT:0,CUP:0,SM:0},ledger:[]}),
 paymentConfig:getStored('paymentConfig',{smReceiver:'',cupCard:'',usdtAddress:'',usdtEnabled:false,whatsappNumber:''}),
@@ -2043,24 +2066,59 @@ case 'checkout':
   break;
  }
  case 'wallet':{
-  if(!resellerHasPlan()){html=modalTitle('Wallet de revendedor','Activa un plan para utilizar la wallet')+`<div class="empty"><p>La wallet está reservada para cuentas con un plan de revendedor.</p><button class="btn primary" data-action="modal-nav" data-page="revendedores">Ver planes</button></div>`;break}
-  const instructions=s.resellerPortal?.paymentInstructions||{};
-  const curr=s.resellerDepositCurrency||'USDT';
-  const instruction=curr==='USDT'?`USDT · ${esc(instructions.USDT?.network||'BEP-20')} · ${esc(instructions.USDT?.address||'Dirección no configurada')}`:curr==='CUP'?`Transfermóvil · ${esc(instructions.CUP?.destination||'Datos no configurados')}`:`Saldo móvil ETECSA · ${esc(instructions.SM?.destination||'Datos no configurados')}`;
-  html=modalTitle('Recargar wallet','Envía una solicitud de recarga para tu cuenta mayorista')+
-   `<div class="grid-media wallet-balances"><div class="card panel"><small>USDT</small><strong>${Number(s.reseller.wallet.USDT||0).toFixed(2)}</strong></div><div class="card panel"><small>CUP</small><strong>${fmtMoney(s.reseller.wallet.CUP||0)}</strong></div><div class="card panel"><small>SM</small><strong>${fmtMoney(s.reseller.wallet.SM||0)}</strong></div></div>
-   <span class="sheet-label" for="wallet-currency">Moneda que deseas recargar</span><select id="wallet-currency" class="field"><option value="USDT" ${curr==='USDT'?'selected':''}>USDT BEP-20</option><option value="CUP" ${curr==='CUP'?'selected':''}>CUP · Transfermóvil</option><option value="SM" ${curr==='SM'?'selected':''}>Saldo móvil ETECSA</option></select>
-   <span class="sheet-label" for="wallet-amount">Importe</span><input id="wallet-amount" class="field" type="number" min="0.01" step="0.01" placeholder="Introduce el importe">
-   <div class="payment-instructions"><strong>Datos para transferir</strong><p>${instruction}</p></div>
-   <span class="sheet-label" for="wallet-txhash">Hash de transferencia (solo USDT)</span><input id="wallet-txhash" class="field" type="text" placeholder="0x…">
-   <span class="sheet-label" for="wallet-sender">Número desde el que transfieres (saldo móvil)</span><input id="wallet-sender" class="field" type="tel" placeholder="Tu número de origen">
-   <span class="sheet-label" for="wallet-proof">Comprobante de pago (CUP / SM o si no tienes hash)</span><input id="wallet-proof" class="field" type="file" accept="image/png,image/jpeg,image/webp">
-   <p class="helper">La wallet solo se acredita cuando administración verifica el pago o el hash BEP-20.</p>
-   <button class="btn primary full" data-action="reseller-deposit-submit">Enviar solicitud de recarga</button>`;
+  if(!resellerHasPlan()){
+   html=modalTitle('Wallet de revendedor','Activa un plan para utilizar la wallet')+
+    '<div class="empty"><p>La billetera y sus recargas están disponibles para revendedores con un plan activo.</p><button class="btn primary" data-action="modal-nav" data-page="revendedores">Ver planes</button></div>';
+   break;
+  }
+  const settings=s.resellerPortal?.paymentInstructions||{};
+  const currency=['USDT','CUP','SM'].includes(s.resellerDepositCurrency)?s.resellerDepositCurrency:'USDT';
+  const options={
+   USDT:{title:'USDT · BEP-20',subtitle:'Hash de transacción o captura · Revisión de ingreso',name:'Wallet receptora · USDT BEP-20',recipient:String(settings.USDT?.address||''),network:String(settings.USDT?.network||'BEP-20'),visual:paymentVisual('usdt'),note:'Envía únicamente USDT por la red indicada. Introduce el hash o adjunta una captura. El abono se realizará tras verificar el ingreso.'},
+   CUP:{title:'CUP · Transfermóvil',subtitle:'Captura del comprobante · Revisión manual',name:'Tarjeta receptora · Transfermóvil',recipient:String(settings.CUP?.destination||''),network:'CUP',visual:paymentVisual('cup'),note:'Transfiere el importe exacto y adjunta una captura JPG, PNG o WEBP. Comprobaremos que recibimos el dinero antes de acreditar la wallet.'},
+   SM:{title:'Saldo móvil ETECSA',subtitle:'Captura y número de origen · Revisión manual',name:'Número receptor · Saldo móvil',recipient:String(settings.SM?.destination||''),network:'SM',visual:paymentVisual('sm'),note:'Envía el saldo a la línea indicada, adjunta una captura e introduce el número desde el que realizaste la transferencia.'}
+  };
+  const current=options[currency];
+  if(s.resellerDepositStage!=='details'){
+   html=modalTitle('Depositar en wallet','Elige cómo deseas recargar tu cuenta de revendedor')+
+    '<div class="rs-checkout-simple rs-wallet-deposit-ui"><div class="rs-checkout-total"><div><span>TU SALDO DISPONIBLE</span><strong>'+
+    Number(s.reseller.wallet?.USDT||0).toFixed(2)+' <small>USDT</small></strong></div><div><small>Recarga en USDT, CUP o saldo móvil. La acreditación requiere confirmación del ingreso.</small></div></div>'+
+    '<div class="rs-wallet-stage-head"><strong>Selecciona un método de depósito</strong><small>Los datos para pagar aparecerán en el siguiente paso.</small></div>'+
+    '<div class="payment-choice-list">'+Object.entries(options).map(([code,item])=>{
+     const available=!!item.recipient;
+     return '<button type="button" class="payment-choice rs-wallet-method" data-action="wallet-select-currency" data-currency="'+code+'" '+(!available?'disabled':'')+'>'+
+       '<span class="payment-choice-icon">'+item.visual+'</span><span class="payment-choice-copy"><strong>'+esc(item.title)+'</strong><small>'+esc(available?item.subtitle:'Método sin cuenta receptora configurada')+'</small></span><span class="payment-choice-arrow">'+I('arrow','tiny')+'</span></button>';
+    }).join('')+'</div>'+
+    '<div class="rs-wallet-review-note">Las solicitudes se acreditan solamente después de verificar la transferencia. No compartas datos de tu cuenta con terceros.</div></div>';
+   break;
+  }
+  const balance=Number(s.reseller.wallet?.USDT||0);
+  html=modalTitle('Depositar en wallet','Datos para transferir y enviar comprobante')+
+   '<div class="rs-checkout-simple rs-wallet-deposit-ui"><div class="rs-checkout-total"><div><span>IMPORTE A DEPOSITAR</span><strong id="wallet-deposit-preview">0.00 <small>'+currency+'</small></strong></div><div><small>Saldo actual: '+balance.toFixed(2)+' USDT</small><small>La acreditación no es instantánea: se verificará el pago primero.</small></div></div>'+
+   '<div class="rs-checkout-method"><span>'+current.visual+'<strong>'+esc(current.title)+'</strong></span><button type="button" class="btn ghost small" data-action="wallet-change-currency">Cambiar</button></div>'+
+   '<div class="rs-checkout-inputs rs-wallet-amount-field"><label class="sheet-label" for="wallet-amount">¿Cuánto deseas depositar? ('+currency+')</label>'+
+    '<input id="wallet-amount" class="field" type="number" inputmode="decimal" min="'+(currency==='USDT'?'0.01':'1')+'" step="'+(currency==='USDT'?'0.01':'1')+'" autocomplete="off" placeholder="'+(currency==='USDT'?'Ejemplo: 5.00':'Ejemplo: 500')+'" required>'+
+    '<small>Envía exactamente el importe que indicas aquí.</small><input id="wallet-currency" type="hidden" value="'+currency+'"></div>'+
+   '<section class="rs-pay-destination"><div class="rs-pay-dest-head"><span>DATOS PARA PAGAR</span><span class="rs-pay-dest-mode">EN REVISIÓN</span></div>'+
+    '<h3>'+esc(current.name)+'</h3>'+
+    '<div class="rs-pay-dest-value">'+(current.recipient?
+      '<code>'+esc(current.recipient)+'</code><button type="button" class="btn secondary small" data-action="wallet-copy-recipient">Copiar</button>':
+      '<span class="rs-wallet-missing">No hay datos receptores configurados. No envíes dinero.</span>')+'</div>'+
+    (currency==='USDT'?'<div class="rs-wallet-network">RED · '+esc(current.network)+'</div>':'')+
+    '<p>'+esc(current.note)+'</p></section>'+
+   '<div class="rs-checkout-inputs rs-wallet-evidence">'+
+   (currency==='USDT'?'<label class="sheet-label" for="wallet-txhash">Hash de transacción USDT (recomendado)</label><input id="wallet-txhash" class="field" type="text" autocomplete="off" placeholder="0x…"><small>Si todavía no tienes el hash, puedes adjuntar una captura.</small>':'')+
+   (currency==='SM'?'<label class="sheet-label" for="wallet-sender">Número desde el que transferiste</label><input id="wallet-sender" class="field" type="tel" inputmode="numeric" maxlength="20" placeholder="Número de la línea emisora" required>':'')+
+   '<label class="sheet-label" for="wallet-proof">Captura del comprobante '+(currency==='USDT'?'(si no envías hash)':'(obligatoria)')+'</label>'+
+   '<input id="wallet-proof" class="field rs-proof-input" type="file" accept="image/png,image/jpeg,image/webp" '+(currency==='USDT'?'':'required')+'>'+
+   '<small>JPG, PNG o WEBP · tamaño máximo 5 MB.</small></div>'+
+   '<button class="btn primary full rs-checkout-submit" data-action="reseller-deposit-submit" '+(!current.recipient?'disabled':'')+'>'+
+     I('check','tiny')+' Enviar solicitud de depósito</button>'+
+   '<p class="rs-checkout-footnote">La captura o el hash no significan que el dinero ya esté acreditado. Consulta su estado en Movimientos.</p></div>';
   break;
  }
  case 'reseller-deposit':
-  s.modal='wallet';modal();return;
+  s.resellerDepositStage='methods';s.modal='wallet';modal();return;
  case 'reseller-ledger':
   if(!resellerHasPlan()){html=modalTitle('Movimientos de wallet','Disponible con un plan de revendedor')+`<div class="empty"><p>Activa un plan para consultar los movimientos de tu wallet.</p><button class="btn primary" data-action="modal-nav" data-page="revendedores">Ver planes</button></div>`}
   else{
@@ -2141,7 +2199,8 @@ document.addEventListener('change',e=>{
   const target=document.querySelector('#modal-root .payment-instructions p');if(target)target.textContent=message;
  }
 });
-document.addEventListener('input',e=>{if(e.target.id==='catalog-search'){s.search=e.target.value;refreshCatalog()}if(e.target.id==='player-input'){s.player=e.target.value;s.playerCheck=null;queuePlayerVerification()}if(e.target.matches('.rs-target-field')){const offer=itemBy(s.detailId)?.offers?.[s.selected];if(offer){s.playerTargets[offer.id]||={};s.playerTargets[offer.id][e.target.dataset.targetKey]=e.target.value;s.playerCheck=null;queuePlayerVerification()}}});
+document.addEventListener('input',e=>{if(e.target?.id==='wallet-amount'){const el=document.getElementById('wallet-deposit-preview');const curr=s.resellerDepositCurrency||'USDT';const v=Number(e.target.value);if(el)el.innerHTML=(Number.isFinite(v)&&v>0?v.toLocaleString('es-ES',{minimumFractionDigits:curr==='USDT'?2:0,maximumFractionDigits:curr==='USDT'?2:0}):'0.00')+' <small>'+curr+'</small>';}
+if(e.target.id==='catalog-search'){s.search=e.target.value;refreshCatalog()}if(e.target.id==='player-input'){s.player=e.target.value;s.playerCheck=null;queuePlayerVerification()}if(e.target.matches('.rs-target-field')){const offer=itemBy(s.detailId)?.offers?.[s.selected];if(offer){s.playerTargets[offer.id]||={};s.playerTargets[offer.id][e.target.dataset.targetKey]=e.target.value;s.playerCheck=null;queuePlayerVerification()}}});
 document.addEventListener('change',e=>{if(e.target.id==='sort-catalog'){s.sort=e.target.value;refreshCatalog()}});
 document.addEventListener('keydown',e=>{if(e.key==='Escape'&&s.modal){s.modal=null;modal()}if((e.key==='Enter'||e.key===' ')&&e.target.classList.contains('brand')){e.preventDefault();navigate('inicio')}if((e.key==='Enter'||e.key===' ')&&e.target.classList.contains('product-clickable')){e.preventDefault();openDetail(e.target.dataset.id)}});
 document.addEventListener('click',e=>{let b=e.target.closest('[data-action]');if(!b)return;const action=b.dataset.action;if(action==='backdrop'&&e.target!==b)return;e.preventDefault();switch(action){
@@ -2153,10 +2212,13 @@ case 'reseller-preview':void openResellerPlanPreview(b.dataset.tier);break;
 case 'reseller-deposit-submit':void submitResellerDeposit();break;
 
 case 'nav':navigate(b.dataset.page);break;case 'modal-nav':navigate(b.dataset.page);break;
-case 'home-wallet-deposit':s.modal='wallet';modal();break;case 'home-wallet-movements':s.modal='reseller-ledger';modal();break;
+case 'home-wallet-deposit':s.resellerDepositStage='methods';s.modal='wallet';modal();break;case 'home-wallet-movements':s.modal='reseller-ledger';modal();break;
+case 'wallet-select-currency':{s.resellerDepositCurrency=b.dataset.currency;s.resellerDepositStage='details';modal();break;}
+case 'wallet-change-currency':{s.resellerDepositStage='methods';modal();break;}
+case 'wallet-copy-recipient':{const data=s.resellerPortal?.paymentInstructions||{};const currency=s.resellerDepositCurrency||'USDT';const val=currency==='USDT'?data.USDT?.address:currency==='CUP'?data.CUP?.destination:data.SM?.destination;if(!val){toast('No hay cuenta receptora configurada');break;}void navigator.clipboard?.writeText(String(val)).then(()=>toast('Datos para pagar copiados'),()=>toast('Mantén pulsado el dato para copiarlo'));break;}
 case 'open-item':openDetail(b.dataset.id);break;
 case 'choose-region':openRegionGame(b.dataset.id,b.dataset.region);break;
-case 'modal':s.modal=b.dataset.modal;if(s.modal==='alerts'){s.changesLastSeen=Math.max(Number(s.changesLastSeen||0),Number(s.changes?.[0]?.id||0));save('changesSeen',s.changesLastSeen);updateChangeBadge();}modal();break;
+case 'modal':s.modal=b.dataset.modal;if(s.modal==='wallet')s.resellerDepositStage='methods';if(s.modal==='alerts'){s.changesLastSeen=Math.max(Number(s.changesLastSeen||0),Number(s.changes?.[0]?.id||0));save('changesSeen',s.changesLastSeen);updateChangeBadge();}modal();break;
 case 'close':case 'backdrop':s.modal=null;modal();break;
 case 'fav':{let idx=s.favorites.indexOf(b.dataset.id);if(idx>=0)s.favorites.splice(idx,1);else s.favorites.push(b.dataset.id);save('favs',s.favorites);if(s.page==='perfil'||s.showFavs)render();else{b.classList.toggle('active');b.title=idx>=0?'Añadir a favoritos':'Eliminar de favoritos'}toast(idx>=0?'Eliminado de favoritos':'Guardado en favoritos');break;}
 case 'only-favs':s.showFavs=!s.showFavs;render();break;
