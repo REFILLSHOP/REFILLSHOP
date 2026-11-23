@@ -26,7 +26,7 @@ alert:'<path d="M12 2 2 21h20z"/><path d="M12 9v5M12 17h.01"/>'
 };
 const ico=(name)=>'<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" width="19" height="19" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">'+(paths[name]||paths.shield)+'</svg>';
 const MENU=[['overview','Resumen','overview','Indicadores y accesos'],['games','Juegos','games','Tu catálogo'],['offers','Ofertas','offers','Precios y productos'],['orders','Pedidos','orders','Compras y entregas'],['customers','Clientes','customers','Cuentas y seguridad'],['resellers','Revendedores','resellers','Planes y depósitos'],['payments','Pagos y tasas','payments','Configuración comercial'],['centralone','Central One','centralone','Integración proveedor']];
-const S={client:null,user:null,page:'overview',busy:false,rememberSession:true,cache:{},search:'',offerSearch:'',editingGameId:null,gameFilter:'all',offerFilter:'all',coFilter:'',coKind:'all',product:null,offerMode:'centralone',bulkNotice:'',bulkFamily:''};
+const S={client:null,user:null,page:'overview',busy:false,rememberSession:true,cache:{},search:'',offerSearch:'',editingGameId:null,gameFilter:'all',offerFilter:'all',coFilter:'',coKind:'all',product:null,offerMode:'centralone',bulkNotice:'',bulkFamily:'',regionGame:'',regionName:'',regionMarginPct:null};
 function flash(message,error=false){
  const el=$('notify');el.textContent=String(message||'');el.classList.toggle('error',error);el.hidden=false;
  clearTimeout(flash.timer);flash.timer=setTimeout(()=>el.hidden=true,5000);
@@ -179,6 +179,44 @@ function drawGames(){
  +(filtered.length?'<div class="list">'+filtered.map(g=>'<div class="record"><div class="record-main"><img class="thumb" alt="" src="'+esc(/^https:\/\//.test(g.imageUrl||'')?g.imageUrl:'/REFILLSHOP/assets/refills-icon.png')+'"><div><h3>'+esc(g.name)+'</h3><small>'+esc(g.id)+' · '+esc(g.tag||'Juegos')+'</small></div></div><div class="row-actions">'+tag(g.active?'Publicado':'Archivado',g.active?'good':'warn')+'<button class="btn ghost small" data-action="edit-game" data-id="'+esc(g.id)+'">Editar</button>'+(g.active?'<button class="btn secondary small" data-page="offers">Ofertas</button>':'<button class="btn secondary small" data-action="restore-game" data-id="'+esc(g.id)+'">Restaurar</button>')+'<button class="btn danger small" data-action="delete-game" data-id="'+esc(g.id)+'">Eliminar</button></div></div>').join('')+'</div>':empty('Sin resultados','No hay juegos que coincidan.'))+'</section></div>';
 }
 
+
+function regionMarginPanel(){
+ const games=(S.cache.games||[]).filter(g=>g.active),offers=S.cache.offers||[];
+ const game=games.find(g=>g.id===S.regionGame)||games[0]||null;
+ const regions=[...new Set(offers.filter(o=>o.game_id===game?.id).map(o=>String(o.provider_region||'').trim()).filter(Boolean))].sort((a,b)=>a.localeCompare(b,'es'));
+ const region=regions.includes(S.regionName)?S.regionName:(regions[0]||'');
+ const relevant=offers.filter(o=>o.game_id===game?.id&&String(o.provider_region||'').trim()===region);
+ const unique=[...new Set(relevant.map(o=>Number(o.margin_percent||0)))];
+ const storedPct=unique.length===1?unique[0]:null;
+ const percentage=S.regionMarginPct!==null&&game?.id===S.regionGame&&region===S.regionName?S.regionMarginPct:storedPct;
+ const example=relevant.find(o=>Number(o.provider_price_usdt)>0)||null;
+ const rate=Number(S.cache.store?.config?.buySmPerUsdt||0),cup=Number(S.cache.store?.config?.cupPerSm||0);
+ const previewValue=example&&Number.isFinite(percentage)?Math.floor((Number(example.provider_price_usdt)*(1+percentage/100)+1e-9)*100)/100:null;
+ const sm=previewValue!==null&&rate>0?Math.ceil(previewValue*rate):null;
+ const cupValue=sm!==null&&cup>0?Math.ceil(sm*cup):null;
+ return '<section class="surface section rs-regional-margin-panel"><div class="panel-head"><div><span class="tag">CONTROL DE GANANCIA POR REGIÓN</span><h2>Ganancia de un juego por región</h2><small>Cambia el porcentaje de las ofertas existentes en una región, sin modificar las demás.</small></div>'+ico('offers')+'</div>'
+ +'<div class="form-grid"><label>Juego<select id="region-margin-game">'+games.map(g=>'<option value="'+esc(g.id)+'" '+(g.id===game?.id?'selected':'')+'>'+esc(g.name)+'</option>').join('')+'</select></label>'
+ +'<label>Región<select id="region-margin-region">'+regions.map(r=>'<option value="'+esc(r)+'" '+(region===r?'selected':'')+'>'+esc(r)+'</option>').join('')+'</select></label>'
+ +'<label>Ganancia sobre el costo del proveedor (%)<input id="region-margin-pct" type="number" min="0" max="300" step="0.01" inputmode="decimal" value="'+(percentage===null?'':percentage)+'" placeholder="'+(unique.length>1?'Las ofertas tienen márgenes diferentes':'Ejemplo: 30')+'"></label>'
+ +'<div class="preview" id="region-margin-preview"><small>'+relevant.length+' OFERTAS EN '+esc(region||'ESTA REGIÓN')+'</small><strong id="region-margin-preview-value">'+(previewValue!==null?usd(previewValue)+' USDT':'Introduce el porcentaje')+'</strong><span id="region-margin-preview-other">'+(cupValue!==null?money(sm)+' SM · '+money(cupValue)+' CUP':'Vista previa según las tasas globales')+'</span></div>'
+ +'</div><div class="form-actions"><button type="button" class="btn primary" data-action="region-margin-save" '+(!relevant.length?'disabled':'')+'>Guardar ganancia de esta región</button></div>'
+ +'<p class="footer-caption">Se actualizarán '+relevant.length+' ofertas de '+esc(game?.name||'Juego')+' · '+esc(region||'Sin región')+'. Las ofertas, estados y precios de otras regiones no se tocan. Los pedidos existentes conservan su importe original.</p>'
+ +'</section><div class="spacing"></div>';
+}
+function updateRegionMarginPreview(){
+ const box=$('region-margin-preview'),value=$('region-margin-preview-value'),other=$('region-margin-preview-other');
+ const gameId=$('region-margin-game')?.value,region=$('region-margin-region')?.value,percent=Number($('region-margin-pct')?.value);
+ const o=(S.cache.offers||[]).find(x=>x.game_id===gameId&&x.provider_region===region&&Number(x.provider_price_usdt)>0);
+ const config=S.cache.store?.config||{},rate=Number(config.buySmPerUsdt),cup=Number(config.cupPerSm);
+ const valid=$('region-margin-pct')?.value.trim()!==''&&Number.isFinite(percent)&&percent>=0&&percent<=300;
+ if(box)box.classList.toggle('invalid',!valid);
+ if(!valid||!o){if(value)value.textContent='Introduce una ganancia entre 0 y 300 %';if(other)other.textContent='No se cambiará ningún precio hasta que confirmes.';return}
+ const usdt=Math.floor((Number(o.provider_price_usdt)*(1+percent/100)+1e-9)*100)/100;
+ const sm=Math.ceil(usdt*rate);
+ if(value)value.textContent=usd(usdt)+' USDT';
+ if(other)other.textContent=rate>0&&cup>0?money(sm)+' SM · '+money(Math.ceil(sm*cup))+' CUP':'Revisa las tasas de conversión';
+}
+
 function bulkOffersPanel(){
  const games=(S.cache.games||[]).filter(g=>g.active),families=S.cache.coFamilies||[],regions=S.cache.bulkRegions||[];
  const cfg=S.cache.store?.config||{},selectedGame=games.find(g=>g.id===S.bulkGame)||games[0];
@@ -254,7 +292,7 @@ function drawOffers(){
  const filtered=offers.filter(o=>(S.offerFilter==='all'||(S.offerFilter==='active')===!!o.active));
  const settings=S.cache.store?.config||{};
  const previews=o=>{const sm=Math.ceil(Number(o.provider_price_usdt||0)*Number(settings.buySmPerUsdt||0)+Number(o.gain_sm||0));const cup=Math.ceil(sm*Number(settings.cupPerSm||0));return sm>0&&cup>0?money(sm)+' SM / '+money(cup)+' CUP':'Revisar tasas'};
- $('admin-view').innerHTML=bulkOffersPanel()+'<div class="surface section"><div class="panel-head"><div><h2>Crear oferta</h2><small>Selecciona un producto de Central One o crea un borrador manual</small></div>'+ico('plus')+'</div><div class="tabs"><button data-action="mode-centralone" class="'+(S.offerMode==='centralone'?'active':'')+'">Catálogo Central One</button><button data-action="mode-manual" class="'+(S.offerMode==='manual'?'active':'')+'">Borrador manual</button></div>'
+ $('admin-view').innerHTML=regionMarginPanel()+bulkOffersPanel()+'<div class="surface section"><div class="panel-head"><div><h2>Crear oferta</h2><small>Selecciona un producto de Central One o crea un borrador manual</small></div>'+ico('plus')+'</div><div class="tabs"><button data-action="mode-centralone" class="'+(S.offerMode==='centralone'?'active':'')+'">Catálogo Central One</button><button data-action="mode-manual" class="'+(S.offerMode==='manual'?'active':'')+'">Borrador manual</button></div>'
  +(S.offerMode==='manual'
  ?'<form id="manual-offer-form" class="form-grid spacer"><label>Juego <select name="gameId" required>'+games.map(g=>'<option value="'+esc(g.id)+'">'+esc(g.name)+'</option>').join('')+'</select></label><label>Nombre de la oferta<input name="name" required placeholder="Paquete / diamantes"></label><label>Costo proveedor USDT<input type="number" name="providerPriceUsdt" min=".0001" step=".0001" required></label><label>Ganancia en SM<input type="number" name="gainSm" min="0" step=".01" value="0" required></label><div class="form-actions wide"><button class="btn primary" type="submit">Guardar borrador</button></div></form><div class="alert-note">Los borradores no están visibles ni generan compras hasta vincularlos y verificar el proveedor.</div>'
  :'<div class="toolbar spacer"><input id="co-search-inline" type="search" placeholder="Buscar producto o categoría de Central One…" value="'+esc(S.coFilter)+'"><button class="btn secondary" data-action="search-co">Buscar catálogo</button></div>'+renderCoResults()+
@@ -423,6 +461,20 @@ async function openOfferEdit(id){
 function modalConfirm(text){return window.confirm(text)}
 async function runAction(action,el){
  const id=el.dataset.id,code=el.dataset.code;
+ if(action==='region-margin-save')return withBusy(async()=>{
+  const gameId=$('region-margin-game')?.value,region=$('region-margin-region')?.value;
+  const raw=$('region-margin-pct')?.value,marginPercent=Number(raw);
+  if(!raw||!gameId||!region||!Number.isFinite(marginPercent)||marginPercent<0||marginPercent>300)
+   throw Error('Selecciona juego y región y escribe un porcentaje entre 0 y 300.');
+  const matches=(S.cache.offers||[]).filter(o=>o.game_id===gameId&&o.provider_region===region);
+  if(!matches.length)throw Error('La región no tiene ofertas. Actualiza el catálogo.');
+  const game=(S.cache.games||[]).find(x=>x.id===gameId);
+  if(!modalConfirm('¿Cambiar el margen a '+marginPercent+' % en las '+matches.length+' ofertas de '+(game?.name||gameId)+' · '+region+'? Se mantienen intactas las otras regiones.'))return;
+  const result=await request('/admin/region-margin',{method:'POST',body:{gameId,region,marginPercent}});
+  if(!result?.ok||result.updated!==matches.length)throw Error('No se pudo confirmar la actualización. Actualiza el catálogo antes de intentar de nuevo.');
+  S.regionGame=gameId;S.regionName=region;S.regionMarginPct=null;
+  await load('offers');flash(result.message||'Ganancia regional actualizada.');
+ });
  if(action==='bulk-apply')return withBusy(async()=>{const args=bulkArgs();if(!modalConfirm('¿Actualizar SOLO '+args.region+' con ganancia '+args.marginPercent+' %?'))return;await applyExistingMargin(args);await load('offers')});
  if(action==='bulk-import')return withBusy(async()=>{const args=bulkArgs();await importFamilyOffers(args)});
  if(action==='close-modal')return closeModal();
@@ -514,6 +566,7 @@ function filterVisibleRecords(value,root){
 }
 document.addEventListener('input',e=>{
  if(e.target?.id==='bulk-margin'){S.bulkMargin=Number(e.target.value);updateBulkPreview();}
+ if(e.target?.id==='region-margin-pct'){S.regionMarginPct=e.target.value===''?null:Number(e.target.value);updateRegionMarginPreview();}
  const id=e.target.id;
  if(id==='filter-games'){S.search=e.target.value;filterVisibleRecords(e.target.value,e.target.closest('.surface')||$('admin-view'))}
  if(id==='filter-offers'){S.offerSearch=e.target.value;filterVisibleRecords(e.target.value,e.target.closest('.surface')||$('admin-view'))}
@@ -521,6 +574,8 @@ document.addEventListener('input',e=>{
  if(id==='filter-customers'){S.search=e.target.value;filterVisibleRecords(e.target.value,e.target.closest('.surface')||$('admin-view'))}
 });
 document.addEventListener('change',e=>{
+ if(e.target?.id==='region-margin-game'){S.regionGame=e.target.value;S.regionName='';S.regionMarginPct=null;drawOffers();return}
+ if(e.target?.id==='region-margin-region'){S.regionGame=$('region-margin-game')?.value||'';S.regionName=e.target.value;S.regionMarginPct=null;drawOffers();return}
  if(e.target?.id==='bulk-family'){
   const family=e.target.value;S.bulkFamily=family;S.bulkRegion='';S.cache.bulkRegions=[];S.cache.bulkFamilySample=null;
   updateBulkPreview();const select=$('bulk-region');
