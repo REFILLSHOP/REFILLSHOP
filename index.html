@@ -1646,7 +1646,7 @@ function gameRegionOptions(g){
 }
 function openRegionGame(id,region=''){
  const g=itemBy(id);if(!g)return;
- s.detailId=id;s.selected=0;s.regionChoice=region||null;s.player='';s.offerGroup='recargas';s.playerTargets={};s.playerCheck=null;s.qty=1;s.modal=null;s.page='detalle';
+ s.detailId=id;s.selected=0;s.checkoutSession=null;s.regionChoice=region||null;s.player='';s.offerGroup='recargas';s.playerTargets={};s.playerCheck=null;s.qty=1;s.modal=null;s.page='detalle';
  const matches=(g.offers||[]).map((o,i)=>({o,i})).filter(x=>!s.regionChoice||String(x.o.region||'Global')===s.regionChoice);
  const selected=matches.find(x=>offerGroup(x.o)==='recargas')||matches[0];
  if(selected){s.selected=selected.i;s.offerGroup=offerGroup(selected.o)}
@@ -1846,6 +1846,61 @@ function profile(){
  </div>`;
 }
 function modalTitle(title,desc=''){return `<div class="modal-title"><div><h2>${title}</h2>${desc?`<p>${desc}</p>`:''}</div><button class="xbtn" data-action="close" aria-label="Cerrar">${I('close')}</button></div>`}
+
+let rsCheckoutClockTimer=null;
+function startCheckoutCountdown(){
+ if(rsCheckoutClockTimer){clearInterval(rsCheckoutClockTimer);rsCheckoutClockTimer=null}
+ const expiration=Date.parse(s.checkoutSession?.expiresAt||s.usdtPayment?.expiresAt||'');
+ const clock=document.getElementById('rs-deadline-clock');
+ if(!clock||!Number.isFinite(expiration))return;
+ function updateClock(){
+  const target=document.getElementById('rs-deadline-clock');
+  if(!target){clearInterval(rsCheckoutClockTimer);rsCheckoutClockTimer=null;return}
+  const remaining=Math.max(0,Math.ceil((expiration-Date.now())/1000));
+  target.textContent=String(Math.floor(remaining/60)).padStart(2,'0')+':'+String(remaining%60).padStart(2,'0');
+  const panel=target.closest('.rs-payment-deadline');
+  panel?.classList.toggle('is-urgent',remaining>0&&remaining<=120);
+  panel?.classList.toggle('is-expired',remaining===0);
+  if(remaining<=0){
+   for(const action of ['send-order','verify-usdt-payment']){const button=modalRoot.querySelector('[data-action="'+action+'"]');if(button)button.disabled=true}
+   clearInterval(rsCheckoutClockTimer);rsCheckoutClockTimer=null;
+   const small=panel?.querySelector('small');if(small)small.textContent='Tiempo agotado. No envíes más dinero; el pedido se marcará como fallido. Contacta soporte si ya pagaste.';
+  }
+ }
+ updateClock();if(rsCheckoutClockTimer===null&&expiration>Date.now())rsCheckoutClockTimer=setInterval(updateClock,1000);
+}
+async function startPaymentReservation(button){
+ const g=itemBy(s.detailId),o=g?.offers?.[s.selected],player=String(s.player||'').trim();
+ if(!s.user||!g||!o){toast('Selecciona una recarga válida.');return}
+ if(!s.salesEnabled||!o.purchasable||!o.inStock){toast('La tienda todavía no acepta compras. No transfieras dinero.');return}
+ if(o.kind!=='pin'&&!(s.playerCheck?.status==='valid'&&s.playerCheck.offerId===o.id&&s.playerCheck.player===player)){toast('Valida el ID antes de pagar.');return}
+ if(s.payment==='balance'){s.modal='checkout';modal();return}
+ const method=s.payment==='sm'?'mobile':s.payment==='cup'?'card':s.payment==='mitransfer'?'wallet':s.payment==='usdt'?'usdt_wallet':null;
+ if(!method){toast('El método de pago no está disponible.');return}
+ const amount=Number(method==='mobile'?o.sm:method==='card'?o.card:method==='wallet'?o.cup:o.usdt);
+ const currency=method==='mobile'?'SM':method==='usdt_wallet'?'USDT':'CUP';
+ if(!Number.isFinite(amount)||amount<=0){toast('El precio no está disponible.');return}
+ let targetPayload;
+ try{targetPayload=playerTargetData(o,true)}catch(err){toast(err.message);return}
+ const requestId=newRequestId();
+ button.disabled=true;button.textContent='Preparando pago seguro…';
+ try{
+  const result=await edgeRequest('rs10-api','/orders/start',{method:'POST',auth:true,body:{
+    gameId:g.id,offerId:o.id,clientRequestId:requestId,method,playerId:player||'PIN',
+    targetPayload,quotedAmount:amount,quotedCurrency:currency
+  }});
+  if(!result?.order?.code||!result?.expiresAt)throw Error('No se confirmó el plazo de pago en el servidor.');
+  s.checkoutSession={requestId,code:result.order.code,expiresAt:result.expiresAt,method,offerId:o.id,gameId:g.id,player};
+  if(method==='usdt_wallet'){
+   s.usdtPayment={code:result.order.code,amount:Number(result.payment?.amount||amount),
+     address:result.payment?.address||s.paymentConfig.usdtAddress||'',network:'BEP-20',
+     txHash:'',message:'',expiresAt:result.expiresAt};
+   s.modal='usdt-wallet-pay';
+  }else{s.modal='checkout'}
+  modal();
+ }catch(err){toast(err?.message||'No se pudo reservar el pedido. No realices transferencias.');button.disabled=false;button.textContent='Confirmar y continuar al pago'}
+}
+
 function checkoutPaymentInstructions(){
  const method=s.payment;
  const data=method==='cup'?{name:'Tarjeta receptora · Transfermóvil',value:s.paymentConfig.cupCard,type:'Tarjeta CUP'}:
@@ -1983,6 +2038,7 @@ case 'checkout':
  }
  }
  modalRoot.innerHTML=`<div class="overlay" data-action="backdrop"><section class="modal" role="dialog" aria-modal="true" aria-label="${esc(s.modal)}"><div class="sheet-grabber" aria-hidden="true"></div>${html}</section></div>`;
+ if(s.modal==='checkout'||s.modal==='usdt-wallet-pay')startCheckoutCountdown();else if(rsCheckoutClockTimer){clearInterval(rsCheckoutClockTimer);rsCheckoutClockTimer=null}
 }
 function render(scroll=false){headerNav();
 if(s.page==='detalle')main.innerHTML=detail();
@@ -2005,6 +2061,7 @@ function openDetail(id){let g=itemBy(id);if(!g)return;const regions=gameRegionOp
 function toast(t){const root=document.getElementById('toast-root');root.innerHTML=`<div class="toast">${esc(t)}</div>`;clearTimeout(toast.timer);toast.timer=setTimeout(()=>root.innerHTML='',2800)}
 function changePayment(p){
  if(!PAYMENT_METHODS[p])return;
+ if(s.checkoutSession&&s.modal==='checkout'){toast('Este pedido ya tiene un método confirmado. Cierra el pago para crear otro.');return}
  if(p==='balance'&&!resellerHasPlan()){toast('Activa uno de los planes de revendedor para pagar con tu saldo de Refills Shop.');return}
  if(p==='balance'&&s.detailId){const selectedOffer=itemBy(s.detailId)?.offers?.[s.selected];if(selectedOffer&&!currentPrice(selectedOffer,'balance')){toast('Esta oferta no tiene costo de proveedor configurado para el pago con wallet.');return}}
  if(p==='usdt'&&(!s.paymentConfig.usdtEnabled||!s.paymentConfig.usdtAddress)){toast('USDT wallet propia todavía no está habilitada por administración.');return}
@@ -2273,6 +2330,7 @@ if(a==='send-order'){
  if(!s.user||!g||!o?.id){toast('Selecciona una oferta publicada.');return}
  if(!s.salesEnabled||!o.purchasable||!o.inStock){toast('La tienda todavía no acepta compras. No transfieras dinero.');return}
  if(s.qty!==1){toast('Realiza un pedido por oferta.');return}
+ if(s.payment!=='balance'&&(!s.checkoutSession||s.checkoutSession.offerId!==o.id||Date.parse(s.checkoutSession.expiresAt)<=Date.now())){toast('La reserva de pago ya no es válida. Inicia de nuevo el pedido.');return}
  let targetPayload;
  try{targetPayload=playerTargetData(o,true)}catch(err){toast(err.message);return}
  const player=String(s.player||'').trim();
@@ -2297,22 +2355,22 @@ if(a==='send-order'){
    const sourcePhone=method==='mobile'?String(document.getElementById('payment-source-phone')?.value||'').trim():'';
    if(method==='mobile'&&!/^[0-9]{8}$/.test(sourcePhone))throw Error('Introduce los 8 dígitos de la línea que envió saldo.');
    const paymentReference=['card','wallet'].includes(method)?String(document.getElementById('payment-reference')?.value||'').trim():'';
-   if(['card','wallet'].includes(method)&&paymentReference.length<4)throw Error('Introduce el número de transacción u operación.');
+   if(paymentReference&&!/^[A-Za-z0-9][A-Za-z0-9._/-]{3,79}$/.test(paymentReference))throw Error('La referencia del comprobante contiene caracteres no válidos.');
    let receipt='';
-   if(method==='mobile'){
+   if(['mobile','card','wallet'].includes(method)){
     const file=document.getElementById('payment-proof')?.files?.[0];
-    if(!file)throw Error('Adjunta la captura del saldo móvil.');
+    if(!file)throw Error('Adjunta la captura del pago realizado.');
     if(file.size>5242880||!['image/jpeg','image/png','image/webp'].includes(file.type))throw Error('La captura debe ser JPG, PNG o WEBP y pesar como máximo 5 MB.');
     receipt=await new Promise((resolve,reject)=>{const reader=new FileReader();reader.onload=()=>resolve(reader.result);reader.onerror=()=>reject(Error('No se pudo leer el comprobante.'));reader.readAsDataURL(file)});
    }
-   result=await edgeRequest('rs10-api','/orders',{method:'POST',auth:true,body:{gameId:g.id,offerId:o.id,clientRequestId:newRequestId(),method,playerId:player||'PIN',targetPayload,quotedAmount,quotedCurrency,sourcePhone,paymentReference,receipt}});
+   result=await edgeRequest('rs10-api','/orders',{method:'POST',auth:true,body:{gameId:g.id,offerId:o.id,clientRequestId:s.checkoutSession.requestId,method,playerId:player||'PIN',targetPayload,quotedAmount,quotedCurrency,sourcePhone,paymentReference,receipt}});
    if(method==='usdt_wallet'){
     s.usdtPayment={code:result.order.code,amount:Number(result.payment?.amount||quotedAmount),address:result.payment?.address||s.paymentConfig.usdtAddress||'',network:'BEP-20',txHash:'',message:''};
     s.modal='usdt-wallet-pay';modal();toast('Pedido creado. Envía el importe exacto y verifica el hash.');return;
    }
   }
   if(!result?.ok&&!result?.order)throw Error('El servidor no confirmó el pedido.');
-  s.modal=null;await loadCustomerOrders();navigate('pedidos');toast('Pedido registrado. Comprueba el estado en Pedidos.');
+  s.checkoutSession=null;s.modal=null;await loadCustomerOrders();navigate('pedidos');toast('Comprobante enviado. Comprueba el estado en Pedidos.');
  }catch(err){toast(err?.message||'No se pudo registrar la compra.');}
  finally{b.disabled=false;b.textContent='Enviar solicitud de compra';}
  return;
