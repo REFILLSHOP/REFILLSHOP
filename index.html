@@ -939,6 +939,26 @@ img{max-width:100%}
 }
 </style>
 
+<style id="refills-performance-polish-v1">
+/* Rendimiento visual y microinteracciones */
+.content{animation:rsContentIn .22s ease-out both}
+@keyframes rsContentIn{from{opacity:0;transform:translateY(5px)}to{opacity:1;transform:translateY(0)}}
+.product,.home-game-card-v4,.notice,.card{transition:transform .18s ease,border-color .18s ease,box-shadow .18s ease}
+.product img,.home-game-art-v4 img{display:block;max-width:100%;height:auto}
+.product-cover img,.home-game-art-v4 img{content-visibility:auto}
+@media(hover:hover){
+ .product:hover,.home-game-card-v4:hover,.notice:hover{transform:translateY(-2px);border-color:rgba(93,177,255,.55);box-shadow:0 12px 30px rgba(0,0,0,.2)}
+ .btn:hover{transform:translateY(-1px)}
+}
+button,a,input,select{touch-action:manipulation}
+.remember-row-v7{display:flex;align-items:center;gap:11px;padding:11px 12px;border:1px solid rgba(83,151,234,.25);border-radius:12px;background:rgba(8,27,56,.62);cursor:pointer}
+.remember-row-v7 input{width:17px;height:17px;min-width:17px;accent-color:#39aaff;margin:0}
+.remember-row-v7 span{display:flex;flex-direction:column;gap:3px;min-width:0}
+.remember-row-v7 strong{font-size:12px;color:#e7f4ff}
+.remember-row-v7 small{font-size:10px;color:#8faed4;line-height:1.4}
+@media(max-width:720px){.remember-row-v7{padding:10px}.remember-row-v7 strong{font-size:11px}}
+@media(prefers-reduced-motion:reduce){.content,.product,.home-game-card-v4,.notice,.card,.btn{animation:none!important;transition:none!important;scroll-behavior:auto!important}}
+</style>
 </head>
 <body>
 <div id="app-loader" role="status" aria-label="Cargando Refills Shop">
@@ -1006,7 +1026,7 @@ const icons={inicio:'home',recargas:'game',gift:'gift',pedidos:'file',perfil:'us
 const getStored=(key,fallback)=>{try{return JSON.parse(localStorage.getItem('refills_shop_'+key)??localStorage.getItem('refills_mock_'+key))??fallback}catch{return fallback}};
 const save=(key,data)=>{try{localStorage.setItem('refills_shop_'+key,JSON.stringify(data))}catch{}};
 /* El catálogo antiguo guardado en localStorage no se reintroduce. */
-const s={page:'inicio',authMode:'login',authBusy:false,authError:'',afterAuthPage:'inicio',authSession:null,profile:null,member:false,resellerPortal:null,resellerLoading:false,wholesalePrices:{},resellerOrders:[],resellerDeposits:[],resellerCurrency:'USDT',resellerDepositCurrency:'USDT',detailId:null,search:'',filter:'todos',sort:'name',payment:'cup',selected:0,player:'',qty:1,modal:null, nickname:getStored('nickname','Invitado'),favorites:getStored('favs',[]),orders:[],cart:getStored('cart',[]),showFavs:false,selectedOrder:null, role:(window.REFILLS_SESSION&&window.REFILLS_SESSION.role)||'guest', user:(window.REFILLS_SESSION&&window.REFILLS_SESSION.user)||null,
+const s={page:'inicio',authMode:'login',authBusy:false,authError:'',rememberSession:(()=>{try{return localStorage.getItem('refills_shop_remember_session')!=='false'}catch{return true}})(),afterAuthPage:'inicio',authSession:null,profile:null,member:false,resellerPortal:null,resellerLoading:false,wholesalePrices:{},resellerOrders:[],resellerDeposits:[],resellerCurrency:'USDT',resellerDepositCurrency:'USDT',detailId:null,search:'',filter:'todos',sort:'name',payment:'cup',selected:0,player:'',qty:1,modal:null, nickname:getStored('nickname','Invitado'),favorites:getStored('favs',[]),orders:[],cart:getStored('cart',[]),showFavs:false,selectedOrder:null, role:(window.REFILLS_SESSION&&window.REFILLS_SESSION.role)||'guest', user:(window.REFILLS_SESSION&&window.REFILLS_SESSION.user)||null,
 rates:getStored('rates',{usdtSm:300,smCup:3,gainSM:0}), adminTab:'resumen',
 adminOrders:getStored('adminOrders',[]), reseller:getStored('reseller',{plan:null,wallet:{USDT:0,CUP:0,SM:0},ledger:[]}),
 paymentConfig:getStored('paymentConfig',{smReceiver:'',cupCard:'',usdtAddress:'',usdtEnabled:false,whatsappNumber:''}),
@@ -1032,19 +1052,36 @@ const RS_COUNTRIES=[
 ];
 function authStoredSession(){
  try{
-  const own=JSON.parse(localStorage.getItem(RS_AUTH_STORE)||'null');if(own?.access_token&&own?.refresh_token)return own;
+  const own=JSON.parse(localStorage.getItem(RS_AUTH_STORE)||'null');
+  if(own?.access_token&&own?.refresh_token){s.rememberSession=true;return own}
   const old=JSON.parse(localStorage.getItem('sb-kcgjlnymhmxylrjchcvl-auth-token')||'null');
-  const session=old?.currentSession||old?.session||old;
-  return session?.access_token&&session?.refresh_token?session:null;
+  const legacy=old?.currentSession||old?.session||old;
+  if(legacy?.access_token&&legacy?.refresh_token){s.rememberSession=true;return legacy}
+  const tab=JSON.parse(sessionStorage.getItem(RS_AUTH_STORE)||'null');
+  if(tab?.access_token&&tab?.refresh_token){s.rememberSession=false;return tab}
+  return null;
  }catch{return null}
 }
-function saveAuthSession(data){
+function saveAuthSession(data,remember=s.rememberSession!==false){
  const expiresAt=Number(data.expires_at||0)||Math.floor(Date.now()/1000)+Number(data.expires_in||3600);
- s.authSession={...data,expires_at:expiresAt};
- try{localStorage.setItem(RS_AUTH_STORE,JSON.stringify(s.authSession));localStorage.setItem('sb-kcgjlnymhmxylrjchcvl-auth-token',JSON.stringify(s.authSession))}catch{}
+ s.authSession={...data,expires_at:expiresAt};s.rememberSession=!!remember;
+ try{
+  localStorage.setItem('refills_shop_remember_session',String(s.rememberSession));
+  if(s.rememberSession){
+   localStorage.setItem(RS_AUTH_STORE,JSON.stringify(s.authSession));
+   localStorage.setItem('sb-kcgjlnymhmxylrjchcvl-auth-token',JSON.stringify(s.authSession));
+   sessionStorage.removeItem(RS_AUTH_STORE);
+  }else{
+   localStorage.removeItem(RS_AUTH_STORE);localStorage.removeItem('sb-kcgjlnymhmxylrjchcvl-auth-token');
+   sessionStorage.setItem(RS_AUTH_STORE,JSON.stringify(s.authSession));
+  }
+ }catch{}
  return s.authSession;
 }
-function clearAuthSession(){s.authSession=null;try{localStorage.removeItem(RS_AUTH_STORE);localStorage.removeItem('sb-kcgjlnymhmxylrjchcvl-auth-token')}catch{}}
+function clearAuthSession(){
+ s.authSession=null;
+ try{localStorage.removeItem(RS_AUTH_STORE);localStorage.removeItem('sb-kcgjlnymhmxylrjchcvl-auth-token');sessionStorage.removeItem(RS_AUTH_STORE)}catch{}
+}
 async function authRequest(path,{method='GET',body,token}={}){
  const headers={apikey:RS_SUPABASE_KEY,Accept:'application/json'};
  if(body!==undefined)headers['Content-Type']='application/json';
@@ -1102,9 +1139,9 @@ function newRequestId(){
  try{if(crypto.randomUUID)return crypto.randomUUID()}catch{}
  return 'xxxxxxxx-xxxx-4xxx-yxxx-xxxxxxxxxxxx'.replace(/[xy]/g,c=>{const r=Math.random()*16|0;return(c==='x'?r:(r&3|8)).toString(16)});
 }
-async function signInWithPhone(phone,password){
+async function signInWithPhone(phone,password,remember=s.rememberSession){
  const data=await authRequest('/auth/v1/token?grant_type=password',{method:'POST',body:{email:phoneEmailAlias(phone),password}});
- saveAuthSession(data);
+ saveAuthSession(data,remember);
  const user=await authRequest('/auth/v1/user',{token:data.access_token});
  s.authSession.user=user;
  await loadAccountProfile(user);
@@ -1169,7 +1206,8 @@ async function handleAuthSubmit(form){
    if(String(form.elements.website?.value||''))return;
    await edgeRequest('rs10-api','/auth/phone-register',{method:'POST',auth:false,body:{fullName,phone,password,website:''}});
   }
-  await signInWithPhone(phone,password);
+  const remember=registering?s.rememberSession:form.elements.rememberSession?.checked!==false;
+  await signInWithPhone(phone,password,remember);
   const destination=s.afterAuthPage&&s.afterAuthPage!=='login'?s.afterAuthPage:'inicio';
   s.page=destination;
   if(destination==='revendedores'&&!s.resellerPortal)await loadResellerPortal(true,false);
@@ -1350,10 +1388,10 @@ function headerNav(){
  const count=s.cart.length,b=document.getElementById('cart-count');if(b){b.textContent=count;b.style.display=count?'grid':'none'}
 }
 function card(g){
- const fav=s.favorites.includes(g.id),o=g.offers?.[0],price=o?displayPrice(o):'Sin ofertas';
+ const fav=s.favorites.includes(g.id),o=g.offers?.[0],count=g.offers?.length||0,price=o?displayPrice(o):'Sin ofertas';
  return `<article class="product product-horizontal product-clickable" data-action="open-item" data-id="${g.id}" role="button" tabindex="0" aria-label="Abrir ${esc(g.name)}">
-  <div class="product-cover"><img loading="lazy" src="${photo(g)}" alt="${esc(g.name)}"></div>
-  <div class="product-info"><strong class="product-name">${esc(g.name)}</strong><div class="product-kind">${g.offers.length} ${g.offers.length===1?'oferta':'ofertas'}${o?' · '+esc(o.title):''}</div><div class="product-desc">${esc(g.desc||'')}</div></div>
+  <div class="product-cover"><img loading="lazy" decoding="async" src="${photo(g)}" alt="${esc(g.name)}"></div>
+  <div class="product-info"><strong class="product-name">${esc(g.name)}</strong><div class="product-kind">${count?count+' '+(count===1?'oferta':'ofertas'):'Próximamente'}${o?' · '+esc(o.title):''}</div><div class="product-desc">${esc(g.desc||'')}</div></div>
   <div class="product-payment"><small>${o?esc(paymentName()):'Catálogo'}</small><strong>${price}</strong><span class="product-tap-hint">Toca para abrir ${I('arrow','tiny')}</span></div>
   <button class="favorite ${fav?'active':''}" data-action="fav" data-id="${g.id}" title="${fav?'Eliminar de favoritos':'Añadir a favoritos'}" aria-label="Favorito ${esc(g.name)}">${I('star')}</button>
  </article>`;
@@ -1363,7 +1401,7 @@ function homeGameTile(g){
  if(!g)return '';
  const count=g.offers?.length||0;
  return `<button class="home-game-card-v4" data-action="open-item" data-id="${g.id}" aria-label="Abrir ${esc(g.name)}">
-  <span class="home-game-art-v4"><img loading="lazy" src="${photo(g)}" alt="${esc(g.name)}"><i>${count} ${count===1?'oferta':'ofertas'}</i></span>
+  <span class="home-game-art-v4"><img loading="lazy" decoding="async" src="${photo(g)}" alt="${esc(g.name)}"><i>${count?count+' '+(count===1?'oferta':'ofertas'):'Próximamente'}</i></span>
   <span class="home-game-meta-v4"><strong>${esc(g.name)}</strong><small>${esc(g.region||'Catálogo digital')}</small></span>
   <span class="home-game-arrow-v4">${I('arrow','tiny')}</span>
  </button>`;
@@ -1393,7 +1431,7 @@ function home(){
  return `${walletHero}
  <div class="notice-grid"><button class="notice" data-action="modal" data-modal="news"><span class="notice-icon">${I('spark')}</span><span><strong>Ofertas y novedades</strong><small>Descubre recargas y productos</small></span>${I('arrow','tiny arrow')}</button><button class="notice" data-action="modal" data-modal="help"><span class="notice-icon">${I('headset')}</span><span><strong>Centro de ayuda</strong><small>Conoce cómo funciona la tienda</small></span>${I('arrow','tiny arrow')}</button></div>
  ${sectionMini('Móvil, internet y más',['nauta','cubacel','vpn','sms'],'recargas')}
- ${sectionMini('Más populares',['freefire','mlbb','pubg','honor'],'recargas')}
+ ${sectionMini('Juegos disponibles',ITEMS.filter(g=>g.category==='juegos').sort((a,b)=>Number(b.featured)-Number(a.featured)||a.sortOrder-b.sortOrder||a.name.localeCompare(b.name)).slice(0,4).map(g=>g.id),'recargas')}
  <section class="card home-howto"><div class="live">REFILLS SHOP</div><h2>Una compra sencilla, desde tu móvil</h2><div class="feature-row"><div class="feature">${I('search')} Busca tu juego</div><div class="feature">${I('diamond')} Elige una oferta</div><div class="feature">${I('credit')} Revisa tu pedido</div></div><button class="btn secondary full" data-action="nav" data-page="recargas">Empezar ahora ${I('arrow','tiny')}</button></section>`;
 }
 function payPills(){
@@ -1617,6 +1655,7 @@ function changePayment(p){
 function refreshCatalog(){const isGift=s.page==='gift',container=document.getElementById('catalog-results');if(!container)return;const doc=new DOMParser().parseFromString(catalog(isGift),'text/html');const newContainer=doc.getElementById('catalog-results');if(newContainer)container.innerHTML=newContainer.innerHTML;const title=document.querySelector('.section-head h2');const match=(newContainer?.querySelectorAll('.product')||[]).length;if(title&&s.page!=='detalle')title.textContent=match+' productos disponibles'}
 document.addEventListener('submit',e=>{if(e.target?.id==='auth-form'){e.preventDefault();void handleAuthSubmit(e.target)}});
 document.addEventListener('change',e=>{
+ if(e.target?.id==='remember-session'){s.rememberSession=!!e.target.checked;try{localStorage.setItem('refills_shop_remember_session',String(s.rememberSession))}catch{}}
  if(e.target?.id==='reseller-currency')s.resellerCurrency=e.target.value;
  if(e.target?.id==='wallet-currency'){
   s.resellerDepositCurrency=e.target.value;
@@ -1676,6 +1715,7 @@ function authPage(){
    ${registering?`<div class="field-wrap"><label for="auth-fullname">Nombre completo</label><input id="auth-fullname" name="fullName" type="text" autocomplete="name" minlength="2" maxlength="90" placeholder="Tu nombre y apellidos" required></div>`:''}
    <div class="field-wrap"><label for="auth-country">País y número de teléfono</label><div class="phone-grid-v7"><select id="auth-country" name="countryCode" required>${countryOptions}</select><input id="auth-phone" name="phone" type="tel" inputmode="tel" autocomplete="tel-national" placeholder="Tu número de teléfono" minlength="5" maxlength="18" required></div><small class="helper">Para Cuba (+53), escribe los 8 dígitos de tu línea; pueden comenzar por 5 o 6.</small></div>
    <div class="field-wrap"><label for="auth-password">Contraseña</label><input id="auth-password" name="password" type="password" autocomplete="${registering?'new-password':'current-password'}" minlength="${registering?'10':'1'}" maxlength="72" placeholder="${registering?'Mínimo 10 caracteres, letras y números':'Tu contraseña'}" required></div>
+   ${!registering?`<label class="remember-row-v7" for="remember-session"><input id="remember-session" name="rememberSession" type="checkbox" ${s.rememberSession?'checked':''}><span><strong>Recordar mi sesión</strong><small>No tendrás que iniciar sesión cada vez en este dispositivo.</small></span></label>`:''}
    ${registering?`<input class="auth-honeypot-v7" name="website" tabindex="-1" autocomplete="off" aria-hidden="true">`:''}
    ${s.authError?`<div class="auth-error-v7" role="alert">${esc(s.authError)}</div>`:''}
    <button class="btn primary auth-submit-v7" type="submit" ${s.authBusy?'disabled':''}>${s.authBusy?'Conectando…':registering?'Crear mi cuenta':'Iniciar sesión'}</button>
@@ -1878,12 +1918,12 @@ async function loadLiveCatalog(){
   const games=Array.isArray(data.games)?data.games:[],offers=Array.isArray(data.offers)?data.offers:[];
   const grouped=new Map();for(const g of games){
    const id=String(g.id||'').trim();if(!id)continue;
-   grouped.set(id,{id,name:String(g.name||'Producto'),category:/gift|pin|tarjeta/i.test(String(g.tag||''))?'gift':(/m[oó]vil|internet|nauta|cubacel/i.test(String(g.tag||''))?'movil':'juegos'),photo:'',imageUrl:g.imageUrl||'',region:'Global',desc:'',offers:[]});
+   grouped.set(id,{id,name:String(g.name||'Producto'),category:/gift|pin|tarjeta/i.test(String(g.tag||''))?'gift':(/m[oó]vil|internet|nauta|cubacel/i.test(String(g.tag||''))?'movil':'juegos'),photo:'',imageUrl:g.imageUrl||'',featured:g.featured===true,sortOrder:Number(g.sortOrder||99),region:'Global',desc:'',offers:[]});
   }
   for(const o of offers){const game=grouped.get(String(o.gameId||''));if(!game||o.visible===false)continue;
    game.offers.push({id:String(o.id||''),title:String(o.name||'Oferta'),cup:Number(o.cup||0),card:Number(o.card||o.cup||0),sm:Number(o.sm||0),usdt:Number(o.usdt||0),providerProductId:o.providerProductId||null,kind:o.kind||'topup',region:o.region||'Global',targetSchema:Array.isArray(o.targetSchema)?o.targetSchema:[],inStock:o.inStock===true,purchasable:o.purchasable===true,bonus:''});
   }
-  ITEMS.splice(0,ITEMS.length,...[...grouped.values()].filter(g=>g.offers.length).sort((a,b)=>a.name.localeCompare(b.name)));
+  ITEMS.splice(0,ITEMS.length,...[...grouped.values()].sort((a,b)=>Number(b.featured)-Number(a.featured)||a.sortOrder-b.sortOrder||a.name.localeCompare(b.name)));
   s.salesEnabled=data.salesEnabled===true;s.catalogLoading=false;
   if(data.config){
    s.rates={...s.rates,usdtSm:Number(data.config.buySmPerUsdt||s.rates.usdtSm),smCup:Number(data.config.cupPerSm||s.rates.smCup)};
