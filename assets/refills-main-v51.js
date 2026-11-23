@@ -1396,7 +1396,7 @@ function requestRefillsInstallation(){
 window.addEventListener('beforeinstallprompt',event=>{event.preventDefault();rsDeferredInstall=event;});
 window.addEventListener('appinstalled',()=>{rsDeferredInstall=null;toast('Refills Shop instalada correctamente.');});
 if('serviceWorker' in navigator&&location.protocol==='https:'){
- const registerRefillsWorker=()=>navigator.serviceWorker.register('/REFILLSHOP/sw.js?v=4',{scope:'/REFILLSHOP/',updateViaCache:'none'}).catch(error=>console.warn('PWA Refills Shop:',error?.message||error));
+ const registerRefillsWorker=()=>navigator.serviceWorker.register('/REFILLSHOP/sw.js?v=5',{scope:'/REFILLSHOP/',updateViaCache:'none'}).catch(error=>console.warn('PWA Refills Shop:',error?.message||error));
  if(document.readyState==='complete')void registerRefillsWorker();
  else window.addEventListener('load',()=>{void registerRefillsWorker()},{once:true});
 }
