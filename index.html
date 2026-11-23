@@ -5,9 +5,9 @@
 <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
 <meta name="theme-color" content="#030918">
 <meta name="description" content="Refills Shop: catálogo de recargas y productos digitales con diseño azul y negro.">
-<link rel="manifest" href="/REFILLSHOP/manifest.webmanifest?v=logo-final">
-<link rel="icon" type="image/png" href="/REFILLSHOP/assets/refills-icon.png?v=logo-final">
-<link rel="apple-touch-icon" href="/REFILLSHOP/assets/refills-icon.png?v=logo-final">
+<link rel="manifest" href="/REFILLSHOP/manifest.webmanifest?v=brand-final-20261123b">
+<link rel="icon" type="image/png" sizes="512x512" href="/REFILLSHOP/assets/refills-app-512.png">
+<link rel="apple-touch-icon" sizes="192x192" href="/REFILLSHOP/assets/refills-app-192.png">
 <meta name="apple-mobile-web-app-capable" content="yes">
 <meta name="apple-mobile-web-app-title" content="Refills Shop">
 <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
@@ -2472,13 +2472,27 @@ case 'checkout':
 let rsDeferredInstall=null;
 function requestRefillsInstallation(){
  if(window.matchMedia('(display-mode: standalone)').matches||navigator.standalone===true){toast('Refills Shop ya está instalada en este dispositivo.');return}
- if(rsDeferredInstall){const prompt=rsDeferredInstall;rsDeferredInstall=null;void Promise.resolve(prompt.prompt()).catch(()=>{s.modal='install-guide';modal()});return;}
+ if(rsDeferredInstall){
+  const prompt=rsDeferredInstall;rsDeferredInstall=null;
+  // Mantener el gesto del usuario para que Android abra el diálogo de instalación.
+  void (async()=>{
+   try{
+    await prompt.prompt();
+    const result=await prompt.userChoice;
+    if(result?.outcome==='accepted')toast('Instalación aceptada. Busca Refills Shop en tu teléfono.');
+    else toast('Instalación cancelada. Puedes intentarlo de nuevo desde el menú de Chrome.');
+   }catch(error){console.warn('Instalación PWA:',error?.message||error);s.modal='install-guide';modal();}
+  })();
+  return;
+ }
  s.modal='install-guide';modal();
 }
 window.addEventListener('beforeinstallprompt',event=>{event.preventDefault();rsDeferredInstall=event;});
 window.addEventListener('appinstalled',()=>{rsDeferredInstall=null;toast('Refills Shop instalada correctamente.');});
 if('serviceWorker' in navigator&&location.protocol==='https:'){
- window.addEventListener('load',()=>{navigator.serviceWorker.register('/REFILLSHOP/sw.js',{scope:'/REFILLSHOP/'}).catch(error=>console.warn('PWA Refills Shop:',error?.message||error));},{once:true});
+ const registerRefillsWorker=()=>navigator.serviceWorker.register('/REFILLSHOP/sw.js',{scope:'/REFILLSHOP/',updateViaCache:'none'}).catch(error=>console.warn('PWA Refills Shop:',error?.message||error));
+ if(document.readyState==='complete')void registerRefillsWorker();
+ else window.addEventListener('load',()=>{void registerRefillsWorker()},{once:true});
 }
 function render(scroll=false){document.body.classList.toggle('rs-auth-screen',s.page==='login'&&!s.user);headerNav();
 if(s.page==='detalle')main.innerHTML=detail();
