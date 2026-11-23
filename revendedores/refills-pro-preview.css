@@ -54,3 +54,12 @@
 .rs-price-currencies strong{font-size:14px}
 }
 @media(prefers-reduced-motion:reduce){.rs-price-sheet{animation:none}}
+
+
+/* Remember my session — shared Refills Shop preference */
+.rs-remember{display:flex!important;flex-direction:row!important;align-items:center;gap:10px;padding:11px 12px;border:1px solid #315579;border-radius:12px;background:#0a1b35;cursor:pointer}
+.rs-remember input{width:17px;height:17px;min-width:17px;margin:0;accent-color:#48bfff}
+.rs-remember span{display:flex;flex-direction:column;gap:3px}
+.rs-remember strong{font-size:11px;color:#e6f4ff}
+.rs-remember small{font-size:9px;color:#91afd1}
+@media(prefers-reduced-motion:reduce){.rs-remember{transition:none!important}}
