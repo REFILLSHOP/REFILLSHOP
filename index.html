@@ -1090,6 +1090,23 @@ button,a,input,select{touch-action:manipulation}
 .rs-region-row small{font-size:11px;color:#a8c9e4}
 .rs-region-tip{font-size:11px;color:#a8bdd6;margin:13px 3px;line-height:1.5}
 @media(hover:hover){.rs-region-row:hover{border-color:#8bd4ff;transform:translateY(-1px)}}
+</style><style id="rs-timed-purchase-v16">
+.rs-purchase-confirm{display:grid;gap:13px}
+.rs-confirm-info{display:grid;grid-template-columns:110px minmax(0,1fr);gap:10px;padding:17px;border:1px solid #2c5c82;border-radius:14px;background:#0b2547;align-items:center}
+.rs-confirm-info small{font-size:10px;font-weight:800;color:#96b9d8}
+.rs-confirm-info strong{font-size:12px;color:#e6f7ff;overflow-wrap:anywhere}
+.rs-confirm-total{font-size:21px!important;color:#8bd7ff!important}
+.rs-confirm-warning{border:1px solid #88683f;color:#eed8ae;background:#49391d33;border-radius:12px;padding:13px;font-size:11px;line-height:1.6}
+.rs-payment-deadline{border:1px solid #2b77b2;background:linear-gradient(115deg,#0e3560,#082343);border-radius:14px;display:grid;gap:5px;justify-items:center;padding:14px;color:#b4d7f4;text-align:center}
+.rs-payment-deadline span{font-size:10px;font-weight:800;letter-spacing:.09em}
+.rs-payment-deadline strong{font:850 30px/1 ui-monospace,SFMono-Regular,monospace;color:#9bddff}
+.rs-payment-deadline small{color:#a9c3de;font-size:10px;line-height:1.5}
+.rs-payment-deadline.is-urgent{border-color:#c29551;background:#47351f}
+.rs-payment-deadline.is-urgent strong{color:#ffe0a1}
+.rs-payment-deadline.is-expired{border-color:#c95166;background:#482632}
+.rs-payment-deadline.is-expired strong{color:#ffc4c9}
+.rs-payment-fixed{font-size:9px;font-weight:800;color:#8ac9ff;border:1px solid #2670a2;border-radius:99px;padding:4px 8px}
+@media(max-width:420px){.rs-confirm-info{grid-template-columns:88px minmax(0,1fr);padding:12px;gap:9px}.rs-payment-deadline strong{font-size:27px}}
 </style></head>
 <body>
 <div id="app-loader" role="status" aria-label="Cargando Refills Shop">
@@ -1157,7 +1174,7 @@ const icons={inicio:'home',recargas:'game',gift:'gift',pedidos:'file',perfil:'us
 const getStored=(key,fallback)=>{try{return JSON.parse(localStorage.getItem('refills_shop_'+key)??localStorage.getItem('refills_mock_'+key))??fallback}catch{return fallback}};
 const save=(key,data)=>{try{localStorage.setItem('refills_shop_'+key,JSON.stringify(data))}catch{}};
 /* El catálogo antiguo guardado en localStorage no se reintroduce. */
-const s={page:'inicio',authMode:'login',authBusy:false,authError:'',rememberSession:(()=>{try{return localStorage.getItem('refills_shop_remember_session')!=='false'}catch{return true}})(),afterAuthPage:'inicio',authSession:null,profile:null,member:false,resellerPortal:null,resellerLoading:false,wholesalePrices:{},resellerOrders:[],resellerDeposits:[],resellerCurrency:'USDT',resellerDepositCurrency:'USDT',detailId:null,search:'',filter:'todos',offerGroup:'recargas',regionChoice:null,playerTargets:{},playerCheck:null,resellerPreview:null,resellerPreviewTier:'free',sort:'name',payment:'cup',selected:0,player:'',qty:1,modal:null,usdtPayment:null,recentTopups:[],recentTopupsLoaded:false, nickname:getStored('nickname','Invitado'),favorites:getStored('favs',[]),orders:[],cart:getStored('cart',[]),showFavs:false,selectedOrder:null, role:(window.REFILLS_SESSION&&window.REFILLS_SESSION.role)||'guest', user:(window.REFILLS_SESSION&&window.REFILLS_SESSION.user)||null,
+const s={page:'inicio',authMode:'login',authBusy:false,authError:'',rememberSession:(()=>{try{return localStorage.getItem('refills_shop_remember_session')!=='false'}catch{return true}})(),afterAuthPage:'inicio',authSession:null,profile:null,member:false,resellerPortal:null,resellerLoading:false,wholesalePrices:{},resellerOrders:[],resellerDeposits:[],resellerCurrency:'USDT',resellerDepositCurrency:'USDT',detailId:null,search:'',filter:'todos',offerGroup:'recargas',regionChoice:null,playerTargets:{},playerCheck:null,resellerPreview:null,resellerPreviewTier:'free',sort:'name',payment:'cup',selected:0,player:'',checkoutSession:null,qty:1,modal:null,usdtPayment:null,recentTopups:[],recentTopupsLoaded:false, nickname:getStored('nickname','Invitado'),favorites:getStored('favs',[]),orders:[],cart:getStored('cart',[]),showFavs:false,selectedOrder:null, role:(window.REFILLS_SESSION&&window.REFILLS_SESSION.role)||'guest', user:(window.REFILLS_SESSION&&window.REFILLS_SESSION.user)||null,
 rates:getStored('rates',{usdtSm:300,smCup:3,gainSM:0}), adminTab:'resumen',
 adminOrders:getStored('adminOrders',[]), reseller:getStored('reseller',{plan:null,wallet:{USDT:0,CUP:0,SM:0},ledger:[]}),
 paymentConfig:getStored('paymentConfig',{smReceiver:'',cupCard:'',usdtAddress:'',usdtEnabled:false,whatsappNumber:''}),
@@ -1873,15 +1890,26 @@ function modal(){
   html=modalTitle('Cambiar método de pago','Selecciona cómo quieres pagar tu compra')+
   paymentChoiceList();
   break;
- case 'checkout':
-  html=modalTitle('Realizar pago','Un solo paso para registrar tu comprobante')+
-  `<div class="rs-checkout-simple">
+ case 'purchase-confirm':{
+ html=modalTitle('Confirmar compra','Revisa los datos antes de continuar')+
+  '<div class="rs-purchase-confirm"><div class="rs-confirm-info"><small>JUEGO / REGIÓN</small><strong>'+esc(gameFamilyName(g||{}))+' · '+esc(o?.region||'Global')+'</strong>'
+  +'<small>PAQUETE</small><strong>'+esc(o?.title||'Recarga')+'</strong>'
+  +'<small>DESTINATARIO</small><strong>'+esc(o?.kind==='pin'?'Código digital':s.player||'Sin ID')+'</strong>'
+  +'<small>MÉTODO</small><strong>'+esc(paymentName())+'</strong>'
+  +'<small>TOTAL</small><strong class="rs-confirm-total">'+(total?formatPriceValue(total.amount,total.currency):'No disponible')+'</strong></div>'
+  +'<p class="rs-confirm-warning">Después de confirmar tendrás 20 minutos para enviar la captura o el hash. Si no lo envías, el pedido pasará a fallido.</p>'
+  +'<button class="btn primary full" data-action="start-payment">Confirmar y continuar al pago</button><button class="btn ghost full" data-action="close">Corregir datos</button></div>';
+ break;
+}
+case 'checkout':
+  html=modalTitle('Realizar pago','Envía el comprobante dentro del plazo de 20 minutos')+
+  `<div class="rs-checkout-simple"><div class="rs-payment-deadline"><span>TIEMPO RESTANTE</span><strong id="rs-deadline-clock">20:00</strong><small>Si no envías el comprobante, la solicitud vencerá automáticamente.</small></div>
    <div class="rs-checkout-total"><div><span>IMPORTE EXACTO</span><strong>${total?formatPriceValue(total.amount,total.currency):'No disponible'}</strong></div><div><small>${esc(g?.name||'Recarga')} · ${esc(o?.title||'Paquete')}</small><small>Destino: ${esc(s.player||'Según producto')}</small></div></div>
-   <div class="rs-checkout-method"><span>${paymentVisual(s.payment)}<strong>${esc(paymentName())}</strong></span><button type="button" class="btn ghost small" data-action="open-payment-methods">Cambiar</button></div>
+   <div class="rs-checkout-method"><span>${paymentVisual(s.payment)}<strong>${esc(paymentName())}</strong></span><span class="rs-payment-fixed">CONFIRMADO</span></div>
    ${checkoutPaymentInstructions()}
    ${Array.isArray(o?.targetSchema)&&o.targetSchema.length?'<div class="rs-checkout-confirmed"><strong>Datos de jugador guardados</strong>'+Object.entries(playerTargetData(o)).map(([key,value])=>'<span>'+esc((o.targetSchema.find(f=>f.key===key)||{}).label||key)+': <b>'+esc(value)+'</b></span>').join('')+'<small>Se tomaron de la pantalla anterior. Para cambiarlos, cierra el pago y vuelve al juego.</small></div>':''}
    ${s.payment==='sm'?'<div class="rs-checkout-inputs"><label class="sheet-label" for="payment-source-phone">Número que transfirió el saldo móvil</label><input id="payment-source-phone" class="field" type="tel" inputmode="numeric" pattern="[0-9]{8}" maxlength="8" placeholder="8 dígitos" required><label class="sheet-label" for="payment-proof">Captura del pago realizado</label><input id="payment-proof" class="field rs-proof-input" type="file" accept="image/png,image/jpeg,image/webp" required><small>JPG, PNG o WEBP · máximo 5 MB</small></div>':''}
-   ${s.payment==='cup'||s.payment==='mitransfer'?'<div class="rs-checkout-inputs"><label class="sheet-label" for="payment-reference">Número de transacción</label><input id="payment-reference" class="field" type="text" inputmode="text" autocomplete="off" minlength="4" maxlength="80" placeholder="Número que aparece en Transfermóvil" required><small>El pedido quedará pendiente hasta comprobar el ingreso en la cuenta receptora.</small></div>':''}
+   ${s.payment==='cup'||s.payment==='mitransfer'?'<div class="rs-checkout-inputs"><label class="sheet-label" for="payment-proof">Captura del comprobante</label><input id="payment-proof" class="field rs-proof-input" type="file" accept="image/png,image/jpeg,image/webp" required><small>JPG, PNG o WEBP · máximo 5 MB. Sin mínimo de tamaño.</small><label class="sheet-label" for="payment-reference">Número de operación (opcional)</label><input id="payment-reference" class="field" type="text" autocomplete="off" maxlength="80" placeholder="Si aparece en tu comprobante"><small>Confirmaremos que el importe llegó a la cuenta receptora.</small></div>':''}
    ${s.payment==='usdt'?'<div class="rs-checkout-safe">Primero registra el pedido para reservar su identificador. Después envía USDT y pega el hash en la siguiente pantalla. No transfieras antes de crear el pedido.</div>':''}
    ${s.payment==='balance'?'<div class="rs-checkout-safe">Solo revendedores con suscripción activa y saldo suficiente pueden utilizar esta opción.</div>':''}
    <button class="btn primary full rs-checkout-submit" data-action="send-order">${I('check','tiny')} ${s.payment==='usdt'?'Crear pedido y continuar al hash':s.payment==='balance'?'Confirmar compra con saldo':'Enviar comprobante y crear pedido'}</button>
@@ -1891,7 +1919,7 @@ function modal(){
  case 'usdt-wallet-pay':{
   const pay=s.usdtPayment||{};
   html=modalTitle('Pagar con USDT BEP-20','Envía el importe exacto desde tu wallet')+
-   `<div class="usdt-wallet-pay-v1">
+   `<div class="usdt-wallet-pay-v1"><div class="rs-payment-deadline"><span>TIEMPO PARA REGISTRAR EL HASH</span><strong id="rs-deadline-clock">20:00</strong><small>El pedido vencerá si no envías el hash a tiempo.</small></div>
     <div class="usdt-pay-order"><small>PEDIDO</small><strong>${esc(pay.code||'—')}</strong></div>
     <div class="usdt-pay-amount"><small>IMPORTE EXACTO</small><strong>${Number(pay.amount||0).toFixed(2)} USDT</strong></div>
     <div class="usdt-pay-network"><span>Red</span><strong>BNB Smart Chain · BEP-20</strong></div>
@@ -2026,7 +2054,8 @@ case 'choose-payment':changePayment(b.dataset.value);break;
 case 'offer-group':{const id=b.dataset.value,g=itemBy(s.detailId);if(!OFFER_TABS.some(t=>t[0]===id)||!g)break;const first=g.offers.findIndex(o=>offerGroup(o)===id&&(!s.regionChoice||String(o.region||'Global')===s.regionChoice));if(first<0){toast('Esta región no tiene productos de esa categoría.');break}s.offerGroup=id;s.selected=first;s.playerCheck=null;const pos=window.scrollY;render();window.scrollTo(0,pos);break;}
 case 'select-offer':{let pos=window.scrollY;s.selected=Number(b.dataset.index);s.playerCheck=null;render();window.scrollTo(0,pos);break;}
 case 'verify-player':void verifyPlayerIdentity();break;
-case 'checkout':{if(s.role==='guest'){s.page='login';render(true);toast('Inicia sesión para continuar con la compra');return}const o=itemBy(s.detailId)?.offers?.[s.selected];let v=(document.getElementById('player-input')?.value||s.player||'').trim();s.player=v;if(o?.kind!=='pin'&&v.length<3){toast('Primero escribe el ID o destinatario.');document.getElementById('player-input')?.focus();return}try{playerTargetData(o,true)}catch(err){toast(err.message);return}if(s.playerCheck?.status==='invalid'&&s.playerCheck.offerId===o?.id&&s.playerCheck.player===v){toast('Corrige el ID del jugador antes de pagar.');return}s.modal='checkout';modal();break;}
+case 'start-payment':void startPaymentReservation(b);break;
+case 'checkout':{if(s.role==='guest'){s.page='login';render(true);toast('Inicia sesión para continuar con la compra');return}const o=itemBy(s.detailId)?.offers?.[s.selected];let v=(document.getElementById('player-input')?.value||s.player||'').trim();s.player=v;if(o?.kind!=='pin'&&v.length<3){toast('Primero escribe el ID o destinatario.');document.getElementById('player-input')?.focus();return}try{playerTargetData(o,true)}catch(err){toast(err.message);return}if(o?.kind!=='pin'&&!(s.playerCheck?.status==='valid'&&s.playerCheck.offerId===o.id&&s.playerCheck.player===v)){toast('Valida el ID para continuar. Si el juego no permite verificarlo, no puedes iniciar el pago.');return}s.checkoutSession=null;s.modal='purchase-confirm';modal();break;}
 case 'add-cart':{let v=(document.getElementById('player-input')?.value||s.player||'').trim();s.player=v;const offer=itemBy(s.detailId)?.offers?.[s.selected];if(offer?.kind!=='pin'&&v.length<3){toast('Indica el ID o destinatario');return}let targets;try{targets=playerTargetData(offer,true)}catch(err){toast(err.message);return}s.cart.push({id:s.detailId,offer:s.selected,offerId:offer.id,player:s.player,targets,region:offer.region||s.regionChoice||'Global'});save('cart',s.cart);headerNav();toast('Producto añadido al carrito');break;}
 case 'qty-minus':s.qty=Math.max(1,s.qty-1);modal();break;case 'qty-plus':s.qty=Math.min(20,s.qty+1);modal();break;
 
