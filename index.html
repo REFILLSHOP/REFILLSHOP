@@ -959,7 +959,37 @@ button,a,input,select{touch-action:manipulation}
 @media(max-width:720px){.remember-row-v7{padding:10px}.remember-row-v7 strong{font-size:11px}}
 @media(prefers-reduced-motion:reduce){.content,.product,.home-game-card-v4,.notice,.card,.btn{animation:none!important;transition:none!important;scroll-behavior:auto!important}}
 </style>
-</head>
+<style id="refills-payments-activity-v1">
+.payment-method-symbol.mitransfer{display:grid;place-items:center;border-radius:12px;background:linear-gradient(135deg,#176b88,#14375c);color:#fff;font-weight:900;font-size:20px}
+.order-card-actions{display:flex;align-items:center;gap:8px;flex-wrap:wrap}
+.order-status-v4.refunded,.recent-topup-status.refunded{color:#e1c3ff;background:rgba(144,76,202,.16);border:1px solid rgba(174,111,228,.4)}
+.order-status-v4.rejected,.recent-topup-status.failed{color:#ffb2b2;background:rgba(220,60,60,.13);border:1px solid rgba(231,88,88,.36)}
+.order-status-v4.pending,.recent-topup-status.pending{color:#f6d78c;background:rgba(213,158,55,.13);border:1px solid rgba(224,174,72,.35)}
+.order-status-v4.complete,.recent-topup-status.complete{color:#a3e6c1;background:rgba(51,171,111,.13);border:1px solid rgba(73,190,130,.35)}
+.order-status-v4.processing,.recent-topup-status.processing{color:#a9d6ff;background:rgba(58,139,218,.13);border:1px solid rgba(79,157,226,.35)}
+.recent-topups-v1{padding:18px;display:grid;gap:13px}
+.recent-topups-head{display:flex;align-items:center;justify-content:space-between;gap:12px}
+.recent-topups-head h2{font-size:18px;margin:3px 0}
+.recent-topups-head p{font-size:11px;color:var(--muted);margin:0}
+.recent-topups-list{display:grid;gap:9px}
+.recent-topup-row{display:flex;align-items:center;gap:10px;padding:10px;border-radius:12px;background:rgba(10,28,52,.5);border:1px solid rgba(104,154,204,.13);min-width:0}
+.recent-topup-icon{width:34px;height:34px;display:grid;place-items:center;border-radius:10px;background:rgba(50,139,219,.12);color:#9fd1ff;flex:0 0 auto}
+.recent-topup-copy{display:grid;gap:3px;min-width:0;flex:1}
+.recent-topup-copy strong{font-size:12px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.recent-topup-copy small{font-size:10px;color:var(--muted);white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.recent-topup-status{font-size:9px;font-weight:750;padding:5px 8px;border-radius:20px;white-space:nowrap}
+.recent-topups-empty{font-size:11px;color:var(--muted);padding:14px 8px;text-align:center;border:1px dashed rgba(104,154,204,.2);border-radius:12px}
+.usdt-wallet-pay-v1{display:grid;gap:13px}
+.usdt-pay-order,.usdt-pay-amount,.usdt-pay-network{display:flex;align-items:center;justify-content:space-between;gap:12px;padding:12px;border:1px solid rgba(85,153,215,.2);border-radius:12px;background:rgba(8,26,51,.5)}
+.usdt-pay-order small,.usdt-pay-amount small{font-size:9px;color:var(--muted);letter-spacing:.08em}
+.usdt-pay-order strong{font-size:12px}
+.usdt-pay-amount strong{font-size:20px;color:#9ed4ff}
+.usdt-pay-network span{font-size:11px;color:var(--muted)}
+.usdt-pay-network strong{font-size:11px}
+#usdt-wallet-address{font-size:11px;overflow-wrap:anywhere;min-height:58px;resize:none}
+@media(max-width:560px){.recent-topups-v1{padding:14px}.recent-topup-row{gap:8px;padding:9px}.recent-topup-status{font-size:8px;padding:5px 6px}.order-card-actions{width:100%;justify-content:flex-end}}
+@media(prefers-reduced-motion:reduce){.recent-topup-row,.usdt-wallet-pay-v1{animation:none!important;transition:none!important}}
+</style></head>
 <body>
 <div id="app-loader" role="status" aria-label="Cargando Refills Shop">
  <div class="app-loader-glow"></div>
@@ -1026,7 +1056,7 @@ const icons={inicio:'home',recargas:'game',gift:'gift',pedidos:'file',perfil:'us
 const getStored=(key,fallback)=>{try{return JSON.parse(localStorage.getItem('refills_shop_'+key)??localStorage.getItem('refills_mock_'+key))??fallback}catch{return fallback}};
 const save=(key,data)=>{try{localStorage.setItem('refills_shop_'+key,JSON.stringify(data))}catch{}};
 /* El catálogo antiguo guardado en localStorage no se reintroduce. */
-const s={page:'inicio',authMode:'login',authBusy:false,authError:'',rememberSession:(()=>{try{return localStorage.getItem('refills_shop_remember_session')!=='false'}catch{return true}})(),afterAuthPage:'inicio',authSession:null,profile:null,member:false,resellerPortal:null,resellerLoading:false,wholesalePrices:{},resellerOrders:[],resellerDeposits:[],resellerCurrency:'USDT',resellerDepositCurrency:'USDT',detailId:null,search:'',filter:'todos',sort:'name',payment:'cup',selected:0,player:'',qty:1,modal:null, nickname:getStored('nickname','Invitado'),favorites:getStored('favs',[]),orders:[],cart:getStored('cart',[]),showFavs:false,selectedOrder:null, role:(window.REFILLS_SESSION&&window.REFILLS_SESSION.role)||'guest', user:(window.REFILLS_SESSION&&window.REFILLS_SESSION.user)||null,
+const s={page:'inicio',authMode:'login',authBusy:false,authError:'',rememberSession:(()=>{try{return localStorage.getItem('refills_shop_remember_session')!=='false'}catch{return true}})(),afterAuthPage:'inicio',authSession:null,profile:null,member:false,resellerPortal:null,resellerLoading:false,wholesalePrices:{},resellerOrders:[],resellerDeposits:[],resellerCurrency:'USDT',resellerDepositCurrency:'USDT',detailId:null,search:'',filter:'todos',sort:'name',payment:'cup',selected:0,player:'',qty:1,modal:null,usdtPayment:null,recentTopups:[],recentTopupsLoaded:false, nickname:getStored('nickname','Invitado'),favorites:getStored('favs',[]),orders:[],cart:getStored('cart',[]),showFavs:false,selectedOrder:null, role:(window.REFILLS_SESSION&&window.REFILLS_SESSION.role)||'guest', user:(window.REFILLS_SESSION&&window.REFILLS_SESSION.user)||null,
 rates:getStored('rates',{usdtSm:300,smCup:3,gainSM:0}), adminTab:'resumen',
 adminOrders:getStored('adminOrders',[]), reseller:getStored('reseller',{plan:null,wallet:{USDT:0,CUP:0,SM:0},ledger:[]}),
 paymentConfig:getStored('paymentConfig',{smReceiver:'',cupCard:'',usdtAddress:'',usdtEnabled:false,whatsappNumber:''}),
@@ -1281,8 +1311,9 @@ const REFILLS_WALLET_MARK='data:image/webp;base64,UklGRhbrAABXRUJQVlA4IArrAAAQuw
 const PAYMENT_METHODS={
  sm:{name:'Saldo móvil ETECSA',short:'Saldo móvil',currency:'SM',icon:'wallet'},
  cup:{name:'Transfermóvil',short:'CUP',currency:'CUP',icon:'credit'},
+ mitransfer:{name:'MiTransfer · envío por teléfono',short:'MiTransfer',currency:'CUP',icon:'wallet'},
  balance:{name:'Saldo de la web',short:'Mi saldo',currency:'USDT',icon:'wallet'},
- usdt:{name:'USDT · BEP-20',short:'USDT',currency:'USDT',icon:'shield'}
+ usdt:{name:'USDT · Wallet propia BEP-20',short:'USDT',currency:'USDT',icon:'shield'}
 };
 function paymentName(id=s.payment){return PAYMENT_METHODS[id]?.name||'Transfermóvil'}
 const TRANSFERMOVIL_MARK='data:image/jpeg;base64,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';const ETECSA_MARK='data:image/png;base64,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';
@@ -1292,6 +1323,7 @@ function resellerHasPlan(){
 function paymentVisual(id){
  if(id==='cup')return `<img class="payment-method-logo transfermovil-mark" src="${TRANSFERMOVIL_MARK}" alt="Transfermóvil">`;
  if(id==='sm')return `<img class="payment-method-logo etecsa-mark" src="${ETECSA_MARK}" alt="ETECSA">`;
+ if(id==='mitransfer')return `<span class="payment-method-symbol mitransfer" aria-label="MiTransfer">M</span>`;
  if(id==='balance')return `<span class="payment-method-symbol balance" aria-label="Saldo Refills Shop">${I('wallet')}</span>`;
  return `<span class="payment-method-symbol usdt" aria-label="USDT">₮</span>`;
 }
@@ -1301,25 +1333,26 @@ function paymentChoiceList(){
  const balanceAvailable=Number(s.reseller?.wallet?.USDT||0);
  const methods=Object.entries(PAYMENT_METHODS).filter(([id])=>id!=='balance'||s.role==='reseller');
  return `<div class="payment-choice-list">${methods.map(([id,m])=>{
-  const noPlan=id==='balance'&&!resellerHasPlan();
-  const noCost=id==='balance'&&!!selectedOffer&&!balancePrice;
-  const disabled=(id==='usdt'&&(!s.paymentConfig.usdtEnabled||!s.paymentConfig.usdtAddress))||noPlan||noCost;
-  const active=s.payment===id;
-  const description=id==='sm'?'Paga directamente desde tu línea móvil':
-   id==='cup'?'Transferencia mediante Transfermóvil':
+  const noPlan=id==='balance'&&!resellerHasPlan(),noCost=id==='balance'&&!!selectedOffer&&!balancePrice;
+  const missing=(id==='sm'&&!s.paymentConfig.smReceiver)||(id==='cup'&&!s.paymentConfig.cupCard)||(id==='mitransfer'&&!s.paymentConfig.mitransferPhone)||(id==='usdt'&&(!s.paymentConfig.usdtEnabled||!s.paymentConfig.usdtAddress));
+  const disabled=missing||noPlan||noCost,active=s.payment===id;
+  const description=id==='sm'?'Manual · envía saldo móvil y adjunta el comprobante':
+   id==='cup'?'Transfermóvil · tarjeta receptora y número de transacción':
+   id==='mitransfer'?'MiTransfer · envío al teléfono receptor y número de operación':
    id==='balance'?(noPlan?'Disponible al activar Gratis, Level 2 o Level 3':noCost?'Esta oferta no tiene costo de proveedor configurado':`Wallet de revendedor · ${balanceAvailable.toFixed(2)} USDT disponibles`):
-   'Red BNB Smart Chain · BEP-20';
+   'Automático · USDT BEP-20 en tu wallet; se verifica el hash en blockchain';
   return `<button type="button" class="payment-choice ${active?'active':''} ${id==='balance'?'payment-choice-balance':''}" data-action="choose-payment" data-value="${id}" ${disabled?'disabled':''} ${active?'aria-pressed="true"':'aria-pressed="false"'}>
    <span class="payment-choice-icon">${paymentVisual(id)}</span>
-   <span class="payment-choice-copy"><strong>${esc(m.name)}</strong><small>${disabled?(noPlan?'Activa un plan de revendedor':noCost?'Costo del proveedor no disponible':'No habilitado por administración'):description}</small></span>
+   <span class="payment-choice-copy"><strong>${esc(m.name)}</strong><small>${disabled?(noPlan?'Activa un plan de revendedor':noCost?'Costo del proveedor no disponible':'No habilitado o sin datos de cobro'):description}</small></span>
    <span class="payment-choice-state">${active?'✓':''}</span>
   </button>`;
- }).join('')}</div><p class="payment-choice-note">El saldo de Refills Shop solo aparece para cuentas de revendedor con un plan reconocido. El servidor debe validar el saldo y autorizar cada descuento.</p>`;
+ }).join('')}</div><p class="payment-choice-note">USDT se comprueba automáticamente en BEP-20. Transfermóvil y MiTransfer necesitan conexión comercial de consulta para validar referencias automáticamente. Saldo móvil permanece manual.</p>`;
 }
 function priceFor(o,method=s.payment){
  if(!o)return null;
  if(method==='sm')return {amount:Number(o.sm||0),currency:'SM',method:PAYMENT_METHODS.sm};
  if(method==='usdt'||method==='balance')return {amount:Number(o.usdt||0),currency:'USDT',method:PAYMENT_METHODS[method]};
+ if(method==='mitransfer')return {amount:Number(o.cup||0),currency:'CUP',method:PAYMENT_METHODS.mitransfer};
  return {amount:Number(o.card||o.cup||0),currency:'CUP',method:PAYMENT_METHODS.cup};
 }
 function formatPriceValue(amount,currency){
@@ -1354,10 +1387,11 @@ function displayPrice(o,method=s.payment){
  return (p.currency==='USDT'?Number(p.amount).toFixed(2):Number(p.amount).toLocaleString('es-ES',{maximumFractionDigits:2}))+' '+p.currency;
 }
 function paymentConfigText(){
- if(s.payment==='cup')return s.paymentConfig.cupCard?`Transfermóvil · ${esc(s.paymentConfig.cupCard)}`:'Transfermóvil no está configurado todavía.';
+ if(s.payment==='cup')return s.paymentConfig.cupCard?`Transfermóvil · tarjeta receptora: ${esc(s.paymentConfig.cupCard)}`:'Transfermóvil no está configurado todavía.';
+ if(s.payment==='mitransfer')return s.paymentConfig.mitransferPhone?`MiTransfer · envía al teléfono ${esc(s.paymentConfig.mitransferPhone)}`:'MiTransfer no tiene teléfono receptor configurado.';
  if(s.payment==='sm')return s.paymentConfig.smReceiver?`Saldo móvil · ${esc(s.paymentConfig.smReceiver)}`:'El número receptor de saldo móvil no está configurado todavía.';
  if(s.payment==='balance')return resellerHasPlan()?'Saldo de tu wallet Refills Shop en USDT. El servidor comprobará los fondos y autorizará el débito.':'Necesitas un plan de revendedor activo para utilizar el saldo de la web.';
- return s.paymentConfig.usdtEnabled&&s.paymentConfig.usdtAddress?`USDT BEP-20 · ${esc(s.paymentConfig.usdtAddress)}`:'USDT no está habilitado todavía.';
+ return s.paymentConfig.usdtEnabled&&s.paymentConfig.usdtAddress?`USDT BEP-20 · ${esc(s.paymentConfig.usdtAddress)}`:'USDT wallet propia no está habilitada todavía.';
 }
 function saveCatalog(){/* No se permiten catálogos locales: toda publicación pasa por Supabase. */}
 
@@ -1411,6 +1445,31 @@ function sectionMini(title,ids,navpage){
  if(!items.length)return '';
  return `<section class="home-mini-section"><div class="section-head"><h2>${title}</h2><button class="text-link" data-action="nav" data-page="${navpage}">Ver catálogo ${I('arrow','tiny')}</button></div><div class="home-game-grid-v4">${items.map(homeGameTile).join('')}</div></section>`;
 }
+function recentTopupStatus(value){
+ const s=String(value||'pending').toLowerCase();
+ if(s==='completed')return {label:'Completada',className:'complete'};
+ if(s==='failed'||s==='rejected')return {label:'Fallida',className:'failed'};
+ if(s==='refunded')return {label:'Reembolsada',className:'refunded'};
+ if(s==='processing'||s==='partially_completed')return {label:'En proceso',className:'processing'};
+ return {label:'Pendiente',className:'pending'};
+}
+function recentTopupsMarkup(){
+ const rows=Array.isArray(s.recentTopups)?s.recentTopups:[];
+ return `<section class="card recent-topups-v1" id="recent-topups">
+  <div class="recent-topups-head"><div><span class="eyebrow">ACTIVIDAD DE HOY</span><h2>Últimas 3 recargas</h2><p>Movimientos recientes de la tienda, sin mostrar datos privados.</p></div><button class="btn ghost small" data-action="refresh-recent-topups" aria-label="Actualizar actividad">↻</button></div>
+  ${rows.length?`<div class="recent-topups-list">${rows.slice(0,3).map(x=>{const st=recentTopupStatus(x.status);return `<article class="recent-topup-row"><span class="recent-topup-icon">${I('game')}</span><span class="recent-topup-copy"><strong>${esc(x.game||'Recarga')}</strong><small>${esc(x.offer||'Producto digital')} · ${x.createdAt?new Date(x.createdAt).toLocaleTimeString('es-ES',{hour:'2-digit',minute:'2-digit'}):'Hoy'}</small></span><span class="recent-topup-status ${st.className}">${st.label}</span></article>`}).join('')}</div>`:`<div class="recent-topups-empty">Todavía no hay recargas registradas hoy.</div>`}
+ </section>`;
+}
+async function loadRecentTopups(force=false){
+ if(s.recentTopupsLoaded&&!force)return;
+ try{
+  const response=await fetch(RS10_BASE+'/recent-topups',{headers:{apikey:RS_SUPABASE_KEY,accept:'application/json'},cache:'no-store'});
+  if(!response.ok)throw Error('No se pudo consultar la actividad.');
+  const data=await response.json();s.recentTopups=Array.isArray(data.topups)?data.topups.slice(0,3):[];s.recentTopupsLoaded=true;
+ }catch(error){console.warn('Recent topups:',error?.message||error)}
+ const node=document.getElementById('recent-topups');
+ if(node){const temp=document.createElement('div');temp.innerHTML=recentTopupsMarkup();node.replaceWith(temp.firstElementChild)}
+}
 function home(){
  const greeting=s.user?.name||s.nickname||'Invitado';
  const hasPlan=resellerHasPlan();
@@ -1432,6 +1491,7 @@ function home(){
  <div class="notice-grid"><button class="notice" data-action="modal" data-modal="news"><span class="notice-icon">${I('spark')}</span><span><strong>Ofertas y novedades</strong><small>Descubre recargas y productos</small></span>${I('arrow','tiny arrow')}</button><button class="notice" data-action="modal" data-modal="help"><span class="notice-icon">${I('headset')}</span><span><strong>Centro de ayuda</strong><small>Conoce cómo funciona la tienda</small></span>${I('arrow','tiny arrow')}</button></div>
  ${sectionMini('Móvil, internet y más',['nauta','cubacel','vpn','sms'],'recargas')}
  ${sectionMini('Juegos disponibles',ITEMS.filter(g=>g.category==='juegos').sort((a,b)=>Number(b.featured)-Number(a.featured)||a.sortOrder-b.sortOrder||a.name.localeCompare(b.name)).slice(0,4).map(g=>g.id),'recargas')}
+ ${recentTopupsMarkup()}
  <section class="card home-howto"><div class="live">REFILLS SHOP</div><h2>Una compra sencilla, desde tu móvil</h2><div class="feature-row"><div class="feature">${I('search')} Busca tu juego</div><div class="feature">${I('diamond')} Elige una oferta</div><div class="feature">${I('credit')} Revisa tu pedido</div></div><button class="btn secondary full" data-action="nav" data-page="recargas">Empezar ahora ${I('arrow','tiny')}</button></section>`;
 }
 function payPills(){
@@ -1458,7 +1518,7 @@ function detail(){
  if(!g.offers?.length)return `<button class="detail-back" data-action="nav" data-page="recargas">${I('back','tiny')} Volver al catálogo</button><div class="card empty"><h3>Próximamente</h3><p>Este juego ya está en el catálogo. Sus ofertas aparecerán aquí cuando estén publicadas y verificadas.</p></div>`;
  const o=g.offers[s.selected]||g.offers[0],p=currentPrice(o);
  const selectedPrice=p?displayPrice(o):'Costo pendiente';
- const methodAvailable=s.payment==='usdt'?(s.paymentConfig.usdtEnabled&&!!s.paymentConfig.usdtAddress):s.payment==='balance'?(resellerHasPlan()&&!!currentPrice(o,'balance')):true;
+ const methodAvailable=s.payment==='usdt'?(s.paymentConfig.usdtEnabled&&!!s.paymentConfig.usdtAddress):s.payment==='mitransfer'?!!s.paymentConfig.mitransferPhone:s.payment==='balance'?(resellerHasPlan()&&!!currentPrice(o,'balance')):true;
  return `<button class="detail-back" data-action="nav" data-page="${g.category==='gift'?'gift':'recargas'}">${I('back','tiny')} Volver al catálogo</button>
  <div class="detail-head"><div class="detail-icon"><img src="${photo(g)}" alt="${esc(g.name)}"></div><div><h1>${esc(g.name)}</h1><p>${esc(g.region)} · ${esc(g.desc)}</p></div></div>
  <div class="stepper"><div class="step ${s.player?'done':'active'}"><span class="num">${s.player?I('check','tiny'):'1'}</span>Tu ID</div><div class="step active"><span class="num">2</span>Paquete</div><div class="step"><span class="num">3</span>Pago</div></div>
@@ -1494,20 +1554,21 @@ function orders(){
   ${!list.length?`<div class="card orders-empty-v4"><div class="orders-empty-icon">${I('file','big')}</div><h3>Tu historial está vacío</h3><p>Cuando realices tu primera compra, aquí podrás seguir su estado y consultar todos sus detalles.</p><button class="btn primary" data-action="nav" data-page="recargas">Explorar recargas ${I('arrow','tiny')}</button></div>`:
   `<div class="orders-list-v4">${list.map(o=>{
    const g=itemBy(o.id),status=String(o.status||'Pendiente'),low=status.toLowerCase();
-   const statusClass=/complet|entregad/.test(low)?'complete':/rechaz|cancel|fall/.test(low)?'rejected':/proces|revisi/.test(low)?'processing':'pending';
+   const statusClass=low==='completed'||/complet|entregad/.test(low)?'complete':low==='refunded'?'refunded':/rechaz|cancel|fall/.test(low)?'rejected':/proces|revisi/.test(low)?'processing':'pending';
+   const statusLabel=low==='completed'?'Completado':low==='refunded'?'Reembolsado':/rechaz|cancel|fall/.test(low)?'Fallido':/proces|revisi/.test(low)?'En proceso':'Pendiente';
    const title=g?.name||o.gameName||o.id||'Compra digital';
    const total=o.totalText||fmtMoney(o.total)+' '+(o.currency||'CUP');
    return `<article class="order-card-v4">
     <div class="order-card-top">
      <div class="order-game-v4">${g?`<img src="${photo(g)}" alt="">`:`<span>${I('game')}</span>`}<div><strong>${esc(title)}</strong><small>Pedido #${esc(o.ref||'—')} · ${esc(o.date||'Fecha no disponible')}</small></div></div>
-     <span class="order-status-v4 ${statusClass}">${esc(status)}</span>
+     <span class="order-status-v4 ${statusClass}">${statusLabel}</span>
     </div>
     <div class="order-card-info">
      <div><small>PAQUETE</small><strong>${esc(o.offer||'—')}</strong></div>
      <div><small>MÉTODO DE PAGO</small><strong>${esc(o.payment||'—')}</strong></div>
      <div><small>DESTINO</small><strong>${esc(o.player||'—')}</strong></div>
     </div>
-    <div class="order-card-bottom"><div><small>TOTAL DEL PEDIDO</small><strong>${esc(total)}</strong></div><button class="btn secondary order-detail-button" data-action="order-details" data-ref="${esc(o.ref)}">Ver detalles ${I('arrow','tiny')}</button></div>
+    <div class="order-card-bottom"><div><small>TOTAL DEL PEDIDO</small><strong>${esc(total)}</strong></div><div class="order-card-actions">${o.payment==='usdt_wallet'&&o.paymentStatus!=='paid'?`<button class="btn primary small" data-action="resume-usdt" data-ref="${esc(o.ref)}">Continuar pago</button>`:''}<button class="btn secondary order-detail-button" data-action="order-details" data-ref="${esc(o.ref)}">Ver detalles ${I('arrow','tiny')}</button></div></div>
    </article>`;
   }).join('')}</div>`}
  </div>`;
@@ -1563,13 +1624,30 @@ function modal(){
   `<div class="sheet-product"><img src="${photo(g)}" alt=""><div><strong>${esc(g?.name||'')}</strong><div class="muted">${esc(o?.title||'')} · Para: ${esc(s.player)}</div><div class="amount">${total?formatPriceValue(total.amount,total.currency):'Precio no disponible'}</div></div></div>
   <span class="sheet-label">Método seleccionado</span>${payPills()}
 ${s.payment==='sm'?'<label class="sheet-label" for="payment-source-phone">Número que envió el saldo móvil</label><input id="payment-source-phone" class="field" inputmode="numeric" maxlength="8" placeholder="8 dígitos" required>':''}
+${['cup','mitransfer'].includes(s.payment)?'<label class="sheet-label" for="payment-reference">Número de transacción / operación</label><input id="payment-reference" class="field" inputmode="text" maxlength="80" placeholder="Introduce el número que aparece en la operación" required>':''}
 ${Array.isArray(o?.targetSchema)&&o.targetSchema.length?o.targetSchema.map(f=>`<label class="sheet-label">${esc(f.label||f.key)}</label>${f.type==='select'&&Array.isArray(f.options)?`<select class="field order-target-field" data-target-key="${esc(f.key)}" required><option value="">Selecciona</option>${f.options.map(x=>`<option value="${esc(x.value)}">${esc(x.label||x.value)}</option>`).join('')}</select>`:`<input class="field order-target-field" data-target-key="${esc(f.key)}" placeholder="${esc(f.label||f.key)}" maxlength="80" required>`}`).join(''):''}
   <div class="summary-list"><div class="summary-row"><span>Destino</span><strong>${esc(s.player)}</strong></div><div class="summary-row"><span>Pago</span><strong>${esc(paymentName())}</strong></div><div class="summary-row"><span>Cantidad</span><strong>${s.qty}</strong></div><div class="summary-row"><span>Total</span><strong>${total?formatPriceValue(total.amount,total.currency):'No disponible'}</strong></div></div>
-  <div class="payment-instructions"><strong>Datos para pagar</strong><p>${paymentConfigText()}</p></div>
-  ${s.payment==='balance'?'':`<label class="sheet-label" for="payment-proof">Comprobante de pago (si corresponde)</label><input id="payment-proof" class="field" type="file" accept="image/png,image/jpeg,image/webp">`}
-  <div class="warn">${s.payment==='balance'&&!resellerHasPlan()?'Activa un plan de revendedor para pagar con el saldo de la web.':s.payment==='balance'&&Number(s.reseller?.wallet?.USDT||0)<(total?.amount||0)?'Tu saldo USDT no alcanza para esta compra. Recarga tu wallet antes de continuar.':s.payment==='usdt'&&!s.paymentConfig.usdtEnabled?'USDT no está habilitado para recibir pagos en este momento.':(!s.paymentConfig.cupCard&&s.payment==='cup')||(!s.paymentConfig.smReceiver&&s.payment==='sm')?'Configura los datos del método de pago desde Administración antes de recibir pedidos.':s.payment==='balance'?'El servidor verificará tu saldo y descontará el importe únicamente si autoriza la compra.':'El pedido solo se enviará cuando el servidor confirme la recepción.'}</div>
-  <button class="btn primary full" data-action="send-order">${I('check','tiny')} Enviar solicitud de compra</button>`;
+  <div class="payment-instructions"><strong>Cómo realizar el pago</strong><p>${paymentConfigText()}</p></div>
+  ${s.payment==='sm'?'<label class="sheet-label" for="payment-proof">Comprobante de saldo móvil</label><input id="payment-proof" class="field" type="file" accept="image/png,image/jpeg,image/webp" required>':''}
+  <div class="warn">${s.payment==='balance'&&!resellerHasPlan()?'Activa un plan de revendedor para pagar con el saldo de la web.':s.payment==='balance'&&Number(s.reseller?.wallet?.USDT||0)<(total?.amount||0)?'Tu saldo USDT no alcanza para esta compra. Recarga tu wallet antes de continuar.':s.payment==='usdt'?'Primero se crea el pedido. Después verás la wallet, el importe exacto y el campo para verificar el hash.':s.payment==='sm'?'Saldo móvil es manual: se revisa el comprobante antes de procesar la recarga.':s.payment==='cup'||s.payment==='mitransfer'?'Introduce el número de operación. La verificación automática de estas cuentas comerciales todavía está pendiente de conectar.':'El servidor comprobará tu saldo y autorizará el débito.'}</div>
+  <button class="btn primary full" data-action="send-order">${I('check','tiny')} ${s.payment==='usdt'?'Crear pedido y mostrar wallet':'Enviar solicitud de compra'}</button>`;
   break;
+ case 'usdt-wallet-pay':{
+  const pay=s.usdtPayment||{};
+  html=modalTitle('Pagar con USDT BEP-20','Envía el importe exacto desde tu wallet')+
+   `<div class="usdt-wallet-pay-v1">
+    <div class="usdt-pay-order"><small>PEDIDO</small><strong>${esc(pay.code||'—')}</strong></div>
+    <div class="usdt-pay-amount"><small>IMPORTE EXACTO</small><strong>${Number(pay.amount||0).toFixed(2)} USDT</strong></div>
+    <div class="usdt-pay-network"><span>Red</span><strong>BNB Smart Chain · BEP-20</strong></div>
+    <label class="sheet-label" for="usdt-wallet-address">Wallet receptora</label><textarea id="usdt-wallet-address" class="field" rows="2" readonly>${esc(pay.address||'')}</textarea>
+    <button class="btn secondary full" data-action="copy-usdt-address">Copiar dirección</button>
+    <label class="sheet-label" for="usdt-tx-hash">Hash de la transacción</label><input id="usdt-tx-hash" class="field" inputmode="text" autocomplete="off" placeholder="0x…" value="${esc(pay.txHash||'')}">
+    <p class="helper">El servidor comprobará el token USDT auténtico, la dirección, el importe y las confirmaciones. No envíes por TRC-20, ERC-20 ni otra red.</p>
+    ${pay.message?`<div class="warn">${esc(pay.message)}</div>`:''}
+    <button class="btn primary full" data-action="verify-usdt-payment">Verificar pago automáticamente</button>
+   </div>`;
+  break;
+ }
  case 'wallet':{
   if(!resellerHasPlan()){html=modalTitle('Wallet de revendedor','Activa un plan para utilizar la wallet')+`<div class="empty"><p>La wallet está reservada para cuentas con un plan de revendedor.</p><button class="btn primary" data-action="modal-nav" data-page="revendedores">Ver planes</button></div>`;break}
   const instructions=s.resellerPortal?.paymentInstructions||{};
@@ -1636,7 +1714,7 @@ modal();if(scroll)window.scrollTo({top:0,behavior:'instant'})}
 function navigate(page){
  if(!s.user&&page!=='login'){s.afterAuthPage=page;s.authMode='login';s.page='login';s.modal=null;render(true);toast('Inicia sesión o crea tu cuenta para continuar.');return}
  if(page==='admin'&&s.role!=='admin'){s.page='inicio';render(true);toast('Esta sección requiere permisos de administrador.');return}
- s.modal=null;if(page!=='detalle')s.search='';s.filter='todos';s.showFavs=false;s.page=page;render(true);history.replaceState(null,'','#'+page);
+ s.modal=null;if(page!=='detalle')s.search='';s.filter='todos';s.showFavs=false;s.page=page;render(true);history.replaceState(null,'','#'+page);if(page==='inicio')void loadRecentTopups();
  if(page==='revendedores'&&!s.resellerPortal)void loadResellerPortal(false,true);
 }
 function openDetail(id){let g=itemBy(id);if(!g)return;s.detailId=id;s.selected=0;s.player='';s.qty=1;s.modal=null;s.page='detalle';render(true);history.replaceState(null,'','#producto/'+id)}
@@ -1645,7 +1723,8 @@ function changePayment(p){
  if(!PAYMENT_METHODS[p])return;
  if(p==='balance'&&!resellerHasPlan()){toast('Activa uno de los planes de revendedor para pagar con tu saldo de Refills Shop.');return}
  if(p==='balance'&&s.detailId){const selectedOffer=itemBy(s.detailId)?.offers?.[s.selected];if(selectedOffer&&!currentPrice(selectedOffer,'balance')){toast('Esta oferta no tiene costo de proveedor configurado para el pago con wallet.');return}}
- if(p==='usdt'&&(!s.paymentConfig.usdtEnabled||!s.paymentConfig.usdtAddress)){toast('USDT todavía no está habilitado por administración.');return}
+ if(p==='usdt'&&(!s.paymentConfig.usdtEnabled||!s.paymentConfig.usdtAddress)){toast('USDT wallet propia todavía no está habilitada por administración.');return}
+ if(p==='mitransfer'&&!s.paymentConfig.mitransferPhone){toast('MiTransfer no tiene teléfono receptor configurado.');return}
  s.payment=p;
  const returnModal=s.paymentReturnModal||null;
  s.paymentReturnModal=null;
@@ -1855,18 +1934,41 @@ document.addEventListener('click',async e=>{
   try{const response=await fetch(endpoint,{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({ref:b.dataset.ref,status:b.dataset.status})});if(!response.ok)throw new Error();toast('Estado actualizado');}catch(err){toast('No se pudo actualizar el pedido.')}
   return;
  }
- if(a==='send-order'){
+ if(a==='copy-usdt-address'){
+ const address=s.usdtPayment?.address||'';if(!address){toast('No hay una wallet configurada.');return}
+ try{await navigator.clipboard.writeText(address);toast('Dirección USDT copiada.')}catch{const input=document.getElementById('usdt-wallet-address');if(input){input.focus();input.select();document.execCommand('copy');toast('Dirección copiada.')}else toast('No se pudo copiar la dirección.')}
+ return;
+}
+if(a==='resume-usdt'){
+ const order=s.orders.find(x=>x.ref===b.dataset.ref);if(!order||order.paymentStatus==='paid')return;
+ s.usdtPayment={code:order.ref,amount:Number(order.total||0),address:s.paymentConfig.usdtAddress||'',network:'BEP-20',txHash:order.paymentTxHash||'',message:''};s.modal='usdt-wallet-pay';modal();return;
+}
+if(a==='verify-usdt-payment'){
+ const code=s.usdtPayment?.code,txHash=String(document.getElementById('usdt-tx-hash')?.value||'').trim();
+ if(!code||!/^0x[0-9a-fA-F]{64}$/.test(txHash)){toast('Introduce un hash BEP-20 válido.');return}
+ b.disabled=true;b.textContent='Comprobando blockchain…';
+ try{
+  const result=await edgeRequest('rs10-api','/usdt-wallet/verify',{method:'POST',auth:true,body:{code,txHash}});
+  s.usdtPayment={...s.usdtPayment,txHash,message:result.message||''};
+  if(result.status==='confirmed'){s.modal=null;await loadCustomerOrders();navigate('pedidos');toast('Pago USDT confirmado automáticamente.');}
+  else{modal();toast(result.message||'El pago todavía está pendiente de confirmación.')}
+ }catch(err){toast(err?.message||'No se pudo verificar el hash.')}
+ finally{b.disabled=false;b.textContent='Verificar pago automáticamente'}
+ return;
+}
+if(a==='refresh-recent-topups'){s.recentTopupsLoaded=false;await loadRecentTopups(true);return}
+if(a==='send-order'){
  const g=itemBy(s.detailId),o=g?.offers[s.selected];
  if(!s.user||!g||!o?.id){toast('Selecciona una oferta publicada.');return}
- if(!s.salesEnabled||!o.purchasable||!o.inStock){toast('La tienda todavía no acepta compras de esta oferta. No transfieras dinero.');return}
+ if(!s.salesEnabled||!o.purchasable||!o.inStock){toast('La tienda todavía no acepta compras. No transfieras dinero.');return}
  if(s.qty!==1){toast('Realiza un pedido por oferta.');return}
- if(s.payment==='usdt'){toast('USDT directo requiere una factura verificada y todavía no está habilitado.');return}
  const targetPayload={};
  for(const el of document.querySelectorAll('.order-target-field')){const value=String(el.value||'').trim();if(!value){toast('Completa los datos del jugador.');return}targetPayload[el.dataset.targetKey]=value}
  const player=String(s.player||'').trim();
  if(o.kind!=='pin'&&!player&&!Object.keys(targetPayload).length){toast('Escribe el ID de jugador.');return}
  b.disabled=true;b.textContent='Registrando pedido…';
- try{let result;
+ try{
+  let result;
   if(s.payment==='balance'){
    if(!resellerHasPlan())throw Error('Necesitas un plan activo de revendedor.');
    const live=await edgeRequest('rs12-reseller','/storefront',{auth:true});
@@ -1876,18 +1978,27 @@ document.addEventListener('click',async e=>{
    result=await edgeRequest('rs12-reseller','/orders',{method:'POST',auth:true,body:{offerId:o.id,clientRequestId:newRequestId(),playerId:player||'PIN',targetPayload,currency:'USDT'}});
    await loadResellerPortal(true,false);
   }else{
-   const method=s.payment==='sm'?'mobile':s.payment==='cup'?'card':null;
+   const method=s.payment==='sm'?'mobile':s.payment==='cup'?'card':s.payment==='mitransfer'?'wallet':s.payment==='usdt'?'usdt_wallet':null;
    if(!method)throw Error('Método de pago no disponible.');
-   const file=document.getElementById('payment-proof')?.files?.[0];
-   if(!file)throw Error('Adjunta la captura del pago antes de enviar el pedido.');
-   if(file.size>5242880||!['image/jpeg','image/png','image/webp'].includes(file.type))throw Error('La captura debe ser JPG, PNG o WEBP y pesar como máximo 5 MB.');
+   const quotedAmount=Number(method==='mobile'?o.sm:method==='card'?o.card:method==='wallet'?o.cup:o.usdt);
+   const quotedCurrency=method==='mobile'?'SM':method==='usdt_wallet'?'USDT':'CUP';
+   if(!Number.isFinite(quotedAmount)||quotedAmount<=0)throw Error('El precio no está disponible.');
    const sourcePhone=method==='mobile'?String(document.getElementById('payment-source-phone')?.value||'').trim():'';
    if(method==='mobile'&&!/^[0-9]{8}$/.test(sourcePhone))throw Error('Introduce los 8 dígitos de la línea que envió saldo.');
-   const receipt=await new Promise((resolve,reject)=>{const reader=new FileReader();reader.onload=()=>resolve(reader.result);reader.onerror=()=>reject(Error('No se pudo leer el comprobante.'));reader.readAsDataURL(file)});
-   const quotedAmount=Number(method==='mobile'?o.sm:o.card||o.cup);
-   const quotedCurrency=method==='mobile'?'SM':'CUP';
-   if(!Number.isFinite(quotedAmount)||quotedAmount<=0)throw Error('El precio no está disponible.');
-   result=await edgeRequest('rs10-api','/orders',{method:'POST',auth:true,body:{gameId:g.id,offerId:o.id,clientRequestId:newRequestId(),method,playerId:player||'PIN',targetPayload,quotedAmount,quotedCurrency,sourcePhone,receipt}});
+   const paymentReference=['card','wallet'].includes(method)?String(document.getElementById('payment-reference')?.value||'').trim():'';
+   if(['card','wallet'].includes(method)&&paymentReference.length<4)throw Error('Introduce el número de transacción u operación.');
+   let receipt='';
+   if(method==='mobile'){
+    const file=document.getElementById('payment-proof')?.files?.[0];
+    if(!file)throw Error('Adjunta la captura del saldo móvil.');
+    if(file.size>5242880||!['image/jpeg','image/png','image/webp'].includes(file.type))throw Error('La captura debe ser JPG, PNG o WEBP y pesar como máximo 5 MB.');
+    receipt=await new Promise((resolve,reject)=>{const reader=new FileReader();reader.onload=()=>resolve(reader.result);reader.onerror=()=>reject(Error('No se pudo leer el comprobante.'));reader.readAsDataURL(file)});
+   }
+   result=await edgeRequest('rs10-api','/orders',{method:'POST',auth:true,body:{gameId:g.id,offerId:o.id,clientRequestId:newRequestId(),method,playerId:player||'PIN',targetPayload,quotedAmount,quotedCurrency,sourcePhone,paymentReference,receipt}});
+   if(method==='usdt_wallet'){
+    s.usdtPayment={code:result.order.code,amount:Number(result.payment?.amount||quotedAmount),address:result.payment?.address||s.paymentConfig.usdtAddress||'',network:'BEP-20',txHash:'',message:''};
+    s.modal='usdt-wallet-pay';modal();toast('Pedido creado. Envía el importe exacto y verifica el hash.');return;
+   }
   }
   if(!result?.ok&&!result?.order)throw Error('El servidor no confirmó el pedido.');
   s.modal=null;await loadCustomerOrders();navigate('pedidos');toast('Pedido registrado. Comprueba el estado en Pedidos.');
@@ -1906,7 +2017,7 @@ if(a==='request-wallet-deposit'){
 async function loadCustomerOrders(){
  if(!s.user){s.orders=[];return}
  try{const result=await edgeRequest('rs10-api','/orders',{auth:true});
-  s.orders=(result.orders||[]).map(x=>({id:x.id,ref:x.code,gameName:x.game,offer:x.offer,player:x.playerId||'PIN',payment:x.method,total:x.amount,currency:x.currency,status:x.status,date:x.created?new Date(x.created).toLocaleString('es-ES'):'',totalText:(Number(x.amount||0).toLocaleString('es-ES')+' '+(x.currency||''))}));
+  s.orders=(result.orders||[]).map(x=>({id:x.id,ref:x.code,gameName:x.game,offer:x.offer,player:x.playerId||'PIN',payment:x.method==='mobile'?'Saldo móvil':x.method==='card'?'Transfermóvil':x.method==='wallet'?'MiTransfer':x.method==='usdt_wallet'?'USDT Wallet BEP-20':x.method==='usdt_bep20'?'USDT BEP-20':x.method,total:x.amount,currency:x.currency,status:x.status,paymentStatus:x.paymentStatus||'unpaid',paymentReference:x.paymentReference||'',paymentTxHash:x.paymentTxHash||'',refundReference:x.refundReference||'',date:x.created?new Date(x.created).toLocaleString('es-ES'):'',totalText:(Number(x.amount||0).toLocaleString('es-ES')+' '+(x.currency||''))}));
   if(s.page==='pedidos')render();
  }catch(err){console.warn('No se pudo cargar el historial:',err?.message||err)}
 }
@@ -1918,7 +2029,7 @@ async function loadLiveCatalog(){
   const games=Array.isArray(data.games)?data.games:[],offers=Array.isArray(data.offers)?data.offers:[];
   const grouped=new Map();for(const g of games){
    const id=String(g.id||'').trim();if(!id)continue;
-   grouped.set(id,{id,name:String(g.name||'Producto'),category:/gift|pin|tarjeta/i.test(String(g.tag||''))?'gift':(/m[oó]vil|internet|nauta|cubacel/i.test(String(g.tag||''))?'movil':'juegos'),photo:'',imageUrl:g.imageUrl||'',featured:g.featured===true,sortOrder:Number(g.sortOrder||99),region:'Global',desc:'',offers:[]});
+   grouped.set(id,{id,name:String(g.name||'Producto'),category:/gift|pin|tarjeta/i.test(String(g.tag||''))?'gift':(/m[oó]vil|internet|nauta|cubacel/i.test(String(g.tag||''))?'movil':'juegos'),photo:'',imageUrl:g.imageUrl||'',featured:g.featured===true,sortOrder:Number(g.sortOrder||99),marginPercent:Number(g.marginPercent||0),region:'Global',desc:'',offers:[]});
   }
   for(const o of offers){const game=grouped.get(String(o.gameId||''));if(!game||o.visible===false)continue;
    game.offers.push({id:String(o.id||''),title:String(o.name||'Oferta'),cup:Number(o.cup||0),card:Number(o.card||o.cup||0),sm:Number(o.sm||0),usdt:Number(o.usdt||0),providerProductId:o.providerProductId||null,kind:o.kind||'topup',region:o.region||'Global',targetSchema:Array.isArray(o.targetSchema)?o.targetSchema:[],inStock:o.inStock===true,purchasable:o.purchasable===true,bonus:''});
@@ -1927,11 +2038,11 @@ async function loadLiveCatalog(){
   s.salesEnabled=data.salesEnabled===true;s.catalogLoading=false;
   if(data.config){
    s.rates={...s.rates,usdtSm:Number(data.config.buySmPerUsdt||s.rates.usdtSm),smCup:Number(data.config.cupPerSm||s.rates.smCup)};
-   s.paymentConfig={...s.paymentConfig,smReceiver:data.config.mobilePhone||'',cupCard:data.config.cardNumber||'',usdtEnabled:data.cryptoBep20Enabled===true,whatsappNumber:data.config.supportWhatsapp||''};
+   s.paymentConfig={...s.paymentConfig,smReceiver:data.config.mobilePhone||'',cupCard:data.config.cardNumber||'',mitransferPhone:data.config.walletPhone||'',mitransferEnabled:data.config.mitransferEnabled===true,usdtEnabled:data.config.usdtWalletEnabled===true,usdtAddress:data.config.usdtWalletAddress||'',whatsappNumber:data.config.supportWhatsapp||''};
   }
   const validIds=new Set(ITEMS.map(g=>g.id));s.cart=s.cart.filter(c=>validIds.has(c.id));
   if(s.page==='detalle'&&!validIds.has(s.detailId))s.page='recargas';
-  render();
+  render();if(s.page==='inicio')void loadRecentTopups();
  }catch(error){
   s.catalogLoading=false;s.catalogError=error?.message||'No se pudo actualizar el catálogo desde Supabase';
   ITEMS.length=0;render();console.warn('Refills Shop storefront:',s.catalogError);
