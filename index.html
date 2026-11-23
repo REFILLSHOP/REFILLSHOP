@@ -1082,7 +1082,15 @@ button,a,input,select{touch-action:manipulation}
 .rs-preview-footer,.rs-preview-empty-state{font-size:11px;line-height:1.6;color:#abc9e7;background:rgba(11,34,65,.6);border-radius:11px;padding:12px}
 .rs-preview-empty-state{text-align:center;padding:25px 12px}
 @media(max-width:480px){.rs-preview-offer{align-items:flex-start;flex-direction:column}.rs-preview-offer-prices{text-align:left}.rs-preview-offers-list{max-height:55vh}.rs-preview-only-head span{font-size:8px}.rs-plan-preview-btn{min-height:44px}}
-</style><style id="refills-pin-simple-v13">.rs-pin-no-player .input-group,.rs-pin-no-player>.helper,.rs-pin-no-player .rs-target-container,.rs-pin-no-player .rs-player-result{display:none!important}.rs-pin-intro{padding:12px 14px;margin:6px 0 0;border-radius:12px;border:1px solid rgba(78,175,206,.35);background:rgba(10,52,76,.55);color:#acdfe9;font-size:12px;line-height:1.55}</style></head>
+</style><style id="refills-pin-simple-v13">.rs-pin-no-player .input-group,.rs-pin-no-player>.helper,.rs-pin-no-player .rs-target-container,.rs-pin-no-player .rs-player-result{display:none!important}.rs-pin-intro{padding:12px 14px;margin:6px 0 0;border-radius:12px;border:1px solid rgba(78,175,206,.35);background:rgba(10,52,76,.55);color:#acdfe9;font-size:12px;line-height:1.55}</style><style id="refills-game-regions-v15">
+.rs-region-list{display:grid;gap:10px;max-height:min(54vh,520px);overflow-y:auto}
+.rs-region-row{display:flex;justify-content:space-between;align-items:center;gap:12px;border:1px solid rgba(70,155,227,.46);border-radius:14px;background:linear-gradient(120deg,#102f57,#0a2040);color:#e8f8ff;padding:15px;text-align:left;min-height:63px}
+.rs-region-row>span:first-child{display:grid;gap:4px}
+.rs-region-row strong{font-size:14px}
+.rs-region-row small{font-size:11px;color:#a8c9e4}
+.rs-region-tip{font-size:11px;color:#a8bdd6;margin:13px 3px;line-height:1.5}
+@media(hover:hover){.rs-region-row:hover{border-color:#8bd4ff;transform:translateY(-1px)}}
+</style></head>
 <body>
 <div id="app-loader" role="status" aria-label="Cargando Refills Shop">
  <div class="app-loader-glow"></div>
@@ -1531,12 +1539,12 @@ function homeGameTile(g){
  const count=g.offers?.length||0;
  return `<button class="home-game-card-v4" data-action="open-item" data-id="${g.id}" aria-label="Abrir ${esc(g.name)}">
   <span class="home-game-art-v4"><img loading="lazy" decoding="async" src="${photo(g)}" alt="${esc(g.name)}"><i>${count?count+' '+(count===1?'oferta':'ofertas'):'Próximamente'}</i></span>
-  <span class="home-game-meta-v4"><strong>${esc(g.name)}</strong><small>${esc(g.region||'Catálogo digital')}</small></span>
+  <span class="home-game-meta-v4"><strong>${esc(gameFamilyName(g))}</strong><small>${gameRegionOptions(g).length>1?gameRegionOptions(g).length+' regiones':esc(g.region||'Catálogo digital')}</small></span>
   <span class="home-game-arrow-v4">${I('arrow','tiny')}</span>
  </button>`;
 }
 function sectionMini(title,ids,navpage){
- const items=(ids||[]).map(itemBy).filter(Boolean);
+ const dedupe=new Set();const items=(ids||[]).map(itemBy).filter(g=>{if(!g)return false;const k=g.category==='juegos'?gameFamilyKey(g):g.id;if(dedupe.has(k))return false;dedupe.add(k);return true}).slice(0,4);
  if(!items.length)return '';
  return `<section class="home-mini-section"><div class="section-head"><h2>${title}</h2><button class="text-link" data-action="nav" data-page="${navpage}">Ver catálogo ${I('arrow','tiny')}</button></div><div class="home-game-grid-v4">${items.map(homeGameTile).join('')}</div></section>`;
 }
@@ -1597,6 +1605,50 @@ function payPills(){
   <span class="pay-current-change">Cambiar ${I('arrow','tiny')}</span>
  </button>`;
 }
+
+function gameFamilyName(g){
+ return String(g?.name||'Juego').trim().replace(/\s+(?:LATAM|GLOBAL|BRASIL|BRAZIL|EUROPA|EU|NA|NORTEAMERICA|USA|US|MENA|ASIA|SEA|TURQUIA|TURKEY|INDIA)$/i,'').trim();
+}
+function gameFamilyKey(g){
+ return (gameFamilyName(g)||'').normalize('NFD').replace(/[\u0300-\u036f]/g,'').toLowerCase();
+}
+function gameRegionOptions(g){
+ if(!g)return [];
+ const games=ITEMS.filter(x=>x.category===g.category&&gameFamilyKey(x)===gameFamilyKey(g));
+ const choices=[],seen=new Set();
+ for(const x of games){
+  const regions=[...new Set((x.offers||[]).map(o=>String(o.region||'').trim()).filter(Boolean))];
+  if(!regions.length)regions.push(String(x.name).match(/\s+(GLOBAL|LATAM|BRASIL|EU|EUROPA|USA|ASIA|NA)$/i)?.[1]||'Global');
+  for(const region of regions){
+   const key=x.id+'|'+region;
+   if(seen.has(key))continue;seen.add(key);
+   choices.push({id:x.id,region,name:x.name,offerCount:x.offers.filter(o=>String(o.region||'Global')===region).length});
+  }
+ }
+ return choices;
+}
+function openRegionGame(id,region=''){
+ const g=itemBy(id);if(!g)return;
+ s.detailId=id;s.selected=0;s.regionChoice=region||null;s.player='';s.offerGroup='recargas';s.playerTargets={};s.playerCheck=null;s.qty=1;s.modal=null;s.page='detalle';
+ const matches=(g.offers||[]).map((o,i)=>({o,i})).filter(x=>!s.regionChoice||String(x.o.region||'Global')===s.regionChoice);
+ const selected=matches.find(x=>offerGroup(x.o)==='recargas')||matches[0];
+ if(selected){s.selected=selected.i;s.offerGroup=offerGroup(selected.o)}
+ render(true);history.replaceState(null,'','#producto/'+id);
+}
+function catalogueFamilyCards(items){
+ const seen=new Set(),result=[];
+ for(const g of items){
+  const key=g.category==='juegos'?gameFamilyKey(g):g.id;
+  if(seen.has(key))continue;seen.add(key);
+  const choices=gameRegionOptions(g);
+  if(g.category!=='juegos'||choices.length<=1){result.push(card(g));continue}
+  result.push('<article class="product product-horizontal product-clickable rs-family-card" data-action="open-item" data-id="'+esc(g.id)+'" role="button" tabindex="0" aria-label="Elegir región de '+esc(gameFamilyName(g))+'">'
+  +'<div class="product-cover"><img loading="lazy" decoding="async" src="'+photo(g)+'" alt="'+esc(gameFamilyName(g))+'"></div>'
+  +'<div class="product-info"><strong class="product-name">'+esc(gameFamilyName(g))+'</strong><div class="product-kind">'+choices.length+' regiones disponibles</div><div class="product-desc">Selecciona la región de tu cuenta antes de comprar.</div></div>'
+  +'<div class="product-payment"><small>REGIONES</small><strong>'+choices.length+' opciones</strong><span class="product-tap-hint">Elegir región '+I('arrow','tiny')+'</span></div></article>');
+ }
+ return result.join('');
+}
 function catalog(isGift=false){
  const list=ITEMS.filter(g=>(isGift?g.category==='gift':s.filter==='todos'?g.category!=='gift':g.category===s.filter))
  .filter(g=>g.name.toLowerCase().includes(s.search.trim().toLowerCase())||(g.desc||'').toLowerCase().includes(s.search.trim().toLowerCase()));
@@ -1606,7 +1658,7 @@ function catalog(isGift=false){
  <div class="catalog-toolbar"><label class="searchbox">${I('search')}<input id="catalog-search" autocomplete="off" type="search" placeholder="Buscar juego o tarjeta..." value="${esc(s.search)}"></label><select id="sort-catalog" class="select" aria-label="Ordenar catálogo"><option value="name" ${s.sort==='name'?'selected':''}>A-Z</option><option value="price" ${s.sort==='price'?'selected':''}>Menor precio</option><option value="z" ${s.sort==='z'?'selected':''}>Z-A</option></select></div>
  <div class="payment-selector"><div><strong>Método de pago</strong><small>Los precios se actualizan según tu selección.</small></div>${payPills()}</div>
  <div class="chip-row">${(isGift?[['todos','Todas las tarjetas']]:[['todos','Todo'],['juegos','Juegos'],['movil','Móvil e internet']]).map(([id,l])=>`<button class="chip ${s.filter===id?'active':''}" data-action="filter" data-value="${id}">${l}</button>`).join('')}<button class="chip ${s.showFavs?'active':''}" data-action="only-favs">${I('star','tiny')} Favoritos</button></div>
- <div class="section-head" style="margin-top:0"><h2>${visible.length} productos disponibles</h2></div><div id="catalog-results">${visible.length?`<div class="catalog-grid">${visible.map(card).join('')}</div>`:`<div class="empty">${I('search')}<h3>${ITEMS.length?'No hay resultados':'Próximamente nuevas recargas'}</h3><p>${ITEMS.length?'Prueba con otro nombre o cambia los filtros.':'Estamos preparando el catálogo. Los productos aparecerán cuando el administrador los publique.'}</p><button class="btn secondary" data-action="reset-filters">Mostrar todos</button></div>`}</div></div>`;
+ <div class="section-head" style="margin-top:0"><h2>${visible.length} productos disponibles</h2></div><div id="catalog-results">${visible.length?`<div class="catalog-grid">${catalogueFamilyCards(visible)}</div>`:`<div class="empty">${I('search')}<h3>${ITEMS.length?'No hay resultados':'Próximamente nuevas recargas'}</h3><p>${ITEMS.length?'Prueba con otro nombre o cambia los filtros.':'Estamos preparando el catálogo. Los productos aparecerán cuando el administrador los publique.'}</p><button class="btn secondary" data-action="reset-filters">Mostrar todos</button></div>`}</div></div>`;
 }
 
 function offerGroup(o){
@@ -1811,6 +1863,12 @@ function modal(){
     +'<div class="rs-preview-footer">No se puede comprar desde esta vista. Para comprar debes activar un plan y tener saldo disponible.</div></div>';
   break;
  }
+ case 'region-picker':{
+  const g=itemBy(s.regionPickGame),regions=gameRegionOptions(g);
+  html=modalTitle('Elige la región','Selecciona la región que corresponde a tu cuenta')+
+   '<div class="rs-region-list">'+regions.map(region=>'<button type="button" class="rs-region-row" data-action="choose-region" data-id="'+esc(region.id)+'" data-region="'+esc(region.region)+'"><span><strong>'+esc(region.region)+'</strong><small>'+region.offerCount+' '+(region.offerCount===1?'oferta':'ofertas')+'</small></span><span>'+I('arrow','tiny')+'</span></button>').join('')+'</div><p class="rs-region-tip">Cada región tiene sus propias ofertas. Confirma tu región antes de continuar.</p>';
+  break;
+ }
  case 'payment-methods':
   html=modalTitle('Cambiar método de pago','Selecciona cómo quieres pagar tu compra')+
   paymentChoiceList();
@@ -1915,7 +1973,7 @@ function navigate(page){
  s.modal=null;if(page!=='detalle')s.search='';s.filter='todos';s.showFavs=false;s.page=page;render(true);history.replaceState(null,'','#'+page);if(page==='inicio')void loadRecentTopups();
  if(page==='revendedores'&&!s.resellerPortal)void loadResellerPortal(false,true);
 }
-function openDetail(id){let g=itemBy(id);if(!g)return;s.detailId=id;s.selected=0;s.player='';s.offerGroup='recargas';s.playerTargets={};s.playerCheck=null;s.qty=1;s.modal=null;s.page='detalle';render(true);history.replaceState(null,'','#producto/'+id)}
+function openDetail(id){let g=itemBy(id);if(!g)return;const regions=gameRegionOptions(g);if(g.category==='juegos'&&regions.length>1){s.regionPickGame=id;s.modal='region-picker';modal();return}openRegionGame(id,regions[0]?.region||'')}
 function toast(t){const root=document.getElementById('toast-root');root.innerHTML=`<div class="toast">${esc(t)}</div>`;clearTimeout(toast.timer);toast.timer=setTimeout(()=>root.innerHTML='',2800)}
 function changePayment(p){
  if(!PAYMENT_METHODS[p])return;
@@ -1955,6 +2013,7 @@ case 'reseller-deposit-submit':void submitResellerDeposit();break;
 case 'nav':navigate(b.dataset.page);break;case 'modal-nav':navigate(b.dataset.page);break;
 case 'home-wallet-deposit':s.modal='wallet';modal();break;case 'home-wallet-movements':s.modal='reseller-ledger';modal();break;
 case 'open-item':openDetail(b.dataset.id);break;
+case 'choose-region':openRegionGame(b.dataset.id,b.dataset.region);break;
 case 'modal':s.modal=b.dataset.modal;modal();break;
 case 'close':case 'backdrop':s.modal=null;modal();break;
 case 'fav':{let idx=s.favorites.indexOf(b.dataset.id);if(idx>=0)s.favorites.splice(idx,1);else s.favorites.push(b.dataset.id);save('favs',s.favorites);if(s.page==='perfil'||s.showFavs)render();else{b.classList.toggle('active');b.title=idx>=0?'Añadir a favoritos':'Eliminar de favoritos'}toast(idx>=0?'Eliminado de favoritos':'Guardado en favoritos');break;}
@@ -1964,16 +2023,16 @@ case 'reset-filters':s.filter='todos';s.search='';s.showFavs=false;render();brea
 case 'set-payment':changePayment(b.dataset.value);break;
 case 'open-payment-methods':s.paymentReturnModal=s.modal==='checkout'?'checkout':null;s.modal='payment-methods';modal();break;
 case 'choose-payment':changePayment(b.dataset.value);break;
-case 'offer-group':{const id=b.dataset.value,g=itemBy(s.detailId);if(!OFFER_TABS.some(t=>t[0]===id)||!g)break;s.offerGroup=id;const first=g.offers.findIndex(o=>offerGroup(o)===id&&(!s.regionChoice||String(o.region||'Global')===s.regionChoice));if(first>=0)s.selected=first;s.playerCheck=null;const pos=window.scrollY;render();window.scrollTo(0,pos);break;}
+case 'offer-group':{const id=b.dataset.value,g=itemBy(s.detailId);if(!OFFER_TABS.some(t=>t[0]===id)||!g)break;const first=g.offers.findIndex(o=>offerGroup(o)===id&&(!s.regionChoice||String(o.region||'Global')===s.regionChoice));if(first<0){toast('Esta región no tiene productos de esa categoría.');break}s.offerGroup=id;s.selected=first;s.playerCheck=null;const pos=window.scrollY;render();window.scrollTo(0,pos);break;}
 case 'select-offer':{let pos=window.scrollY;s.selected=Number(b.dataset.index);s.playerCheck=null;render();window.scrollTo(0,pos);break;}
 case 'verify-player':void verifyPlayerIdentity();break;
 case 'checkout':{if(s.role==='guest'){s.page='login';render(true);toast('Inicia sesión para continuar con la compra');return}const o=itemBy(s.detailId)?.offers?.[s.selected];let v=(document.getElementById('player-input')?.value||s.player||'').trim();s.player=v;if(o?.kind!=='pin'&&v.length<3){toast('Primero escribe el ID o destinatario.');document.getElementById('player-input')?.focus();return}try{playerTargetData(o,true)}catch(err){toast(err.message);return}if(s.playerCheck?.status==='invalid'&&s.playerCheck.offerId===o?.id&&s.playerCheck.player===v){toast('Corrige el ID del jugador antes de pagar.');return}s.modal='checkout';modal();break;}
-case 'add-cart':{let v=(document.getElementById('player-input')?.value||s.player||'').trim();s.player=v;const offer=itemBy(s.detailId)?.offers?.[s.selected];if(offer?.kind!=='pin'&&v.length<3){toast('Indica el ID o destinatario');return}let targets;try{targets=playerTargetData(offer,true)}catch(err){toast(err.message);return}s.cart.push({id:s.detailId,offer:s.selected,offerId:offer.id,player:s.player,targets});save('cart',s.cart);headerNav();toast('Producto añadido al carrito');break;}
+case 'add-cart':{let v=(document.getElementById('player-input')?.value||s.player||'').trim();s.player=v;const offer=itemBy(s.detailId)?.offers?.[s.selected];if(offer?.kind!=='pin'&&v.length<3){toast('Indica el ID o destinatario');return}let targets;try{targets=playerTargetData(offer,true)}catch(err){toast(err.message);return}s.cart.push({id:s.detailId,offer:s.selected,offerId:offer.id,player:s.player,targets,region:offer.region||s.regionChoice||'Global'});save('cart',s.cart);headerNav();toast('Producto añadido al carrito');break;}
 case 'qty-minus':s.qty=Math.max(1,s.qty-1);modal();break;case 'qty-plus':s.qty=Math.min(20,s.qty+1);modal();break;
 
 
 case 'remove-cart':{s.cart.splice(Number(b.dataset.index),1);save('cart',s.cart);headerNav();modal();break;}
-case 'cart-first':{const c=s.cart[0];if(!c)return;openDetail(c.id);const game=itemBy(c.id),index=game?.offers?.findIndex(o=>o.id===c.offerId);s.selected=index>=0?index:c.offer;s.player=String(c.player||'');const offerId=c.offerId||game?.offers?.[s.selected]?.id;if(offerId)s.playerTargets[offerId]={...(c.targets||{})};if(!game?.offers?.[s.selected]){toast('La oferta guardada ya no está disponible.');render();return}s.modal='checkout';render();break;}
+case 'cart-first':{const c=s.cart[0];if(!c)return;openRegionGame(c.id,c.region||'');const game=itemBy(c.id),index=game?.offers?.findIndex(o=>o.id===c.offerId);s.selected=index>=0?index:c.offer;s.player=String(c.player||'');const offerId=c.offerId||game?.offers?.[s.selected]?.id;if(offerId)s.playerTargets[offerId]={...(c.targets||{})};if(!game?.offers?.[s.selected]){toast('La oferta guardada ya no está disponible.');render();return}s.modal='checkout';render();break;}
 case 'save-profile':{const name=(document.getElementById('profile-name')?.value||'').trim();if(!name){toast('Escribe un nombre');return}s.nickname=name.slice(0,32);save('nickname',s.nickname);render();toast('Nombre guardado');break;}
 case 'order-details':s.selectedOrder=b.dataset.ref;s.modal='order';modal();break;
 case 'delete-order':s.orders=s.orders.filter(o=>o.ref!==b.dataset.ref);save('orders',s.orders);s.modal=null;render();toast('Pedido eliminado');break;
