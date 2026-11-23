@@ -1004,7 +1004,7 @@ const ITEMS=[];
 const getStored=(key,fallback)=>{try{return JSON.parse(localStorage.getItem('refills_shop_'+key)??localStorage.getItem('refills_mock_'+key))??fallback}catch{return fallback}};
 const save=(key,data)=>{try{localStorage.setItem('refills_shop_'+key,JSON.stringify(data))}catch{}};
 /* El catálogo antiguo guardado en localStorage no se reintroduce. */
-const s={page:'inicio',authMode:'login',authBusy:false,authError:'',afterAuthPage:'inicio',authSession:null,profile:null,member:false,resellerPortal:null,resellerLoading:false,resellerOrders:[],resellerDeposits:[],resellerCurrency:'USDT',resellerDepositCurrency:'USDT',detailId:null,search:'',filter:'todos',sort:'name',payment:'cup',selected:0,player:'',qty:1,modal:null, nickname:getStored('nickname','Invitado'),favorites:getStored('favs',[]),orders:getStored('orders',[]),cart:getStored('cart',[]),showFavs:false,selectedOrder:null, role:(window.REFILLS_SESSION&&window.REFILLS_SESSION.role)||'guest', user:(window.REFILLS_SESSION&&window.REFILLS_SESSION.user)||null,
+const s={page:'inicio',authMode:'login',authBusy:false,authError:'',afterAuthPage:'inicio',authSession:null,profile:null,member:false,resellerPortal:null,resellerLoading:false,resellerOrders:[],resellerDeposits:[],resellerCurrency:'USDT',resellerDepositCurrency:'USDT',detailId:null,search:'',filter:'todos',sort:'name',payment:'cup',selected:0,player:'',qty:1,modal:null, nickname:getStored('nickname','Invitado'),favorites:getStored('favs',[]),orders:[],cart:getStored('cart',[]),showFavs:false,selectedOrder:null, role:(window.REFILLS_SESSION&&window.REFILLS_SESSION.role)||'guest', user:(window.REFILLS_SESSION&&window.REFILLS_SESSION.user)||null,
 rates:getStored('rates',{usdtSm:300,smCup:3,gainSM:0}), adminTab:'resumen',
 adminOrders:getStored('adminOrders',[]), reseller:getStored('reseller',{plan:null,wallet:{USDT:0,CUP:0,SM:0},ledger:[]}),
 paymentConfig:getStored('paymentConfig',{smReceiver:'',cupCard:'',usdtAddress:'',usdtEnabled:false,whatsappNumber:''}),
@@ -1117,6 +1117,7 @@ async function loadAccountProfile(authUser=s.authSession?.user){
  s.nickname=name;
  s.user={id:authUser.id,name,phone:data.profile?.phone||'',email:'',app_metadata:authUser.app_metadata||{}};
  s.role=authUser.app_metadata?.role==='refills_admin'?'admin':(s.member?'reseller':'customer');
+ void loadCustomerOrders();
  if(s.member)await loadResellerPortal(true,false);
  else{s.resellerPortal=null;s.reseller={...s.reseller,plan:null,wallet:{USDT:0,CUP:0,SM:0}}}
  return data;
@@ -1516,9 +1517,11 @@ function modal(){
   html=modalTitle('Revisar tu compra','Confirma el destino y el método de pago')+
   `<div class="sheet-product"><img src="${photo(g)}" alt=""><div><strong>${esc(g?.name||'')}</strong><div class="muted">${esc(o?.title||'')} · Para: ${esc(s.player)}</div><div class="amount">${total?formatPriceValue(total.amount,total.currency):'Precio no disponible'}</div></div></div>
   <span class="sheet-label">Método seleccionado</span>${payPills()}
+${s.payment==='sm'?'<label class="sheet-label" for="payment-source-phone">Número que envió el saldo móvil</label><input id="payment-source-phone" class="field" inputmode="numeric" maxlength="8" placeholder="8 dígitos" required>':''}
+${Array.isArray(o?.targetSchema)&&o.targetSchema.length?o.targetSchema.map(f=>`<label class="sheet-label">${esc(f.label||f.key)}</label>${f.type==='select'&&Array.isArray(f.options)?`<select class="field order-target-field" data-target-key="${esc(f.key)}" required><option value="">Selecciona</option>${f.options.map(x=>`<option value="${esc(x.value)}">${esc(x.label||x.value)}</option>`).join('')}</select>`:`<input class="field order-target-field" data-target-key="${esc(f.key)}" placeholder="${esc(f.label||f.key)}" maxlength="80" required>`}`).join(''):''}
   <div class="summary-list"><div class="summary-row"><span>Destino</span><strong>${esc(s.player)}</strong></div><div class="summary-row"><span>Pago</span><strong>${esc(paymentName())}</strong></div><div class="summary-row"><span>Cantidad</span><strong>${s.qty}</strong></div><div class="summary-row"><span>Total</span><strong>${total?formatPriceValue(total.amount,total.currency):'No disponible'}</strong></div></div>
   <div class="payment-instructions"><strong>Datos para pagar</strong><p>${paymentConfigText()}</p></div>
-  ${s.payment==='balance'?'':`<label class="sheet-label" for="payment-proof">Comprobante de pago (si corresponde)</label><input id="payment-proof" class="field" type="file" accept="image/*,.pdf">`}
+  ${s.payment==='balance'?'':`<label class="sheet-label" for="payment-proof">Comprobante de pago (si corresponde)</label><input id="payment-proof" class="field" type="file" accept="image/png,image/jpeg,image/webp">`}
   <div class="warn">${s.payment==='balance'&&!resellerHasPlan()?'Activa un plan de revendedor para pagar con el saldo de la web.':s.payment==='balance'&&Number(s.reseller?.wallet?.USDT||0)<(total?.amount||0)?'Tu saldo USDT no alcanza para esta compra. Recarga tu wallet antes de continuar.':s.payment==='usdt'&&!s.paymentConfig.usdtEnabled?'USDT no está habilitado para recibir pagos en este momento.':(!s.paymentConfig.cupCard&&s.payment==='cup')||(!s.paymentConfig.smReceiver&&s.payment==='sm')?'Configura los datos del método de pago desde Administración antes de recibir pedidos.':s.payment==='balance'?'El servidor verificará tu saldo y descontará el importe únicamente si autoriza la compra.':'El pedido solo se enviará cuando el servidor confirme la recepción.'}</div>
   <button class="btn primary full" data-action="send-order">${I('check','tiny')} Enviar solicitud de compra</button>`;
   break;
@@ -1879,45 +1882,60 @@ document.addEventListener('click',async e=>{
   return;
  }
  if(a==='send-order'){
-  const endpoint=window.REFILLS_CONFIG?.orderEndpoint;
-  if(!endpoint){toast('El servidor de pedidos todavía no está conectado.');return}
-  const g=itemBy(s.detailId),o=g?.offers[s.selected];if(!g||!o)return;
-  if(s.payment==='usdt'&&(!s.paymentConfig.usdtEnabled||!s.paymentConfig.usdtAddress)){toast('USDT no está habilitado.');return}
-  if(s.payment==='cup'&&!s.paymentConfig.cupCard){toast('Configura los datos de Transfermóvil.');return}
-  if(s.payment==='sm'&&!s.paymentConfig.smReceiver){toast('Configura el número receptor.');return}
-  const selectedPrice=currentPrice(o);
-  if(!selectedPrice||!Number.isFinite(Number(selectedPrice.amount))){toast('No se pudo calcular el precio de esta oferta.');return}
+ const g=itemBy(s.detailId),o=g?.offers[s.selected];
+ if(!s.user||!g||!o?.id){toast('Selecciona una oferta publicada.');return}
+ if(!s.salesEnabled||!o.purchasable||!o.inStock){toast('La tienda todavía no acepta compras de esta oferta. No transfieras dinero.');return}
+ if(s.qty!==1){toast('Realiza un pedido por oferta.');return}
+ if(s.payment==='usdt'){toast('USDT directo requiere una factura verificada y todavía no está habilitado.');return}
+ const targetPayload={};
+ for(const el of document.querySelectorAll('.order-target-field')){const value=String(el.value||'').trim();if(!value){toast('Completa los datos del jugador.');return}targetPayload[el.dataset.targetKey]=value}
+ const player=String(s.player||'').trim();
+ if(o.kind!=='pin'&&!player&&!Object.keys(targetPayload).length){toast('Escribe el ID de jugador.');return}
+ b.disabled=true;b.textContent='Registrando pedido…';
+ try{let result;
   if(s.payment==='balance'){
-   if(!resellerHasPlan()){toast('Necesitas un plan de revendedor para pagar con saldo de la web.');return}
-   const available=Number(s.reseller?.wallet?.USDT||0),due=Number(selectedPrice.amount)*s.qty;
-   if(available<due){toast('Saldo insuficiente. Recarga tu wallet antes de comprar.');return}
+   if(!resellerHasPlan())throw Error('Necesitas un plan activo de revendedor.');
+   const live=await edgeRequest('rs12-reseller','/storefront',{auth:true});
+   const item=(live.offers||[]).find(x=>x.id===o.id&&x.inStock===true);
+   if(!item)throw Error('La oferta no está disponible al costo mayorista.');
+   if(Number(s.reseller?.wallet?.USDT||0)<Number(item.resellerUsdt||0))throw Error('No tienes saldo USDT suficiente.');
+   result=await edgeRequest('rs12-reseller','/orders',{method:'POST',auth:true,body:{offerId:o.id,clientRequestId:newRequestId(),playerId:player||'PIN',targetPayload,currency:'USDT'}});
+   await loadResellerPortal(true,false);
+  }else{
+   const method=s.payment==='sm'?'mobile':s.payment==='cup'?'card':null;
+   if(!method)throw Error('Método de pago no disponible.');
+   const file=document.getElementById('payment-proof')?.files?.[0];
+   if(!file)throw Error('Adjunta la captura del pago antes de enviar el pedido.');
+   if(file.size>5242880||!['image/jpeg','image/png','image/webp'].includes(file.type))throw Error('La captura debe ser JPG, PNG o WEBP y pesar como máximo 5 MB.');
+   const sourcePhone=method==='mobile'?String(document.getElementById('payment-source-phone')?.value||'').trim():'';
+   if(method==='mobile'&&!/^[0-9]{8}$/.test(sourcePhone))throw Error('Introduce los 8 dígitos de la línea que envió saldo.');
+   const receipt=await new Promise((resolve,reject)=>{const reader=new FileReader();reader.onload=()=>resolve(reader.result);reader.onerror=()=>reject(Error('No se pudo leer el comprobante.'));reader.readAsDataURL(file)});
+   const quotedAmount=Number(method==='mobile'?o.sm:o.card||o.cup);
+   const quotedCurrency=method==='mobile'?'SM':'CUP';
+   if(!Number.isFinite(quotedAmount)||quotedAmount<=0)throw Error('El precio no está disponible.');
+   result=await edgeRequest('rs10-api','/orders',{method:'POST',auth:true,body:{gameId:g.id,offerId:o.id,clientRequestId:newRequestId(),method,playerId:player||'PIN',targetPayload,quotedAmount,quotedCurrency,sourcePhone,receipt}});
   }
-  const proof=document.getElementById('payment-proof')?.files?.[0];
-  if(s.payment!=='usdt'&&s.payment!=='balance'&&!proof){toast('Adjunta el comprobante de pago para continuar.');return}
-  const payload={gameId:g.id,offer:o.title,player:s.player,quantity:s.qty,payment:s.payment,price:{...selectedPrice,amount:Number(selectedPrice.amount)*s.qty},...(s.payment==='balance'?{walletCurrency:'USDT'}:{})};
-  if(proof){if(proof.size>5*1024*1024){toast('El comprobante no puede superar 5 MB.');return}payload.proofName=proof.name;payload.proofType=proof.type;payload.proofData=await new Promise(resolve=>{const reader=new FileReader();reader.onload=()=>resolve(reader.result);reader.onerror=()=>resolve(null);reader.readAsDataURL(proof)})}
-  b.disabled=true;b.textContent='Enviando…';
-  try{
-   const response=await fetch(endpoint,{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify(payload)});
-   const result=await response.json();if(!response.ok||result.error)throw new Error(result.message||'Error de servidor');
-   if(result.order)s.orders.unshift(result.order);
-   if(result.wallet&&s.reseller){s.reseller.wallet={...s.reseller.wallet,...result.wallet};save('reseller',s.reseller)}
-   save('orders',s.orders);s.modal=null;navigate('pedidos');
-   if(result.order?.ref&&s.paymentConfig.whatsappNumber){const msg=encodeURIComponent('SOLICITUD DE COMPRA ENVIADA # '+result.order.ref);window.open('https://wa.me/'+s.paymentConfig.whatsappNumber.replace(/\D/g,'')+'?text='+msg,'_blank','noopener')}
-   toast('Solicitud enviada correctamente');
-  }catch(err){b.disabled=false;b.textContent='Enviar solicitud de compra';toast(err.message||'No se pudo enviar la solicitud.')}
-  return;
- }
- if(a==='request-wallet-deposit'){
-  if(!resellerHasPlan()){toast('Necesitas un plan de revendedor para recargar la wallet.');return}
-  const endpoint=window.REFILLS_CONFIG?.walletEndpoint,amount=Number(document.getElementById('wallet-amount')?.value),currency=document.getElementById('wallet-currency')?.value;
-  if(!amount||amount<=0){toast('Introduce un monto válido');return}
-  if(!endpoint){toast('La recarga de wallet requiere conexión con el servidor.');return}
-  try{const response=await fetch(endpoint,{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({amount,currency})});if(!response.ok)throw new Error();toast('Solicitud de recarga enviada');s.modal=null;modal()}catch(err){toast('No se pudo enviar la solicitud.')}
-  return;
- }
+  if(!result?.ok&&!result?.order)throw Error('El servidor no confirmó el pedido.');
+  s.modal=null;await loadCustomerOrders();navigate('pedidos');toast('Pedido registrado. Comprueba el estado en Pedidos.');
+ }catch(err){toast(err?.message||'No se pudo registrar la compra.');}
+ finally{b.disabled=false;b.textContent='Enviar solicitud de compra';}
+ return;
+}
+if(a==='request-wallet-deposit'){
+ if(!resellerHasPlan()){toast('Activa un plan de revendedor para recargar la wallet.');return}
+ await submitResellerDeposit();return;
+}
+
 });
 
+
+async function loadCustomerOrders(){
+ if(!s.user){s.orders=[];return}
+ try{const result=await edgeRequest('rs10-api','/orders',{auth:true});
+  s.orders=(result.orders||[]).map(x=>({id:x.id,ref:x.code,gameName:x.game,offer:x.offer,player:x.playerId||'PIN',payment:x.method,total:x.amount,currency:x.currency,status:x.status,date:x.created?new Date(x.created).toLocaleString('es-ES'):'',totalText:(Number(x.amount||0).toLocaleString('es-ES')+' '+(x.currency||''))}));
+  if(s.page==='pedidos')render();
+ }catch(err){console.warn('No se pudo cargar el historial:',err?.message||err)}
+}
 
 async function loadLiveCatalog(){
  s.catalogLoading=true;s.catalogError='';
