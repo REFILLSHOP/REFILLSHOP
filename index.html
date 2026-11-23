@@ -1702,7 +1702,7 @@ function resellerPage(){
   <div class="reseller-v7-head"><div><div class="eyebrow">PORTAL INDEPENDIENTE / REVENDEDORES</div><h1 class="page-title">Panel de revendedores</h1><p class="page-lead">Tus planes, precios mayoristas y wallet en un solo lugar.</p></div><button class="reseller-v7-refresh" data-action="reseller-refresh">${I('arrow','tiny')} Actualizar</button></div>
   <section class="card wallet-hero" style="margin-top:16px">
    <span class="wallet-text">TU PLAN ACTUAL</span><div class="wallet-number" style="font-size:clamp(30px,5vw,42px)">${esc(currentPlan)}</div>
-   <div class="muted">Margen sobre el proveedor: <strong>+${currentMargin}%</strong>${expires?` · Vence ${expires.toLocaleDateString('es-ES')} · ${daysLeft} días restantes`:' · Sin vencimiento'}</div>
+   <div class="muted">Precios finales disponibles en tu catálogo de revendedor${expires?` · Vence ${expires.toLocaleDateString('es-ES')} · ${daysLeft} días restantes`:' · Sin vencimiento'}</div>
    <div class="wallet-controls"><button class="btn primary" data-action="modal" data-modal="wallet">${I('plus','tiny')} Recargar wallet</button><button class="btn secondary" data-action="modal" data-modal="reseller-ledger">${I('file','tiny')} Movimientos</button></div>
   </section>
   <div class="section-head"><h2>Mi wallet</h2><span class="muted small">Saldos reales de tu cuenta</span></div>
@@ -1711,7 +1711,7 @@ function resellerPage(){
    <div class="reseller-v7-balance"><small>CUP</small><strong>${fmtMoney(balance.CUP||0)}</strong></div>
    <div class="reseller-v7-balance"><small>SALDO MÓVIL</small><strong>${fmtMoney(balance.SM||0)}</strong></div>
   </div>
-  <div class="section-head"><h2>Elige tu plan</h2><span class="muted small">Precios y márgenes sincronizados con Supabase</span></div>
+  <div class="section-head"><h2>Elige tu plan</h2><span class="muted small">Consulta una vista previa de los precios finales</span></div>
   <div class="reseller-v7-actions"><label class="muted small" for="reseller-currency">Pagar suscripción con</label><select id="reseller-currency" aria-label="Moneda para pagar el plan"><option value="USDT" ${s.resellerCurrency==='USDT'?'selected':''}>USDT</option><option value="CUP" ${s.resellerCurrency==='CUP'?'selected':''}>CUP</option><option value="SM" ${s.resellerCurrency==='SM'?'selected':''}>Saldo móvil (SM)</option></select></div>
   <div class="reseller-v7-plans">${plans.map(plan=>{
    const isCurrent=plan.tier===tier,isFree=plan.tier==='free';
@@ -1719,9 +1719,11 @@ function resellerPage(){
    const duration=isFree?'Sin vencimiento':`${plan.days} días`;
    const update=plan.refresh==='daily_mini'?'Actualización diaria ligera':'Actualización diaria';
    const blockedLower=tier==='level3'&&plan.tier==='level2';
+   const example=Object.values(s.wholesalePrices||{}).find(o=>Number(o.providerCostUsdt)>0);
+   const examplePrice=example?Math.ceil(Number(example.providerCostUsdt)*(1+Number(plan.markupPercent||0)/100)*100)/100:null;
    return `<article class="reseller-v7-plan ${isCurrent?'current':''}">
     <div class="plan-kicker">${isCurrent?'TU PLAN ACTUAL':'PLAN DE REVENDEDOR'}</div><h3>${esc(plan.name)}</h3>
-    <div class="plan-margin">+${plan.markupPercent}%</div><p>${priceLabel} · ${duration}<br>${update}</p>
+    <div class="plan-margin">${examplePrice!==null?`${examplePrice.toFixed(2)} USDT`:'Sin ofertas'}</div><div class="muted small">VISTA PREVIA${example?` · ${esc(example.name)}`:' · Publica una oferta para ver precios'}</div><p>${priceLabel} · ${duration}<br>${update}</p>
     ${isCurrent?(isFree?`<span class="current-pill">Activo</span>`:`<button class="btn secondary" data-action="reseller-subscribe" data-tier="${esc(plan.tier)}">Renovar ${esc(plan.name)}</button>`):blockedLower?`<button class="btn secondary" disabled>Requiere bajar de nivel al vencer</button>`:isFree?`<span class="muted small">Plan gratuito</span>`:`<button class="btn primary" data-action="reseller-subscribe" data-tier="${esc(plan.tier)}">Activar ${esc(plan.name)}</button>`}
    </article>`;
   }).join('')}</div>
