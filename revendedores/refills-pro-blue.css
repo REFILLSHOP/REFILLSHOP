@@ -18,3 +18,36 @@ body{background:radial-gradient(ellipse 46vw 46vh at 98% 12%,#266cdf42,transpare
 .eyebrow{color:#8ac4ff}
 .foot{border-color:#2b4779}
 @media(max-width:640px){body{background-attachment:scroll}.shell{width:calc(100% - 26px)}.main{padding-bottom:86px}}
+
+
+/* REFILLS PRO · Horizontal wholesale offers */
+.reseller-offer-toolbar{display:flex;align-items:center;justify-content:flex-end;gap:10px;flex-wrap:wrap;margin:12px 0 14px;padding:10px 12px;border:1px solid #304d83;border-radius:13px;background:#0c1630}
+.reseller-offer-toolbar label{font-size:11px;font-weight:850;color:#9fb8e6}
+.reseller-offer-toolbar select{min-width:105px;max-width:150px;padding:8px 11px;border:1px solid #3a62a3;border-radius:9px;background:#101d3d;color:#f3f7ff;font-weight:900}
+.reseller-offer-list{display:grid;grid-template-columns:minmax(0,1fr);gap:10px}
+.reseller-offer-row{display:grid;grid-template-columns:70px minmax(0,1fr) minmax(150px,185px);align-items:center;gap:13px;padding:12px!important;min-width:0;background:linear-gradient(110deg,#121f40,#0c1732)!important;border-color:#2e4e89!important}
+.reseller-offer-art{width:70px;height:70px;overflow:hidden;border:1px solid #3a5e9d;border-radius:13px;background:#09142d}
+.reseller-offer-art img{width:100%;height:100%;object-fit:cover}
+.reseller-offer-info{display:flex;flex-direction:column;gap:4px;min-width:0}
+.reseller-offer-info .eyebrow{font-size:8px;letter-spacing:.1em}
+.reseller-offer-info strong{font-size:14px;line-height:1.25;color:#f4f7ff;overflow-wrap:anywhere}
+.reseller-offer-info small{font-size:10px;color:#9fb4d9}
+.reseller-offer-purchase{display:flex;flex-direction:column;gap:5px;min-width:0;padding:8px 9px;border:1px solid #304d87;border-radius:11px;background:#0a1530}
+.reseller-offer-purchase>small{font-size:8px;letter-spacing:.1em;color:#8fa9d8;font-weight:900}
+.reseller-offer-purchase>strong{font-size:18px;color:#fff;font-weight:950;white-space:nowrap}
+.reseller-offer-purchase .button{width:100%;min-height:34px;padding:6px 8px;font-size:11px}
+@media(max-width:640px){
+ .reseller-offer-row{grid-template-columns:52px minmax(0,1fr) minmax(104px,116px);gap:7px;padding:8px!important;border-radius:13px}
+ .reseller-offer-art{width:52px;height:52px;border-radius:10px}
+ .reseller-offer-info{gap:3px}
+ .reseller-offer-info .eyebrow{font-size:7px}
+ .reseller-offer-info strong{font-size:11px;line-height:1.18}
+ .reseller-offer-info small{font-size:8px;line-height:1.2}
+ .reseller-offer-purchase{gap:4px;padding:6px;border-radius:9px}
+ .reseller-offer-purchase>small{font-size:6px}
+ .reseller-offer-purchase>strong{font-size:14px}
+ .reseller-offer-purchase .button{min-height:28px;font-size:9px;padding:5px 6px}
+ .reseller-offer-toolbar{padding:8px 9px;margin:9px 0 11px}
+ .reseller-offer-toolbar label{font-size:9px}
+ .reseller-offer-toolbar select{min-width:90px;max-width:110px;padding:7px 8px;font-size:11px}
+}
