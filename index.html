@@ -1004,7 +1004,7 @@ const ITEMS=[];
 const getStored=(key,fallback)=>{try{return JSON.parse(localStorage.getItem('refills_shop_'+key)??localStorage.getItem('refills_mock_'+key))??fallback}catch{return fallback}};
 const save=(key,data)=>{try{localStorage.setItem('refills_shop_'+key,JSON.stringify(data))}catch{}};
 /* El catálogo antiguo guardado en localStorage no se reintroduce. */
-const s={page:'inicio',authMode:'login',authBusy:false,authError:'',afterAuthPage:'inicio',authSession:null,profile:null,member:false,resellerPortal:null,resellerLoading:false,resellerOrders:[],resellerDeposits:[],resellerCurrency:'USDT',resellerDepositCurrency:'USDT',detailId:null,search:'',filter:'todos',sort:'name',payment:'cup',selected:0,player:'',qty:1,modal:null, nickname:getStored('nickname','Invitado'),favorites:getStored('favs',[]),orders:[],cart:getStored('cart',[]),showFavs:false,selectedOrder:null, role:(window.REFILLS_SESSION&&window.REFILLS_SESSION.role)||'guest', user:(window.REFILLS_SESSION&&window.REFILLS_SESSION.user)||null,
+const s={page:'inicio',authMode:'login',authBusy:false,authError:'',afterAuthPage:'inicio',authSession:null,profile:null,member:false,resellerPortal:null,resellerLoading:false,wholesalePrices:{},resellerOrders:[],resellerDeposits:[],resellerCurrency:'USDT',resellerDepositCurrency:'USDT',detailId:null,search:'',filter:'todos',sort:'name',payment:'cup',selected:0,player:'',qty:1,modal:null, nickname:getStored('nickname','Invitado'),favorites:getStored('favs',[]),orders:[],cart:getStored('cart',[]),showFavs:false,selectedOrder:null, role:(window.REFILLS_SESSION&&window.REFILLS_SESSION.role)||'guest', user:(window.REFILLS_SESSION&&window.REFILLS_SESSION.user)||null,
 rates:getStored('rates',{usdtSm:300,smCup:3,gainSM:0}), adminTab:'resumen',
 adminOrders:getStored('adminOrders',[]), reseller:getStored('reseller',{plan:null,wallet:{USDT:0,CUP:0,SM:0},ledger:[]}),
 paymentConfig:getStored('paymentConfig',{smReceiver:'',cupCard:'',usdtAddress:'',usdtEnabled:false,whatsappNumber:''}),
@@ -1119,7 +1119,7 @@ async function loadAccountProfile(authUser=s.authSession?.user){
  s.role=authUser.app_metadata?.role==='refills_admin'?'admin':(s.member?'reseller':'customer');
  void loadCustomerOrders();
  if(s.member)await loadResellerPortal(true,false);
- else{s.resellerPortal=null;s.reseller={...s.reseller,plan:null,wallet:{USDT:0,CUP:0,SM:0}}}
+ else{s.resellerPortal=null;s.wholesalePrices={};s.reseller={...s.reseller,plan:null,wallet:{USDT:0,CUP:0,SM:0}}}
  return data;
 }
 async function loadResellerPortal(silent=false,rerender=true){
@@ -1140,6 +1140,8 @@ async function loadResellerPortal(silent=false,rerender=true){
    edgeRequest('rs12-reseller','/wallet/deposits',{auth:true}).catch(()=>({deposits:portal.deposits||[]}))
   ]);
   s.resellerOrders=orders.orders||[];
+  try{const wholesale=await edgeRequest('rs12-reseller','/storefront',{auth:true});s.wholesalePrices=Object.fromEntries((wholesale.offers||[]).filter(x=>x.id&&x.inStock).map(x=>[x.id,x]));}
+  catch(error){s.wholesalePrices={};console.warn('Mayorista no disponible:',error?.message||error);}
   s.resellerDeposits=deposits.deposits||portal.deposits||[];
   return portal;
  }catch(error){
@@ -1300,7 +1302,10 @@ function resellerPrice(o,method=s.payment){
  return {amount:base,currency:'USDT'};
 }
 function currentPrice(o,method=s.payment){
- if(s.role==='reseller')return resellerPrice(o,method);
+ if(method==='balance'){
+  const quote=s.wholesalePrices?.[o?.id];
+  return quote&&Number(quote.resellerUsdt)>0?{amount:Number(quote.resellerUsdt),currency:'USDT',method:PAYMENT_METHODS.balance}:null;
+ }
  return priceFor(o,method);
 }
 function displayPrice(o,method=s.payment){
