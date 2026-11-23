@@ -69,28 +69,44 @@ function home(){
  <section class="section"><div class="rs-pro-section-title"><h2>Mis pedidos recientes</h2><button type="button" data-view="pedidos">Ver todos ›</button></div><div class="panel pad">${ordersRows(S.orders.slice(0,3))}</div></section>
  </div>`;
 }
+function tierPrice(offer,tier){
+ const supplierCost=Number(offer?.providerCostUsdt);
+ const markup=Number(tier?.markupPercent);
+ if(!Number.isFinite(supplierCost)||supplierCost<=0||!Number.isFinite(markup))return null;
+ const value=Math.ceil((supplierCost*(1+markup/100)-1e-10)*100)/100;
+ return {usdt:value,sm:Math.ceil(value*num(S.rates.buySmPerUsdt)),cup:Math.ceil(value*num(S.rates.buySmPerUsdt)*num(S.rates.cupPerSm))};
+}
 function plans(){
- const markup=S.membership?.markupPercent||7;
- return `<span class="eyebrow">PRECIOS POR NIVEL</span><h1 class="heading">Suscripciones</h1><p class="sub">Elige tu plan. Level 2 y Level 3 duran 15 días cada uno, pero tienen un precio y un margen diferentes. Los importes se validan al activar.</p>
- <div class="grid grid-3">${S.tiers.map(t=>`<article class="panel tier ${t.tier===S.membership?.planTier?'active':''}"><span class="eyebrow">${t.tier==='free'?'ACCESO BASE':'PLAN DE REVENTA'}</span><h3>${esc(t.name)}</h3><div class="tier-price">${t.tier==='free'?'Gratis':usdt(t.priceUsdt)+' USDT'}<small>${t.tier==='free'?'Sin vencimiento':num(t.days)+' días'}</small></div><div class="dim reduced">Precio del proveedor +${num(t.markupPercent)}%<br>Catálogo actualizado para tu nivel</div>${t.tier===S.membership?.planTier?'<span class="pill">Plan actual</span>':t.tier==='free'?'<span class="dim tiny">Incluido al crear tu cuenta</span>':`<button class="button full" data-plan="${esc(t.tier)}">Elegir ${esc(t.name)}</button>`}</article>`).join('')}</div>
- <section class="panel pad section"><h2>Activar o renovar</h2><p class="dim reduced">Se descuenta directamente de tu wallet en USDT, CUP o SM. Las conversiones se calculan con las tasas configuradas por administración.</p>
- <form id="planForm" class="grid"><div class="two"><label class="field">Suscripción<select name="tier">${S.tiers.filter(t=>t.tier!=='free').map(t=>`<option value="${esc(t.tier)}" ${S.tier===t.tier?'selected':''}>${esc(t.name)} · ${usdt(t.priceUsdt)} USDT · ${num(t.days)} días</option>`).join('')}</select></label><label class="field">Pagar desde wallet<select name="currency"><option>USDT</option><option>SM</option><option>CUP</option></select></label></div><button class="button" type="submit">Confirmar suscripción</button></form>
- <p class="help">Tu plan actual tiene un margen de +${num(markup)}%. Si la wallet no tiene saldo suficiente, recárgala primero.</p></section>`;
+ const available=S.offers.filter(o=>o.inStock&&num(o.providerCostUsdt)>0),selected=available.find(o=>o.id===S.planPreviewId)||available[0]||null;
+ if(selected&&!S.planPreviewId)S.planPreviewId=selected.id;
+ return '<span class="eyebrow">REFILLS PRO · MEMBRESÍAS</span><h1 class="heading">Elige tu plan</h1><p class="sub">Explora los beneficios y consulta el precio final de cualquier oferta antes de activar un plan. Sin cálculos complicados.</p>' +
+ '<section class="panel pad section rs-plan-preview"><div class="section-head"><h2>Vista previa de precios</h2><span class="dim tiny">Importes informativos del catálogo activo</span></div>' +
+ (available.length?'<label class="field">Selecciona una oferta real del catálogo<select id="planPreviewProduct">'+available.slice(0,120).map(o=>'<option value="'+esc(o.id)+'" '+(o.id===selected.id?'selected':'')+'>'+esc(o.name)+' · '+esc((S.games.find(g=>g.id===o.gameId)||{}).name||'')+'</option>').join('')+'</select></label>':'<div class="rs-preview-empty">La vista previa de precios aparecerá cuando administración publique las primeras ofertas reales. No mostraremos importes inventados.</div>') +
+ '</section>' +
+ '<div class="grid grid-3 rs-tier-cards">'+S.tiers.map(t=>{const price=selected?tierPrice(selected,t):null,active=t.tier===S.membership?.planTier;return '<article class="panel tier rs-tier-card '+(active?'active':'')+'"><span class="eyebrow">'+(t.tier==='free'?'INCLUIDO':'PLAN REVENDEDOR')+'</span><h3>'+esc(t.name)+'</h3><div class="tier-price">'+(t.tier==='free'?'Gratis':usdt(t.priceUsdt)+' USDT')+'<small>'+(t.tier==='free'?'Sin vencimiento':num(t.days)+' días')+'</small></div><div class="rs-tier-preview">'+(price?'<small>VISTA PREVIA · '+esc(selected.name)+'</small><strong>'+usdt(price.usdt)+' USDT</strong><span>'+integer(price.sm)+' SM · '+integer(price.cup)+' CUP</span>':'<small>VISTA PREVIA</small><strong>Sin ofertas</strong><span>Los precios aparecerán aquí al publicarlas</span>')+'</div>'+(active?'<span class="pill">Tu plan actual</span>':t.tier==='free'?'<span class="dim tiny">Disponible sin pago</span>':'<button class="button full" data-plan="'+esc(t.tier)+'">Seleccionar '+esc(t.name)+'</button>')+'</article>'}).join('')+'</div>' +
+ '<section class="panel pad section"><h2>Activar o renovar suscripción</h2><p class="dim reduced">Los cobros se realizan desde tu wallet y siempre se confirman en Supabase.</p><form id="planForm" class="grid"><div class="two"><label class="field">Plan<select name="tier">'+S.tiers.filter(t=>t.tier!=='free').map(t=>'<option value="'+esc(t.tier)+'" '+(S.tier===t.tier?'selected':'')+'>'+esc(t.name)+' · '+usdt(t.priceUsdt)+' USDT · '+num(t.days)+' días</option>').join('')+'</select></label><label class="field">Moneda<select name="currency"><option>USDT</option><option>SM</option><option>CUP</option></select></label></div><button type="submit" class="button">Confirmar suscripción</button></form><p class="help">Antes de activar el plan revisa su importe, duración y disponibilidad de saldo.</p></section>';
 }
 function catalog(){
  const q=S.search.toLocaleLowerCase('es');
  const visible=S.games.filter(g=>g.name.toLocaleLowerCase('es').includes(q)&&(S.kindFilter==='all'||S.offers.some(o=>o.gameId===g.id&&o.kind==='pin')));
  return `<header class="rs-pro-app-title"><span class="eyebrow">REFILLS PRO · JUEGOS</span><h1 class="heading">Explora tus recargas</h1><p class="sub">Todos los precios se ajustan a tu plan y se verifican al comprar.</p></header>
  <div class="rs-pro-kind-tabs"><button class="${S.kindFilter==='all'?'active':''}" type="button" data-pro-kind="all">Todos los productos</button><button class="${S.kindFilter==='pin'?'active':''}" type="button" data-pro-kind="pin">Códigos PIN</button></div><form id="searchForm" class="form-actions" role="search"><input class="search" style="flex:1" name="search" type="search" placeholder="Buscar juego" value="${esc(S.search)}" aria-label="Buscar juego"><button class="ghost" type="submit">Buscar</button></form>
- <p class="dim tiny">Mostrando ${visible.length} de ${S.games.length} juegos · Margen de tu plan: +${num(S.membership?.markupPercent||7)}%</p>
+ <p class="dim tiny">Mostrando ${visible.length} de ${S.games.length} juegos · Precios finales para tu suscripción</p>
  ${visible.length?`<div class="game-list">${visible.map(g=>{const count=S.offers.filter(o=>o.gameId===g.id&&o.inStock&&(S.kindFilter!=='pin'||o.kind==='pin')).length;return `<button class="game" data-game="${esc(g.id)}"><img src="${esc(imageURL(g.imageUrl))}" alt="" loading="lazy" onerror="this.onerror=null;this.src='/REFILLSHOP/assets/refills-icon.png'"><span class="game-name">${esc(g.name)}</span><small class="game-count">${count} ofertas disponibles</small></button>`}).join('')}</div>`:'<div class="panel empty">No se encontraron juegos con esa búsqueda.</div>'}`;
 }
 function gamePage(){
- const g=S.games.find(g=>g.id===S.selectedGame);
- if(!g)return catalog();
+ const g=S.games.find(g=>g.id===S.selectedGame);if(!g)return catalog();
  const offers=S.offers.filter(o=>o.gameId===g.id&&(S.kindFilter!=='pin'||o.kind==='pin')).sort((a,b)=>num(a.resellerUsdt)-num(b.resellerUsdt));
- return `<button class="back" data-view="catalogo">‹ Volver al catálogo</button><span class="eyebrow">PRECIOS PARA TU NIVEL</span><h1 class="heading">${esc(g.name)}</h1><p class="sub">${offers.length} ofertas · Precios finales en USDT, saldo móvil y CUP. Oferta sujeta a disponibilidad.</p>
- <div class="grid">${offers.map(o=>`<article class="panel offer"><div class="offer-info"><strong>${esc(o.name)}</strong><small>${esc(o.region||'Global')} · ${o.kind==='pin'?'PIN digital · entrega manual':'Recarga directa'} · <span class="${o.inStock?'in-stock':'out-stock'}">${o.inStock?'Disponible':'Agotada'}</span></small><div class="price">${usdt(o.resellerUsdt)} USDT</div><div class="price-alt">${integer(o.resellerSm)} SM · ${integer(o.resellerCup)} CUP</div></div><button class="button" data-buy="${esc(o.id)}" ${o.inStock?'':'disabled'}>${o.inStock?'Comprar':'Agotada'}</button></article>`).join('')||'<div class="panel empty">Este juego no tiene ofertas activas para reventa.</div>'}</div>`;
+ return '<button class="back" data-view="catalogo">‹ Volver al catálogo</button><span class="eyebrow">TUS PRECIOS DE COMPRA</span><h1 class="heading">'+esc(g.name)+'</h1><p class="sub">Toca Vista previa para consultar el importe final en USDT, SM y CUP antes de comprar.</p>' +
+ '<div class="grid rs-offer-previews">'+(offers.map(o=>'<article class="panel offer rs-price-preview-card"><div class="offer-info"><strong>'+esc(o.name)+'</strong><small>'+esc(o.region||'Global')+' · '+(o.kind==='pin'?'PIN digital':'Recarga directa')+' · '+(o.inStock?'Disponible':'Agotada')+'</small><div class="price">'+usdt(o.resellerUsdt)+' USDT</div><span class="rs-price-hint">Precio final para tu plan</span></div><div class="rs-price-actions"><button class="ghost" data-preview-offer="'+esc(o.id)+'">Vista previa</button><button class="button" data-buy="'+esc(o.id)+'" '+(o.inStock?'':'disabled')+'>'+(o.inStock?'Comprar':'Agotada')+'</button></div></article>').join('')||'<div class="panel empty">Todavía no hay ofertas activas para este juego.</div>')+'</div>';
+}
+function showPricePreview(offerId){
+ const o=S.offers.find(x=>x.id===offerId);if(!o)return;
+ const game=S.games.find(x=>x.id===o.gameId);
+ const old=document.getElementById('rsPricePreview');if(old)old.remove();
+ const node=document.createElement('div');node.className='rs-price-modal';node.id='rsPricePreview';
+ node.innerHTML='<section role="dialog" aria-modal="true" class="rs-price-sheet"><div class="rs-price-grabber"></div><div class="rs-price-heading"><div><span class="eyebrow">REFILLS PRO · VISTA PREVIA</span><h2>'+esc(game?.name||'Recarga')+'</h2><p>'+esc(o.name)+' · '+esc(o.region||'Global')+'</p></div><button type="button" data-close-price aria-label="Cerrar">×</button></div><div class="rs-price-main"><small>PRECIO FINAL DE TU PLAN</small><strong>'+usdt(o.resellerUsdt)+' <em>USDT</em></strong><span>Precios calculados con las tasas actuales</span></div><div class="rs-price-currencies"><div><small>SALDO MÓVIL</small><strong>'+integer(o.resellerSm)+' SM</strong></div><div><small>PAGO CUP</small><strong>'+integer(o.resellerCup)+' CUP</strong></div></div><p class="dim tiny">La disponibilidad y el precio se volverán a verificar en el servidor al comprar.</p><div class="rs-price-actions"><button class="ghost" data-close-price>Cerrar</button><button class="button" data-preview-buy="'+esc(o.id)+'" '+(o.inStock?'':'disabled')+'>Continuar a comprar</button></div></section>';
+ document.body.appendChild(node);
 }
 function targetFields(o){
  if(o?.kind==='pin')return '<div class="alert-note">PIN digital · No necesitas ID de jugador. Confirma la región y consulta el código una vez entregado.</div>';
@@ -139,7 +155,7 @@ function account(){
 }
 function auth(){
  const register=S.authMode==='register';
- return `<div class="auth-wrap"><section class="panel auth-intro"><span class="eyebrow">PORTAL INDEPENDIENTE</span><h1>REFILLS <span style="color:#78cfff">PRO</span></h1><h2>Recargas digitales para revendedores.</h2><p>Tu propia entrada para consultar ofertas de reventa, activar planes de 15 días y administrar tu wallet. Sin mezclarte con la tienda para clientes.</p><div class="stats"><div class="stat"><small>LEVEL 2</small><strong>15 días</strong><small>+4% proveedor</small></div><div class="stat"><small>LEVEL 3</small><strong>15 días</strong><small>+2% proveedor</small></div><div class="stat"><small>PLAN GRATIS</small><strong>+7%</strong><small>Sin vencimiento</small></div></div></section>
+ return `<div class="auth-wrap"><section class="panel auth-intro"><span class="eyebrow">PORTAL INDEPENDIENTE</span><h1>REFILLS <span style="color:#78cfff">PRO</span></h1><h2>Recargas digitales para revendedores.</h2><p>Tu propia entrada para consultar ofertas de reventa, activar planes de 15 días y administrar tu wallet. Sin mezclarte con la tienda para clientes.</p><div class="stats"><div class="stat"><small>LEVEL 2</small><strong>15 días</strong><small>Precios especiales</small></div><div class="stat"><small>LEVEL 3</small><strong>15 días</strong><small>Precios preferentes</small></div><div class="stat"><small>PLAN GRATIS</small><strong>Gratis</strong><small>Sin vencimiento</small></div></div></section>
  <section class="panel auth-card"><span class="eyebrow">ACCESO DE REVENDEDORES</span><h2>${register?'Crear mi cuenta':'Bienvenido de nuevo'}</h2><div class="auth-tabs"><button class="${register?'':'active'}" data-auth="login">Iniciar sesión</button><button class="${register?'active':''}" data-auth="register">Registrarme</button></div><form id="authForm"><input type="hidden" name="mode" value="${register?'register':'login'}">${register?'<label class="field">Nombre completo<input name="fullName" minlength="2" maxlength="90" autocomplete="name" required></label>':''}
  <div class="two"><label class="field">País<select name="prefix" required>${countries()}</select></label><label class="field">Número de teléfono<input name="phone" type="tel" inputmode="tel" autocomplete="tel-national" placeholder="5xxxxxxx" minlength="5" maxlength="15" required></label></div>
  <label class="field">Contraseña<input name="password" type="password" autocomplete="${register?'new-password':'current-password'}" minlength="${register?'10':'1'}" maxlength="72" required></label><input type="text" name="website" autocomplete="off" tabindex="-1" aria-hidden="true" class="sr-only"><button class="button full" type="submit">${register?'Crear cuenta de revendedor':'Acceder a Refills Pro'}</button></form>
@@ -239,6 +255,8 @@ async function handleForm(f){
 }
 document.addEventListener('submit',e=>{if(e.target instanceof HTMLFormElement){e.preventDefault();void handleForm(e.target)}});
 document.addEventListener('change',e=>{if(e.target.id==='depositCurrency'){$('paymentDetails').innerHTML=instructions(e.target.value)}});
+document.addEventListener('change',e=>{if(e.target?.id==='planPreviewProduct'){S.planPreviewId=e.target.value;render();}});
+document.addEventListener('click',e=>{if(e.target?.id==='rsPricePreview'){e.target.remove();}});
 document.addEventListener('click',async e=>{
  const b=e.target.closest('button');if(!b||b.disabled)return;
  if(b.id==='signout'||b.id==='accountSignout')return void signout();
@@ -249,6 +267,9 @@ document.addEventListener('click',async e=>{
   updateURL('catalogo',S.kindFilter==='pin'?'tipo=pin':'',true);
   S.view='catalogo';render();return;
  }
+ if(b.hasAttribute('data-close-price')){document.getElementById('rsPricePreview')?.remove();return}
+ if(b.dataset.previewOffer){showPricePreview(b.dataset.previewOffer);return}
+ if(b.dataset.previewBuy){document.getElementById('rsPricePreview')?.remove();S.selectedOffer=b.dataset.previewBuy;S.pendingOrderId=null;S.view='compra';updateURL('compra','offer='+encodeURIComponent(S.selectedOffer));render();scrollTo(0,0);return}
  if(b.dataset.game){S.selectedGame=b.dataset.game;S.view='juego';updateURL('juego','game='+encodeURIComponent(S.selectedGame));render();scrollTo(0,0);return}
  if(b.dataset.buy){S.selectedOffer=b.dataset.buy;S.pendingOrderId=null;S.view='compra';updateURL('compra','offer='+encodeURIComponent(S.selectedOffer));render();scrollTo(0,0);return}
  if(b.dataset.plan){S.tier=b.dataset.plan;S.view='planes';updateURL('planes');render();document.getElementById('planForm')?.scrollIntoView({behavior:'smooth',block:'center'});return}
