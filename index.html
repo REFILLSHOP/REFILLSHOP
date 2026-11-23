@@ -5,7 +5,7 @@
 <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
 <meta name="theme-color" content="#030918">
 <meta name="description" content="Refills Shop: catálogo de recargas y productos digitales con diseño azul y negro.">
-<link rel="manifest" href="/REFILLSHOP/manifest.webmanifest?v=brand-final-20261123b">
+<link rel="manifest" href="/REFILLSHOP/manifest.webmanifest?v=20261123-install-fix-v4">
 <link rel="icon" type="image/png" sizes="512x512" href="/REFILLSHOP/assets/refills-app-512.png">
 <link rel="apple-touch-icon" sizes="192x192" href="/REFILLSHOP/assets/refills-app-192.png">
 <meta name="apple-mobile-web-app-capable" content="yes">
@@ -1374,7 +1374,7 @@ body.rs-auth-screen .bottom-nav,body.rs-auth-screen #mobile-cart-shortcut{displa
 .rs-order-modal-actions .btn:last-child{grid-column:span 2}
 .rs-order-modal-hint{font-size:12px;line-height:1.6;color:#a9c6e7}
 @media(max-width:480px){.rs-order-compact-card{padding:14px}.rs-order-compact-top h2{font-size:15px}.rs-order-compact-top{gap:7px}.rs-order-compact-bottom{align-items:flex-start}.rs-order-compact-bottom>div{flex-wrap:wrap;justify-content:end}.rs-order-compact-bottom .btn{font-size:10px;padding:8px}.rs-simple-orders-header .btn{font-size:11px}}
-</style></head>
+</style><style id="rs-pwa-install-recovery-v4">.rs-install-check{padding:12px;margin:12px 0;border:1px solid rgba(59,165,207,.45);background:rgba(25,82,124,.16);border-radius:12px;color:#b6e8fc;font-size:12px;line-height:1.55}.rs-install-check.warning{border-color:rgba(250,170,80,.5);background:rgba(127,68,22,.15);color:#f9d0a2}.rs-install-help .btn{margin:8px 0}</style></head>
 <body>
 <div id="app-loader" role="status" aria-label="Cargando Refills Shop">
  <div class="app-loader-glow"></div>
@@ -2296,17 +2296,23 @@ function modal(){
  case 'install-guide':{
   const ios=/iPad|iPhone|iPod/.test(navigator.userAgent);
   const android=/Android/i.test(navigator.userAgent);
-  html=modalTitle('Instalar Refills Shop','Guarda la tienda en tu teléfono con el logo oficial')+
+  const isChrome=android&&/Chrome\//.test(navigator.userAgent);
+  html=modalTitle('Instalar Refills Shop','Icono oficial en tu pantalla de inicio')+
    '<div class="card panel rs-install-help">'+
    '<img src="/REFILLSHOP/assets/refills-app-192.png" alt="Logo Refills Shop" width="64" height="64" style="width:64px;height:64px;border-radius:17px;margin:0 auto 12px;display:block">'+
-   (ios?'<p>En <strong>Safari</strong>, toca <strong>Compartir</strong> y después <strong>Añadir a pantalla de inicio</strong>.</p>':
-    android?'<p>En <strong>Chrome</strong>, abre el menú <strong>⋮</strong> y pulsa <strong>Instalar aplicación</strong>. Confirma la instalación en Android.</p>'+
-     '<p>Si Android indica <strong>No se pudo instalar</strong>, vuelve al menú ⋮ y utiliza <strong>Crear acceso directo</strong>. Así tendrás Refills Shop en la pantalla de inicio mientras se soluciona el instalador de tu dispositivo.</p>':
-     '<p>En Chrome o Edge, pulsa el icono <strong>Instalar</strong> de la barra o ve a su menú y elige <strong>Instalar Refills Shop</strong>.</p>')+
-   '<p class="helper">Es una aplicación web instalable (PWA), no un archivo APK. Para consultar saldo, comprar y seguir pedidos necesitas conexión a internet.</p></div>';
+   (ios?'<p>Abre la web en <strong>Safari</strong>, toca <strong>Compartir</strong> y luego <strong>Añadir a pantalla de inicio</strong>.</p>':
+    android?'<p><strong>1.</strong> Abre el menú <strong>⋮</strong> de Chrome y entra a <strong>Instalar y crear acceso directo</strong>.</p>'+
+     '<p><strong>2.</strong> Si <strong>Instalar</strong> está disponible, tócalo para abrir la app sin la barra del navegador.</p>'+
+     '<p><strong>3.</strong> Si aparece <strong>«Esta aplicación no se puede instalar»</strong>, selecciona <strong>Crear acceso directo</strong>. Tendrás el mismo logo en tu inicio, aunque la tienda se abrirá en Chrome.</p>'+
+     '<p>La instalación completa depende de Chrome y los servicios de Android. Si está bloqueada, revisa actualizaciones de Chrome y Servicios de Google Play; también puedes probar sin VPN o con otra conexión de confianza.</p>':
+     '<p>Usa el menú de Chrome o Edge y elige <strong>Instalar aplicación</strong> o <strong>Crear acceso directo</strong>.</p>')+
+   '<div id="rs-install-check" class="rs-install-check" role="status">Comprobando compatibilidad de tu navegador…</div>'+
+   '<button type="button" class="btn secondary full" data-action="check-install-app">Volver a comprobar instalación</button>'+
+   '<p class="helper">Refills Shop es una aplicación web (PWA), no una descarga APK. Para comprar, ver saldo y consultar pedidos sigue siendo necesaria la conexión a internet.</p></div>';
+  queueMicrotask(()=>{void checkRefillsInstall();});
   break;
  }
- case 'reseller-preview':{
+  case 'reseller-preview':{
   const tier=s.resellerPreviewTier||'free',name=tier==='level2'?'Level 2':tier==='level3'?'Level 3':'Gratis';
   const data=s.resellerPreview,items=Array.isArray(data?.offers)?data.offers:[];
   const byGame=new Map();
@@ -2476,6 +2482,34 @@ case 'checkout':
  if(s.modal==='checkout'||s.modal==='usdt-wallet-pay')startCheckoutCountdown();else if(rsCheckoutClockTimer){clearInterval(rsCheckoutClockTimer);rsCheckoutClockTimer=null}
 }
 let rsDeferredInstall=null;
+async function checkRefillsInstall(){
+ const el=document.getElementById('rs-install-check');if(!el)return;
+ if(window.matchMedia('(display-mode: standalone)').matches||navigator.standalone){el.textContent='Refills Shop ya se está ejecutando como aplicación instalada.';return}
+ const problems=[];
+ try{
+  const response=await fetch('/REFILLSHOP/manifest.webmanifest?verify=20261123v4',{cache:'no-store'});
+  if(!response.ok)problems.push('No se puede cargar la configuración de la app.');
+  else{
+   const mf=await response.json();
+   if(!mf.start_url||!mf.name||!mf.icons?.length)problems.push('La configuración de instalación está incompleta.');
+   else{
+    const icon=mf.icons.find(i=>String(i.sizes).includes('192'))||mf.icons[0];
+    const img=await fetch(new URL(icon.src,location.origin),{method:'HEAD',cache:'no-store'});
+    if(!img.ok)problems.push('No se puede cargar el icono.');
+   }
+  }
+ }catch{problems.push('El manifiesto o el icono no respondieron. Comprueba la conexión.')}
+ if(!('serviceWorker' in navigator))problems.push('Este navegador no admite el servicio requerido.');
+ else{
+  try{const reg=await navigator.serviceWorker.getRegistration('/REFILLSHOP/');
+   if(!reg||!reg.active)problems.push('El servicio de la aplicación todavía se está activando.');
+  }catch{problems.push('El navegador bloqueó el servicio de la app.')}
+ }
+ if(!el.isConnected)return;
+ if(problems.length){el.textContent=problems.join(' ');el.classList.add('warning');return}
+ el.classList.remove('warning');
+ el.textContent=rsDeferredInstall?'La tienda está preparada. Cierra esta ventana y pulsa Instalar.':'La configuración de Refills Shop está correcta. Si Chrome deshabilita Instalar, usa Crear acceso directo: el bloqueo depende del instalador del dispositivo.';
+}
 function requestRefillsInstallation(){
  if(window.matchMedia('(display-mode: standalone)').matches||navigator.standalone===true){toast('Refills Shop ya está instalada en este dispositivo.');return}
  if(rsDeferredInstall){
@@ -2496,7 +2530,7 @@ function requestRefillsInstallation(){
 window.addEventListener('beforeinstallprompt',event=>{event.preventDefault();rsDeferredInstall=event;});
 window.addEventListener('appinstalled',()=>{rsDeferredInstall=null;toast('Refills Shop instalada correctamente.');});
 if('serviceWorker' in navigator&&location.protocol==='https:'){
- const registerRefillsWorker=()=>navigator.serviceWorker.register('/REFILLSHOP/sw.js',{scope:'/REFILLSHOP/',updateViaCache:'none'}).catch(error=>console.warn('PWA Refills Shop:',error?.message||error));
+ const registerRefillsWorker=()=>navigator.serviceWorker.register('/REFILLSHOP/sw.js?v=3',{scope:'/REFILLSHOP/',updateViaCache:'none'}).catch(error=>console.warn('PWA Refills Shop:',error?.message||error));
  if(document.readyState==='complete')void registerRefillsWorker();
  else window.addEventListener('load',()=>{void registerRefillsWorker()},{once:true});
 }
@@ -2558,7 +2592,7 @@ case 'reseller-deposit-submit':void submitResellerDeposit();break;
 
 case 'nav':navigate(b.dataset.page);break;case 'modal-nav':navigate(b.dataset.page);break;
 case 'home-wallet-deposit':if(resellerHasPlan())openDepositCheckout();else{s.modal='wallet';modal()}break;
-case 'install-refills':requestRefillsInstallation();break;case 'home-wallet-movements':s.modal='reseller-ledger';modal();break;
+case 'install-refills':requestRefillsInstallation();break;case 'check-install-app':void checkRefillsInstall();break;case 'home-wallet-movements':s.modal='reseller-ledger';modal();break;
 case 'wallet-select-currency':{s.resellerDepositCurrency=b.dataset.currency;s.resellerDepositStage='details';modal();break;}
 case 'wallet-change-currency':{s.resellerDepositStage='methods';modal();break;}
 case 'wallet-copy-confirmation':{const val=String(s.resellerPortal?.paymentInstructions?.CUP?.confirmationPhone||s.paymentConfig.cupConfirmPhone||'').trim();if(!val){toast('Falta el número de confirmación de CUP');break;}void navigator.clipboard?.writeText(val).then(()=>toast('Número de confirmación copiado'),()=>toast('Mantén pulsado el número para copiarlo'));break;}
