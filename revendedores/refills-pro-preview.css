@@ -1,0 +1,56 @@
+/* Refills Pro — price preview and tier cards, Refills Shop visual identity */
+.rs-plan-preview{margin:18px 0 15px;padding:17px 19px;border-color:#385f92;background:linear-gradient(126deg,#102c56,#0a1a37)}
+.rs-plan-preview .section-head{display:flex;align-items:flex-start;justify-content:space-between;gap:12px}
+.rs-plan-preview .section-head h2{font-size:17px;margin-bottom:10px}
+.rs-plan-preview .field select{min-height:44px}
+.rs-preview-empty{background:rgba(4,19,45,.68);padding:16px 17px;border:1px dashed #365d88;border-radius:13px;color:#9cb9dc;font-size:12px;line-height:1.55}
+.rs-tier-cards{align-items:stretch}
+.rs-tier-card{display:flex;flex-direction:column;gap:10px;min-width:0;overflow:hidden;border-radius:17px}
+.rs-tier-card.active{border-color:#58baff;box-shadow:0 0 0 1px #3487dd4a,0 12px 34px #06122370}
+.rs-tier-card h3{font-size:20px;margin:3px 0}
+.rs-tier-card .tier-price{margin-bottom:5px}
+.rs-tier-card .button,.rs-tier-card .pill{margin-top:auto}
+.rs-tier-preview{display:flex;flex-direction:column;gap:4px;margin:9px 0 13px;padding:15px 13px;border:1px solid #315b89;background:linear-gradient(135deg,#0a2c57,#07172f);border-radius:13px;min-width:0}
+.rs-tier-preview small{font-size:9px;letter-spacing:.07em;font-weight:800;color:#91b5da;line-height:1.4}
+.rs-tier-preview strong{font-family:inherit;font-size:23px;font-weight:900;line-height:1.2;color:#f1f8ff}
+.rs-tier-preview span{font-size:11px;color:#81cfff}
+.rs-price-preview-card{display:flex;align-items:center;justify-content:space-between;gap:15px;padding:17px 18px;border:1px solid #2d5281;border-radius:16px;background:linear-gradient(125deg,#0d2347,#09172e)}
+.rs-price-preview-card .offer-info{flex:1;min-width:0}
+.rs-price-preview-card .offer-info strong{font-size:13px}
+.rs-price-preview-card .price{font-size:19px;color:#78d2ff}
+.rs-price-hint{font-size:10px;color:#81a6d5}
+.rs-price-actions{display:flex;gap:9px;align-items:center;justify-content:flex-end;flex-wrap:wrap}
+.rs-price-actions .ghost,.rs-price-actions .button{min-height:39px;padding:9px 12px;font-weight:800;font-size:11px;white-space:nowrap}
+.rs-price-actions .ghost{background:#0c3057;border:1px solid #4682b6;color:#b5ddff;border-radius:10px}
+.rs-price-modal{position:fixed;inset:0;z-index:999;background:#010919bc;display:flex;justify-content:center;align-items:flex-end;padding:0 12px}
+.rs-price-sheet{width:min(100%,630px);max-height:90dvh;overflow-y:auto;padding:14px 22px calc(23px + env(safe-area-inset-bottom,0px));background:radial-gradient(ellipse at 100% 0%,#12457977,transparent 45%),linear-gradient(155deg,#102b52,#07152d);border:1px solid #417bba;border-bottom:0;border-radius:25px 25px 0 0;box-shadow:0 0 50px #0009;animation:rsPriceRise .27s ease-out}
+@keyframes rsPriceRise{from{opacity:.6;transform:translateY(50px)}to{opacity:1;transform:translateY(0)}}
+.rs-price-grabber{width:46px;height:4px;background:#6da7df;border-radius:99px;margin:0 auto 19px}
+.rs-price-heading{display:flex;justify-content:space-between;align-items:flex-start;gap:12px}
+.rs-price-heading h2{font-size:20px;margin:7px 0 4px}
+.rs-price-heading p{font-size:11px;color:#8eadd6;margin:0}
+.rs-price-heading button{width:34px;height:34px;border-radius:10px;background:#143660;border:1px solid #4273a4;color:#cee9ff;font-size:20px}
+.rs-price-main{padding:20px 17px;margin:18px 0 12px;border-radius:16px;border:1px solid #3576b3;background:#082b56;display:flex;flex-direction:column;gap:4px}
+.rs-price-main small{font-size:9px;color:#95bee8;letter-spacing:.1em}
+.rs-price-main strong{font-size:clamp(30px,6vw,39px);font-weight:900;color:white;letter-spacing:-1px}
+.rs-price-main strong em{font-size:14px;font-style:normal;color:#6ed8ff}
+.rs-price-main span{font-size:10px;color:#86aede}
+.rs-price-currencies{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:10px}
+.rs-price-currencies>div{padding:14px;border:1px solid #274e77;border-radius:13px;background:#081e3c}
+.rs-price-currencies small{display:block;font-size:9px;color:#87a6d1;margin-bottom:7px}
+.rs-price-currencies strong{font-size:16px;color:#deefff;word-wrap:break-word}
+.rs-price-sheet>.dim{margin:15px 0}
+.rs-price-sheet .rs-price-actions .button,.rs-price-sheet .rs-price-actions .ghost{flex:1}
+.brand-logo img{border-radius:11px}
+@media(max-width:740px){
+.rs-plan-preview{padding:13px}
+.rs-plan-preview .section-head{flex-direction:column;gap:2px}
+.rs-tier-preview{padding:12px}
+.rs-tier-preview strong{font-size:21px}
+.rs-price-preview-card{gap:9px;padding:12px;flex-wrap:wrap}
+.rs-price-preview-card .rs-price-actions{width:100%;display:grid;grid-template-columns:repeat(2,minmax(0,1fr))}
+.rs-price-preview-card .rs-price-actions button{width:100%;min-width:0}
+.rs-price-sheet{padding:12px 15px calc(20px + env(safe-area-inset-bottom,0px))}
+.rs-price-currencies strong{font-size:14px}
+}
+@media(prefers-reduced-motion:reduce){.rs-price-sheet{animation:none}}
