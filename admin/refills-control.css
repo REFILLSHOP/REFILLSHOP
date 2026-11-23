@@ -239,3 +239,31 @@ body::before{content:"";position:fixed;inset:0;pointer-events:none;z-index:0;opa
  #admin-view .form-grid{grid-template-columns:repeat(2,minmax(0,1fr))}
 }
 @media(prefers-reduced-motion:reduce){#admin-view *, .sidebar *{animation-duration:.01ms!important;transition-duration:.01ms!important}}
+
+
+/* Pedidos prioritarios y avisos locales, con botones compactos y sin desbordar móvil. */
+.rs-order-alert-control{border-color:rgba(63,154,252,.36);background:linear-gradient(130deg,rgba(12,45,93,.7),rgba(9,20,45,.9))}
+.rs-order-alert-row{display:flex;gap:10px;flex-wrap:wrap;align-items:center;margin:13px 0}
+.rs-order-alert-row>strong{margin-right:auto;font-size:14px;color:#dceeff}
+.rs-order-alert-row>strong span{font-size:21px;color:#73c8ff}
+.rs-order-alert-row>.btn{min-height:36px;white-space:normal}
+.rs-urgent-orders{display:grid;gap:8px;padding:13px;border:1px solid rgba(70,123,195,.28);border-radius:14px;background:rgba(2,16,37,.45);margin:12px 0}
+.rs-urgent-orders>h3{font-size:13px;margin:0 0 3px;color:#d4edff}
+.rs-urgent-order{display:flex;justify-content:space-between;gap:10px;align-items:center;padding:9px;border:1px solid rgba(91,151,236,.22);border-radius:10px;min-width:0}
+.rs-urgent-order>div{min-width:0}
+.rs-urgent-order strong{display:block;overflow-wrap:anywhere;font-size:12px}
+.rs-urgent-order small{display:block;overflow-wrap:anywhere;margin-top:4px;color:#91b6d9;font-size:10px}
+.rs-regional-margin-panel{border-color:rgba(30,152,255,.4)}
+.rs-regional-margin-panel .form-grid{align-items:end}
+.rs-regional-margin-panel .preview{display:flex;flex-direction:column;gap:6px;min-width:0}
+.rs-regional-margin-panel .preview strong{font-size:20px;color:#a9defa}
+.rs-regional-margin-panel .preview span{font-size:11px;color:#b8d8e8;overflow-wrap:anywhere}
+.rs-regional-margin-panel .form-actions .btn{min-height:43px}
+.rs-regional-margin-panel .preview.invalid{border-color:#a35757}
+@media(max-width:740px){
+ .rs-order-alert-row{align-items:stretch;gap:8px}
+ .rs-order-alert-row>strong{flex:1 1 100%}
+ .rs-order-alert-row>.btn{flex:1 1 135px}
+ .rs-urgent-order{padding:10px 9px}
+ .rs-regional-margin-panel .form-actions .btn{width:100%}
+}
