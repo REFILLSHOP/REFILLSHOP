@@ -6,7 +6,7 @@ const $=id=>document.getElementById(id);
 const esc=x=>String(x??'').replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
 const money=x=>(Number(x)||0).toLocaleString('es-ES',{maximumFractionDigits:2});
 const usd=x=>(Number(x)||0).toLocaleString('es-ES',{minimumFractionDigits:2,maximumFractionDigits:2});
-const date=x=>x?new Date(x).toLocaleString('es-ES'):'—';
+const date=x=>{const d=new Date(x);return x&&Number.isFinite(d.getTime())?d.toLocaleDateString('es-ES',{day:'2-digit',month:'2-digit',year:'numeric'})+' · '+d.toLocaleTimeString('en-US',{hour:'numeric',minute:'2-digit',hour12:true}):'—'};
 const paths={
 overview:'<rect x="3" y="3" width="7" height="7" rx="1"/><rect x="14" y="3" width="7" height="7" rx="1"/><rect x="3" y="14" width="7" height="7" rx="1"/><rect x="14" y="14" width="7" height="7" rx="1"/>',
 games:'<path d="M7 8h10a5 5 0 0 1 5 5l-1 4a3 3 0 0 1-4 2l-4-2H11l-4 2a3 3 0 0 1-4-2l-1-4a5 5 0 0 1 5-5z"/><path d="M8 11v5M5.5 13.5h5M16 12h.01M19 15h.01"/>',
@@ -26,7 +26,7 @@ alert:'<path d="M12 2 2 21h20z"/><path d="M12 9v5M12 17h.01"/>'
 };
 const ico=(name)=>'<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" width="19" height="19" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">'+(paths[name]||paths.shield)+'</svg>';
 const MENU=[['overview','Resumen','overview','Indicadores y accesos'],['games','Juegos','games','Tu catálogo'],['offers','Ofertas','offers','Precios y productos'],['orders','Pedidos','orders','Compras y entregas'],['customers','Clientes','customers','Cuentas y seguridad'],['resellers','Revendedores','resellers','Planes y depósitos'],['payments','Pagos y tasas','payments','Configuración comercial'],['centralone','Central One','centralone','Integración proveedor']];
-const S={client:null,user:null,page:'overview',busy:false,rememberSession:true,cache:{},search:'',offerSearch:'',editingGameId:null,gameFilter:'all',offerFilter:'all',coFilter:'',coKind:'all',product:null,offerMode:'centralone',bulkNotice:'',bulkFamily:'',regionGame:'',regionName:'',regionMarginPct:null};
+const S={client:null,user:null,page:'overview',busy:false,rememberSession:true,cache:{},search:'',offerSearch:'',editingGameId:null,gameFilter:'all',offerFilter:'all',coFilter:'',coKind:'all',product:null,offerMode:'centralone',bulkNotice:'',bulkFamily:'',regionGame:'',regionName:'',regionMarginPct:null,orderAlertTimer:null,orderAlertBusy:false,orderAlerts:{orders:[],pendingCount:0},notifyOrdersEnabled:false};
 function flash(message,error=false){
  const el=$('notify');el.textContent=String(message||'');el.classList.toggle('error',error);el.hidden=false;
  clearTimeout(flash.timer);flash.timer=setTimeout(()=>el.hidden=true,5000);
@@ -64,14 +64,14 @@ async function verifyAdmin(){
 }
 function pageFromHash(){const page=location.hash.replace(/^#/,'').split('?')[0];return MENU.some(m=>m[0]===page)?page:'overview'}
 function showLogin(message){
- S.user=null;$('auth-shell').hidden=false;$('console').hidden=true;
+ S.user=null;if(S.orderAlertTimer){clearInterval(S.orderAlertTimer);S.orderAlertTimer=null}$('auth-shell').hidden=false;$('console').hidden=true;
  const remember=$('admin-login')?.elements.rememberSession;if(remember)remember.checked=S.rememberSession;
  if(message)flash(message,true);
 }
 function showConsole(){
  $('auth-shell').hidden=true;$('console').hidden=false;
  $('whoami').textContent='Administrador';
- S.page=pageFromHash();renderMenu();navigate(S.page,true);
+ S.page=pageFromHash();renderMenu();navigate(S.page,true);startAdminOrderAlerts();
 }
 function renderMenu(){
  $('admin-menu').innerHTML=MENU.map(m=>'<button type="button" class="side-item '+(S.page===m[0]?'active':'')+'" data-page="'+m[0]+'">'+ico(m[2])+'<span>'+m[1]+'</span></button>').join('');
@@ -151,6 +151,52 @@ function status(value){
  if(v==='processing'||v.includes('proces'))return tag('En proceso','info');
  return tag('Pendiente','warn');
 }
+
+const ADMIN_SEEN_ORDERS='refills_admin_seen_orders_v3',ADMIN_NOTIFY_PREF='refills_admin_notifications_v3';
+function adminOrderAlertPanel(){
+ const canNotify=typeof Notification!=='undefined',enabled=S.notifyOrdersEnabled&&canNotify&&Notification.permission==='granted';
+ const pending=(S.orderAlerts.orders||[]).filter(o=>o.status==='pending').slice(0,6);
+ return '<section class="surface section rs-order-alert-control"><div class="panel-head"><div><h2>Avisos de pedidos</h2><small>Se revisan cada 15 segundos mientras el panel está abierto.</small></div>'+ico('orders')+'</div>'
+ +'<div class="rs-order-alert-row"><strong><span id="rs-admin-pending-number">'+Number(S.orderAlerts.pendingCount||0)+'</span> pedidos pendientes</strong><button type="button" class="btn '+(enabled?'secondary':'primary')+' small" data-action="'+(enabled?'disable-order-notifications':'enable-order-notifications')+'">'+(enabled?'Desactivar avisos':'Activar notificaciones')+'</button><button type="button" class="btn ghost small" data-action="check-new-orders">Actualizar</button></div>'
+ +'<p class="footer-caption">'+(canNotify?(Notification.permission==='denied'?'Permisos bloqueados: actívalos en los ajustes del navegador.':enabled?'Notificaciones permitidas en este dispositivo.':'Pulsa Activar para solicitar permiso al navegador.'):'Este navegador no admite notificaciones de página.')+' Las alertas del sistema necesitan que este panel siga abierto; no son notificaciones push con la web cerrada.</p>'
+ +'<div class="rs-urgent-orders" id="rs-admin-pending-list"><h3>Los últimos pendientes</h3>'+(pending.length?pending.map(o=>'<div class="rs-urgent-order"><div><strong>'+esc(o.game||'Recarga')+'</strong><small>'+esc(o.offer||'Oferta')+' · '+esc(o.code||'')+' · '+date(o.createdAt)+'</small></div>'+status(o.status)+'</div>').join(''):'<p class="footer-caption">Por ahora no hay pedidos pendientes nuevos.</p>')+'</div><button class="btn secondary small" type="button" data-page="orders">Revisar pedidos</button></section><div class="spacing"></div>';
+}
+function adminSaveSeen(ids){try{localStorage.setItem(ADMIN_SEEN_ORDERS,JSON.stringify(ids.slice(0,80)))}catch{}}
+function adminReadSeen(){try{const x=JSON.parse(localStorage.getItem(ADMIN_SEEN_ORDERS)||'null');return Array.isArray(x)?x:null}catch{return null}}
+async function adminPollOrders(visibleStatus=false){
+ if(!S.user||S.orderAlertBusy)return;
+ S.orderAlertBusy=true;
+ try{
+  const data=await request('/admin/order-alerts');
+  const orders=Array.isArray(data.orders)?data.orders:[];
+  const previous=adminReadSeen();
+  const seen=new Set(previous||orders.map(o=>o.id));
+  const added=previous?orders.filter(o=>o.id&&!seen.has(o.id)):[];
+  const oldState=(S.orderAlerts.orders||[]).map(o=>o.id+':'+o.status).join(',');
+  S.orderAlerts={orders,pendingCount:Number(data.pendingCount)||0};
+  adminSaveSeen(orders.map(o=>o.id));
+  if(S.notifyOrdersEnabled&&typeof Notification!=='undefined'&&Notification.permission==='granted'){
+   for(const o of added.slice(0,3)){try{
+    const n=new Notification('Nuevo pedido · Refills Shop',{body:(o.game||'Recarga')+' · '+(o.offer||'Oferta')+' · '+(o.code||''),icon:'/REFILLSHOP/assets/refills-icon.png',tag:'rs-order-'+o.id});
+    n.onclick=()=>{window.focus();navigate('orders');n.close()};
+   }catch{}}
+  }
+  if(added.length)flash('Llegaron '+added.length+' pedidos nuevos. Revisa Pedidos.');
+  const current=oldState!==orders.map(o=>o.id+':'+o.status).join(',');
+  if(S.page==='overview'&&$('rs-admin-order-alert-box'))$('rs-admin-order-alert-box').innerHTML=adminOrderAlertPanel();
+  if(S.page==='orders'&&current&&!S.busy){const currentOrders=await request('/admin/orders');S.cache.orders=currentOrders;drawOrders()}
+  else if(S.page==='orders'){const el=$('rs-admin-pending-number');if(el)el.textContent=String(S.orderAlerts.pendingCount)}
+  if(visibleStatus)flash('Pedidos sincronizados: '+S.orderAlerts.pendingCount+' pendientes.');
+ }catch(error){if(visibleStatus)guarded(error);else console.warn('Avisos:',error?.message||error)}
+ finally{S.orderAlertBusy=false}
+}
+function startAdminOrderAlerts(){
+ if(S.orderAlertTimer)return;
+ try{S.notifyOrdersEnabled=localStorage.getItem(ADMIN_NOTIFY_PREF)==='true'}catch{}
+ void adminPollOrders();
+ S.orderAlertTimer=window.setInterval(()=>{if(S.user)void adminPollOrders()},15000);
+}
+
 function drawOverview(){
  const x=S.cache.overview?.counts||{}, r=S.cache.reseller||{}, co=S.cache.commerce||{},cn=S.cache.central||{};
  $('admin-view').innerHTML='<div class="grid four">'
