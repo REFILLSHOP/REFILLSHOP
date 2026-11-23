@@ -271,12 +271,13 @@ function paymentMethodLabel(method){
 }
 function drawOrders(){
  const orders=S.cache.orders?.orders||[];
- const pending=orders.filter(o=>o.status==='pending'),processing=orders.filter(o=>o.status==='processing'),failed=orders.filter(o=>['failed','rejected'].includes(o.status));
+ const pending=orders.filter(o=>o.status==='pending'),processing=orders.filter(o=>o.status==='processing'),failed=orders.filter(o=>['failed','rejected'].includes(o.status)),refundReview=orders.filter(o=>['rejected','failed'].includes(o.status)&&o.paymentStatus==='paid'&&!o.refundReference);
  $('admin-view').innerHTML='<div class="grid three">'
   +metric('PEDIDOS RECIENTES',orders.length,'Hasta 150 movimientos','orders')
   +metric('POR REVISAR',pending.length+processing.length,processing.length+' enviados al proveedor · consultar su entrega','shield')
   +metric('FALLIDOS',failed.length,'Comprobar incidencias','alert')
   +'</div><div class="spacing"></div>'
+  +(refundReview.length?'<section class="surface section" style="border-color:#9b6545;background:linear-gradient(145deg,#38251f,#151b2c);margin-bottom:14px" role="status"><h2>Revisar '+refundReview.length+' pedido(s) pagados y rechazados</h2><p>Estos pedidos todavía no tienen una referencia de reembolso registrada. Comprueba si se devolvió el dinero antes de cerrar la incidencia. No realices un segundo envío al proveedor.</p></section>':'')
   +'<section class="surface section"><div class="panel-head"><div><h2>Revisión de pagos</h2><small>Verifica cada ingreso en la cuenta antes de aprobar la compra; la referencia del cliente no es confirmación del banco.</small></div>'+ico('payments')+'</div>'
   +'<div class="toolbar"><input type="search" id="filter-orders" placeholder="Código, juego, teléfono o referencia…" value="'+esc(S.search)+'"><button type="button" class="btn secondary" data-action="refresh">Actualizar ↻</button></div>'
   +(orders.length?'<div class="list">'+orders.map(o=>{
