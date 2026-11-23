@@ -999,26 +999,11 @@ const I=(name,cls='')=>`<svg class="svg ${cls}" aria-hidden="true"><use href="#i
 const esc=s=>String(s??'').replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
 const money=n=>Math.round(n).toLocaleString('es-ES');
 const entry=(id,name,category,photo,offers,desc='',region='Global')=>({id,name,category,photo,offers:offers.map(([title,cup,bonus=''])=>({title,cup,bonus})),desc,region});
-const ITEMS=[
-entry('freefire','Free Fire','juegos','freefire',[['110 Diamantes',240,'100 + 10% de bono'],['341 Diamantes',720,'310 + 10% de bono'],['572 Diamantes',1213,'520 + 10% de bono'],['1166 Diamantes',2253,'1060 + 10% de bono'],['2398 Diamantes',4471,'2180 + 10% de bono'],['6160 Diamantes',11380,'5600 + 10% de bono']],'Recargas de diamantes','LATAM'),
-entry('mlbb','Mobile Legends','juegos','mlbb',[['86 Diamantes',280],['172 Diamantes',540],['257 Diamantes',790],['706 Diamantes',2010],['1412 Diamantes',3930]],'Recargas de diamantes','Global'),
-entry('pubg','PUBG Mobile','juegos','pubg',[['60 UC',280],['325 UC',1350],['660 UC',2700],['1800 UC',7070]],'Recargas de UC','Global'),
-entry('honor','Honor of Kings','juegos','honor',[['80 Tokens',255],['240 Tokens',720],['400 Tokens',1150],['800 Tokens',2170]],'Tokens para tu cuenta','Global'),
-entry('pool','8 Ball Pool','juegos','pool',[['100 Cash',680],['250 Cash',1580],['500 Cash',3060]],'Efectivo y paquetes del juego','Global'),
-entry('afk','AFK Journey','juegos','afk',[['Paquete inicial',1127],['Paquete estándar',2300],['Paquete premium',4450]],'Paquetes y recursos digitales','Global'),
-entry('nauta','Nauta Hogar','movil','nauta',[['Paquete 1',340],['Paquete 2',820],['Paquete 3',1470]],'Servicios de conectividad','Cuba'),
-entry('cubacel','Recargas Cubacel','movil','cubacel',[['Plan básico',490],['Plan medio',980],['Plan completo',1490]],'Saldo móvil y datos','Cuba'),
-entry('sms','Números virtuales','movil','sms',[['Número temporal',633],['Número premium',1190]],'Productos digitales','Global'),
-entry('vpn','VPN Cuba','movil','vpn',[['30 días',650],['90 días',1750],['180 días',2900]],'Servicio digital','Cuba'),
-entry('acash','A-Cash','gift','acash',[['Tarjeta básica',3496],['Tarjeta premium',6700]],'Tarjetas digitales','Global'),
-entry('adobe','Adobe Digital Code','gift','adobe',[['Código digital',71714]],'Licencia digital','Global'),
-entry('airalo','Airalo Voucher','gift','airalo',[['Voucher 5',5750],['Voucher 10',10850]],'Tarjeta de regalo digital','Global')
-];
-const labels={inicio:'Inicio',recargas:'Recargas',gift:'Gift Cards',pedidos:'Pedidos',perfil:'Perfil',revendedores:'Mayoristas',admin:'Administración',login:'Entrar'};
-const icons={inicio:'home',recargas:'game',gift:'gift',pedidos:'file',perfil:'user',revendedores:'wallet',admin:'shield',login:'user'};
+const ITEMS=[];
+/* Los productos publicados provienen exclusivamente de Supabase; no cargar precios ni artículos de ejemplo. */
 const getStored=(key,fallback)=>{try{return JSON.parse(localStorage.getItem('refills_shop_'+key)??localStorage.getItem('refills_mock_'+key))??fallback}catch{return fallback}};
 const save=(key,data)=>{try{localStorage.setItem('refills_shop_'+key,JSON.stringify(data))}catch{}};
-const savedCatalog=getStored('catalog',null);if(Array.isArray(savedCatalog)&&savedCatalog.length){ITEMS.splice(0,ITEMS.length,...savedCatalog)}
+/* El catálogo antiguo guardado en localStorage no se reintroduce. */
 const s={page:'inicio',authMode:'login',authBusy:false,authError:'',afterAuthPage:'inicio',authSession:null,profile:null,member:false,resellerPortal:null,resellerLoading:false,resellerOrders:[],resellerDeposits:[],resellerCurrency:'USDT',resellerDepositCurrency:'USDT',detailId:null,search:'',filter:'todos',sort:'name',payment:'cup',selected:0,player:'',qty:1,modal:null, nickname:getStored('nickname','Invitado'),favorites:getStored('favs',[]),orders:getStored('orders',[]),cart:getStored('cart',[]),showFavs:false,selectedOrder:null, role:(window.REFILLS_SESSION&&window.REFILLS_SESSION.role)||'guest', user:(window.REFILLS_SESSION&&window.REFILLS_SESSION.user)||null,
 rates:getStored('rates',{usdtSm:300,smCup:3,gainSM:0}), adminTab:'resumen',
 adminOrders:getStored('adminOrders',[]), reseller:getStored('reseller',{plan:null,wallet:{USDT:0,CUP:0,SM:0},ledger:[]}),
@@ -1026,7 +1011,7 @@ paymentConfig:getStored('paymentConfig',{smReceiver:'',cupCard:'',usdtAddress:''
 checkoutStep:1,checkoutProof:'',checkoutSource:'',checkoutMethod:'CUP',paymentReturnModal:null,
 adminUsers:getStored('adminUsers',[]), resellerPlans:getStored('resellerPlans',[
 {name:'Gratis',margin:7,price:0,days:0},{name:'Level 2',margin:4,price:.8,days:7},{name:'Level 3',margin:2,price:1.5,days:15}])};
-const itemBy=id=>ITEMS.find(g=>g.id===id),photo=g=>pictures[g.photo]||'',minPrice=g=>Math.min(...g.offers.map(o=>Number(o.cup)||Infinity));
+const itemBy=id=>ITEMS.find(g=>g.id===id),photo=g=>(g?.imageUrl&&/^https:\/\//i.test(g.imageUrl)?g.imageUrl:pictures[g?.photo]||REFILLS_WALLET_MARK),minPrice=g=>Math.min(...(g.offers||[]).map(o=>Number(o.cup)||Infinity));
 /* Autenticación de Refills Shop: reutiliza los alias telefónicos de la web anterior. */
 const RS_SUPABASE_URL='https://kcgjlnymhmxylrjchcvl.supabase.co';
 const RS_SUPABASE_KEY='sb_publishable_sGK_1a5Tp8gY83KI8wiSZg_LP5uxGdc';
@@ -1289,22 +1274,10 @@ function paymentChoiceList(){
  }).join('')}</div><p class="payment-choice-note">El saldo de Refills Shop solo aparece para cuentas de revendedor con un plan reconocido. El servidor debe validar el saldo y autorizar cada descuento.</p>`;
 }
 function priceFor(o,method=s.payment){
- const usdtRate=Math.max(.000001,Number(s.rates.usdtSm)||300);
- const cupRate=Math.max(.000001,Number(s.rates.smCup)||3);
- const gain=Math.max(0,Number(s.rates.gainSM)||0);
- let sm,cup,usdt;
- if(Number(o?.providerUsdt)>0){
-  sm=Number(o.providerUsdt)*usdtRate+gain;
-  cup=sm*cupRate;
-  usdt=sm/usdtRate;
- }else{
-  cup=Math.max(0,Number(o?.cup)||0);
-  sm=cup/cupRate;
-  usdt=sm/usdtRate;
- }
- if(method==='sm')return {amount:sm,currency:'SM',method:PAYMENT_METHODS.sm};
- if(method==='usdt')return {amount:usdt,currency:'USDT',method:PAYMENT_METHODS.usdt};
- return {amount:cup,currency:'CUP',method:PAYMENT_METHODS.cup};
+ if(!o)return null;
+ if(method==='sm')return {amount:Number(o.sm||0),currency:'SM',method:PAYMENT_METHODS.sm};
+ if(method==='usdt'||method==='balance')return {amount:Number(o.usdt||0),currency:'USDT',method:PAYMENT_METHODS[method]};
+ return {amount:Number(o.card||o.cup||0),currency:'CUP',method:PAYMENT_METHODS.cup};
 }
 function formatPriceValue(amount,currency){
  const value=currency==='USDT'?Number(amount).toFixed(2):Number(amount).toLocaleString('es-ES',{maximumFractionDigits:2});
@@ -1340,7 +1313,7 @@ function paymentConfigText(){
  if(s.payment==='balance')return resellerHasPlan()?'Saldo de tu wallet Refills Shop en USDT. El servidor comprobará los fondos y autorizará el débito.':'Necesitas un plan de revendedor activo para utilizar el saldo de la web.';
  return s.paymentConfig.usdtEnabled&&s.paymentConfig.usdtAddress?`USDT BEP-20 · ${esc(s.paymentConfig.usdtAddress)}`:'USDT no está habilitado todavía.';
 }
-function saveCatalog(){save('catalog',ITEMS)}
+function saveCatalog(){/* No se permiten catálogos locales: toda publicación pasa por Supabase. */}
 
 const main=document.getElementById('app'),modalRoot=document.getElementById('modal-root');
 function headerNav(){
@@ -1387,7 +1360,11 @@ function homeGameTile(g){
   <span class="home-game-arrow-v4">${I('arrow','tiny')}</span>
  </button>`;
 }
-function sectionMini(title,ids,navpage){return `<section class="home-mini-section"><div class="section-head"><h2>${title}</h2><button class="text-link" data-action="nav" data-page="${navpage}">Ver catálogo ${I('arrow','tiny')}</button></div><div class="home-game-grid-v4">${ids.map(id=>homeGameTile(itemBy(id))).join('')}</div></section>`}
+function sectionMini(title,ids,navpage){
+ const items=(ids||[]).map(itemBy).filter(Boolean);
+ if(!items.length)return '';
+ return `<section class="home-mini-section"><div class="section-head"><h2>${title}</h2><button class="text-link" data-action="nav" data-page="${navpage}">Ver catálogo ${I('arrow','tiny')}</button></div><div class="home-game-grid-v4">${items.map(homeGameTile).join('')}</div></section>`;
+}
 function home(){
  const greeting=s.user?.name||s.nickname||'Invitado';
  const hasPlan=resellerHasPlan();
@@ -1428,7 +1405,7 @@ function catalog(isGift=false){
  <div class="catalog-toolbar"><label class="searchbox">${I('search')}<input id="catalog-search" autocomplete="off" type="search" placeholder="Buscar juego o tarjeta..." value="${esc(s.search)}"></label><select id="sort-catalog" class="select" aria-label="Ordenar catálogo"><option value="name" ${s.sort==='name'?'selected':''}>A-Z</option><option value="price" ${s.sort==='price'?'selected':''}>Menor precio</option><option value="z" ${s.sort==='z'?'selected':''}>Z-A</option></select></div>
  <div class="payment-selector"><div><strong>Método de pago</strong><small>Los precios se actualizan según tu selección.</small></div>${payPills()}</div>
  <div class="chip-row">${(isGift?[['todos','Todas las tarjetas']]:[['todos','Todo'],['juegos','Juegos'],['movil','Móvil e internet']]).map(([id,l])=>`<button class="chip ${s.filter===id?'active':''}" data-action="filter" data-value="${id}">${l}</button>`).join('')}<button class="chip ${s.showFavs?'active':''}" data-action="only-favs">${I('star','tiny')} Favoritos</button></div>
- <div class="section-head" style="margin-top:0"><h2>${visible.length} productos disponibles</h2></div><div id="catalog-results">${visible.length?`<div class="catalog-grid">${visible.map(card).join('')}</div>`:`<div class="empty">${I('search')}<h3>No hay resultados</h3><p>Prueba con otro nombre o cambia los filtros.</p><button class="btn secondary" data-action="reset-filters">Mostrar todos</button></div>`}</div></div>`;
+ <div class="section-head" style="margin-top:0"><h2>${visible.length} productos disponibles</h2></div><div id="catalog-results">${visible.length?`<div class="catalog-grid">${visible.map(card).join('')}</div>`:`<div class="empty">${I('search')}<h3>${ITEMS.length?'No hay resultados':'Próximamente nuevas recargas'}</h3><p>${ITEMS.length?'Prueba con otro nombre o cambia los filtros.':'Estamos preparando el catálogo. Los productos aparecerán cuando el administrador los publique.'}</p><button class="btn secondary" data-action="reset-filters">Mostrar todos</button></div>`}</div></div>`;
 }
 function detail(){
  const g=itemBy(s.detailId);if(!g)return home();
@@ -1606,7 +1583,7 @@ else if(s.page==='pedidos')main.innerHTML=orders();
 else if(s.page==='perfil')main.innerHTML=profile();
 else if(s.page==='login')main.innerHTML=authPage();
 else if(s.page==='revendedores')main.innerHTML=resellerPage();
-else if(s.page==='admin')main.innerHTML=s.role==='admin'?adminPage():`<div class="catalog-top"><h1 class="page-title">Acceso restringido</h1><p class="page-lead">Esta área requiere una sesión administrativa válida.</p><button class="btn primary" data-action="nav" data-page="login">Iniciar sesión</button></div>`;
+else if(s.page==='admin')main.innerHTML=s.role==='admin'?`<div class="catalog-top"><div class="eyebrow">ADMINISTRACIÓN / REFILLS SHOP</div><h1 class="page-title">Centro de control</h1><p class="page-lead">Tu catálogo, precios, clientes, pedidos y conexión real con Central One se administran desde el panel seguro conectado a Supabase.</p><section class="card panel" style="max-width:640px;margin:20px auto;padding:24px"><div style="display:grid;gap:12px"><a class="btn primary full" href="/REFILLSHOP/admin/">${I('shield','tiny')} Abrir administración real</a><a class="btn secondary full" href="/REFILLSHOP/admin/integrations">${I('settings','tiny')} Central One y conexiones</a><a class="btn secondary full" href="/REFILLSHOP/admin/games">${I('game','tiny')} Crear juegos y ofertas</a><button class="btn ghost full" data-action="nav" data-page="inicio">Volver a la tienda</button></div></section></div>`:`<div class="catalog-top"><h1 class="page-title">Acceso restringido</h1><p class="page-lead">Esta área requiere una sesión administrativa válida.</p><button class="btn primary" data-action="nav" data-page="login">Iniciar sesión</button></div>`;
 modal();if(scroll)window.scrollTo({top:0,behavior:'instant'})}
 function navigate(page){
  if(!s.user&&page!=='login'){s.afterAuthPage=page;s.authMode='login';s.page='login';s.modal=null;render(true);toast('Inicia sesión o crea tu cuenta para continuar.');return}
@@ -1943,19 +1920,31 @@ document.addEventListener('click',async e=>{
 
 
 async function loadLiveCatalog(){
- const endpoint=window.REFILLS_CONFIG?.catalogEndpoint;
- if(!endpoint)return;
+ s.catalogLoading=true;s.catalogError='';
  try{
-  const response=await fetch(endpoint,{headers:{'Accept':'application/json'}});
-  if(!response.ok)return;
-  const data=await response.json();
-  const products=Array.isArray(data)?data:data.items;
-  if(!Array.isArray(products)||!products.length)return;
-  const normalized=products.filter(g=>g&&g.id&&g.name&&Array.isArray(g.offers)).map(g=>({...g,offers:g.offers.map(o=>({...o,cup:Number(o.cup)||0,providerUsdt:Number(o.providerUsdt)||0}))}));
-  if(normalized.length){ITEMS.splice(0,ITEMS.length,...normalized);saveCatalog();render()}
- }catch(error){/* keep the last available catalog */}
+  const data=await edgeRequest('rs10-api','/storefront',{auth:false});
+  const games=Array.isArray(data.games)?data.games:[],offers=Array.isArray(data.offers)?data.offers:[];
+  const grouped=new Map();for(const g of games){
+   const id=String(g.id||'').trim();if(!id)continue;
+   grouped.set(id,{id,name:String(g.name||'Producto'),category:/gift|pin|tarjeta/i.test(String(g.tag||''))?'gift':(/m[oó]vil|internet|nauta|cubacel/i.test(String(g.tag||''))?'movil':'juegos'),photo:'',imageUrl:g.imageUrl||'',region:'Global',desc:'',offers:[]});
+  }
+  for(const o of offers){const game=grouped.get(String(o.gameId||''));if(!game||o.visible===false)continue;
+   game.offers.push({id:String(o.id||''),title:String(o.name||'Oferta'),cup:Number(o.cup||0),card:Number(o.card||o.cup||0),sm:Number(o.sm||0),usdt:Number(o.usdt||0),providerProductId:o.providerProductId||null,kind:o.kind||'topup',region:o.region||'Global',targetSchema:Array.isArray(o.targetSchema)?o.targetSchema:[],inStock:o.inStock===true,purchasable:o.purchasable===true,bonus:''});
+  }
+  ITEMS.splice(0,ITEMS.length,...[...grouped.values()].filter(g=>g.offers.length).sort((a,b)=>a.name.localeCompare(b.name)));
+  s.salesEnabled=data.salesEnabled===true;s.catalogLoading=false;
+  if(data.config){
+   s.rates={...s.rates,usdtSm:Number(data.config.buySmPerUsdt||s.rates.usdtSm),smCup:Number(data.config.cupPerSm||s.rates.smCup)};
+   s.paymentConfig={...s.paymentConfig,smReceiver:data.config.mobilePhone||'',cupCard:data.config.cardNumber||'',usdtEnabled:data.cryptoBep20Enabled===true,whatsappNumber:data.config.supportWhatsapp||''};
+  }
+  const validIds=new Set(ITEMS.map(g=>g.id));s.cart=s.cart.filter(c=>validIds.has(c.id));
+  if(s.page==='detalle'&&!validIds.has(s.detailId))s.page='recargas';
+  render();
+ }catch(error){
+  s.catalogLoading=false;s.catalogError=error?.message||'No se pudo actualizar el catálogo desde Supabase';
+  ITEMS.length=0;render();console.warn('Refills Shop storefront:',s.catalogError);
+ }
 }
-
 let requestedPage='inicio';
 if(location.pathname.replace(/\/$/,'')==='/admin'||location.hash==='#admin')requestedPage='admin';
 else if(location.pathname.replace(/\/$/,'')==='/revendedores')requestedPage='revendedores';
