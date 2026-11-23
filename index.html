@@ -1039,10 +1039,10 @@ function authStoredSession(){
 function saveAuthSession(data){
  const expiresAt=Number(data.expires_at||0)||Math.floor(Date.now()/1000)+Number(data.expires_in||3600);
  s.authSession={...data,expires_at:expiresAt};
- try{localStorage.setItem(RS_AUTH_STORE,JSON.stringify(s.authSession))}catch{}
+ try{localStorage.setItem(RS_AUTH_STORE,JSON.stringify(s.authSession));localStorage.setItem('sb-kcgjlnymhmxylrjchcvl-auth-token',JSON.stringify(s.authSession))}catch{}
  return s.authSession;
 }
-function clearAuthSession(){s.authSession=null;try{localStorage.removeItem(RS_AUTH_STORE)}catch{}}
+function clearAuthSession(){s.authSession=null;try{localStorage.removeItem(RS_AUTH_STORE);localStorage.removeItem('sb-kcgjlnymhmxylrjchcvl-auth-token')}catch{}}
 async function authRequest(path,{method='GET',body,token}={}){
  const headers={apikey:RS_SUPABASE_KEY,Accept:'application/json'};
  if(body!==undefined)headers['Content-Type']='application/json';
