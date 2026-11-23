@@ -2321,7 +2321,7 @@ case 'checkout':
     Number(s.reseller.wallet?.USDT||0).toFixed(2)+' <small>USDT</small></strong></div><div><small>Recarga en USDT, CUP o saldo móvil. La acreditación requiere confirmación del ingreso.</small></div></div>'+
     '<div class="rs-wallet-stage-head"><strong>Selecciona un método de depósito</strong><small>Los datos para pagar aparecerán en el siguiente paso.</small></div>'+
     '<div class="payment-choice-list">'+Object.entries(options).map(([code,item])=>{
-     const available=!!item.recipient;
+     const available=!!item.recipient&&(code!=='CUP'||!!item.confirmPhone);
      return '<button type="button" class="payment-choice rs-wallet-method" data-action="wallet-select-currency" data-currency="'+code+'" '+(!available?'disabled':'')+'>'+
        '<span class="payment-choice-icon">'+item.visual+'</span><span class="payment-choice-copy"><strong>'+esc(item.title)+'</strong><small>'+esc(available?item.subtitle:'Método sin cuenta receptora configurada')+'</small></span><span class="payment-choice-arrow">'+I('arrow','tiny')+'</span></button>';
     }).join('')+'</div>'+
