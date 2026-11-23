@@ -11,7 +11,7 @@ const status=s=>({pending:'Pendiente',processing:'En proceso',partially_complete
 const date=s=>s?new Date(s).toLocaleDateString('es-ES',{year:'numeric',month:'short',day:'numeric'}):'Sin vencimiento';
 const timestamp=s=>{const d=new Date(s);return s&&Number.isFinite(d.getTime())?d.toLocaleDateString('es-ES',{day:'2-digit',month:'2-digit',year:'numeric'})+' · '+d.toLocaleTimeString('en-US',{hour:'numeric',minute:'2-digit',hour12:true}):'—'};
 const imageURL=s=>/^https:\/\//i.test(String(s||''))?String(s):'/REFILLSHOP/assets/refills-icon.png';
-const S={client:null,user:null,profile:null,membership:null,rememberSession:true,bootstrap:null,wallet:{USDT:0,CUP:0,SM:0},rates:{buySmPerUsdt:0,cupPerSm:0},tiers:[],instructions:{},deposits:[],games:[],offers:[],orders:[],view:'inicio',authMode:'login',selectedGame:'',selectedOffer:'',pinOrder:'',pinValue:null,search:'',kindFilter:'recargas',depositStage:'methods',depositCurrency:'USDT',tier:'level2',currency:'USDT',pendingPlanId:null,pendingOrderId:null,busy:false,ready:false};
+const S={client:null,user:null,profile:null,membership:null,rememberSession:true,bootstrap:null,wallet:{USDT:0,CUP:0,SM:0},rates:{buySmPerUsdt:0,cupPerSm:0},tiers:[],instructions:{},deposits:[],games:[],offers:[],orders:[],view:'inicio',planPreviewGameId:'',planPreviewRegion:'',authMode:'login',selectedGame:'',selectedOffer:'',pinOrder:'',pinValue:null,search:'',kindFilter:'recargas',depositStage:'methods',depositCurrency:'USDT',tier:'level2',currency:'USDT',pendingPlanId:null,pendingOrderId:null,busy:false,ready:false};
 const BASE='/REFILLSHOP/revendedores';
 const ROUTES=new Set(['inicio','catalogo','planes','billetera','pedidos','cuenta','juego','compra','codigo']);
 function routeURL(view,extra=''){return BASE+'/'+(view==='inicio'?'':view+'/')+(extra?'?'+extra:'')}
@@ -45,7 +45,7 @@ function countries(){return [['+53','Cuba (+53)'],['+1','Estados Unidos (+1)'],[
 function loading(message='Cargando…'){$('content').innerHTML=`<section class="loading"><div class="loader"></div><strong>${esc(message)}</strong></section>`}
 async function hydrate(){
  const p=await req('rs12-reseller','/portal');
- S.profile=p.profile;S.membership=p.membership||{planTier:'free',markupPercent:7,expiresAt:null};
+ S.profile=p.profile;S.membership=p.membership||{planTier:null,markupPercent:7,expiresAt:null,activationRequired:true,minimumDepositUsdt:5};
  S.wallet=p.wallet||{USDT:0,CUP:0,SM:0};S.tiers=p.tiers||[];
  S.rates=p.rates||S.rates;S.instructions=p.paymentInstructions||{};S.deposits=p.deposits||[];
  const data=await req('rs12-reseller','/storefront').catch(e=>{if(/plan no est[aá] activo/i.test(e.message))return {games:[],offers:[]};throw e});
@@ -56,12 +56,14 @@ async function reload(){loading('Actualizando tus datos');try{await hydrate();if
 function balanceSummary(){return `<div class="grid grid-3 balance-grid">${[['USDT',usdt(S.wallet.USDT)],['SALDO SM',integer(S.wallet.SM)],['CUP',integer(S.wallet.CUP)]].map(([name,value])=>`<div class="panel balance-card"><span>${name}</span><strong>${value}</strong></div>`).join('')}</div>`}
 function sectionHead(title,action=''){return `<div class="section-head"><h2>${title}</h2>${action}</div>`}
 function home(){
+ const activationRequired=!!S.membership?.activationRequired||!S.membership?.planTier;
  const tier=S.tiers.find(x=>x.tier===S.membership?.planTier),offers=S.offers.filter(x=>x.inStock);
  const days=S.membership?.expiresAt?Math.max(0,Math.ceil((new Date(S.membership.expiresAt)-Date.now())/86400000)):null;
  const featured=(S.games||[]).filter(g=>g.featured).slice(0,3);
  const games=(featured.length?featured:S.games).slice(0,3);
  return `<div class="rs-pro-home">
- <section class="rs-pro-welcome panel"><div class="rs-pro-welcome-main"><span class="eyebrow">REFILLS PRO · PORTAL EXCLUSIVO</span><h1>Recargas para<br><em>tu negocio.</em></h1><p>Consulta tus precios, compra con wallet y revisa pedidos en un solo espacio.</p><div class="tag-row"><span class="pill">${esc(tier?.name||'Plan Gratis')}</span><span class="pill">${days===null?'Sin vencimiento':days+' días restantes'}</span></div></div><div class="rs-pro-welcome-art" aria-hidden="true"><span>R</span></div></section>
+ <section class="rs-pro-welcome panel"><div class="rs-pro-welcome-main"><span class="eyebrow">REFILLS PRO · PORTAL EXCLUSIVO</span><h1>Recargas para<br><em>tu negocio.</em></h1><p>Consulta tus precios, compra con wallet y revisa pedidos en un solo espacio.</p><div class="tag-row"><span class="pill">${esc(activationRequired?'Activación pendiente':tier?.name||'Plan Gratis')}</span><span class="pill">${days===null?'Sin vencimiento':days+' días restantes'}</span></div></div><div class="rs-pro-welcome-art" aria-hidden="true"><span>R</span></div></section>
+ ${activationRequired?'<section class="panel pad rs-pro-activation-note"><strong>Activa tu plan Gratis</strong><p>Realiza un depósito único mínimo equivalente a 5.00 USDT. El saldo se acredita en tu wallet y el plan se activa cuando administración verifique el pago.</p><button type="button" class="button" data-view="billetera">Depositar para activar</button></section>':''}
  <button class="rs-pro-search-launch" type="button" data-view="catalogo"><span class="rs-pro-search-icon" aria-hidden="true"></span><span>Buscar juego o código digital...</span><b>›</b></button>
  <div class="rs-pro-shortcuts"><button type="button" data-view="catalogo">Ofertas<small>${offers.length} disponibles</small></button><button type="button" data-view="planes">Mi plan<small>Level 2 y Level 3</small></button><button type="button" data-view="billetera">Recargar<small>USDT, SM y CUP</small></button></div>
  <div class="rs-pro-section-title"><h2>Saldo de mi wallet</h2><button type="button" data-view="billetera">Gestionar saldo ›</button></div>${balanceSummary()}
@@ -77,13 +79,22 @@ function tierPrice(offer,tier){
  return {usdt:value,sm:Math.ceil(value*num(S.rates.buySmPerUsdt)),cup:Math.ceil(value*num(S.rates.buySmPerUsdt)*num(S.rates.cupPerSm))};
 }
 function plans(){
- const available=S.offers.filter(o=>o.inStock&&num(o.providerCostUsdt)>0),selected=available.find(o=>o.id===S.planPreviewId)||available[0]||null;
- if(selected&&!S.planPreviewId)S.planPreviewId=selected.id;
+ const available=S.offers.filter(o=>o.inStock&&num(o.providerCostUsdt)>0);
+ const games=(S.games||[]).filter(g=>available.some(o=>o.gameId===g.id));
+ const game=games.find(g=>g.id===S.planPreviewGameId)||games[0]||null;
+ if(game&&!S.planPreviewGameId)S.planPreviewGameId=game.id;
+ const regions=[...new Set(available.filter(o=>o.gameId===game?.id).map(o=>String(o.region||'Global')))].sort((a,b)=>a.localeCompare(b,'es'));
+ const region=regions.includes(S.planPreviewRegion)?S.planPreviewRegion:(regions[0]||'');
+ if(region&&!S.planPreviewRegion)S.planPreviewRegion=region;
+ const filtered=available.filter(o=>o.gameId===game?.id&&String(o.region||'Global')===region);
+ const selected=filtered.find(o=>o.id===S.planPreviewId)||filtered[0]||null;
+ if(selected&&selected.id!==S.planPreviewId)S.planPreviewId=selected.id;
+ const activationRequired=!!S.membership?.activationRequired||!S.membership?.planTier;
  return '<span class="eyebrow">REFILLS PRO · MEMBRESÍAS</span><h1 class="heading">Elige tu plan</h1><p class="sub">Explora los beneficios y consulta el precio final de cualquier oferta antes de activar un plan. Sin cálculos complicados.</p>' +
  '<section class="panel pad section rs-plan-preview"><div class="section-head"><h2>Vista previa de precios</h2><span class="dim tiny">Importes informativos del catálogo activo</span></div>' +
- (available.length?'<label class="field">Selecciona una oferta real del catálogo<select id="planPreviewProduct">'+available.slice(0,120).map(o=>'<option value="'+esc(o.id)+'" '+(o.id===selected.id?'selected':'')+'>'+esc(o.name)+' · '+esc((S.games.find(g=>g.id===o.gameId)||{}).name||'')+'</option>').join('')+'</select></label>':'<div class="rs-preview-empty">La vista previa de precios aparecerá cuando administración publique las primeras ofertas reales. No mostraremos importes inventados.</div>') +
+ (available.length?'<div class="rs-plan-preview-filters"><label class="field">Juego<select id="planPreviewGame">'+games.map(g=>'<option value="'+esc(g.id)+'" '+(g.id===game?.id?'selected':'')+'>'+esc(g.name)+'</option>').join('')+'</select></label><label class="field">Región<select id="planPreviewRegion">'+regions.map(r=>'<option value="'+esc(r)+'" '+(r===region?'selected':'')+'>'+esc(r)+'</option>').join('')+'</select></label><label class="field">Oferta<select id="planPreviewProduct">'+filtered.slice(0,120).map(o=>'<option value="'+esc(o.id)+'" '+(o.id===selected?.id?'selected':'')+'>'+esc(o.name)+'</option>').join('')+'</select></label></div>':'<div class="rs-preview-empty">La vista previa aparecerá cuando administración publique ofertas reales. No mostraremos importes inventados.</div>') +
  '</section>' +
- '<div class="grid grid-3 rs-tier-cards">'+S.tiers.map(t=>{const price=selected?tierPrice(selected,t):null,active=t.tier===S.membership?.planTier;return '<article class="panel tier rs-tier-card '+(active?'active':'')+'"><span class="eyebrow">'+(t.tier==='free'?'INCLUIDO':'PLAN REVENDEDOR')+'</span><h3>'+esc(t.name)+'</h3><div class="tier-price">'+(t.tier==='free'?'Gratis':usdt(t.priceUsdt)+' USDT')+'<small>'+(t.tier==='free'?'Sin vencimiento':num(t.days)+' días')+'</small></div><div class="rs-tier-preview">'+(price?'<small>VISTA PREVIA · '+esc(selected.name)+'</small><strong>'+usdt(price.usdt)+' USDT</strong><span>'+integer(price.sm)+' SM · '+integer(price.cup)+' CUP</span>':'<small>VISTA PREVIA</small><strong>Sin ofertas</strong><span>Los precios aparecerán aquí al publicarlas</span>')+'</div>'+(active?'<span class="pill">Tu plan actual</span>':t.tier==='free'?'<span class="dim tiny">Disponible sin pago</span>':'<button class="button full" data-plan="'+esc(t.tier)+'">Seleccionar '+esc(t.name)+'</button>')+'<button type="button" class="ghost full rs-tier-view-offers" data-tier-preview="'+esc(t.tier)+'">Ver todas las ofertas sin comprar</button></article>'}).join('')+'</div>' +
+ '<div class="grid grid-3 rs-tier-cards">'+S.tiers.map(t=>{const price=selected?tierPrice(selected,t):null,active=!!S.membership?.planTier&&t.tier===S.membership?.planTier;return '<article class="panel tier rs-tier-card '+(active?'active':'')+'"><span class="eyebrow">'+(t.tier==='free'?'INCLUIDO':'PLAN REVENDEDOR')+'</span><h3>'+esc(t.name)+'</h3><div class="tier-price">'+(t.tier==='free'?'Gratis':usdt(t.priceUsdt)+' USDT')+'<small>'+(t.tier==='free'?'Sin vencimiento':num(t.days)+' días')+'</small></div><div class="rs-tier-preview">'+(price?'<small>VISTA PREVIA · '+esc(selected.name)+'</small><strong>'+usdt(price.usdt)+' USDT</strong><span>'+integer(price.sm)+' SM · '+integer(price.cup)+' CUP</span>':'<small>VISTA PREVIA</small><strong>Sin ofertas</strong><span>Los precios aparecerán aquí al publicarlas</span>')+'</div>'+(active?'<span class="pill">Tu plan actual</span>':t.tier==='free'&&activationRequired?'<button class="button full" data-view="billetera">Depositar 5 USDT para activar Gratis</button>':t.tier==='free'?'<span class="dim tiny">Disponible</span>':'<button class="button full" data-plan="'+esc(t.tier)+'">Seleccionar '+esc(t.name)+'</button>')+'<button type="button" class="ghost full rs-tier-view-offers" data-tier-preview="'+esc(t.tier)+'">Ver todas las ofertas sin comprar</button></article>'}).join('')+'</div>' +
  '<section class="panel pad section"><h2>Activar o renovar suscripción</h2><p class="dim reduced">Los cobros se realizan desde tu wallet y siempre se confirman en Supabase.</p><form id="planForm" class="grid"><div class="two"><label class="field">Plan<select name="tier">'+S.tiers.filter(t=>t.tier!=='free').map(t=>'<option value="'+esc(t.tier)+'" '+(S.tier===t.tier?'selected':'')+'>'+esc(t.name)+' · '+usdt(t.priceUsdt)+' USDT · '+num(t.days)+' días</option>').join('')+'</select></label><label class="field">Moneda<select name="currency"><option>USDT</option><option>SM</option><option>CUP</option></select></label></div><button type="submit" class="button">Confirmar suscripción</button></form><p class="help">Antes de activar el plan revisa su importe, duración y disponibilidad de saldo.</p></section>';
 }
 
@@ -165,12 +176,14 @@ function checkout(){
  <aside class="panel pad"><span class="eyebrow">RESUMEN</span><h2>${esc(o.name)}</h2><p class="dim">${esc(g.name)} · ${esc(o.region)}</p><div class="checkout-summary panel"><strong>${usdt(o.resellerUsdt)} USDT</strong>${o.kind==='pin'?'<div class="pill">PIN · Entrega manual verificada</div>':''}<div class="dim">${integer(o.resellerSm)} SM · ${integer(o.resellerCup)} CUP</div></div><p class="dim tiny">Este es tu precio final según el plan activo. Si administración rechaza el pedido, el saldo se reintegra según las reglas del servidor.</p><button class="ghost full" data-view="billetera">Ver mi wallet</button></aside></div>`;
 }
 function instructions(currency){
- const i=S.instructions[currency]||{};
- const v=currency==='USDT'?i.address:i.destination;
- return `<div class="payment-instructions"><b>${currency==='USDT'?'USDT · '+esc(i.network||'BEP-20'):currency==='CUP'?'CUP · Transfermóvil':'SM · Saldo móvil ETECSA'}</b><small class="dim">Datos de pago configurados por administración</small><code>${esc(v||'Pendiente de configurar')}</code>${v?`<button type="button" class="ghost small-button" data-copy="${esc(v)}">Copiar dato</button>`:''}<p class="help">Verifica la moneda, red, importe y destino antes de enviar fondos. Un comprobante no acredita automáticamente tu wallet.</p></div>`;
+ const i=S.instructions[currency]||{},v=currency==='USDT'?i.address:i.destination;
+ const confirmation=currency==='CUP'?String(i.confirmPhone||''):'';
+ return `<div class="payment-instructions"><b>${currency==='USDT'?'USDT · '+esc(i.network||'BEP-20'):currency==='CUP'?'CUP · Transfermóvil':'SM · Saldo móvil ETECSA'}</b><small class="dim">Datos de pago configurados por administración</small><code>${esc(v||'Pendiente de configurar')}</code>${v?`<button type="button" class="ghost small-button" data-copy="${esc(v)}">${currency==='CUP'?'Copiar tarjeta':'Copiar dato'}</button>`:''}${currency==='CUP'?`<div class="payment-confirm-number"><small>NÚMERO DE CONFIRMACIÓN</small><code>${esc(confirmation||'Pendiente de configurar')}</code>${confirmation?`<button type="button" class="ghost small-button" data-copy="${esc(confirmation)}">Copiar número</button>`:''}</div>`:''}<p class="help">Verifica la moneda, red, importe y destino antes de enviar fondos. Un comprobante no acredita automáticamente tu wallet.</p></div>`;
 }
 function wallet(){
  const currency=['USDT','CUP','SM'].includes(S.depositCurrency)?S.depositCurrency:'USDT';
+ const activationRequired=!!S.membership?.activationRequired||!S.membership?.planTier;
+ const minimumDeposit=currency==='USDT'?5:currency==='SM'?Math.ceil(5*num(S.rates.buySmPerUsdt)):Math.ceil(5*num(S.rates.buySmPerUsdt)*num(S.rates.cupPerSm));
  const currencyInfo={
   USDT:{title:'USDT · BEP-20',subtitle:'Hash o captura · revisión de pago',address:S.instructions.USDT?.address||'',method:'USDT'},
   CUP:{title:'CUP · Transfermóvil',subtitle:'Tarjeta y número de confirmación · revisión manual',address:S.instructions.CUP?.destination&&S.instructions.CUP?.confirmPhone?S.instructions.CUP.destination:'',method:'CUP'},
@@ -182,16 +195,16 @@ function wallet(){
   '<div class="rs-pro-selected-method"><div><span class="rs-pro-method-mark">'+(currency==='USDT'?'₮':currency==='CUP'?'CUP':'SM')+'</span><strong>'+esc(selected.title)+'</strong></div><button type="button" class="ghost small-button" data-deposit-back>Cambiar</button></div>'+
   '<div class="rs-pro-checkout-destination"><div class="rs-pro-checkout-overline"><small>DATOS PARA PAGAR</small><span>EN REVISIÓN</span></div>'+instructions(currency)+'</div>'+
   '<form id="depositForm" class="rs-pro-checkout-form"><input type="hidden" id="depositCurrency" name="currency" value="'+currency+'">'+
-  '<label class="field">¿Cuánto deseas depositar? ('+currency+')<input id="depositAmount" name="amount" type="number" inputmode="decimal" min="'+(currency==='USDT'?'0.01':'1')+'" step="'+(currency==='USDT'?'0.01':'1')+'" required placeholder="Importe exacto"></label>'+
+  '<label class="field">¿Cuánto deseas depositar? ('+currency+')<input id="depositAmount" name="amount" type="number" inputmode="decimal" min="'+(activationRequired?minimumDeposit:(currency==='USDT'?'0.01':'1'))+'" step="'+(currency==='USDT'?'0.01':'1')+'" required placeholder="'+(activationRequired?minimumDeposit.toLocaleString('es-ES'):'Importe exacto')+'"></label>'+
   (currency==='SM'?'<label class="field">Número desde el que transferiste<input name="senderPhone" type="tel" inputmode="tel" maxlength="20" autocomplete="off" required placeholder="Número de la línea que realizó el envío"></label>':'<input type="hidden" name="senderPhone" value="">')+
   (currency==='USDT'?'<label class="field">Hash de transacción USDT (recomendado)<input name="txHash" type="text" maxlength="66" autocomplete="off" placeholder="0x…"></label>':'<input type="hidden" name="txHash" value="">')+
   '<label class="field">Captura del comprobante '+(currency==='USDT'?'(si no envías hash)':'(obligatoria)')+'<input name="proof" type="file" accept="image/jpeg,image/png,image/webp" '+(currency==='USDT'?'':'required')+'></label>'+
-  '<p class="help">JPG, PNG o WEBP · máximo 5 MB. La captura o el hash no acreditan fondos por sí solos.</p>'+
+  '<p class="help">'+(activationRequired?'Primer depósito: mínimo '+minimumDeposit.toLocaleString('es-ES')+' '+currency+' (equivalente a 5 USDT). El saldo se acredita y el plan Gratis se activa al aprobar el pago.':'JPG, PNG o WEBP · máximo 5 MB. La captura o el hash no acreditan fondos por sí solos.')+'</p>'+
   '<button class="button full rs-pro-deposit-submit" type="submit" '+(!selected.address?'disabled':'')+'>Enviar solicitud de depósito</button></form></div>':
   '<div class="rs-pro-payflow"><div class="rs-pro-checkout-total"><small>TU SALDO DISPONIBLE</small><strong>'+usdt(S.wallet.USDT)+' <em>USDT</em></strong><p>Elige el método con el que deseas depositar.</p></div>'+
   '<div class="rs-pro-choice-heading"><strong>Selecciona un método de depósito</strong><small>Después podrás copiar los datos y adjuntar el comprobante.</small></div>'+
   '<div class="rs-pro-deposit-methods">'+Object.entries(currencyInfo).map(([value,item])=>'<button type="button" class="rs-pro-deposit-method" data-deposit-method="'+value+'" '+(!item.address?'disabled':'')+'><span class="rs-pro-method-mark">'+(value==='USDT'?'₮':value==='CUP'?'CUP':'SM')+'</span><span class="rs-pro-deposit-method-copy"><strong>'+esc(item.title)+'</strong><small>'+esc(item.address?item.subtitle:'Cuenta receptora no configurada')+'</small></span><b>›</b></button>').join('')+'</div><p class="rs-pro-pay-notice">Las transferencias se confirman en el servidor antes de acreditar saldo en tu wallet.</p></div>';
- return '<span class="eyebrow">SALDO DEL REVENDEDOR</span><h1 class="heading">Mi billetera</h1><p class="sub">Deposita con los mismos pasos claros que al pagar una oferta. Puedes consultar aquí tus solicitudes recientes.</p>'+balanceSummary()+
+ return '<span class="eyebrow">SALDO DEL REVENDEDOR</span><h1 class="heading">Mi billetera</h1><p class="sub">Deposita con los mismos pasos claros que al pagar una oferta. Puedes consultar aquí tus solicitudes recientes.</p>'+balanceSummary()+(activationRequired?'<section class="panel pad rs-pro-activation-note"><strong>Activa Gratis con un depósito mínimo de 5 USDT</strong><p>Se acepta el equivalente en CUP o SM según las tasas globales. La wallet se acredita y el plan se activa después de la verificación administrativa.</p></section>':'')+
  '<div class="grid grid-2 section rs-pro-wallet-layout"><section class="panel pad rs-pro-wallet-main"><div class="rs-pro-section-head"><h2>Depositar en wallet</h2><span class="pill">PAGO SEGURO</span></div>'+depositStep+'</section>'+
  '<section class="panel pad rs-pro-wallet-history"><h2>Recargas recientes</h2>'+(S.deposits.length?S.deposits.map(d=>'<div class="deposit-row"><div><strong>'+integer(d.amount)+' '+esc(d.currency)+'</strong><small>'+timestamp(d.createdAt)+'</small></div><span class="status '+esc(d.status)+'">'+esc(status(d.status))+'</span></div>').join(''):'<p class="empty">Aún no hay recargas registradas.</p>')+'</section></div>';
 }
@@ -221,7 +234,7 @@ function auth(){
  <section class="panel auth-card"><span class="eyebrow">ACCESO DE REVENDEDORES</span><h2>${register?'Crear mi cuenta':'Bienvenido de nuevo'}</h2><div class="auth-tabs"><button class="${register?'':'active'}" data-auth="login">Iniciar sesión</button><button class="${register?'active':''}" data-auth="register">Registrarme</button></div><form id="authForm"><input type="hidden" name="mode" value="${register?'register':'login'}">${register?'<label class="field">Nombre completo<input name="fullName" minlength="2" maxlength="90" autocomplete="name" required></label>':''}
  <div class="two"><label class="field">País<select name="prefix" required>${countries()}</select></label><label class="field">Número de teléfono<input name="phone" type="tel" inputmode="tel" autocomplete="tel-national" placeholder="5xxxxxxx" minlength="5" maxlength="15" required></label></div>
  <label class="field">Contraseña<input name="password" type="password" autocomplete="${register?'new-password':'current-password'}" minlength="${register?'10':'1'}" maxlength="72" required></label>${!register?'<label class="rs-remember"><input type="checkbox" name="rememberSession" '+(S.rememberSession?'checked':'')+'><span><strong>Recordar mi sesión</strong><small>Mantener el acceso en este dispositivo</small></span></label>':''}<input type="text" name="website" autocomplete="off" tabindex="-1" aria-hidden="true" class="sr-only"><button class="button full" type="submit">${register?'Crear cuenta de revendedor':'Acceder a Refills Pro'}</button></form>
- <p class="authentication-note">Si ya tienes una cuenta Refills Shop, puedes usar tus credenciales aquí; <strong>el inicio de sesión de este portal se guarda por separado</strong>. Al registrarte se asigna el plan Gratis.</p></section></div>`;
+ <p class="authentication-note">Si ya tienes una cuenta Refills Shop, puedes usar tus credenciales aquí; <strong>el inicio de sesión de este portal se guarda por separado</strong>. El plan Gratis se activa cuando se verifica tu primer depósito mínimo equivalente a 5 USDT.</p></section></div>`;
 }
 function render(){
  document.title='Refills Pro · Revendedores';
@@ -230,7 +243,7 @@ function render(){
  $('portalNav').hidden=!authed;
  $('signout').hidden=!authed;
  $('memberChip').hidden=!authed;
- if(authed)$('memberChip').textContent=S.tiers.find(t=>t.tier===S.membership?.planTier)?.name||'Plan Gratis';
+ if(authed)$('memberChip').textContent=S.membership?.planTier?S.tiers.find(t=>t.tier===S.membership?.planTier)?.name||'Plan Gratis':S.membership?.activationRequired?'Activación pendiente':'Plan Gratis';
  $('portalNav').innerHTML=authed?[['inicio','Inicio'],['catalogo','Ofertas'],['planes','Planes'],['billetera','Wallet'],['pedidos','Pedidos'],['cuenta','Mi cuenta']].map(([v,label])=>`<button class="nav-button ${S.view===v||v==='catalogo'&&['juego','compra'].includes(S.view)?'active':''}" data-view="${v}">${label}</button>`).join(''):'';
  const dock=$('portalDock');
  if(dock){
@@ -301,6 +314,7 @@ async function handleForm(f){
   }else if(id==='depositForm'){
    const currency=f.elements.currency.value,amount=Number(f.elements.amount.value),txHash=String(f.elements.txHash.value||'').trim(),senderPhone=String(f.elements.senderPhone.value||'').trim();
    if(!Number.isFinite(amount)||amount<=0||(currency!=='USDT'&&!Number.isInteger(amount)))throw Error('Revisa el importe. CUP y SM requieren valores enteros.');
+   if(S.membership?.activationRequired){const sm=num(S.rates.buySmPerUsdt),cup=num(S.rates.cupPerSm),equiv=currency==='USDT'?amount:currency==='SM'?amount/sm:amount/(sm*cup);if(!Number.isFinite(equiv)||equiv<5)throw Error('El primer depósito debe ser equivalente a 5.00 USDT o más.');}
    if(currency==='SM'&&!/^\+?[1-9]\d{7,14}$/.test(senderPhone))throw Error('Para SM debes indicar el número que hizo la transferencia.');
    const proofData=await readProof(f.elements.proof.files?.[0]);
    if(!proofData&&!txHash)throw Error('Adjunta el comprobante o indica el hash USDT.');
@@ -321,7 +335,7 @@ async function handleForm(f){
 }
 document.addEventListener('submit',e=>{if(e.target instanceof HTMLFormElement){e.preventDefault();void handleForm(e.target)}});
 document.addEventListener('input',e=>{if(e.target?.id==='depositAmount'){const el=$('depositAmountPreview');if(!el)return;const curr=S.depositCurrency;const amount=Number(e.target.value);el.innerHTML=(amount>0&&Number.isFinite(amount)?amount.toLocaleString('es-ES',{minimumFractionDigits:curr==='USDT'?2:0,maximumFractionDigits:curr==='USDT'?2:0}):'0.00')+' <em>'+curr+'</em>';}});
-document.addEventListener('change',e=>{if(e.target?.id==='planPreviewProduct'){S.planPreviewId=e.target.value;render();}});
+document.addEventListener('change',e=>{if(e.target?.id==='planPreviewGame'){S.planPreviewGameId=e.target.value;S.planPreviewRegion='';S.planPreviewId='';render();}if(e.target?.id==='planPreviewRegion'){S.planPreviewRegion=e.target.value;S.planPreviewId='';render();}if(e.target?.id==='planPreviewProduct'){S.planPreviewId=e.target.value;render();}});
 document.addEventListener('click',e=>{if(e.target?.id==='rsPricePreview'||e.target?.id==='rsTierReadOnlyPreview'){e.target.remove();}});
 document.addEventListener('click',async e=>{
  const b=e.target.closest('button');if(!b||b.disabled)return;
