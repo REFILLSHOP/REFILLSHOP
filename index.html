@@ -1334,6 +1334,8 @@ body.rs-auth-screen .bottom-nav,body.rs-auth-screen #mobile-cart-shortcut{displa
 .home-balance-actions .btn .svg{width:20px;height:20px}
 .rs-install-entry{display:flex;align-items:center;justify-content:center;gap:9px;width:100%;min-height:42px;margin:11px 0 0;border:1px solid rgba(83,155,246,.36);border-radius:13px;background:rgba(18,68,143,.17);color:#c0e4ff;font-size:12px;font-weight:800}
 .rs-install-entry:hover{border-color:#59b8ff;background:rgba(24,87,172,.3)}
+.rs-install-logo{width:26px;height:26px;border-radius:7px;display:block;object-fit:cover;flex:0 0 auto}
+.rs-install-help{font-size:13px;line-height:1.7}.rs-install-help p{margin:12px 0}.rs-install-help .helper{font-size:11px}
 @media(max-width:620px){.home-balance-actions{gap:7px}.home-balance-actions .btn{min-height:61px;padding:8px 4px;font-size:10.5px;border-radius:14px}.home-balance-actions .btn .svg{width:18px;height:18px}}
 @media(max-width:350px){.home-balance-actions .btn{font-size:9.5px}.home-balance-actions{gap:5px}}
 </style><style id="rs-performance-groups-v40">
@@ -1935,7 +1937,7 @@ function home(){
   ${!hasPlan?`<p class="home-wallet-hint">Activa tu plan Gratis, Level 2 o Level 3 para utilizar el monedero.</p>`:''}
  </section>`;
  return `${walletHero}
- <button type="button" class="rs-install-entry" data-action="install-refills" aria-label="Instalar Refills Shop en este dispositivo">${I('plus','tiny')} Instalar Refills Shop en mi teléfono</button>
+ <button type="button" class="rs-install-entry" data-action="install-refills" aria-label="Instalar Refills Shop en este dispositivo"><img class="rs-install-logo" src="/REFILLSHOP/assets/refills-app-192.png" alt=""><span>Instalar Refills Shop</span></button>
  <div class="notice-grid"><button class="notice" data-action="modal" data-modal="news"><span class="notice-icon">${I('spark')}</span><span><strong>Ofertas y novedades</strong><small>Descubre recargas y productos</small></span>${I('arrow','tiny arrow')}</button><button class="notice" data-action="modal" data-modal="help"><span class="notice-icon">${I('headset')}</span><span><strong>Centro de ayuda</strong><small>Conoce cómo funciona la tienda</small></span>${I('arrow','tiny arrow')}</button></div>
  ${sectionMini('Móvil, internet y más',['nauta','cubacel','vpn','sms'],'recargas')}
  ${sectionMini('Juegos disponibles',ITEMS.filter(g=>g.category==='juegos').sort((a,b)=>Number(b.featured)-Number(a.featured)||a.sortOrder-b.sortOrder||a.name.localeCompare(b.name)).slice(0,4).map(g=>g.id),'recargas')}
@@ -2293,11 +2295,15 @@ function modal(){
  switch(s.modal){
  case 'install-guide':{
   const ios=/iPad|iPhone|iPod/.test(navigator.userAgent);
-  html=modalTitle('Instalar Refills Shop','Accede a la tienda como una aplicación, con su icono en tu pantalla de inicio')+
-   '<div class="card panel" style="line-height:1.7;max-width:490px"><p>'+
-   (ios?'En Safari toca <strong>Compartir</strong>, elige <strong>Añadir a pantalla de inicio</strong> y confirma.':
-        'Abre el menú <strong>⋮</strong> de tu navegador y selecciona <strong>Instalar aplicación</strong> o <strong>Añadir a pantalla de inicio</strong>.')+
-   '</p><p class="helper">No necesitas descargar un APK. Las compras y la cuenta seguirán necesitando conexión a internet.</p></div>';
+  const android=/Android/i.test(navigator.userAgent);
+  html=modalTitle('Instalar Refills Shop','Guarda la tienda en tu teléfono con el logo oficial')+
+   '<div class="card panel rs-install-help">'+
+   '<img src="/REFILLSHOP/assets/refills-app-192.png" alt="Logo Refills Shop" width="64" height="64" style="width:64px;height:64px;border-radius:17px;margin:0 auto 12px;display:block">'+
+   (ios?'<p>En <strong>Safari</strong>, toca <strong>Compartir</strong> y después <strong>Añadir a pantalla de inicio</strong>.</p>':
+    android?'<p>En <strong>Chrome</strong>, abre el menú <strong>⋮</strong> y pulsa <strong>Instalar aplicación</strong>. Confirma la instalación en Android.</p>'+
+     '<p>Si Android indica <strong>No se pudo instalar</strong>, vuelve al menú ⋮ y utiliza <strong>Crear acceso directo</strong>. Así tendrás Refills Shop en la pantalla de inicio mientras se soluciona el instalador de tu dispositivo.</p>':
+     '<p>En Chrome o Edge, pulsa el icono <strong>Instalar</strong> de la barra o ve a su menú y elige <strong>Instalar Refills Shop</strong>.</p>')+
+   '<p class="helper">Es una aplicación web instalable (PWA), no un archivo APK. Para consultar saldo, comprar y seguir pedidos necesitas conexión a internet.</p></div>';
   break;
  }
  case 'reseller-preview':{
@@ -2608,7 +2614,7 @@ function authPage(){
    ${s.authError?`<div class="auth-error-v7" role="alert">${esc(s.authError)}</div>`:''}
    <button class="btn primary auth-submit-v7" type="submit" ${s.authBusy?'disabled':''}>${s.authBusy?'Conectando…':registering?'Crear mi cuenta':'Iniciar sesión'}</button>
   </form>
-  <button type="button" class="rs-install-entry" data-action="install-refills">Instalar Refills Shop en mi dispositivo</button>
+  <button type="button" class="rs-install-entry" data-action="install-refills"><img class="rs-install-logo" src="/REFILLSHOP/assets/refills-app-192.png" alt=""><span>Instalar Refills Shop</span></button>
  </section></div>`;
 }
 
