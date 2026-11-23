@@ -25,7 +25,7 @@ function readURL(){
  S.selectedOffer=search.get('offer')||'';
  S.pinOrder=search.get('order')||'';
  S.pinValue=null;
- S.kindFilter=search.get('tipo')==='pin'?'pin':'all';
+ S.kindFilter=['recargas','pases','tarjetas','pin'].includes(search.get('tipo'))?search.get('tipo'):'all';
 }
 let notifyTimer=null;
 function notify(message,error=false){const el=$('notice');if(!el)return;el.textContent=String(message||'').slice(0,320);el.classList.toggle('error',error);el.hidden=false;clearTimeout(notifyTimer);notifyTimer=setTimeout(()=>{el.hidden=true},5400)}
@@ -83,23 +83,52 @@ function plans(){
  '<section class="panel pad section rs-plan-preview"><div class="section-head"><h2>Vista previa de precios</h2><span class="dim tiny">Importes informativos del catálogo activo</span></div>' +
  (available.length?'<label class="field">Selecciona una oferta real del catálogo<select id="planPreviewProduct">'+available.slice(0,120).map(o=>'<option value="'+esc(o.id)+'" '+(o.id===selected.id?'selected':'')+'>'+esc(o.name)+' · '+esc((S.games.find(g=>g.id===o.gameId)||{}).name||'')+'</option>').join('')+'</select></label>':'<div class="rs-preview-empty">La vista previa de precios aparecerá cuando administración publique las primeras ofertas reales. No mostraremos importes inventados.</div>') +
  '</section>' +
- '<div class="grid grid-3 rs-tier-cards">'+S.tiers.map(t=>{const price=selected?tierPrice(selected,t):null,active=t.tier===S.membership?.planTier;return '<article class="panel tier rs-tier-card '+(active?'active':'')+'"><span class="eyebrow">'+(t.tier==='free'?'INCLUIDO':'PLAN REVENDEDOR')+'</span><h3>'+esc(t.name)+'</h3><div class="tier-price">'+(t.tier==='free'?'Gratis':usdt(t.priceUsdt)+' USDT')+'<small>'+(t.tier==='free'?'Sin vencimiento':num(t.days)+' días')+'</small></div><div class="rs-tier-preview">'+(price?'<small>VISTA PREVIA · '+esc(selected.name)+'</small><strong>'+usdt(price.usdt)+' USDT</strong><span>'+integer(price.sm)+' SM · '+integer(price.cup)+' CUP</span>':'<small>VISTA PREVIA</small><strong>Sin ofertas</strong><span>Los precios aparecerán aquí al publicarlas</span>')+'</div>'+(active?'<span class="pill">Tu plan actual</span>':t.tier==='free'?'<span class="dim tiny">Disponible sin pago</span>':'<button class="button full" data-plan="'+esc(t.tier)+'">Seleccionar '+esc(t.name)+'</button>')+'</article>'}).join('')+'</div>' +
+ '<div class="grid grid-3 rs-tier-cards">'+S.tiers.map(t=>{const price=selected?tierPrice(selected,t):null,active=t.tier===S.membership?.planTier;return '<article class="panel tier rs-tier-card '+(active?'active':'')+'"><span class="eyebrow">'+(t.tier==='free'?'INCLUIDO':'PLAN REVENDEDOR')+'</span><h3>'+esc(t.name)+'</h3><div class="tier-price">'+(t.tier==='free'?'Gratis':usdt(t.priceUsdt)+' USDT')+'<small>'+(t.tier==='free'?'Sin vencimiento':num(t.days)+' días')+'</small></div><div class="rs-tier-preview">'+(price?'<small>VISTA PREVIA · '+esc(selected.name)+'</small><strong>'+usdt(price.usdt)+' USDT</strong><span>'+integer(price.sm)+' SM · '+integer(price.cup)+' CUP</span>':'<small>VISTA PREVIA</small><strong>Sin ofertas</strong><span>Los precios aparecerán aquí al publicarlas</span>')+'</div>'+(active?'<span class="pill">Tu plan actual</span>':t.tier==='free'?'<span class="dim tiny">Disponible sin pago</span>':'<button class="button full" data-plan="'+esc(t.tier)+'">Seleccionar '+esc(t.name)+'</button>')+'<button type="button" class="ghost full rs-tier-view-offers" data-tier-preview="'+esc(t.tier)+'">Ver todas las ofertas sin comprar</button></article>'}).join('')+'</div>' +
  '<section class="panel pad section"><h2>Activar o renovar suscripción</h2><p class="dim reduced">Los cobros se realizan desde tu wallet y siempre se confirman en Supabase.</p><form id="planForm" class="grid"><div class="two"><label class="field">Plan<select name="tier">'+S.tiers.filter(t=>t.tier!=='free').map(t=>'<option value="'+esc(t.tier)+'" '+(S.tier===t.tier?'selected':'')+'>'+esc(t.name)+' · '+usdt(t.priceUsdt)+' USDT · '+num(t.days)+' días</option>').join('')+'</select></label><label class="field">Moneda<select name="currency"><option>USDT</option><option>SM</option><option>CUP</option></select></label></div><button type="submit" class="button">Confirmar suscripción</button></form><p class="help">Antes de activar el plan revisa su importe, duración y disponibilidad de saldo.</p></section>';
 }
+
+function proOfferCategory(o){
+ const name=String(o?.name||'').toLowerCase();
+ if(o?.kind==='pin'||/\bpin\b|c[oó]digo\s+pin/.test(name))return 'pin';
+ if(/pase|pass|weekly|monthly|semanal|mensual|temporada|season|membres[ií]a/.test(name))return 'pases';
+ if(/tarjeta|gift.?card|voucher|regalo|card\s+digital/.test(name))return 'tarjetas';
+ return 'recargas';
+}
+const PRO_OFFER_GROUPS=[['all','Todas'],['recargas','Recargas'],['pases','Pases'],['tarjetas','Tarjetas'],['pin','PIN']];
 function catalog(){
  const q=S.search.toLocaleLowerCase('es');
- const visible=S.games.filter(g=>g.name.toLocaleLowerCase('es').includes(q)&&(S.kindFilter==='all'||S.offers.some(o=>o.gameId===g.id&&o.kind==='pin')));
+ const visible=S.games.filter(g=>g.name.toLocaleLowerCase('es').includes(q)&&(S.kindFilter==='all'||S.offers.some(o=>o.gameId===g.id&&proOfferCategory(o)===S.kindFilter)));
  return `<header class="rs-pro-app-title"><span class="eyebrow">REFILLS PRO · JUEGOS</span><h1 class="heading">Explora tus recargas</h1><p class="sub">Todos los precios se ajustan a tu plan y se verifican al comprar.</p></header>
- <div class="rs-pro-kind-tabs"><button class="${S.kindFilter==='all'?'active':''}" type="button" data-pro-kind="all">Todos los productos</button><button class="${S.kindFilter==='pin'?'active':''}" type="button" data-pro-kind="pin">Códigos PIN</button></div><form id="searchForm" class="form-actions" role="search"><input class="search" style="flex:1" name="search" type="search" placeholder="Buscar juego" value="${esc(S.search)}" aria-label="Buscar juego"><button class="ghost" type="submit">Buscar</button></form>
+ <div class="rs-pro-kind-tabs">${PRO_OFFER_GROUPS.map(([id,label])=>`<button class="${S.kindFilter===id?'active':''}" type="button" data-pro-kind="${id}">${label}</button>`).join('')}</div><form id="searchForm" class="form-actions" role="search"><input class="search" style="flex:1" name="search" type="search" placeholder="Buscar juego" value="${esc(S.search)}" aria-label="Buscar juego"><button class="ghost" type="submit">Buscar</button></form>
  <p class="dim tiny">Mostrando ${visible.length} de ${S.games.length} juegos · Precios finales para tu suscripción</p>
- ${visible.length?`<div class="game-list">${visible.map(g=>{const count=S.offers.filter(o=>o.gameId===g.id&&o.inStock&&(S.kindFilter!=='pin'||o.kind==='pin')).length;return `<button class="game" data-game="${esc(g.id)}"><img src="${esc(imageURL(g.imageUrl))}" alt="" loading="lazy" onerror="this.onerror=null;this.src='/REFILLSHOP/assets/refills-icon.png'"><span class="game-name">${esc(g.name)}</span><small class="game-count">${count} ofertas disponibles</small></button>`}).join('')}</div>`:'<div class="panel empty">No se encontraron juegos con esa búsqueda.</div>'}`;
+ ${visible.length?`<div class="game-list">${visible.map(g=>{const count=S.offers.filter(o=>o.gameId===g.id&&o.inStock&&(S.kindFilter==='all'||proOfferCategory(o)===S.kindFilter)).length;return `<button class="game" data-game="${esc(g.id)}"><img src="${esc(imageURL(g.imageUrl))}" alt="" loading="lazy" onerror="this.onerror=null;this.src='/REFILLSHOP/assets/refills-icon.png'"><span class="game-name">${esc(g.name)}</span><small class="game-count">${count} ofertas disponibles</small></button>`}).join('')}</div>`:'<div class="panel empty">No se encontraron juegos con esa búsqueda.</div>'}`;
 }
 function gamePage(){
  const g=S.games.find(g=>g.id===S.selectedGame);if(!g)return catalog();
- const offers=S.offers.filter(o=>o.gameId===g.id&&(S.kindFilter!=='pin'||o.kind==='pin')).sort((a,b)=>num(a.resellerUsdt)-num(b.resellerUsdt));
+ const offers=S.offers.filter(o=>o.gameId===g.id&&(S.kindFilter==='all'||proOfferCategory(o)===S.kindFilter)).sort((a,b)=>num(a.resellerUsdt)-num(b.resellerUsdt));
  return '<button class="back" data-view="catalogo">‹ Volver al catálogo</button><span class="eyebrow">TUS PRECIOS DE COMPRA</span><h1 class="heading">'+esc(g.name)+'</h1><p class="sub">Toca Vista previa para consultar el importe final en USDT, SM y CUP antes de comprar.</p>' +
  '<div class="grid rs-offer-previews">'+(offers.map(o=>'<article class="panel offer rs-price-preview-card"><div class="offer-info"><strong>'+esc(o.name)+'</strong><small>'+esc(o.region||'Global')+' · '+(o.kind==='pin'?'PIN digital':'Recarga directa')+' · '+(o.inStock?'Disponible':'Agotada')+'</small><div class="price">'+usdt(o.resellerUsdt)+' USDT</div><span class="rs-price-hint">Precio final para tu plan</span></div><div class="rs-price-actions"><button class="ghost" data-preview-offer="'+esc(o.id)+'">Vista previa</button><button class="button" data-buy="'+esc(o.id)+'" '+(o.inStock?'':'disabled')+'>'+(o.inStock?'Comprar':'Agotada')+'</button></div></article>').join('')||'<div class="panel empty">Todavía no hay ofertas activas para este juego.</div>')+'</div>';
 }
+
+async function showTierReadOnlyPreview(tier){
+ if(!['free','level2','level3'].includes(tier))return;
+ const name=S.tiers.find(x=>x.tier===tier)?.name||tier;
+ const old=document.getElementById('rsTierReadOnlyPreview');if(old)old.remove();
+ const modal=document.createElement('div');modal.id='rsTierReadOnlyPreview';modal.className='rs-price-modal';
+ modal.innerHTML='<section role="dialog" aria-modal="true" class="rs-price-sheet"><div class="rs-price-grabber"></div><div class="rs-price-heading"><div><span class="eyebrow">VISTA PREVIA · SIN COMPRA</span><h2>Ofertas '+esc(name)+'</h2><p>Consulta los precios que tendrías al activar este plan</p></div><button type="button" data-close-tier-preview aria-label="Cerrar">×</button></div><p class="dim">Consultando precios reales…</p></section>';
+ document.body.appendChild(modal);
+ try{
+  const data=await req('rs12-reseller','/offers/preview?tier='+encodeURIComponent(tier));
+  if(!document.getElementById('rsTierReadOnlyPreview'))return;
+  const offers=Array.isArray(data.offers)?data.offers:[];
+  const body=offers.length?'<div class="rs-tier-offer-list">'+offers.slice(0,150).map(o=>'<article class="rs-tier-offer"><div><strong>'+esc(o.name)+'</strong><small>'+esc(o.game)+' · '+esc(o.region||'Global')+' · '+esc(proOfferCategory(o))+'</small></div><div><strong>'+usdt(o.usdt)+' USDT</strong><small>'+integer(o.sm)+' SM · '+integer(o.cup)+' CUP</small></div></article>').join('')+'</div>':'<div class="rs-preview-empty">Todavía no hay ofertas publicadas. Se mostrarán aquí cuando el administrador publique productos reales.</div>';
+  modal.querySelector('.rs-price-sheet').innerHTML='<div class="rs-price-grabber"></div><div class="rs-price-heading"><div><span class="eyebrow">SOLO VISTA PREVIA</span><h2>'+esc(name)+'</h2><p>Sin activar suscripción ni realizar compras</p></div><button type="button" data-close-tier-preview aria-label="Cerrar">×</button></div>'+body+'<p class="dim tiny">Precios orientativos del catálogo activo. No puedes comprar desde esta pantalla.</p>';
+ }catch(err){
+  if(!document.getElementById('rsTierReadOnlyPreview'))return;
+  const p=modal.querySelector('.rs-price-sheet p.dim');if(p)p.textContent=err?.message||'No se pudieron consultar las ofertas.';
+ }
+}
+
 function showPricePreview(offerId){
  const o=S.offers.find(x=>x.id===offerId);if(!o)return;
  const game=S.games.find(x=>x.id===o.gameId);
@@ -260,17 +289,19 @@ async function handleForm(f){
 document.addEventListener('submit',e=>{if(e.target instanceof HTMLFormElement){e.preventDefault();void handleForm(e.target)}});
 document.addEventListener('change',e=>{if(e.target.id==='depositCurrency'){$('paymentDetails').innerHTML=instructions(e.target.value)}});
 document.addEventListener('change',e=>{if(e.target?.id==='planPreviewProduct'){S.planPreviewId=e.target.value;render();}});
-document.addEventListener('click',e=>{if(e.target?.id==='rsPricePreview'){e.target.remove();}});
+document.addEventListener('click',e=>{if(e.target?.id==='rsPricePreview'||e.target?.id==='rsTierReadOnlyPreview'){e.target.remove();}});
 document.addEventListener('click',async e=>{
  const b=e.target.closest('button');if(!b||b.disabled)return;
  if(b.id==='signout'||b.id==='accountSignout')return void signout();
  if(b.dataset.auth){S.authMode=b.dataset.auth;render();return}
  if(b.dataset.view)return void go(b.dataset.view);
  if(b.dataset.proKind){
-  S.kindFilter=b.dataset.proKind==='pin'?'pin':'all';
-  updateURL('catalogo',S.kindFilter==='pin'?'tipo=pin':'',true);
+  S.kindFilter=PRO_OFFER_GROUPS.some(x=>x[0]===b.dataset.proKind)?b.dataset.proKind:'all';
+  updateURL('catalogo',S.kindFilter!=='all'?'tipo='+encodeURIComponent(S.kindFilter):'',true);
   S.view='catalogo';render();return;
  }
+ if(b.hasAttribute('data-close-tier-preview')){document.getElementById('rsTierReadOnlyPreview')?.remove();return}
+ if(b.dataset.tierPreview){await showTierReadOnlyPreview(b.dataset.tierPreview);return}
  if(b.hasAttribute('data-close-price')){document.getElementById('rsPricePreview')?.remove();return}
  if(b.dataset.previewOffer){showPricePreview(b.dataset.previewOffer);return}
  if(b.dataset.previewBuy){document.getElementById('rsPricePreview')?.remove();S.selectedOffer=b.dataset.previewBuy;S.pendingOrderId=null;S.view='compra';updateURL('compra','offer='+encodeURIComponent(S.selectedOffer));render();scrollTo(0,0);return}
