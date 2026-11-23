@@ -1666,7 +1666,7 @@ function paymentChoiceList(){
  const methods=Object.entries(PAYMENT_METHODS).filter(([id])=>id!=='balance'||s.role==='reseller');
  return `<div class="payment-choice-list">${methods.map(([id,m])=>{
   const noPlan=id==='balance'&&!resellerHasPlan(),noCost=id==='balance'&&!!selectedOffer&&!balancePrice;
-  const missing=(id==='sm'&&!s.paymentConfig.smReceiver)||(id==='cup'&&!s.paymentConfig.cupCard)||(id==='mitransfer'&&!s.paymentConfig.mitransferPhone)||(id==='usdt'&&(!s.paymentConfig.usdtEnabled||!s.paymentConfig.usdtAddress));
+  const missing=(id==='sm'&&!s.paymentConfig.smReceiver)||(id==='cup'&&(!s.paymentConfig.cupCard||!s.paymentConfig.cupConfirmPhone))||(id==='mitransfer'&&!s.paymentConfig.mitransferPhone)||(id==='usdt'&&(!s.paymentConfig.usdtEnabled||!s.paymentConfig.usdtAddress));
   const disabled=missing||noPlan||noCost,active=s.payment===id;
   const description=id==='sm'?'Manual · envío de saldo móvil y comprobante':
    id==='cup'?'Transfermóvil · número de transacción (pago en revisión)':
