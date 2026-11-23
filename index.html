@@ -989,7 +989,20 @@ button,a,input,select{touch-action:manipulation}
 #usdt-wallet-address{font-size:11px;overflow-wrap:anywhere;min-height:58px;resize:none}
 @media(max-width:560px){.recent-topups-v1{padding:14px}.recent-topup-row{gap:8px;padding:9px}.recent-topup-status{font-size:8px;padding:5px 6px}.order-card-actions{width:100%;justify-content:flex-end}}
 @media(prefers-reduced-motion:reduce){.recent-topup-row,.usdt-wallet-pay-v1{animation:none!important;transition:none!important}}
-</style></head>
+</style><style id="refills-checkout-activity-v2">
+.home-mini-section + .recent-topups-v1{margin-top:37px!important}
+.recent-topups-v1{border-color:rgba(88,156,244,.28);box-shadow:0 11px 31px rgba(1,12,30,.2)}
+.recent-topups-head{padding-bottom:11px;border-bottom:1px solid rgba(98,159,232,.16)}
+.recent-topups-head h2{letter-spacing:-.3px}
+.payment-choice-copy em.payment-mode-label{display:inline-block;width:max-content;max-width:100%;margin-top:6px;padding:4px 7px;border-radius:8px;font-style:normal;font-size:8px;font-weight:850;letter-spacing:.055em;white-space:normal}
+.payment-mode-label.manual{color:#f8d69a;background:rgba(188,138,36,.13);border:1px solid rgba(223,180,90,.3)}
+.payment-mode-label.review{color:#b6d6ff;background:rgba(48,112,182,.15);border:1px solid rgba(107,168,235,.26)}
+.payment-mode-label.auto{color:#99eadb;background:rgba(36,154,140,.16);border:1px solid rgba(79,197,177,.3)}
+.payment-flow-explain{display:block;padding:10px 12px;margin:10px 0 13px;background:linear-gradient(105deg,rgba(8,43,81,.62),rgba(8,23,48,.6));border:1px solid rgba(94,167,233,.23);border-radius:11px;font-size:10px;line-height:1.5;color:#b5d8f8}
+@media(max-width:720px){.home-mini-section + .recent-topups-v1{margin-top:30px!important}.recent-topups-v1{padding:15px}.payment-choice-copy em.payment-mode-label{font-size:7px}}
+@media(prefers-reduced-motion:reduce){.recent-topups-v1{animation:none!important}}
+</style>
+</head>
 <body>
 <div id="app-loader" role="status" aria-label="Cargando Refills Shop">
  <div class="app-loader-glow"></div>
@@ -1336,14 +1349,16 @@ function paymentChoiceList(){
   const noPlan=id==='balance'&&!resellerHasPlan(),noCost=id==='balance'&&!!selectedOffer&&!balancePrice;
   const missing=(id==='sm'&&!s.paymentConfig.smReceiver)||(id==='cup'&&!s.paymentConfig.cupCard)||(id==='mitransfer'&&!s.paymentConfig.mitransferPhone)||(id==='usdt'&&(!s.paymentConfig.usdtEnabled||!s.paymentConfig.usdtAddress));
   const disabled=missing||noPlan||noCost,active=s.payment===id;
-  const description=id==='sm'?'Manual · envía saldo móvil y adjunta el comprobante':
-   id==='cup'?'Transfermóvil · tarjeta receptora y número de transacción':
-   id==='mitransfer'?'MiTransfer · envío al teléfono receptor y número de operación':
+  const description=id==='sm'?'Manual · envío de saldo móvil y comprobante':
+   id==='cup'?'Transfermóvil · número de transacción (pago en revisión)':
+   id==='mitransfer'?'MiTransfer · envío por teléfono (pago en revisión)':
    id==='balance'?(noPlan?'Disponible al activar Gratis, Level 2 o Level 3':noCost?'Esta oferta no tiene costo de proveedor configurado':`Wallet de revendedor · ${balanceAvailable.toFixed(2)} USDT disponibles`):
-   'Automático · USDT BEP-20 en tu wallet; se verifica el hash en blockchain';
+   'Verificación automática BEP-20 después de enviar el hash';
+  const modeText=id==='sm'?'MANUAL':id==='balance'?'WALLET AUTOMÁTICA':id==='usdt'?'BLOCKCHAIN AUTOMÁTICA':'REFERENCIA · REVISIÓN';
+  const modeClass=id==='sm'?'manual':id==='balance'||id==='usdt'?'auto':'review';
   return `<button type="button" class="payment-choice ${active?'active':''} ${id==='balance'?'payment-choice-balance':''}" data-action="choose-payment" data-value="${id}" ${disabled?'disabled':''} ${active?'aria-pressed="true"':'aria-pressed="false"'}>
    <span class="payment-choice-icon">${paymentVisual(id)}</span>
-   <span class="payment-choice-copy"><strong>${esc(m.name)}</strong><small>${disabled?(noPlan?'Activa un plan de revendedor':noCost?'Costo del proveedor no disponible':'No habilitado o sin datos de cobro'):description}</small></span>
+   <span class="payment-choice-copy"><strong>${esc(m.name)}</strong><small>${disabled?(noPlan?'Activa un plan de revendedor':noCost?'Costo del proveedor no disponible':'No habilitado o sin datos de cobro'):description}</small><em class="payment-mode-label ${modeClass}">${modeText}</em></span>
    <span class="payment-choice-state">${active?'✓':''}</span>
   </button>`;
  }).join('')}</div><p class="payment-choice-note">USDT se comprueba automáticamente en BEP-20. Transfermóvil y MiTransfer necesitan conexión comercial de consulta para validar referencias automáticamente. Saldo móvil permanece manual.</p>`;
@@ -1623,6 +1638,7 @@ function modal(){
   html=modalTitle('Revisar tu compra','Confirma el destino y el método de pago')+
   `<div class="sheet-product"><img src="${photo(g)}" alt=""><div><strong>${esc(g?.name||'')}</strong><div class="muted">${esc(o?.title||'')} · Para: ${esc(s.player)}</div><div class="amount">${total?formatPriceValue(total.amount,total.currency):'Precio no disponible'}</div></div></div>
   <span class="sheet-label">Método seleccionado</span>${payPills()}
+  <div class="payment-flow-explain">${s.payment==='sm'?'MANUAL · La confirmación depende de revisar el saldo móvil recibido.':s.payment==='cup'?'REFERENCIA · Transfermóvil: el número de operación se revisa antes de confirmar.':s.payment==='mitransfer'?'REFERENCIA · MiTransfer: el envío es al teléfono receptor y la operación queda pendiente de validación.':s.payment==='usdt'?'AUTOMÁTICO · La blockchain confirma el USDT real cuando introduces el hash.':s.payment==='balance'?'AUTOMÁTICO · El servidor comprueba el saldo de tu wallet de revendedor.':''}</div>
 ${s.payment==='sm'?'<label class="sheet-label" for="payment-source-phone">Número que envió el saldo móvil</label><input id="payment-source-phone" class="field" inputmode="numeric" maxlength="8" placeholder="8 dígitos" required>':''}
 ${['cup','mitransfer'].includes(s.payment)?'<label class="sheet-label" for="payment-reference">Número de transacción / operación</label><input id="payment-reference" class="field" inputmode="text" maxlength="80" placeholder="Introduce el número que aparece en la operación" required>':''}
 ${Array.isArray(o?.targetSchema)&&o.targetSchema.length?o.targetSchema.map(f=>`<label class="sheet-label">${esc(f.label||f.key)}</label>${f.type==='select'&&Array.isArray(f.options)?`<select class="field order-target-field" data-target-key="${esc(f.key)}" required><option value="">Selecciona</option>${f.options.map(x=>`<option value="${esc(x.value)}">${esc(x.label||x.value)}</option>`).join('')}</select>`:`<input class="field order-target-field" data-target-key="${esc(f.key)}" placeholder="${esc(f.label||f.key)}" maxlength="80" required>`}`).join(''):''}
@@ -1689,7 +1705,7 @@ ${Array.isArray(o?.targetSchema)&&o.targetSchema.length?o.targetSchema.map(f=>`<
   let current=s.orders.find(x=>x.ref===s.selectedOrder);
   const orderGame=current?itemBy(current.id):null;
   const orderStatus=String(current?.status||'Pendiente');
-  const orderStatusKey=/complet|entregad/i.test(orderStatus)?'complete':/rechaz|cancel|fall/i.test(orderStatus)?'rejected':/proces|revisi/i.test(orderStatus)?'processing':'pending';
+  const orderStatusKey=/reembols|refund/i.test(orderStatus)?'refunded':/complet|entregad/i.test(orderStatus)?'complete':/rechaz|cancel|fall/i.test(orderStatus)?'rejected':/proces|revisi/i.test(orderStatus)?'processing':'pending';
   html=modalTitle('Detalle del pedido','Información y seguimiento de tu compra')+(current?`
    <div class="order-detail-hero-v4">${orderGame?`<img src="${photo(orderGame)}" alt="">`:`<span>${I('game')}</span>`}<div><small>PEDIDO #${esc(current.ref)}</small><strong>${esc(orderGame?.name||current.gameName||current.id||'Compra digital')}</strong><span>${esc(current.offer||'')}</span></div><b class="order-status-v4 ${orderStatusKey}">${esc(orderStatus)}</b></div>
    <div class="order-detail-total-v4"><small>TOTAL DEL PEDIDO</small><strong>${esc(current.totalText||fmtMoney(current.total)+' '+(current.currency||'CUP'))}</strong></div>
@@ -2038,7 +2054,7 @@ async function loadLiveCatalog(){
   s.salesEnabled=data.salesEnabled===true;s.catalogLoading=false;
   if(data.config){
    s.rates={...s.rates,usdtSm:Number(data.config.buySmPerUsdt||s.rates.usdtSm),smCup:Number(data.config.cupPerSm||s.rates.smCup)};
-   s.paymentConfig={...s.paymentConfig,smReceiver:data.config.mobilePhone||'',cupCard:data.config.cardNumber||'',mitransferPhone:data.config.walletPhone||'',mitransferEnabled:data.config.mitransferEnabled===true,usdtEnabled:data.config.usdtWalletEnabled===true,usdtAddress:data.config.usdtWalletAddress||'',whatsappNumber:data.config.supportWhatsapp||''};
+   s.paymentConfig={...s.paymentConfig,smReceiver:data.config.mobilePhone||'',cupCard:data.config.cardNumber||'',mitransferPhone:data.config.walletPhone||'',mitransferEnabled:data.config.mitransferEnabled===true,mitransferAutoEnabled:data.config.mitransferAutoEnabled===true,transfermovilAutoEnabled:data.config.transfermovilAutoEnabled===true,usdtEnabled:data.config.usdtWalletEnabled===true,usdtAddress:data.config.usdtWalletAddress||'',whatsappNumber:data.config.supportWhatsapp||''};
   }
   const validIds=new Set(ITEMS.map(g=>g.id));s.cart=s.cart.filter(c=>validIds.has(c.id));
   if(s.page==='detalle'&&!validIds.has(s.detailId))s.page='recargas';
