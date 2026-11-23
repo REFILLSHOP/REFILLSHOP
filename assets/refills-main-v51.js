@@ -129,7 +129,7 @@ function rsAddNotice(kind,title,detail,sound='message'){
  rsNotice.items=rsNotice.items.slice(0,50);
  rsSaveNotices();
  updateChangeBadge();
- if(s.modal==='alerts')modal();
+ if(s.modal==='alerts'&&document.activeElement?.tagName!=='BUTTON')modal();
  if(sound!=='silent')rsPlayNoticeSound(sound);
  rsSystemNotice(notice.title,notice.detail,id);
  if(kind==='completed')toast(notice.title+' · '+notice.detail);
@@ -1735,13 +1735,32 @@ if(a==='request-wallet-deposit'){
 });
 
 
+let rsOrderFetch=null;
 async function loadCustomerOrders(){
  if(!s.user){s.orders=[];return}
- try{const result=await edgeRequest('rs10-api','/orders',{auth:true});
-  const oldOrdersJson=JSON.stringify(s.orders||[]);
-  s.orders=(result.orders||[]).map(x=>({id:x.id,ref:x.code,gameName:x.game,offer:x.offer,player:x.playerId||'PIN',payment:x.method==='mobile'?'Saldo móvil':x.method==='card'?'Transfermóvil':x.method==='wallet'?'MiTransfer':x.method==='usdt_wallet'?'USDT Wallet BEP-20':x.method==='usdt_bep20'?'USDT BEP-20':x.method,total:x.amount,currency:x.currency,status:x.status,paymentStatus:x.paymentStatus||'unpaid',paymentReference:x.paymentReference||'',paymentTxHash:x.paymentTxHash||'',refundReference:x.refundReference||'',date:x.created?formatShopDateTime(x.created):'',totalText:(Number(x.amount||0).toLocaleString('es-ES')+' '+(x.currency||''))}));
-  if(s.page==='pedidos'&&JSON.stringify(s.orders)!==oldOrdersJson){const y=window.scrollY;render();window.scrollTo(0,y);if(s.modal==='order')modal()}
- }catch(err){console.warn('No se pudo cargar el historial:',err?.message||err)}
+ if(rsOrderFetch)return rsOrderFetch;
+ const uid=s.user.id;
+ rsOrderFetch=(async()=>{
+  try{
+   const result=await edgeRequest('rs10-api','/orders',{auth:true});
+   if(s.user?.id!==uid)return;
+   const oldOrdersJson=JSON.stringify(s.orders||[]);
+   const items=(Array.isArray(result.orders)?result.orders:[]).map(x=>({
+    id:x.id,ref:x.code,gameName:x.game,offer:x.offer,player:x.playerId||'PIN',
+    payment:x.method==='mobile'?'Saldo móvil':x.method==='card'?'Transfermóvil':x.method==='wallet'?'MiTransfer':x.method==='usdt_wallet'?'USDT Wallet BEP-20':x.method==='usdt_bep20'?'USDT BEP-20':x.method,
+    total:x.amount,currency:x.currency,status:x.status,paymentStatus:x.paymentStatus||'unpaid',
+    paymentReference:x.paymentReference||'',paymentTxHash:x.paymentTxHash||'',refundReference:x.refundReference||'',
+    date:x.created?formatShopDateTime(x.created):'',totalText:(Number(x.amount||0).toLocaleString('es-ES')+' '+(x.currency||''))
+   }));
+   s.orders=items;
+   rsTrackOrders(items);
+   if(s.page==='pedidos'&&JSON.stringify(items)!==oldOrdersJson){
+    const y=window.scrollY;render();window.scrollTo(0,y);
+    if(s.modal==='order')modal();
+   }
+  }catch(err){console.warn('No se pudo cargar el historial:',err?.message||err)}
+ })().finally(()=>{rsOrderFetch=null});
+ return rsOrderFetch;
 }
 
 // Los estados de entrega aparecen sin necesidad de recargar la página.
@@ -1790,26 +1809,32 @@ s.user=null;s.role='guest';s.authSession=null;s.profile=null;s.member=false;s.re
 s.page='login';
 render();
 loadLiveCatalog();
-window.setInterval(()=>{if(document.visibilityState==='visible'&&s.user)void loadPublicChanges(true)},120000);
-window.setInterval(()=>{if(document.visibilityState==='visible'&&s.user&&s.page==='pedidos')void loadCustomerOrders()},25000);
-window.setInterval(()=>{if(document.visibilityState==='visible'&&['inicio','recargas','gift','perfil','pedidos'].includes(s.page)&&!s.modal)void loadLiveCatalog(true)},60000);
-window.setInterval(()=>{if(document.visibilityState==='visible'&&s.page==='inicio')void loadRecentTopups(true)},120000);
-window.setInterval(()=>{
- if(document.visibilityState!=='visible')return;
- try{
-  const seenAt=Number(localStorage.getItem('refills_shop_changes_seen_at')||0);
-  if(!seenAt||Date.now()-seenAt>=RS_NOTICE_TTL){
-   localStorage.removeItem('refills_shop_changesSeen');localStorage.removeItem('refills_mock_changesSeen');
-   localStorage.removeItem('refills_shop_changes_seen_at');s.changesLastSeen=0;
-  }
- }catch{}
- void loadPublicChanges(true);
-},3600000);
-document.addEventListener('visibilitychange',()=>{
- if(document.visibilityState!=='visible')return;
- if(s.user&&s.page==='pedidos')void loadCustomerOrders();
- if(['inicio','recargas','gift','perfil','pedidos'].includes(s.page)&&!s.modal)void loadLiveCatalog(true);
-});
+/* Un solo programador, sin hacer consultas ni repintar mientras la app está oculta. */
+const rsPollLast={orders:0,changes:0,catalog:0,recent:0,reseller:0};
+function rsUpdateCycle(force=false){
+ if(document.visibilityState!=='visible'||navigator.onLine===false)return;
+ const now=Date.now();
+ const slow=!!navigator.connection?.saveData||/^(slow-2g|2g)$/.test(String(navigator.connection?.effectiveType||''));
+ const multiplier=slow?1.6:1;
+ const due=(key,delay,work)=>{
+  if(!force&&now-rsPollLast[key]<delay*multiplier)return;
+  rsPollLast[key]=now;
+  void Promise.resolve().then(work).catch(error=>console.warn('Sincronización:',error?.message||error));
+ };
+ if(s.user){
+  due('orders',s.page==='pedidos'?27000:50000,()=>loadCustomerOrders());
+  due('changes',90000,()=>loadPublicChanges(true));
+  if(s.member)due('reseller',110000,()=>rsPollResellerEvents());
+ }
+ if(['inicio','recargas','gift','perfil','pedidos'].includes(s.page)&&!s.modal){
+  due('catalog',90000,()=>loadLiveCatalog(true));
+ }
+ if(s.page==='inicio')due('recent',90000,()=>loadRecentTopups(true));
+}
+window.setInterval(()=>rsUpdateCycle(false),12000);
+document.addEventListener('visibilitychange',()=>{if(document.visibilityState==='visible')rsUpdateCycle(false)});
+window.addEventListener('online',()=>rsUpdateCycle(true));
+
 (async function restoreRefillsAccount(){
  try{
   const session=await validAuthSession();
