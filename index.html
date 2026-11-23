@@ -1340,6 +1340,38 @@ body.rs-auth-screen .bottom-nav,body.rs-auth-screen #mobile-cart-shortcut{displa
 .rs-preview-game-group{content-visibility:auto;contain-intrinsic-size:auto 160px}
 .rs-preview-region-group{contain:layout style}
 .rs-preview-offer{content-visibility:auto;contain-intrinsic-size:auto 66px}
+</style><style id="rs-final-simple-orders">
+.rs-simple-orders{max-width:920px;margin-inline:auto}
+.rs-simple-orders-header{display:flex;align-items:center;justify-content:space-between;gap:12px}
+.rs-simple-orders-header .page-title{margin-bottom:3px}
+.rs-order-filter-bar{display:flex;gap:7px;margin:19px 0 15px;overflow-x:auto}
+.rs-order-filter-bar button{border:1px solid rgba(91,150,234,.28);border-radius:12px;background:#0a1c3d;color:#bcd2ee;padding:10px 13px;font-weight:800;font-size:12px;white-space:nowrap}
+.rs-order-filter-bar button.active{background:linear-gradient(125deg,#137cf7,#4cb8ff);color:#07152a}
+.rs-order-filter-bar b{margin-left:4px;opacity:.9}
+.rs-orders-compact-list{display:grid;gap:11px}
+.rs-order-compact-card{padding:18px 19px;border-radius:18px}
+.rs-order-compact-top{display:flex;align-items:flex-start;justify-content:space-between;gap:12px}
+.rs-order-compact-top h2{font-size:17px;margin:5px 0 0}
+.rs-order-compact-top small{color:#91b1d6;font-size:11px}
+.rs-order-compact-package{color:#c2d7f3;font-size:13px;margin:12px 0}
+.rs-order-compact-bottom{display:flex;align-items:center;justify-content:space-between;gap:12px;border-top:1px solid rgba(130,167,221,.17);padding-top:12px}
+.rs-order-compact-bottom>strong{font-size:16px}
+.rs-order-compact-bottom>div{display:flex;gap:7px}
+.rs-order-compact-bottom .btn{font-size:11px;padding:8px 10px}
+.rs-order-help{color:#9bb7d6;font-size:11px;line-height:1.5;margin-top:17px}
+.rs-orders-empty{text-align:center;padding:25px}
+.rs-order-sent{border:1px solid #2c8eda;border-radius:15px;padding:13px 15px;background:rgba(25,105,178,.16);display:flex;align-items:center;flex-wrap:wrap;gap:9px;margin:16px 0}
+.rs-order-sent strong{color:#d9f2ff}.rs-order-sent span{font-size:12px;color:#bed6ed;flex:1 1 230px}
+.rs-order-modal-head{display:flex;justify-content:space-between;align-items:flex-start;gap:12px;margin:12px 0}
+.rs-order-modal-head>div{display:grid;gap:4px;min-width:0}.rs-order-modal-head strong{font-size:17px}.rs-order-modal-head small{color:#9dbbe0}
+.rs-order-modal-total{font-size:27px;font-weight:900;color:#f3fbff;margin:17px 0}
+.rs-order-modal-fields{display:grid;gap:10px}
+.rs-order-modal-fields>div{display:flex;justify-content:space-between;gap:15px;padding:11px 0;border-top:1px solid rgba(127,160,220,.16);font-size:13px}
+.rs-order-modal-fields span{color:#97b6dc}.rs-order-modal-fields strong{text-align:right;overflow-wrap:anywhere}
+.rs-order-modal-actions{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:8px;margin-top:19px}
+.rs-order-modal-actions .btn:last-child{grid-column:span 2}
+.rs-order-modal-hint{font-size:12px;line-height:1.6;color:#a9c6e7}
+@media(max-width:480px){.rs-order-compact-card{padding:14px}.rs-order-compact-top h2{font-size:15px}.rs-order-compact-top{gap:7px}.rs-order-compact-bottom{align-items:flex-start}.rs-order-compact-bottom>div{flex-wrap:wrap;justify-content:end}.rs-order-compact-bottom .btn{font-size:10px;padding:8px}.rs-simple-orders-header .btn{font-size:11px}}
 </style></head>
 <body>
 <div id="app-loader" role="status" aria-label="Cargando Refills Shop">
@@ -2096,39 +2128,36 @@ function detail(){
  <button class="btn primary full" style="margin-top:17px" data-action="checkout">${I('credit','tiny')} Continuar con el pago</button>
  <button class="btn ghost full" style="margin-top:9px" data-action="add-cart">${I('cart','tiny')} Añadir al carrito</button></aside></div>`;
 }
+function orderSummaryText(o){
+ if(!o)return '';
+ const amount=o.totalText||fmtMoney(o.total)+' '+(o.currency||'');
+ return ['REFILLS SHOP · RESUMEN DE PEDIDO','Pedido: '+(o.ref||'—'),
+  'Juego: '+(o.gameName||'Producto digital'),'Paquete: '+(o.offer||'—'),
+  'ID / destino: '+(o.player||'—'),'Total: '+amount,
+  'Método: '+(o.payment||'—'),'Estado: '+clientOrderStatus(o.status).label,
+  'Consulta tu pedido en https://refillshop.github.io/REFILLSHOP/'].join('\n');
+}
 function orders(){
  const list=Array.isArray(s.orders)?s.orders:[];
- const completed=list.filter(o=>clientOrderStatus(o.status).key==='complete').length;
- const pending=list.filter(o=>['pending','processing'].includes(clientOrderStatus(o.status).key)).length;
- const rejected=list.filter(o=>['rejected','refunded'].includes(clientOrderStatus(o.status).key)).length;
- return `<div class="catalog-top orders-page-v4">
-  <div class="orders-heading-v4"><div><div class="eyebrow">TU ACTIVIDAD EN REFILLS SHOP</div><h1 class="page-title">Mis pedidos</h1><p class="page-lead">Sigue tus compras, revisa los datos y consulta cada comprobante.</p></div><div class="rs-orders-head-actions"><button class="btn secondary" data-action="refresh-orders">${I('check','tiny')} Actualizar estados</button><button class="btn primary orders-new-button" data-action="nav" data-page="recargas">${I('plus','tiny')} Nueva compra</button></div></div>
-  <div class="orders-stats-v4">
-   <div><small>TOTAL</small><strong>${list.length}</strong><span>Pedidos</span></div>
-   <div><small>EN PROCESO</small><strong>${pending}</strong><span>Por entregar</span></div>
-   <div><small>COMPLETADOS</small><strong>${completed}</strong><span>Entregados</span></div>
-   <div><small>OTROS</small><strong>${rejected}</strong><span>Rechazados</span></div>
-  </div>
-  <div class="orders-list-heading"><h2>Historial de compras</h2><span>${list.length} ${list.length===1?'pedido':'pedidos'}</span></div>
-  ${!list.length?`<div class="card orders-empty-v4"><div class="orders-empty-icon">${I('file','big')}</div><h3>Tu historial está vacío</h3><p>Cuando realices tu primera compra, aquí podrás seguir su estado y consultar todos sus detalles.</p><button class="btn primary" data-action="nav" data-page="recargas">Explorar recargas ${I('arrow','tiny')}</button></div>`:
-  `<div class="orders-list-v4">${list.map(o=>{
-   const g=itemBy(o.id),state=clientOrderStatus(o.status),statusClass=state.key,statusLabel=state.label;
-   const title=g?.name||o.gameName||o.id||'Compra digital';
-   const total=o.totalText||fmtMoney(o.total)+' '+(o.currency||'CUP');
-   return `<article class="order-card-v4">
-    <div class="order-card-top">
-     <div class="order-game-v4">${g?`<img src="${photo(g)}" alt="">`:`<span>${I('game')}</span>`}<div><strong>${esc(title)}</strong><small>Pedido #${esc(o.ref||'—')} · ${esc(o.date||'Fecha no disponible')}</small></div></div>
-     <span class="order-status-v4 ${statusClass}">${statusLabel}</span>
-    </div>
-    <div class="order-card-info">
-     <div><small>PAQUETE</small><strong>${esc(o.offer||'—')}</strong></div>
-     <div><small>MÉTODO DE PAGO</small><strong>${esc(o.payment||'—')}</strong></div>
-     <div><small>DESTINO</small><strong>${esc(o.player||'—')}</strong></div>
-    </div>
-    <div class="order-card-bottom"><div><small>TOTAL DEL PEDIDO</small><strong>${esc(total)}</strong></div><div class="order-card-actions">${o.payment==='usdt_wallet'&&o.paymentStatus!=='paid'?`<button class="btn primary small" data-action="resume-usdt" data-ref="${esc(o.ref)}">Continuar pago</button>`:''}<button class="btn secondary order-detail-button" data-action="order-details" data-ref="${esc(o.ref)}">Ver detalles ${I('arrow','tiny')}</button></div></div>
-   </article>`;
-  }).join('')}</div>`}
- </div>`;
+ const pending=list.filter(o=>['pending','processing'].includes(clientOrderStatus(o.status).key));
+ const complete=list.filter(o=>clientOrderStatus(o.status).key==='complete');
+ const filter=s.orderFilter||'all';
+ const shown=filter==='active'?pending:filter==='completed'?complete:list;
+ const banner=s.orderJustSent&&list.some(o=>o.ref===s.orderJustSent)?
+  '<div class="rs-order-sent"><strong>Pedido recibido: #'+esc(s.orderJustSent)+'</strong><span>Tu solicitud se registró. El estado se actualizará cuando se confirme la entrega.</span><button class="btn secondary small" data-action="share-order-summary" data-ref="'+esc(s.orderJustSent)+'">Compartir resumen</button></div>':'';
+ return '<div class="catalog-top rs-simple-orders">'+
+  '<div class="rs-simple-orders-header"><div><div class="eyebrow">REFILLS SHOP · PEDIDOS</div><h1 class="page-title">Mis pedidos</h1><p class="page-lead">Consulta el estado de cada compra sin pasos complicados.</p></div><button class="btn secondary small" data-action="refresh-orders">'+I('check','tiny')+' Actualizar</button></div>'+
+  banner+
+  '<div class="rs-order-filter-bar" role="group" aria-label="Filtrar pedidos">'+
+  [['all','Todos',list.length],['active','En proceso',pending.length],['completed','Completados',complete.length]].map(row=>'<button type="button" data-action="orders-filter" data-filter="'+row[0]+'" class="'+(filter===row[0]?'active':'')+'">'+row[1]+' <b>'+row[2]+'</b></button>').join('')+'</div>'+
+  (!shown.length?'<div class="card rs-orders-empty"><h3>'+(!list.length?'Todavía no tienes pedidos':'No hay pedidos de esta categoría')+'</h3><p>Cuando compres, podrás consultar aquí la entrega y compartir el resumen.</p><button class="btn primary" data-action="nav" data-page="recargas">Explorar juegos</button></div>':
+    '<div class="rs-orders-compact-list">'+shown.map(o=>{
+     const st=clientOrderStatus(o.status),total=o.totalText||fmtMoney(o.total)+' '+(o.currency||'CUP');
+     return '<article class="card rs-order-compact-card"><div class="rs-order-compact-top"><div><small>#'+esc(o.ref||'—')+' · '+esc(o.date||'')+'</small><h2>'+esc(o.gameName||'Compra digital')+'</h2></div><span class="order-status-v4 '+st.key+'">'+esc(st.label)+'</span></div>'+
+      '<p class="rs-order-compact-package">'+esc(o.offer||'Oferta')+'</p>'+
+      '<div class="rs-order-compact-bottom"><strong>'+esc(total)+'</strong><div><button class="btn secondary small" data-action="order-details" data-ref="'+esc(o.ref)+'">Ver pedido</button><button class="btn ghost small" data-action="share-order-summary" data-ref="'+esc(o.ref)+'">Compartir</button></div></div></article>';
+    }).join('')+'</div>')+
+  '<p class="rs-order-help">Los pedidos con Central One se comprueban automáticamente. Un pago confirmado no significa que el paquete ya esté entregado.</p></div>';
 }
 function profile(){
  const displayName=s.user?.name||s.nickname||'Mi cuenta';
@@ -2424,14 +2453,15 @@ case 'checkout':
  case 'news':
   html=modalTitle('Ofertas y novedades')+`<div class="small-banner">Consulta las promociones disponibles en el catálogo.</div><div class="section-head"><h2>Juegos populares</h2></div><div class="grid-media" style="grid-template-columns:repeat(4,minmax(0,1fr))">${['freefire','mlbb','pubg','honor'].map(id=>minitile(itemBy(id))).join('')}</div>`;break;
  case 'order':{
-  let current=s.orders.find(x=>x.ref===s.selectedOrder);
-  const orderGame=current?itemBy(current.id):null;
-  const orderState=clientOrderStatus(current?.status),orderStatus=orderState.label,orderStatusKey=orderState.key;
-  html=modalTitle('Detalle del pedido','Información y seguimiento de tu compra')+(current?`
-   <div class="order-detail-hero-v4">${orderGame?`<img src="${photo(orderGame)}" alt="">`:`<span>${I('game')}</span>`}<div><small>PEDIDO #${esc(current.ref)}</small><strong>${esc(orderGame?.name||current.gameName||current.id||'Compra digital')}</strong><span>${esc(current.offer||'')}</span></div><b class="order-status-v4 ${orderStatusKey}">${esc(orderStatus)}</b></div>
-   <div class="order-detail-total-v4"><small>TOTAL DEL PEDIDO</small><strong>${esc(current.totalText||fmtMoney(current.total)+' '+(current.currency||'CUP'))}</strong></div>
-   <div class="summary-list order-detail-list-v4"><div class="summary-row"><span>Destino</span><strong>${esc(current.player||'—')}</strong></div><div class="summary-row"><span>Forma de pago</span><strong>${esc(current.payment||'—')}</strong></div><div class="summary-row"><span>Fecha</span><strong>${esc(current.date||'—')}</strong></div><div class="summary-row"><span>Referencia</span><strong>${esc(current.ref||'—')}</strong></div></div>
-   <p class="order-detail-note-v4">Los estados se actualizan desde el servidor. «Completado» solo significa que la entrega fue confirmada; «En proceso» todavía no es una entrega.</p>`:'<div class="empty">Pedido no encontrado.</div>');
+  const current=s.orders.find(x=>x.ref===s.selectedOrder);
+  const st=clientOrderStatus(current?.status);
+  html=modalTitle('Pedido #'+esc(current?.ref||''),'Tu compra y estado de entrega')+
+   (current?'<div class="rs-order-modal-head"><div><strong>'+esc(current.gameName||'Compra digital')+'</strong><small>'+esc(current.offer||'Paquete')+'</small></div><span class="order-status-v4 '+st.key+'">'+esc(st.label)+'</span></div>'+
+    '<div class="rs-order-modal-total">'+esc(current.totalText||fmtMoney(current.total)+' '+(current.currency||'CUP'))+'</div>'+
+    '<div class="rs-order-modal-fields"><div><span>ID / destino</span><strong>'+esc(current.player||'—')+'</strong></div><div><span>Pago</span><strong>'+esc(current.payment||'—')+'</strong></div><div><span>Fecha</span><strong>'+esc(current.date||'—')+'</strong></div></div>'+
+    '<div class="rs-order-modal-actions"><button class="btn primary" data-action="share-order-summary" data-ref="'+esc(current.ref)+'">Enviar resumen</button><button class="btn secondary" data-action="copy-order-summary" data-ref="'+esc(current.ref)+'">Copiar resumen</button><button class="btn ghost" data-action="refresh-orders">Actualizar estado</button></div>'+
+    '<p class="rs-order-modal-hint">'+(st.key==='complete'?'Central One o administración confirmó la entrega.':st.key==='processing'?'Tu pedido sigue en proceso; consultaremos Central One automáticamente.':'El pedido está en revisión. Consulta el estado aquí.')+'</p>':
+    '<div class="empty">No se encontró el pedido. Actualiza la lista.</div>');
   break;
  }
  }
@@ -2537,6 +2567,9 @@ case 'remove-cart':{s.cart.splice(Number(b.dataset.index),1);save('cart',s.cart)
 case 'cart-first':{const c=s.cart[0];if(!c)return;openRegionGame(c.id,c.region||'');const game=itemBy(c.id),index=game?.offers?.findIndex(o=>o.id===c.offerId);s.selected=index>=0?index:c.offer;s.player=String(c.player||'');const offer=game?.offers?.[s.selected],offerId=c.offerId||offer?.id;if(offerId)s.playerTargets[offerId]={...(c.targets||{})};if(!offer){toast('Esta oferta guardada ya no está disponible.');render();return}s.offerGroup=offerGroup(offer);s.playerCheck=null;s.modal=null;render(true);toast(offer.kind==='pin'?'Revisa la oferta y confirma la compra.':'Revisa y valida tu ID antes de continuar al pago.');break;}
 case 'save-profile':{const name=(document.getElementById('profile-name')?.value||'').trim();if(!name){toast('Escribe un nombre');return}s.nickname=name.slice(0,32);save('nickname',s.nickname);render();toast('Nombre guardado');break;}
 case 'order-details':s.selectedOrder=b.dataset.ref;s.modal='order';modal();void loadCustomerOrders();break;
+case 'orders-filter':s.orderFilter=b.dataset.filter||'all';render();break;
+case 'copy-order-summary':{const item=s.orders.find(x=>x.ref===b.dataset.ref);if(item){void navigator.clipboard.writeText(orderSummaryText(item)).then(()=>toast('Resumen copiado'),()=>toast('No se pudo copiar.'));}break;}
+case 'share-order-summary':{const item=s.orders.find(x=>x.ref===b.dataset.ref);if(item){const msg=orderSummaryText(item);const phone=String(s.paymentConfig?.whatsappNumber||'').replace(/\D/g,'');const link='https://wa.me/'+(phone||'')+'?text='+encodeURIComponent(msg);window.open(link,'_blank','noopener,noreferrer');}break;}
 case 'refresh-orders':void loadCustomerOrders();break;
 case 'delete-order':s.orders=s.orders.filter(o=>o.ref!==b.dataset.ref);save('orders',s.orders);s.modal=null;render();toast('Pedido eliminado');break;
 }});
@@ -2795,7 +2828,7 @@ if(a==='send-order'){
    }
   }
   if(!result?.ok&&!result?.order)throw Error('El servidor no confirmó el pedido.');
-  s.checkoutSession=null;s.modal=null;await loadCustomerOrders();navigate('pedidos');toast('Comprobante enviado. Comprueba el estado en Pedidos.');
+  s.checkoutSession=null;s.modal=null;s.orderJustSent=String(result?.order?.code||'');await loadCustomerOrders();navigate('pedidos');toast('Pedido recibido. Puedes compartir el resumen desde Mis pedidos.');
  }catch(err){toast(err?.message||'No se pudo registrar la compra.');}
  finally{b.disabled=false;b.textContent='Enviar solicitud de compra';}
  return;
@@ -2817,6 +2850,8 @@ async function loadCustomerOrders(){
  }catch(err){console.warn('No se pudo cargar el historial:',err?.message||err)}
 }
 
+// Los estados de entrega aparecen sin necesidad de recargar la página.
+window.setInterval(()=>{if(!document.hidden&&s.user&&s.page==='pedidos')void loadCustomerOrders()},30000);
 let rsCatalogSnapshot='';
 async function loadLiveCatalog(silent=false){
  if(silent&&(s.modal||['detalle','login'].includes(s.page)))return;
