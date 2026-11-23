@@ -1753,7 +1753,27 @@ function playerExtraFields(offer){
   return '<label class="rs-target-label">'+esc(label)+'<input class="field rs-target-field" data-target-key="'+esc(key)+'" maxlength="80" autocomplete="off" value="'+esc(value)+'" placeholder="'+esc(label)+'"></label>';
  }).join('')+'</div>';
 }
-async function verifyPlayerIdentity(){
+
+let rsPlayerVerifyDebounce=null;
+let rsPlayerVerifyGeneration=0;
+function queuePlayerVerification(){
+ rsPlayerVerifyGeneration++;
+ if(rsPlayerVerifyDebounce){clearTimeout(rsPlayerVerifyDebounce);rsPlayerVerifyDebounce=null}
+ const offer=itemBy(s.detailId)?.offers?.[s.selected];
+ if(s.page!=='detalle'||!s.user||!offer||offer.kind==='pin'||!Array.isArray(offer.targetSchema)||!offer.targetSchema.length)return;
+ const value=String(s.player||'').trim();
+ if(value.length<3)return;
+ try{playerTargetData(offer,true)}catch{return}
+ const generation=rsPlayerVerifyGeneration;
+ rsPlayerVerifyDebounce=window.setTimeout(()=>{
+  rsPlayerVerifyDebounce=null;
+  if(generation!==rsPlayerVerifyGeneration||s.page!=='detalle'||!s.user)return;
+  const current=itemBy(s.detailId)?.offers?.[s.selected];
+  if(current?.id!==offer.id)return;
+  void verifyPlayerIdentity(generation);
+ },950);
+}
+async function verifyPlayerIdentity(expectedGeneration=rsPlayerVerifyGeneration){
  const offer=itemBy(s.detailId)?.offers?.[s.selected];
  const value=String(document.getElementById('player-input')?.value||s.player||'').trim();
  s.player=value;
@@ -1771,12 +1791,13 @@ async function verifyPlayerIdentity(){
  if(btn){btn.disabled=true;btn.textContent='Verificando…'}
  try{
   const result=await edgeRequest('rs10-api','/player/validate',{method:'POST',auth:true,body:{offerId:offer.id,targetPayload:payload}});
-  if(itemBy(s.detailId)?.offers?.[s.selected]?.id!==offer.id||s.player!==value)return;
+  if(expectedGeneration!==rsPlayerVerifyGeneration||itemBy(s.detailId)?.offers?.[s.selected]?.id!==offer.id||s.player!==value)return;
   s.playerCheck={offerId:offer.id,player:value,status:result.status||'unverified',name:result.status==='valid'?String(result.playerName||''):'',message:result.status==='invalid'?'No se pudo confirmar ese ID. Revisa los datos.':result.status==='valid'?'Jugador verificado correctamente.':'La verificación automática no está disponible para este producto.'};
   render();
   if(result.status==='valid')toast(result.playerName?'Jugador: '+result.playerName:'ID confirmado.');
   else toast(s.playerCheck.message);
  }catch(err){
+  if(expectedGeneration!==rsPlayerVerifyGeneration||itemBy(s.detailId)?.offers?.[s.selected]?.id!==offer.id||s.player!==value)return;
   s.playerCheck={offerId:offer.id,player:value,status:'unverified',message:'No se pudo consultar el nombre: '+(err?.message||'intenta de nuevo')};
   render();toast('No se pudo verificar automáticamente. Los datos seguirán disponibles para revisión.');
  }finally{if(btn){btn.disabled=false}}
@@ -2120,7 +2141,7 @@ document.addEventListener('change',e=>{
   const target=document.querySelector('#modal-root .payment-instructions p');if(target)target.textContent=message;
  }
 });
-document.addEventListener('input',e=>{if(e.target.id==='catalog-search'){s.search=e.target.value;refreshCatalog()}if(e.target.id==='player-input'){s.player=e.target.value;s.playerCheck=null}if(e.target.matches('.rs-target-field')){const offer=itemBy(s.detailId)?.offers?.[s.selected];if(offer){s.playerTargets[offer.id]||={};s.playerTargets[offer.id][e.target.dataset.targetKey]=e.target.value;s.playerCheck=null}}});
+document.addEventListener('input',e=>{if(e.target.id==='catalog-search'){s.search=e.target.value;refreshCatalog()}if(e.target.id==='player-input'){s.player=e.target.value;s.playerCheck=null;queuePlayerVerification()}if(e.target.matches('.rs-target-field')){const offer=itemBy(s.detailId)?.offers?.[s.selected];if(offer){s.playerTargets[offer.id]||={};s.playerTargets[offer.id][e.target.dataset.targetKey]=e.target.value;s.playerCheck=null;queuePlayerVerification()}}});
 document.addEventListener('change',e=>{if(e.target.id==='sort-catalog'){s.sort=e.target.value;refreshCatalog()}});
 document.addEventListener('keydown',e=>{if(e.key==='Escape'&&s.modal){s.modal=null;modal()}if((e.key==='Enter'||e.key===' ')&&e.target.classList.contains('brand')){e.preventDefault();navigate('inicio')}if((e.key==='Enter'||e.key===' ')&&e.target.classList.contains('product-clickable')){e.preventDefault();openDetail(e.target.dataset.id)}});
 document.addEventListener('click',e=>{let b=e.target.closest('[data-action]');if(!b)return;const action=b.dataset.action;if(action==='backdrop'&&e.target!==b)return;e.preventDefault();switch(action){
@@ -2145,8 +2166,8 @@ case 'set-payment':changePayment(b.dataset.value);break;
 case 'open-payment-methods':s.paymentReturnModal=s.modal==='checkout'?'checkout':null;s.modal='payment-methods';modal();break;
 case 'choose-payment':changePayment(b.dataset.value);break;
 case 'offer-group':{const id=b.dataset.value,g=itemBy(s.detailId);if(!OFFER_TABS.some(t=>t[0]===id)||!g)break;const first=g.offers.findIndex(o=>offerGroup(o)===id&&(!s.regionChoice||String(o.region||'Global')===s.regionChoice));if(first<0){toast('Esta región no tiene productos de esa categoría.');break}s.offerGroup=id;s.selected=first;s.playerCheck=null;const pos=window.scrollY;render();window.scrollTo(0,pos);break;}
-case 'select-offer':{let pos=window.scrollY;s.selected=Number(b.dataset.index);s.playerCheck=null;render();window.scrollTo(0,pos);break;}
-case 'verify-player':void verifyPlayerIdentity();break;
+case 'select-offer':{let pos=window.scrollY;s.selected=Number(b.dataset.index);s.playerCheck=null;rsPlayerVerifyGeneration++;render();window.scrollTo(0,pos);queuePlayerVerification();break;}
+case 'verify-player':{rsPlayerVerifyGeneration++;if(rsPlayerVerifyDebounce){clearTimeout(rsPlayerVerifyDebounce);rsPlayerVerifyDebounce=null}void verifyPlayerIdentity();break;}
 case 'start-payment':void startPaymentReservation(b);break;
 case 'checkout':{if(s.role==='guest'){s.page='login';render(true);toast('Inicia sesión para continuar con la compra');return}const o=itemBy(s.detailId)?.offers?.[s.selected];let v=(document.getElementById('player-input')?.value||s.player||'').trim();s.player=v;if(o?.kind!=='pin'&&v.length<3){toast('Primero escribe el ID o destinatario.');document.getElementById('player-input')?.focus();return}try{playerTargetData(o,true)}catch(err){toast(err.message);return}if(o?.kind!=='pin'&&!(s.playerCheck?.status==='valid'&&s.playerCheck.offerId===o.id&&s.playerCheck.player===v)){toast('Valida el ID para continuar. Si el juego no permite verificarlo, no puedes iniciar el pago.');return}s.checkoutSession=null;s.modal='purchase-confirm';modal();break;}
 case 'add-cart':{let v=(document.getElementById('player-input')?.value||s.player||'').trim();s.player=v;const offer=itemBy(s.detailId)?.offers?.[s.selected];if(offer?.kind!=='pin'&&v.length<3){toast('Indica el ID o destinatario');return}let targets;try{targets=playerTargetData(offer,true)}catch(err){toast(err.message);return}s.cart.push({id:s.detailId,offer:s.selected,offerId:offer.id,player:s.player,targets,region:offer.region||s.regionChoice||'Global'});save('cart',s.cart);headerNav();toast('Producto añadido al carrito');break;}
