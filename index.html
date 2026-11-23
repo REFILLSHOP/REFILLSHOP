@@ -1402,6 +1402,17 @@ const icons={inicio:'home',recargas:'game',gift:'gift',pedidos:'file',perfil:'us
 /* Los productos publicados provienen exclusivamente de Supabase; no cargar precios ni artículos de ejemplo. */
 const getStored=(key,fallback)=>{try{return JSON.parse(localStorage.getItem('refills_shop_'+key)??localStorage.getItem('refills_mock_'+key))??fallback}catch{return fallback}};
 const save=(key,data)=>{try{localStorage.setItem('refills_shop_'+key,JSON.stringify(data))}catch{}};
+const RS_NOTICE_TTL=86400000;
+(function pruneLocalNoticeState(){
+ try{
+  const last=Number(localStorage.getItem('refills_shop_changes_seen_at')||0);
+  if(!last||Date.now()-last>=RS_NOTICE_TTL){
+   localStorage.removeItem('refills_shop_changesSeen');
+   localStorage.removeItem('refills_mock_changesSeen');
+   localStorage.removeItem('refills_shop_changes_seen_at');
+  }
+ }catch{}
+})();
 /* El catálogo antiguo guardado en localStorage no se reintroduce. */
 const s={page:'inicio',authMode:'login',authBusy:false,authError:'',rememberSession:(()=>{try{return localStorage.getItem('refills_shop_remember_session')!=='false'}catch{return true}})(),afterAuthPage:'inicio',authSession:null,profile:null,member:false,resellerPortal:null,resellerLoading:false,wholesalePrices:{},resellerOrders:[],resellerDeposits:[],resellerCurrency:'USDT',resellerDepositCurrency:'USDT',resellerDepositStage:'methods',detailId:null,search:'',filter:'todos',offerGroup:'recargas',regionChoice:null,playerTargets:{},playerCheck:null,resellerPreview:null,resellerPreviewTier:'free',sort:'name',payment:'cup',selected:0,player:'',checkoutSession:null,qty:1,modal:null,usdtPayment:null,recentTopups:[],recentTopupsLoaded:false,changes:[],changesLoaded:false,changesLastSeen:getStored('changesSeen',0),changesLastToast:0, nickname:getStored('nickname','Invitado'),favorites:getStored('favs',[]),orders:[],cart:getStored('cart',[]),showFavs:false,selectedOrder:null, role:(window.REFILLS_SESSION&&window.REFILLS_SESSION.role)||'guest', user:(window.REFILLS_SESSION&&window.REFILLS_SESSION.user)||null,
 rates:getStored('rates',{usdtSm:300,smCup:3,gainSM:0}), adminTab:'resumen',
@@ -1817,7 +1828,8 @@ async function loadPublicChanges(force=false){
  if(s.changesLoaded&&!force)return;
  try{
   const data=await edgeRequest('rs10-api','/changes',{auth:false});
-  const changes=Array.isArray(data.events)?data.events:[];
+  const cutoff=Date.now()-RS_NOTICE_TTL;
+  const changes=Array.isArray(data.events)?data.events.filter(e=>{const stamp=Date.parse(e.createdAt||'');return Number.isFinite(stamp)&&stamp>=cutoff}):[];
   s.changes=changes.slice(0,40);s.changesLoaded=true;updateChangeBadge();
   if(force&&s.user&&s.changes[0]&&Number(s.changes[0].id)>Number(s.changesLastSeen||0)&&Number(s.changes[0].id)!==Number(s.changesLastToast||0)){
    s.changesLastToast=s.changes[0].id;
@@ -2307,7 +2319,7 @@ case 'checkout':
    ${checkoutPaymentInstructions()}
    ${Array.isArray(o?.targetSchema)&&o.targetSchema.length?'<div class="rs-checkout-confirmed"><strong>Datos de jugador guardados</strong>'+Object.entries(playerTargetData(o)).map(([key,value])=>'<span>'+esc((o.targetSchema.find(f=>f.key===key)||{}).label||key)+': <b>'+esc(value)+'</b></span>').join('')+'<small>Se tomaron de la pantalla anterior. Para cambiarlos, cierra el pago y vuelve al juego.</small></div>':''}
    ${s.payment==='sm'?'<div class="rs-checkout-inputs"><label class="sheet-label" for="payment-source-phone">Número que transfirió el saldo móvil</label><input id="payment-source-phone" class="field" type="tel" inputmode="numeric" pattern="[0-9]{8}" maxlength="8" placeholder="8 dígitos" required><label class="sheet-label" for="payment-proof">Captura del pago realizado</label><input id="payment-proof" class="field rs-proof-input" type="file" accept="image/png,image/jpeg,image/webp" required><small>JPG, PNG o WEBP · máximo 5 MB</small></div>':''}
-   ${s.payment==='cup'||s.payment==='mitransfer'?'<div class="rs-checkout-inputs"><label class="sheet-label" for="payment-proof">Captura del comprobante</label><input id="payment-proof" class="field rs-proof-input" type="file" accept="image/png,image/jpeg,image/webp" required><small>JPG, PNG o WEBP · máximo 5 MB. Sin mínimo de tamaño.</small><label class="sheet-label" for="payment-reference">Número de operación (opcional)</label><input id="payment-reference" class="field" type="text" autocomplete="off" maxlength="80" placeholder="Si aparece en tu comprobante"><small>Confirmaremos que el importe llegó a la cuenta receptora.</small></div>':''}
+   ${s.payment==='cup'?'<div class="rs-checkout-inputs"><label class="sheet-label" for="payment-proof">Captura del comprobante</label><input id="payment-proof" class="field rs-proof-input" type="file" accept="image/png,image/jpeg,image/webp" required><small>JPG, PNG o WEBP · máximo 5 MB.</small><label class="sheet-label" for="payment-reference">Número de confirmación de la transferencia</label><input id="payment-reference" class="field" type="text" autocomplete="off" minlength="4" maxlength="80" placeholder="Código que aparece en Transfermóvil" required><small>Es obligatorio para identificar y revisar el pago.</small></div>':s.payment==='mitransfer'?'<div class="rs-checkout-inputs"><label class="sheet-label" for="payment-proof">Captura del comprobante</label><input id="payment-proof" class="field rs-proof-input" type="file" accept="image/png,image/jpeg,image/webp" required><small>JPG, PNG o WEBP · máximo 5 MB.</small><label class="sheet-label" for="payment-reference">Número de operación (opcional)</label><input id="payment-reference" class="field" type="text" autocomplete="off" maxlength="80" placeholder="Si aparece en tu comprobante"><small>Confirmaremos que el importe llegó a la cuenta receptora.</small></div>':''}
    ${s.payment==='usdt'?'<div class="rs-checkout-safe">Primero registra el pedido para reservar su identificador. Después envía USDT y pega el hash en la siguiente pantalla. No transfieras antes de crear el pedido.</div>':''}
    ${s.payment==='balance'?'<div class="rs-checkout-safe">Solo revendedores con suscripción activa y saldo suficiente pueden utilizar esta opción.</div>':''}
    <button class="btn primary full rs-checkout-submit" data-action="send-order">${I('check','tiny')} ${s.payment==='usdt'?'Crear pedido y continuar al hash':s.payment==='balance'?'Confirmar compra con saldo':'Enviar comprobante y crear pedido'}</button>
@@ -2499,7 +2511,7 @@ case 'wallet-copy-confirmation':{const val=String(s.resellerPortal?.paymentInstr
 case 'wallet-copy-recipient':{const data=s.resellerPortal?.paymentInstructions||{};const currency=s.resellerDepositCurrency||'USDT';const val=currency==='USDT'?data.USDT?.address:currency==='CUP'?data.CUP?.destination:data.SM?.destination;if(!val){toast('No hay cuenta receptora configurada');break;}void navigator.clipboard?.writeText(String(val)).then(()=>toast('Datos para pagar copiados'),()=>toast('Mantén pulsado el dato para copiarlo'));break;}
 case 'open-item':openDetail(b.dataset.id);break;
 case 'choose-region':openRegionGame(b.dataset.id,b.dataset.region);break;
-case 'modal':s.modal=b.dataset.modal;if(s.modal==='wallet'){openDepositCheckout();break}if(s.modal==='alerts'){s.changesLastSeen=Math.max(Number(s.changesLastSeen||0),Number(s.changes?.[0]?.id||0));save('changesSeen',s.changesLastSeen);updateChangeBadge();}modal();break;
+case 'modal':s.modal=b.dataset.modal;if(s.modal==='wallet'){openDepositCheckout();break}if(s.modal==='alerts'){s.changesLastSeen=Math.max(Number(s.changesLastSeen||0),Number(s.changes?.[0]?.id||0));save('changesSeen',s.changesLastSeen);try{localStorage.setItem('refills_shop_changes_seen_at',String(Date.now()))}catch{}updateChangeBadge();}modal();break;
 case 'close':case 'backdrop':s.modal=null;modal();break;
 case 'fav':{let idx=s.favorites.indexOf(b.dataset.id);if(idx>=0)s.favorites.splice(idx,1);else s.favorites.push(b.dataset.id);save('favs',s.favorites);if(s.page==='perfil'||s.showFavs)render();else{b.classList.toggle('active');b.title=idx>=0?'Añadir a favoritos':'Eliminar de favoritos'}toast(idx>=0?'Eliminado de favoritos':'Guardado en favoritos');break;}
 case 'only-favs':s.showFavs=!s.showFavs;render();break;
@@ -2545,7 +2557,6 @@ function authPage(){
    ${s.authError?`<div class="auth-error-v7" role="alert">${esc(s.authError)}</div>`:''}
    <button class="btn primary auth-submit-v7" type="submit" ${s.authBusy?'disabled':''}>${s.authBusy?'Conectando…':registering?'Crear mi cuenta':'Iniciar sesión'}</button>
   </form>
-  <p class="auth-foot-v7">Tu cuenta se guarda en la base de datos segura de Refills Shop. <b>No necesitas registrarte en otra plataforma.</b></p>
  </section></div>`;
 }
 
@@ -2763,6 +2774,7 @@ if(a==='send-order'){
    const sourcePhone=method==='mobile'?String(document.getElementById('payment-source-phone')?.value||'').trim():'';
    if(method==='mobile'&&!/^[0-9]{8}$/.test(sourcePhone))throw Error('Introduce los 8 dígitos de la línea que envió saldo.');
    const paymentReference=['card','wallet'].includes(method)?String(document.getElementById('payment-reference')?.value||'').trim():'';
+   if(method==='card'&&!paymentReference)throw Error('Escribe el número de confirmación que aparece en el comprobante de Transfermóvil.');
    if(paymentReference&&!/^[A-Za-z0-9][A-Za-z0-9._/-]{3,79}$/.test(paymentReference))throw Error('La referencia del comprobante contiene caracteres no válidos.');
    let receipt='';
    if(['mobile','card','wallet'].includes(method)){
