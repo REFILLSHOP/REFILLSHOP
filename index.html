@@ -2561,6 +2561,7 @@ function authPage(){
    ${s.authError?`<div class="auth-error-v7" role="alert">${esc(s.authError)}</div>`:''}
    <button class="btn primary auth-submit-v7" type="submit" ${s.authBusy?'disabled':''}>${s.authBusy?'Conectando…':registering?'Crear mi cuenta':'Iniciar sesión'}</button>
   </form>
+  <button type="button" class="rs-install-entry" data-action="install-refills">Instalar Refills Shop en mi dispositivo</button>
  </section></div>`;
 }
 
