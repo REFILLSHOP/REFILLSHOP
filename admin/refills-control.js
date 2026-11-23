@@ -569,7 +569,7 @@ async function runAction(action,el){
  if(action==='bulk-apply')return withBusy(async()=>{const args=bulkArgs();if(!modalConfirm('¿Actualizar SOLO '+args.region+' con ganancia '+args.marginPercent+' %?'))return;await applyExistingMargin(args);await load('offers')});
  if(action==='bulk-import')return withBusy(async()=>{const args=bulkArgs();await importFamilyOffers(args)});
  if(action==='close-modal')return closeModal();
- if(action==='admin-order-filter'){S.orderFilter=event.target.closest('[data-action]')?.dataset.filter||'all';return drawOrders();}
+ if(action==='admin-order-filter'){S.orderFilter=el.dataset.filter||'all';return drawOrders();}
  if(action==='copy-order-brief'||action==='send-order-brief'){
   const o=(S.cache.orders?.orders||[]).find(row=>row.id===id);if(!o)return flash('Pedido no encontrado',true);
   const message=adminOrderMessage(o);
