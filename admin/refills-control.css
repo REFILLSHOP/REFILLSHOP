@@ -313,3 +313,51 @@ body::before{content:"";position:fixed;inset:0;pointer-events:none;z-index:0;opa
  .rs-admin-order-buttons>.btn{flex:1 1 125px}
  .rs-admin-order-payment>small{margin-left:0}
 }
+
+/* Refills Shop: tabla horizontal de pedidos, con acciones solo al desplegar */
+.rs-admin-order-list{display:grid;gap:7px}
+.rs-admin-order-list>.rs-admin-horizontal-order{display:block!important;margin:0;padding:0!important;border:1px solid rgba(86,142,213,.27);border-radius:13px;background:linear-gradient(110deg,rgba(5,20,42,.95),rgba(9,29,57,.9));overflow:visible;min-width:0}
+.rs-hor-row{display:grid;grid-template-columns:minmax(150px,1.75fr) minmax(115px,1.12fr) minmax(100px,.87fr) minmax(120px,.95fr) 108px;gap:12px;align-items:center;padding:12px 14px;min-height:68px}
+.rs-hor-row>div{min-width:0}
+.rs-hor-primary{display:flex;flex-direction:column;gap:3px}
+.rs-hor-primary .rs-hor-code{font-size:9px;font-weight:850;color:#6ebeff;letter-spacing:.02em}
+.rs-hor-primary strong{font-size:13px;line-height:1.25;color:#f0f8ff;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+.rs-hor-primary small{font-size:10px;color:#a8c5e4;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;line-height:1.35}
+.rs-hor-customer,.rs-hor-money,.rs-hor-state{display:flex;flex-direction:column;align-items:flex-start;gap:6px}
+.rs-hor-customer>span{font-size:12px;font-weight:750;color:#e2edff;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;max-width:100%}
+.rs-hor-customer small,.rs-hor-money small{font-size:10px;color:#8fb4d9;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;max-width:100%}
+.rs-hor-money strong{font-size:14px;color:#eaf8ff;white-space:nowrap}
+.rs-hor-state{gap:5px}
+.rs-hor-state .pill{font-size:9px;padding:4px 7px}
+.rs-hor-state .rs-admin-paid,.rs-hor-state .rs-admin-unpaid{font-size:9px;padding:4px 6px}
+.rs-hor-toggle{justify-content:center;white-space:nowrap;font-size:11px;padding:8px!important;min-height:33px}
+.rs-hor-toggle[aria-expanded="true"] span{transform:rotate(180deg)}
+.rs-hor-toggle span{display:inline-block;transition:transform .15s ease}
+.rs-hor-expanded{border-top:1px solid rgba(93,147,209,.18);padding:12px 14px 15px;background:rgba(17,47,81,.26)}
+.rs-hor-expanded[hidden]{display:none!important}
+.rs-hor-extra-line{display:flex;gap:8px 18px;flex-wrap:wrap;font-size:11px;color:#afc8e7;margin-bottom:10px}
+.rs-hor-extra-line b{color:#e2f1ff}
+.rs-hor-extra-payment{padding:10px 0;margin:7px 0;border-top:1px solid rgba(92,147,207,.14);font-size:11px;color:#bad6ef}
+.rs-hor-extra-payment strong{margin-left:8px;color:#fff;overflow-wrap:anywhere}
+.rs-hor-extra-payment>div{display:flex;gap:8px;flex-wrap:wrap;align-items:center}
+.rs-hor-action-buttons{display:flex;flex-wrap:wrap;gap:7px}
+.rs-hor-action-buttons>.btn{min-height:35px!important;padding:8px 10px!important;font-size:11px!important}
+@media(max-width:1080px) and (min-width:701px){
+ .rs-hor-row{grid-template-columns:minmax(130px,1.5fr) minmax(90px,1fr) minmax(88px,.9fr) minmax(95px,.9fr) 98px;gap:7px;padding:10px}
+ .rs-hor-customer>span{font-size:11px}.rs-hor-money strong{font-size:12px}
+}
+@media(max-width:700px){
+ .rs-hor-row{grid-template-columns:minmax(0,1.5fr) minmax(0,.86fr) 94px;gap:8px 6px;padding:10px 11px;min-height:82px}
+ .rs-hor-primary{grid-column:1;grid-row:1}.rs-hor-money{grid-column:2;grid-row:1;align-items:flex-end}.rs-hor-money strong{font-size:12px}.rs-hor-money small{text-align:right}
+ .rs-hor-toggle{grid-column:3;grid-row:1;max-width:94px;font-size:10px;min-height:34px}
+ .rs-hor-customer{grid-column:1;grid-row:2;gap:3px}.rs-hor-customer>span{font-size:11px}.rs-hor-customer small{font-size:9px}
+ .rs-hor-state{grid-column:2 / 4;grid-row:2;flex-direction:row;align-items:center;justify-content:flex-end;flex-wrap:wrap;gap:5px}
+ .rs-hor-state .pill{font-size:9px}
+ .rs-hor-extra-line{font-size:10px}
+ .rs-hor-action-buttons>.btn{flex:1 1 120px;font-size:10px!important}
+}
+@media(max-width:370px){
+ .rs-hor-row{grid-template-columns:minmax(0,1.3fr) minmax(0,.7fr) 86px;gap:5px;padding:9px}
+ .rs-hor-primary strong{font-size:12px}.rs-hor-money strong{font-size:11px}
+ .rs-hor-toggle{max-width:86px;font-size:9.5px;padding:6px!important}
+}
