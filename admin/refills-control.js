@@ -26,7 +26,7 @@ alert:'<path d="M12 2 2 21h20z"/><path d="M12 9v5M12 17h.01"/>'
 };
 const ico=(name)=>'<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" width="19" height="19" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">'+(paths[name]||paths.shield)+'</svg>';
 const MENU=[['overview','Resumen','overview','Indicadores y accesos'],['games','Juegos','games','Tu catálogo'],['offers','Ofertas','offers','Precios y productos'],['orders','Pedidos','orders','Compras y entregas'],['customers','Clientes','customers','Cuentas y seguridad'],['resellers','Revendedores','resellers','Planes y depósitos'],['payments','Pagos y tasas','payments','Configuración comercial'],['centralone','Central One','centralone','Integración proveedor']];
-const S={client:null,user:null,page:'overview',busy:false,rememberSession:true,cache:{},search:'',offerSearch:'',gameFilter:'all',offerFilter:'all',coFilter:'',coKind:'all',product:null,offerMode:'centralone',bulkNotice:''};
+const S={client:null,user:null,page:'overview',busy:false,rememberSession:true,cache:{},search:'',offerSearch:'',gameFilter:'all',offerFilter:'all',coFilter:'',coKind:'all',product:null,offerMode:'centralone',bulkNotice:'',bulkFamily:''};
 function flash(message,error=false){
  const el=$('notify');el.textContent=String(message||'');el.classList.toggle('error',error);el.hidden=false;
  clearTimeout(flash.timer);flash.timer=setTimeout(()=>el.hidden=true,5000);
@@ -184,11 +184,11 @@ function bulkOffersPanel(){
  const config=S.cache.store?.config||{};
  const g=games[0],margin=Number(g?.marginPercent||0);
  const rate=Number(config.buySmPerUsdt||0),cupRate=Number(config.cupPerSm||0);
- const sample=(S.cache.coProducts||[]).find(p=>Number(p.resellerPrice)>0);
+ const sample=S.cache.bulkFamilySample&&Number(S.cache.bulkFamilySample.resellerPrice)>0?S.cache.bulkFamilySample:null;
  const unit=sample?Math.floor(Number(sample.resellerPrice)*(1+margin/100)*100+1e-9)/100:0;
  return '<section class="surface section rs-bulk-panel"><div class="panel-head"><div><span class="tag">REFILLS SHOP · GESTIÓN MASIVA</span><h2>Ofertas de un juego con un único margen</h2><small>Importa todas las ofertas de una familia real de Central One o actualiza las que ya vinculaste.</small></div>'+ico('offers')+'</div>'
  +'<div class="form-grid"><label>Juego de Refills Shop<select id="bulk-game" required>'+games.map(x=>'<option value="'+esc(x.id)+'" data-margin="'+Number(x.marginPercent||0)+'">'+esc(x.name)+'</option>').join('')+'</select></label>'
- +'<label>Familia del proveedor<select id="bulk-family" required><option value="">Elige un juego del catálogo Central One</option>'+families.map(x=>'<option value="'+esc(x.id)+'">'+esc(x.name)+'</option>').join('')+'</select></label>'
+ +'<label>Familia del proveedor<select id="bulk-family" required><option value="">Elige un juego del catálogo Central One</option>'+families.map(x=>'<option value="'+esc(x.id)+'" '+(S.bulkFamily===x.id?'selected':'')+'>'+esc(x.name)+'</option>').join('')+'</select></label>'
  +'<label>Ganancia para todas las ofertas (%)<input id="bulk-margin" type="number" min="0" max="300" step="0.01" value="'+margin+'" required></label>'
  +'<div class="preview rs-bulk-preview" id="bulk-preview"><small>VISTA PREVIA DE PRECIOS</small><strong id="bulk-preview-price">'+(unit?usd(unit)+' USDT':'Selecciona un producto de Central One')+'</strong><span id="bulk-preview-conversion">'+(unit?money(Math.ceil(unit*rate))+' SM · '+money(Math.ceil(Math.ceil(unit*rate)*cupRate))+' CUP':'Se calculará desde el costo real del proveedor')+'</span></div>'
  +'</div><div class="form-actions rs-bulk-actions"><button class="btn secondary" data-action="bulk-apply" type="button" '+(!games.length?'disabled':'')+'>Aplicar margen a ofertas existentes</button><button class="btn primary" data-action="bulk-import" type="button" '+(!games.length||!families.length?'disabled':'')+'>Importar todas las ofertas de esta familia</button></div>'
@@ -198,7 +198,7 @@ function bulkOffersPanel(){
 }
 function updateBulkPreview(){
  const sel=$('bulk-game'),gm=(S.cache.games||[]).find(g=>g.id===sel?.value);
- const m=Number($('bulk-margin')?.value),p=(S.cache.coProducts||[]).find(x=>Number(x.resellerPrice)>0);
+ const m=Number($('bulk-margin')?.value),p=S.cache.bulkFamilySample;
  const raw=Number(p?.resellerPrice),rate=Number(S.cache.store?.config?.buySmPerUsdt||0),cup=Number(S.cache.store?.config?.cupPerSm||0);
  const valid=Number.isFinite(m)&&m>=0&&m<=300&&raw>0&&rate>0&&cup>0;
  const cost=valid?Math.floor((raw*(1+m/100)+1e-9)*100)/100:0,sm=Math.ceil(cost*rate),finalCup=Math.ceil(sm*cup);
@@ -218,6 +218,7 @@ async function applyExistingMargin(options){
 }
 async function importFamilyOffers(options){
  if(!options.familyId)throw Error('Selecciona una familia del catálogo Central One.');
+ if(S.cache.store?.salesEnabled===true)throw Error('Pausa las ventas antes de importar por lote: así ninguna oferta se muestra con un precio temporal.');
  if(!modalConfirm('Se vincularán las ofertas de esta familia al juego y se aplicará un margen de '+options.marginPercent+'%. ¿Continuar?'))return;
  const ui=$('bulk-progress');
  const progress=text=>{S.bulkNotice=text;if(ui)ui.textContent=text};
@@ -443,6 +444,12 @@ document.addEventListener('input',e=>{
  if(id==='filter-customers'){S.search=e.target.value;filterVisibleRecords(e.target.value,e.target.closest('.surface')||$('admin-view'))}
 });
 document.addEventListener('change',e=>{
+ if(e.target?.id==='bulk-family'){
+   const family=e.target.value;S.bulkFamily=family;S.cache.bulkFamilySample=null;updateBulkPreview();
+   if(family){void request('/admin/centralone/catalog?kind=all&family='+encodeURIComponent(family)+'&offset=0')
+     .then(data=>{if(S.bulkFamily!==family)return;S.cache.bulkFamilySample=(data.products||[]).find(x=>Number(x.resellerPrice)>0)||null;updateBulkPreview()})
+     .catch(error=>flash(error?.message||'No se pudo consultar la familia.',true))}
+ }
  if(e.target?.id==='bulk-game'){$('bulk-margin').value=Number(e.target.selectedOptions?.[0]?.dataset.margin||0);updateBulkPreview()}
  if(e.target.id==='game-filter'){S.gameFilter=e.target.value;drawGames();filterVisibleRecords(S.search,$('game-filter')?.closest('.surface'))}
  if(e.target.id==='offer-filter'){S.offerFilter=e.target.value;drawOffers();filterVisibleRecords(S.offerSearch,$('offer-filter')?.closest('.surface'))}
