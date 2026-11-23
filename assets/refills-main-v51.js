@@ -106,10 +106,11 @@ function rsPlayNoticeSound(kind='message'){
   });
  }catch(error){console.warn('Sonido Refills:',error?.message||error)}
 }
-function rsSystemNotice(title,detail,id){
+function rsSystemNotice(title,detail,id,kind='order'){
  if(typeof Notification==='undefined'||Notification.permission!=='granted')return;
  const options={body:String(detail||'').slice(0,160),icon:'/REFILLSHOP/assets/refills-app-192.png',
-  badge:'/REFILLSHOP/assets/refills-app-192.png',tag:'refills-'+String(id).slice(0,65),renotify:false};
+  badge:'/REFILLSHOP/assets/refills-app-192.png',tag:'refills-'+String(id).slice(0,65),renotify:false,
+  data:{url:kind==='wallet'||kind==='membership'?'/REFILLSHOP/#revendedores':kind==='store'?'/REFILLSHOP/#recargas':'/REFILLSHOP/#pedidos'}};
  if('serviceWorker' in navigator){
   void navigator.serviceWorker.getRegistration('/REFILLSHOP/').then(reg=>{
    if(reg?.showNotification)return reg.showNotification(title,options);
@@ -131,7 +132,7 @@ function rsAddNotice(kind,title,detail,sound='message'){
  updateChangeBadge();
  if(s.modal==='alerts'&&document.activeElement?.tagName!=='BUTTON')modal();
  if(sound!=='silent')rsPlayNoticeSound(sound);
- rsSystemNotice(notice.title,notice.detail,id);
+ rsSystemNotice(notice.title,notice.detail,id,kind);
  if(kind==='completed')toast(notice.title+' · '+notice.detail);
 }
 function rsTrackOrders(list){
@@ -706,7 +707,7 @@ async function loadPublicChanges(force=false){
    }
   }else if(force&&s.user&&newest>rsNotice.publicSeenId){
    const fresh=s.changes.filter(x=>Number(x.id)>rsNotice.publicSeenId);
-   if(fresh.length){rsPlayNoticeSound('message');rsSystemNotice('Novedades en Refills Shop',fresh.length===1?String(fresh[0].title||'Nueva oferta'):fresh.length+' cambios nuevos en el catálogo','catalog-'+newest);}
+   if(fresh.length){rsPlayNoticeSound('message');rsSystemNotice('Novedades en Refills Shop',fresh.length===1?String(fresh[0].title||'Nueva oferta'):fresh.length+' cambios nuevos en el catálogo','catalog-'+newest,'store');}
   }
   if(newest>rsNotice.publicSeenId){
    rsNotice.publicSeenId=newest;
