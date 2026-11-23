@@ -64,3 +64,23 @@
  #admin-view>.grid,#admin-view>.split,#admin-view>.surface,#admin-view>section,.loading:after{animation:none!important}
  .surface,.record,.quick-card,.btn,.icon-button,.side-item{transition:none!important}
 }
+
+/* Revisión de transferencias: referencias, saldo y colores de estado */
+.rs-admin-order-card{display:flex;flex-direction:column;align-items:stretch;gap:13px;padding:17px}
+.rs-order-head{display:flex;align-items:flex-start;justify-content:space-between;gap:10px;min-width:0}
+.rs-order-head>div{min-width:0}
+.rs-order-head h3{font-size:14px;margin:5px 0}
+.rs-order-head small{font-size:10px;color:#a6bcdb;overflow-wrap:anywhere}
+.rs-order-meta{gap:9px}
+.rs-order-meta>div{padding:11px;background:#0a203d;border:1px solid #23486c;border-radius:10px;display:grid;gap:5px;min-width:0}
+.rs-order-meta strong{font-size:11px;color:#d6ecff;overflow-wrap:anywhere}
+.rs-reference{display:grid;gap:6px;padding:13px 14px;border:1px solid #375f87;border-radius:12px;background:linear-gradient(100deg,#153c65,#102441)}
+.rs-reference>span{font-size:9px;color:#7cbcf3;letter-spacing:.09em;font-weight:800}
+.rs-reference>strong{font:750 14px/1.45 ui-monospace,SFMono-Regular,monospace;color:#edf8ff;overflow-wrap:anywhere;word-break:break-word}
+.rs-reference>small{font-size:10px;color:#aed1f4;line-height:1.5}
+.rs-payment-status{display:flex;align-items:center;flex-wrap:wrap;gap:8px;font-size:11px;color:#a3beda}
+.rs-admin-order-card .row-actions{justify-content:flex-start;align-self:stretch}
+.pill.refund{background:#3a2356;border-color:#7849ba;color:#d9bbff}
+.pill.info{background:#0f3557;border-color:#276d99;color:#94daff}
+@media(max-width:740px){.rs-admin-order-card{padding:12px;gap:11px}.rs-order-head h3{font-size:12px}.rs-order-meta{grid-template-columns:repeat(2,minmax(0,1fr))}.rs-order-meta>div:last-child{grid-column:1/-1}.rs-admin-order-card .row-actions .btn{flex:1 1 auto;white-space:normal}.rs-reference strong{font-size:12px}}
+@media(max-width:360px){.rs-order-meta{grid-template-columns:1fr}.rs-order-meta>div:last-child{grid-column:auto}}
