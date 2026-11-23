@@ -1051,6 +1051,21 @@ button,a,input,select{touch-action:manipulation}
 }
 @media(max-width:380px){.rs-mobile-cart:not([hidden]){right:12px;bottom:calc(92px + env(safe-area-inset-bottom,0px));width:46px;height:46px}}
 @media(prefers-reduced-motion:reduce){.rs-mobile-cart,.rs-offer-tab{transition:none!important}}
+</style><style id="refills-player-id-flow-v11">
+.rs-target-container{display:grid;gap:10px;margin-top:16px;padding:13px;border:1px solid rgba(89,154,226,.25);border-radius:13px;background:rgba(12,34,69,.34)}
+.rs-target-container>strong{font-size:12px;color:#e6f5ff}
+.rs-target-container>small{font-size:10px;color:#98b6d6;line-height:1.4}
+.rs-target-label{display:grid;gap:6px;font-size:11px;font-weight:700;color:#bcdaf4}
+.rs-target-field{max-width:100%;width:100%;min-height:42px}
+.rs-player-result{margin-top:12px;padding:11px;border:1px solid #335978;border-radius:10px;color:#b8d5ef;background:#102c4a;font-size:11px;font-weight:750;line-height:1.5}
+.rs-player-result.valid{border-color:#348c78;background:#0c403b;color:#a9f3dd}
+.rs-player-result.invalid{border-color:#ba596d;background:#532333;color:#ffccdb}
+.rs-player-result.unknown{border-color:#7c6442;background:#433925;color:#f0d6aa}
+.rs-player-result small{display:block;margin-top:3px;color:inherit;opacity:.85;font-weight:500}
+.rs-checkout-confirmed{display:grid;gap:6px;padding:12px 14px;border:1px solid #326d93;border-radius:12px;background:#0b2848;font-size:11px;color:#accde9}
+.rs-checkout-confirmed>strong{font-size:12px;color:#c6e7ff}
+.rs-checkout-confirmed b{color:#e9f7ff;overflow-wrap:anywhere}
+.rs-checkout-confirmed small{color:#8bafce;line-height:1.45}
 </style></head>
 <body>
 <div id="app-loader" role="status" aria-label="Cargando Refills Shop">
@@ -1586,6 +1601,67 @@ function offerGroup(o){
  return 'recargas';
 }
 const OFFER_TABS=[['todos','Todas'],['recargas','Recargas'],['pases','Pases'],['tarjetas','Tarjetas'],['pin','PIN']];
+
+function primaryTargetField(offer){
+ const fields=Array.isArray(offer?.targetSchema)?offer.targetSchema:[];
+ const textFields=fields.filter(f=>f&&f.type!=='select');
+ return textFields.find(f=>/^(?:player_?id|user_?id|uid|role_?id|service_user_id|account_?id|game_?id)$/i.test(String(f.key||'')))||textFields[0]||null;
+}
+function playerTargetData(offer,validate=false){
+ const fields=Array.isArray(offer?.targetSchema)?offer.targetSchema:[];
+ const primary=primaryTargetField(offer),stored=s.playerTargets?.[offer.id]||{},payload={};
+ for(const field of fields){
+  const key=String(field?.key||'');if(!key)continue;
+  const value=String(primary&&field.key===primary.key?s.player:stored[key]||'').trim();
+  if(validate&&(!value||value.length>80))throw Error('Completa '+String(field.label||field.key||'este campo')+' en la pantalla anterior.');
+  if(validate&&field.type==='select'&&Array.isArray(field.options)&&field.options.length&&!field.options.some(v=>String(v.value)===value))throw Error('Elige una región o servidor válido.');
+  if(value)payload[key]=value;
+ }
+ return payload;
+}
+function playerExtraFields(offer){
+ const fields=Array.isArray(offer?.targetSchema)?offer.targetSchema:[],primary=primaryTargetField(offer);
+ const stored=s.playerTargets?.[offer.id]||{};
+ const extra=fields.filter(f=>f?.key&&f.key!==primary?.key);
+ if(!extra.length)return '';
+ return '<div class="rs-target-container"><strong>Datos del juego y región</strong><small>Completa estos campos ahora; no volveremos a pedirlos al pagar.</small>'
+ +extra.map(f=>{
+  const key=String(f.key),label=String(f.label||key),value=String(stored[key]||'');
+  if(f.type==='select'&&Array.isArray(f.options)){
+   return '<label class="rs-target-label">'+esc(label)+'<select class="field rs-target-field" data-target-key="'+esc(key)+'"><option value="">Seleccionar…</option>'+f.options.map(v=>'<option value="'+esc(v.value)+'" '+(String(v.value)===value?'selected':'')+'>'+esc(v.label||v.value)+'</option>').join('')+'</select></label>';
+  }
+  return '<label class="rs-target-label">'+esc(label)+'<input class="field rs-target-field" data-target-key="'+esc(key)+'" maxlength="80" autocomplete="off" value="'+esc(value)+'" placeholder="'+esc(label)+'"></label>';
+ }).join('')+'</div>';
+}
+async function verifyPlayerIdentity(){
+ const offer=itemBy(s.detailId)?.offers?.[s.selected];
+ const value=String(document.getElementById('player-input')?.value||s.player||'').trim();
+ s.player=value;
+ if(!offer){toast('Selecciona una oferta.');return}
+ if(offer.kind==='pin'&&!offer.targetSchema?.length){toast('Este producto no necesita validar un jugador.');return}
+ if(value.length<3){toast('Escribe primero el ID del jugador.');document.getElementById('player-input')?.focus();return}
+ let payload;
+ try{payload=playerTargetData(offer,true)}catch(err){toast(err.message);return}
+ if(!offer.providerProductId||!Array.isArray(offer.targetSchema)||!offer.targetSchema.length){
+  s.playerCheck={offerId:offer.id,player:value,status:'unverified',message:'Este producto no admite consultar el nombre automáticamente.'};
+  render();return;
+ }
+ if(!s.user){toast('Inicia sesión para verificar el usuario con Central One.');return}
+ const btn=document.querySelector('[data-action="verify-player"]');
+ if(btn){btn.disabled=true;btn.textContent='Verificando…'}
+ try{
+  const result=await edgeRequest('rs10-api','/player/validate',{method:'POST',auth:true,body:{productId:offer.providerProductId,targetPayload:payload}});
+  if(itemBy(s.detailId)?.offers?.[s.selected]?.id!==offer.id||s.player!==value)return;
+  s.playerCheck={offerId:offer.id,player:value,status:result.status||'unverified',name:result.status==='valid'?String(result.playerName||''):'',message:result.status==='invalid'?'No se pudo confirmar ese ID. Revisa los datos.':result.status==='valid'?'ID validado por Central One.':'Central One no tiene verificación de nombre para este producto.'};
+  render();
+  if(result.status==='valid')toast(result.playerName?'Jugador: '+result.playerName:'ID confirmado.');
+  else toast(s.playerCheck.message);
+ }catch(err){
+  s.playerCheck={offerId:offer.id,player:value,status:'unverified',message:'No se pudo consultar el nombre: '+(err?.message||'intenta de nuevo')};
+  render();toast('No se pudo verificar automáticamente. Los datos seguirán disponibles para revisión.');
+ }finally{if(btn){btn.disabled=false}}
+}
+
 function detail(){
  const g=itemBy(s.detailId);if(!g)return home();
  if(!g.offers?.length)return `<button class="detail-back" data-action="nav" data-page="recargas">${I('back','tiny')} Volver al catálogo</button><div class="card empty"><h3>Próximamente</h3><p>Este juego ya está en el catálogo. Sus ofertas aparecerán aquí cuando estén publicadas y verificadas.</p></div>`;
@@ -1597,7 +1673,7 @@ function detail(){
  <div class="detail-head"><div class="detail-icon"><img src="${photo(g)}" alt="${esc(g.name)}"></div><div><h1>${esc(g.name)}</h1><p>${esc(g.region)} · ${esc(g.desc)}</p></div></div>
  <div class="stepper"><div class="step ${s.player?'done':'active'}"><span class="num">${s.player?I('check','tiny'):'1'}</span>Tu ID</div><div class="step active"><span class="num">2</span>Paquete</div><div class="step"><span class="num">3</span>Pago</div></div>
  <div class="detail-layout"><div>
- <section class="card panel"><h2><span class="stage">1</span>${g.category==='gift'?'Datos del destinatario':g.category==='movil'?'Introduce tu dato de recarga':'Escribe tu ID de jugador'}</h2><div class="input-group"><input class="field" id="player-input" maxlength="50" value="${esc(s.player)}" placeholder="${g.category==='juegos'?'ID del jugador':g.category==='gift'?'Correo o ID destinatario':'Número o cuenta de destino'}"><button class="btn secondary" data-action="verify-player">${I('check','tiny')} Revisar</button></div><p class="helper">Comprueba el dato antes de continuar.</p></section>
+ <section class="card panel"><h2><span class="stage">1</span>${g.category==='gift'?'Datos del destinatario':g.category==='movil'?'Introduce tu dato de recarga':'Escribe tu ID de jugador'}</h2><div class="input-group"><input class="field" id="player-input" maxlength="80" autocomplete="off" value="${esc(s.player)}" placeholder="${g.category==='juegos'?'ID del jugador':g.category==='gift'?'Correo o ID destinatario':'Número o cuenta de destino'}"><button class="btn secondary" data-action="verify-player">${I('check','tiny')} Revisar ID</button></div><p class="helper">Escribe el ID una sola vez. Si Central One admite validación verás el nombre aquí.</p>${playerExtraFields(o)}${s.playerCheck&&s.playerCheck.offerId===o.id&&s.playerCheck.player===s.player?`<div class="rs-player-result ${s.playerCheck.status==='valid'?'valid':s.playerCheck.status==='invalid'?'invalid':'unknown'}">${s.playerCheck.status==='valid'?'Cuenta confirmada':s.playerCheck.status==='invalid'?'ID no válido':'Validación no disponible'}${s.playerCheck.name?` · <strong>${esc(s.playerCheck.name)}</strong>`:''}${s.playerCheck.message?`<small>${esc(s.playerCheck.message)}</small>`:''}</div>`:''}</section>
  <section class="card panel"><h2><span class="stage">2</span>Elige tu oferta</h2><div class="payment-selector"><div><strong>Método de pago</strong><small>Selecciona cómo quieres pagar.</small></div>${payPills()}</div>
  <div class="rs-offer-tabs" role="group" aria-label="Categorías de ofertas">${OFFER_TABS.map(([id,title])=>{const count=id==='todos'?g.offers.length:g.offers.filter(o=>offerGroup(o)===id).length;return `<button class="rs-offer-tab ${s.offerGroup===id?'active':''}" data-action="offer-group" data-value="${id}" type="button" aria-pressed="${s.offerGroup===id}">${title}<span>${count}</span></button>`}).join('')}</div><div class="offers-grid">${filteredOffers.length?filteredOffers.map(({offer,index:i})=>{const selected=s.selected===i,amount=displayPrice(offer);return `<button type="button" class="offer-row ${selected?'active':''}" data-action="select-offer" data-index="${i}" aria-pressed="${selected}">
  <span class="offer-game-icon"><img src="${photo(g)}" alt="${esc(g.name)}"></span>
@@ -1717,7 +1793,7 @@ function modal(){
    <div class="rs-checkout-total"><div><span>IMPORTE EXACTO</span><strong>${total?formatPriceValue(total.amount,total.currency):'No disponible'}</strong></div><div><small>${esc(g?.name||'Recarga')} · ${esc(o?.title||'Paquete')}</small><small>Destino: ${esc(s.player||'Según producto')}</small></div></div>
    <div class="rs-checkout-method"><span>${paymentVisual(s.payment)}<strong>${esc(paymentName())}</strong></span><button type="button" class="btn ghost small" data-action="open-payment-methods">Cambiar</button></div>
    ${checkoutPaymentInstructions()}
-   ${Array.isArray(o?.targetSchema)&&o.targetSchema.length?'<div class="rs-checkout-inputs"><strong>Datos adicionales del jugador</strong>'+o.targetSchema.map(f=>`<label class="sheet-label">${esc(f.label||f.key)}</label>${f.type==='select'&&Array.isArray(f.options)?`<select class="field order-target-field" data-target-key="${esc(f.key)}" required><option value="">Selecciona</option>${f.options.map(x=>`<option value="${esc(x.value)}">${esc(x.label||x.value)}</option>`).join('')}</select>`:`<input class="field order-target-field" data-target-key="${esc(f.key)}" placeholder="${esc(f.label||f.key)}" maxlength="80" required>`}`).join('')+'</div>':''}
+   ${Array.isArray(o?.targetSchema)&&o.targetSchema.length?'<div class="rs-checkout-confirmed"><strong>Datos de jugador guardados</strong>'+Object.entries(playerTargetData(o)).map(([key,value])=>'<span>'+esc((o.targetSchema.find(f=>f.key===key)||{}).label||key)+': <b>'+esc(value)+'</b></span>').join('')+'<small>Se tomaron de la pantalla anterior. Para cambiarlos, cierra el pago y vuelve al juego.</small></div>':''}
    ${s.payment==='sm'?'<div class="rs-checkout-inputs"><label class="sheet-label" for="payment-source-phone">Número que transfirió el saldo móvil</label><input id="payment-source-phone" class="field" type="tel" inputmode="numeric" pattern="[0-9]{8}" maxlength="8" placeholder="8 dígitos" required><label class="sheet-label" for="payment-proof">Captura del pago realizado</label><input id="payment-proof" class="field rs-proof-input" type="file" accept="image/png,image/jpeg,image/webp" required><small>JPG, PNG o WEBP · máximo 5 MB</small></div>':''}
    ${s.payment==='cup'||s.payment==='mitransfer'?'<div class="rs-checkout-inputs"><label class="sheet-label" for="payment-reference">Número de transacción</label><input id="payment-reference" class="field" type="text" inputmode="text" autocomplete="off" minlength="4" maxlength="80" placeholder="Número que aparece en Transfermóvil" required><small>El pedido quedará pendiente hasta comprobar el ingreso en la cuenta receptora.</small></div>':''}
    ${s.payment==='usdt'?'<div class="rs-checkout-safe">Primero registra el pedido para reservar su identificador. Después envía USDT y pega el hash en la siguiente pantalla. No transfieras antes de crear el pedido.</div>':''}
@@ -1837,7 +1913,7 @@ document.addEventListener('change',e=>{
   const target=document.querySelector('#modal-root .payment-instructions p');if(target)target.textContent=message;
  }
 });
-document.addEventListener('input',e=>{if(e.target.id==='catalog-search'){s.search=e.target.value;refreshCatalog()}if(e.target.id==='player-input'){s.player=e.target.value}});
+document.addEventListener('input',e=>{if(e.target.id==='catalog-search'){s.search=e.target.value;refreshCatalog()}if(e.target.id==='player-input'){s.player=e.target.value;s.playerCheck=null}if(e.target.matches('.rs-target-field')){const offer=itemBy(s.detailId)?.offers?.[s.selected];if(offer){s.playerTargets[offer.id]||={};s.playerTargets[offer.id][e.target.dataset.targetKey]=e.target.value;s.playerCheck=null}}});
 document.addEventListener('change',e=>{if(e.target.id==='sort-catalog'){s.sort=e.target.value;refreshCatalog()}});
 document.addEventListener('keydown',e=>{if(e.key==='Escape'&&s.modal){s.modal=null;modal()}if((e.key==='Enter'||e.key===' ')&&e.target.classList.contains('brand')){e.preventDefault();navigate('inicio')}if((e.key==='Enter'||e.key===' ')&&e.target.classList.contains('product-clickable')){e.preventDefault();openDetail(e.target.dataset.id)}});
 document.addEventListener('click',e=>{let b=e.target.closest('[data-action]');if(!b)return;const action=b.dataset.action;if(action==='backdrop'&&e.target!==b)return;e.preventDefault();switch(action){
@@ -1861,14 +1937,14 @@ case 'open-payment-methods':s.paymentReturnModal=s.modal==='checkout'?'checkout'
 case 'choose-payment':changePayment(b.dataset.value);break;
 case 'offer-group':{const id=b.dataset.value,g=itemBy(s.detailId);if(!OFFER_TABS.some(t=>t[0]===id)||!g)break;s.offerGroup=id;const first=g.offers.findIndex(o=>id==='todos'||offerGroup(o)===id);if(first>=0)s.selected=first;s.playerCheck=null;const pos=window.scrollY;render();window.scrollTo(0,pos);break;}
 case 'select-offer':{let pos=window.scrollY;s.selected=Number(b.dataset.index);s.playerCheck=null;render();window.scrollTo(0,pos);break;}
-case 'verify-player':{const v=document.getElementById('player-input')?.value.trim();s.player=v||'';if(v.length<3){toast('Escribe un ID o número válido');document.getElementById('player-input')?.focus()}else toast('Dato guardado. Se comprobará al enviar el pedido.');break;}
-case 'checkout':{if(s.role==='guest'){s.page='login';render(true);toast('Inicia sesión para continuar con la compra');return}let v=document.getElementById('player-input')?.value.trim();s.player=v||'';if(v.length<3){toast('Primero escribe el ID o el destinatario');document.getElementById('player-input')?.focus();return}s.modal='checkout';modal();break;}
-case 'add-cart':{let v=document.getElementById('player-input')?.value.trim();s.player=v||'';if(v.length<3){toast('Indica el ID o destinatario');return}s.cart.push({id:s.detailId,offer:s.selected,player:s.player});save('cart',s.cart);headerNav();toast('Producto añadido al carrito');break;}
+case 'verify-player':void verifyPlayerIdentity();break;
+case 'checkout':{if(s.role==='guest'){s.page='login';render(true);toast('Inicia sesión para continuar con la compra');return}const o=itemBy(s.detailId)?.offers?.[s.selected];let v=(document.getElementById('player-input')?.value||s.player||'').trim();s.player=v;if(o?.kind!=='pin'&&v.length<3){toast('Primero escribe el ID o destinatario.');document.getElementById('player-input')?.focus();return}try{playerTargetData(o,true)}catch(err){toast(err.message);return}if(s.playerCheck?.status==='invalid'&&s.playerCheck.offerId===o?.id&&s.playerCheck.player===v){toast('Corrige el ID del jugador antes de pagar.');return}s.modal='checkout';modal();break;}
+case 'add-cart':{let v=(document.getElementById('player-input')?.value||s.player||'').trim();s.player=v;const offer=itemBy(s.detailId)?.offers?.[s.selected];if(offer?.kind!=='pin'&&v.length<3){toast('Indica el ID o destinatario');return}let targets;try{targets=playerTargetData(offer,true)}catch(err){toast(err.message);return}s.cart.push({id:s.detailId,offer:s.selected,offerId:offer.id,player:s.player,targets});save('cart',s.cart);headerNav();toast('Producto añadido al carrito');break;}
 case 'qty-minus':s.qty=Math.max(1,s.qty-1);modal();break;case 'qty-plus':s.qty=Math.min(20,s.qty+1);modal();break;
 case 'simulate-order':toast('Continúa con el botón de enviar solicitud.');break;
 case 'preview-deposit':toast('Utiliza el botón de solicitar recarga.');break;
 case 'remove-cart':{s.cart.splice(Number(b.dataset.index),1);save('cart',s.cart);headerNav();modal();break;}
-case 'cart-first':{const c=s.cart[0];if(!c)return;openDetail(c.id);s.selected=c.offer;s.player=c.player;s.modal='checkout';render();break;}
+case 'cart-first':{const c=s.cart[0];if(!c)return;openDetail(c.id);const game=itemBy(c.id),index=game?.offers?.findIndex(o=>o.id===c.offerId);s.selected=index>=0?index:c.offer;s.player=c.player;s.playerTargets[s.cart[0].offerId||game?.offers?.[s.selected]?.id]={...(c.targets||{})};s.modal='checkout';render();break;}
 case 'save-profile':{const name=(document.getElementById('profile-name')?.value||'').trim();if(!name){toast('Escribe un nombre');return}s.nickname=name.slice(0,32);save('nickname',s.nickname);render();toast('Nombre guardado');break;}
 case 'order-details':s.selectedOrder=b.dataset.ref;s.modal='order';modal();break;
 case 'delete-order':s.orders=s.orders.filter(o=>o.ref!==b.dataset.ref);save('orders',s.orders);s.modal=null;render();toast('Pedido eliminado');break;
@@ -2064,8 +2140,8 @@ if(a==='send-order'){
  if(!s.user||!g||!o?.id){toast('Selecciona una oferta publicada.');return}
  if(!s.salesEnabled||!o.purchasable||!o.inStock){toast('La tienda todavía no acepta compras. No transfieras dinero.');return}
  if(s.qty!==1){toast('Realiza un pedido por oferta.');return}
- const targetPayload={};
- for(const el of document.querySelectorAll('.order-target-field')){const value=String(el.value||'').trim();if(!value){toast('Completa los datos del jugador.');return}targetPayload[el.dataset.targetKey]=value}
+ let targetPayload;
+ try{targetPayload=playerTargetData(o,true)}catch(err){toast(err.message);return}
  const player=String(s.player||'').trim();
  if(o.kind!=='pin'&&!player&&!Object.keys(targetPayload).length){toast('Escribe el ID de jugador.');return}
  b.disabled=true;b.textContent='Registrando pedido…';
