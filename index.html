@@ -1281,7 +1281,11 @@ body::after{
  .product-horizontal,.rs-wallet-deposit-ui *{transition:none!important}
 }
 </style>
-</head>
+<style id="refills-order-status-refresh-v30">
+.rs-orders-head-actions{display:flex;gap:9px;flex-wrap:wrap;align-items:center;justify-content:flex-end}
+.rs-orders-head-actions>.btn{min-height:41px;white-space:normal}
+@media(max-width:620px){.rs-orders-head-actions{width:100%;display:grid;grid-template-columns:repeat(2,minmax(0,1fr))}.rs-orders-head-actions>.btn{min-width:0;width:100%;padding:10px 7px;font-size:11px}}
+</style></head>
 <body>
 <div id="app-loader" role="status" aria-label="Cargando Refills Shop">
  <div class="app-loader-glow"></div>
@@ -2022,7 +2026,7 @@ function orders(){
  const pending=list.filter(o=>['pending','processing'].includes(clientOrderStatus(o.status).key)).length;
  const rejected=list.filter(o=>['rejected','refunded'].includes(clientOrderStatus(o.status).key)).length;
  return `<div class="catalog-top orders-page-v4">
-  <div class="orders-heading-v4"><div><div class="eyebrow">TU ACTIVIDAD EN REFILLS SHOP</div><h1 class="page-title">Mis pedidos</h1><p class="page-lead">Sigue tus compras, revisa los datos y consulta cada comprobante.</p></div><button class="btn primary orders-new-button" data-action="nav" data-page="recargas">${I('plus','tiny')} Nueva compra</button></div>
+  <div class="orders-heading-v4"><div><div class="eyebrow">TU ACTIVIDAD EN REFILLS SHOP</div><h1 class="page-title">Mis pedidos</h1><p class="page-lead">Sigue tus compras, revisa los datos y consulta cada comprobante.</p></div><div class="rs-orders-head-actions"><button class="btn secondary" data-action="refresh-orders">${I('check','tiny')} Actualizar estados</button><button class="btn primary orders-new-button" data-action="nav" data-page="recargas">${I('plus','tiny')} Nueva compra</button></div></div>
   <div class="orders-stats-v4">
    <div><small>TOTAL</small><strong>${list.length}</strong><span>Pedidos</span></div>
    <div><small>EN PROCESO</small><strong>${pending}</strong><span>Por entregar</span></div>
@@ -2323,7 +2327,7 @@ case 'checkout':
    <div class="order-detail-hero-v4">${orderGame?`<img src="${photo(orderGame)}" alt="">`:`<span>${I('game')}</span>`}<div><small>PEDIDO #${esc(current.ref)}</small><strong>${esc(orderGame?.name||current.gameName||current.id||'Compra digital')}</strong><span>${esc(current.offer||'')}</span></div><b class="order-status-v4 ${orderStatusKey}">${esc(orderStatus)}</b></div>
    <div class="order-detail-total-v4"><small>TOTAL DEL PEDIDO</small><strong>${esc(current.totalText||fmtMoney(current.total)+' '+(current.currency||'CUP'))}</strong></div>
    <div class="summary-list order-detail-list-v4"><div class="summary-row"><span>Destino</span><strong>${esc(current.player||'—')}</strong></div><div class="summary-row"><span>Forma de pago</span><strong>${esc(current.payment||'—')}</strong></div><div class="summary-row"><span>Fecha</span><strong>${esc(current.date||'—')}</strong></div><div class="summary-row"><span>Referencia</span><strong>${esc(current.ref||'—')}</strong></div></div>
-   <p class="order-detail-note-v4">El estado se actualiza cuando el servidor o la administración registra un cambio en el pedido.</p>`:'<div class="empty">Pedido no encontrado.</div>');
+   <p class="order-detail-note-v4">Los estados se actualizan desde el servidor. «Completado» solo significa que la entrega fue confirmada; «En proceso» todavía no es una entrega.</p>`:'<div class="empty">Pedido no encontrado.</div>');
   break;
  }
  }
@@ -2415,7 +2419,8 @@ case 'qty-minus':s.qty=Math.max(1,s.qty-1);modal();break;case 'qty-plus':s.qty=M
 case 'remove-cart':{s.cart.splice(Number(b.dataset.index),1);save('cart',s.cart);headerNav();modal();break;}
 case 'cart-first':{const c=s.cart[0];if(!c)return;openRegionGame(c.id,c.region||'');const game=itemBy(c.id),index=game?.offers?.findIndex(o=>o.id===c.offerId);s.selected=index>=0?index:c.offer;s.player=String(c.player||'');const offer=game?.offers?.[s.selected],offerId=c.offerId||offer?.id;if(offerId)s.playerTargets[offerId]={...(c.targets||{})};if(!offer){toast('Esta oferta guardada ya no está disponible.');render();return}s.offerGroup=offerGroup(offer);s.playerCheck=null;s.modal=null;render(true);toast(offer.kind==='pin'?'Revisa la oferta y confirma la compra.':'Revisa y valida tu ID antes de continuar al pago.');break;}
 case 'save-profile':{const name=(document.getElementById('profile-name')?.value||'').trim();if(!name){toast('Escribe un nombre');return}s.nickname=name.slice(0,32);save('nickname',s.nickname);render();toast('Nombre guardado');break;}
-case 'order-details':s.selectedOrder=b.dataset.ref;s.modal='order';modal();break;
+case 'order-details':s.selectedOrder=b.dataset.ref;s.modal='order';modal();void loadCustomerOrders();break;
+case 'refresh-orders':void loadCustomerOrders();break;
 case 'delete-order':s.orders=s.orders.filter(o=>o.ref!==b.dataset.ref);save('orders',s.orders);s.modal=null;render();toast('Pedido eliminado');break;
 }});
 
