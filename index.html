@@ -1873,7 +1873,7 @@ function modal(){
   }
   break;
  case 'cart':
-  html=modalTitle('Mi carrito',`${s.cart.length} productos guardados`)+(s.cart.length?s.cart.map((c,index)=>{let item=itemBy(c.id);if(!item)return'';let off=item.offers[c.offer]||item.offers[0];return `<div class="cart-item"><img src="${photo(item)}" alt=""><div class="copy"><strong>${esc(item.name)}</strong><small>${esc(off.title)} · ${displayPrice(off)}</small><small>Destino: ${esc(c.player)}</small></div><button class="xbtn" data-action="remove-cart" data-index="${index}" title="Quitar del carrito">${I('trash','tiny')}</button></div>`}).join('')+`<p class="helper" style="margin-top:14px">Selecciona un producto para revisar la compra.</p><button class="btn primary full" data-action="cart-first" style="margin-top:14px">Revisar primer producto</button>`:`<div class="empty">${I('cart')}<h3>Tu carrito está vacío</h3><p>Elige una recarga y añádela aquí.</p><button class="btn primary" data-action="modal-nav" data-page="recargas">Ver recargas</button></div>`);
+  html=modalTitle('Mi carrito',`${s.cart.length} productos guardados`)+(s.cart.length?s.cart.map((c,index)=>{let item=itemBy(c.id);if(!item)return'';let off=item.offers.find(o=>o.id===c.offerId)||item.offers[c.offer]||item.offers[0];if(!off)return'';return `<div class="cart-item"><img src="${photo(item)}" alt=""><div class="copy"><strong>${esc(item.name)}</strong><small>${esc(off.title)} · ${displayPrice(off)}</small><small>Destino: ${esc(c.player)}</small></div><button class="xbtn" data-action="remove-cart" data-index="${index}" title="Quitar del carrito">${I('trash','tiny')}</button></div>`}).join('')+`<p class="helper" style="margin-top:14px">Selecciona un producto para revisar la compra.</p><button class="btn primary full" data-action="cart-first" style="margin-top:14px">Revisar primer producto</button>`:`<div class="empty">${I('cart')}<h3>Tu carrito está vacío</h3><p>Elige una recarga y añádela aquí.</p><button class="btn primary" data-action="modal-nav" data-page="recargas">Ver recargas</button></div>`);
   break;
  case 'alerts':
   html=modalTitle('Notificaciones')+`<div class="empty">${I('bell')}<h3>Sin notificaciones</h3><p>Aquí aparecerán los avisos de tus pedidos y promociones.</p></div>`;break;
@@ -1971,7 +1971,7 @@ case 'qty-minus':s.qty=Math.max(1,s.qty-1);modal();break;case 'qty-plus':s.qty=M
 case 'simulate-order':toast('Continúa con el botón de enviar solicitud.');break;
 case 'preview-deposit':toast('Utiliza el botón de solicitar recarga.');break;
 case 'remove-cart':{s.cart.splice(Number(b.dataset.index),1);save('cart',s.cart);headerNav();modal();break;}
-case 'cart-first':{const c=s.cart[0];if(!c)return;openDetail(c.id);const game=itemBy(c.id),index=game?.offers?.findIndex(o=>o.id===c.offerId);s.selected=index>=0?index:c.offer;s.player=c.player;s.playerTargets[s.cart[0].offerId||game?.offers?.[s.selected]?.id]={...(c.targets||{})};s.modal='checkout';render();break;}
+case 'cart-first':{const c=s.cart[0];if(!c)return;openDetail(c.id);const game=itemBy(c.id),index=game?.offers?.findIndex(o=>o.id===c.offerId);s.selected=index>=0?index:c.offer;s.player=String(c.player||'');const offerId=c.offerId||game?.offers?.[s.selected]?.id;if(offerId)s.playerTargets[offerId]={...(c.targets||{})};if(!game?.offers?.[s.selected]){toast('La oferta guardada ya no está disponible.');render();return}s.modal='checkout';render();break;}
 case 'save-profile':{const name=(document.getElementById('profile-name')?.value||'').trim();if(!name){toast('Escribe un nombre');return}s.nickname=name.slice(0,32);save('nickname',s.nickname);render();toast('Nombre guardado');break;}
 case 'order-details':s.selectedOrder=b.dataset.ref;s.modal='order';modal();break;
 case 'delete-order':s.orders=s.orders.filter(o=>o.ref!==b.dataset.ref);save('orders',s.orders);s.modal=null;render();toast('Pedido eliminado');break;
@@ -2261,7 +2261,7 @@ async function loadLiveCatalog(){
    s.rates={...s.rates,usdtSm:Number(data.config.buySmPerUsdt||s.rates.usdtSm),smCup:Number(data.config.cupPerSm||s.rates.smCup)};
    s.paymentConfig={...s.paymentConfig,smReceiver:data.config.mobilePhone||'',cupCard:data.config.cardNumber||'',mitransferPhone:data.config.walletPhone||'',mitransferEnabled:data.config.mitransferEnabled===true,mitransferAutoEnabled:data.config.mitransferAutoEnabled===true,transfermovilAutoEnabled:data.config.transfermovilAutoEnabled===true,usdtEnabled:data.config.usdtWalletEnabled===true,usdtAddress:data.config.usdtWalletAddress||'',whatsappNumber:data.config.supportWhatsapp||''};
   }
-  const validIds=new Set(ITEMS.map(g=>g.id));s.cart=s.cart.filter(c=>validIds.has(c.id));
+  const validIds=new Set(ITEMS.map(g=>g.id));s.cart=s.cart.filter(c=>{const game=itemBy(c.id);if(!game||!validIds.has(c.id)||!game.offers.length)return false;return c.offerId?game.offers.some(o=>o.id===c.offerId):Boolean(game.offers[c.offer]);});save('cart',s.cart);
   if(s.page==='detalle'&&!validIds.has(s.detailId))s.page='recargas';
   render();if(s.page==='inicio')void loadRecentTopups();
  }catch(error){
