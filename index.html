@@ -945,7 +945,7 @@ img{max-width:100%}
 @keyframes rsContentIn{from{opacity:0;transform:translateY(5px)}to{opacity:1;transform:translateY(0)}}
 .product,.home-game-card-v4,.notice,.card{transition:transform .18s ease,border-color .18s ease,box-shadow .18s ease}
 .product img,.home-game-art-v4 img{display:block;max-width:100%;height:auto}
-.product-cover img,.home-game-art-v4 img{content-visibility:auto}
+.product,.home-game-card-v4{content-visibility:auto;contain-intrinsic-size:140px}
 @media(hover:hover){
  .product:hover,.home-game-card-v4:hover,.notice:hover{transform:translateY(-2px);border-color:rgba(93,177,255,.55);box-shadow:0 12px 30px rgba(0,0,0,.2)}
  .btn:hover{transform:translateY(-1px)}
@@ -1455,7 +1455,7 @@ function catalog(isGift=false){
 }
 function detail(){
  const g=itemBy(s.detailId);if(!g)return home();
- if(!g.offers?.length)return `<button class="detail-back" data-action="nav" data-page="recargas">${I('back','tiny')} Volver al catálogo</button><div class="card empty"><h3>Ofertas no disponibles</h3><p>Este producto todavía no tiene ofertas publicadas.</p></div>`;
+ if(!g.offers?.length)return `<button class="detail-back" data-action="nav" data-page="recargas">${I('back','tiny')} Volver al catálogo</button><div class="card empty"><h3>Próximamente</h3><p>Este juego ya está en el catálogo. Sus ofertas aparecerán aquí cuando estén publicadas y verificadas.</p></div>`;
  const o=g.offers[s.selected]||g.offers[0],p=currentPrice(o);
  const selectedPrice=p?displayPrice(o):'Costo pendiente';
  const methodAvailable=s.payment==='usdt'?(s.paymentConfig.usdtEnabled&&!!s.paymentConfig.usdtAddress):s.payment==='balance'?(resellerHasPlan()&&!!currentPrice(o,'balance')):true;
