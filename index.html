@@ -2804,6 +2804,17 @@ window.setInterval(()=>{if(document.visibilityState==='visible'&&s.user)void loa
 window.setInterval(()=>{if(document.visibilityState==='visible'&&s.user&&s.page==='pedidos')void loadCustomerOrders()},25000);
 window.setInterval(()=>{if(document.visibilityState==='visible'&&['inicio','recargas','gift','perfil','pedidos'].includes(s.page)&&!s.modal)void loadLiveCatalog(true)},60000);
 window.setInterval(()=>{if(document.visibilityState==='visible'&&s.page==='inicio')void loadRecentTopups(true)},120000);
+window.setInterval(()=>{
+ if(document.visibilityState!=='visible')return;
+ try{
+  const seenAt=Number(localStorage.getItem('refills_shop_changes_seen_at')||0);
+  if(!seenAt||Date.now()-seenAt>=RS_NOTICE_TTL){
+   localStorage.removeItem('refills_shop_changesSeen');localStorage.removeItem('refills_mock_changesSeen');
+   localStorage.removeItem('refills_shop_changes_seen_at');s.changesLastSeen=0;
+  }
+ }catch{}
+ void loadPublicChanges(true);
+},3600000);
 document.addEventListener('visibilitychange',()=>{
  if(document.visibilityState!=='visible')return;
  if(s.user&&s.page==='pedidos')void loadCustomerOrders();
