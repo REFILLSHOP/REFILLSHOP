@@ -26,7 +26,7 @@ alert:'<path d="M12 2 2 21h20z"/><path d="M12 9v5M12 17h.01"/>'
 };
 const ico=(name)=>'<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" width="19" height="19" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">'+(paths[name]||paths.shield)+'</svg>';
 const MENU=[['overview','Resumen','overview','Indicadores y accesos'],['games','Juegos','games','Tu catálogo'],['offers','Ofertas','offers','Precios y productos'],['orders','Pedidos','orders','Compras y entregas'],['customers','Clientes','customers','Cuentas y seguridad'],['resellers','Revendedores','resellers','Planes y depósitos'],['payments','Pagos y tasas','payments','Configuración comercial'],['centralone','Central One','centralone','Integración proveedor']];
-const S={client:null,user:null,page:'overview',busy:false,rememberSession:true,cache:{},search:'',offerSearch:'',gameFilter:'all',offerFilter:'all',coFilter:'',coKind:'all',product:null,offerMode:'centralone',bulkNotice:'',bulkFamily:''};
+const S={client:null,user:null,page:'overview',busy:false,rememberSession:true,cache:{},search:'',offerSearch:'',editingGameId:null,gameFilter:'all',offerFilter:'all',coFilter:'',coKind:'all',product:null,offerMode:'centralone',bulkNotice:'',bulkFamily:''};
 function flash(message,error=false){
  const el=$('notify');el.textContent=String(message||'');el.classList.toggle('error',error);el.hidden=false;
  clearTimeout(flash.timer);flash.timer=setTimeout(()=>el.hidden=true,5000);
@@ -78,7 +78,7 @@ function renderMenu(){
 }
 function navigate(page,first=false){
  if(!MENU.some(m=>m[0]===page))page='overview';
- if(S.page!==page){S.search='';S.offerSearch=''}S.page=page;if(!first)history.replaceState(null,'','#'+page);
+ if(S.page!==page){S.search='';S.offerSearch='';S.editingGameId=null}S.page=page;if(!first)history.replaceState(null,'','#'+page);
  renderMenu();
  const meta=MENU.find(m=>m[0]===page);$('crumb-name').textContent=meta[1];
  $('view-title').textContent=meta[1]==='Resumen'?'Vista general':meta[1];
@@ -170,9 +170,10 @@ function drawOverview(){
 }
 function drawGames(){
  const games=S.cache.games||[];
+ const editing=games.find(g=>g.id===S.editingGameId)||null;
  const filtered=games.filter(g=>(S.gameFilter==='all'||(S.gameFilter==='active')===!!g.active));
  $('admin-view').innerHTML='<div class="split">'
- +'<section class="surface section"><div class="panel-head"><div><h2>Crear o editar juego</h2><small>El producto se guarda en Supabase</small></div>'+ico('plus')+'</div><form id="game-form" class="form-grid"><label>ID único (sin espacios)<input name="id" placeholder="ej: mobile-legends" pattern="[a-z0-9-]{2,60}" required></label><label>Nombre del juego<input name="name" maxlength="90" placeholder="Nombre del producto" required></label><label>Categoría<input name="category" value="Juegos" maxlength="70" required></label><label>Imagen HTTPS<input name="imageUrl" type="url" placeholder="https://…"></label><label class="check wide"><input name="featured" type="checkbox"> Destacar en el inicio</label><div class="form-actions wide"><button class="btn primary" type="submit">'+ico('plus')+' Guardar juego</button></div></form><p class="footer-caption">Primero crea el juego. Después vincula las ofertas que quieras vender desde Central One.</p></section>'
+ +'<section class="surface section"><div class="panel-head"><div><h2>'+(editing?'Editar juego: '+esc(editing.name):'Crear juego')+'</h2><small>'+(editing?'ID permanente · No se alterarán sus ofertas, estado ni orden':'La información del juego se sincroniza con los clientes')+'</small></div>'+ico('plus')+'</div><form id="game-form" class="form-grid"><label>ID único (sin espacios)<input name="id" placeholder="ej: mobile-legends" pattern="[a-z0-9-]{2,60}" value="'+esc(editing?.id||'')+'" '+(editing?'readonly aria-readonly="true"':'')+' required></label><label>Nombre del juego<input name="name" maxlength="90" placeholder="Nombre del producto" value="'+esc(editing?.name||'')+'" required></label><label>Categoría<input name="category" value="'+esc(editing?.tag||'Juegos')+'" maxlength="70" required></label><label>Imagen HTTPS<input name="imageUrl" type="url" placeholder="https://…" value="'+esc(editing?.imageUrl||'')+'"></label><label class="check wide"><input name="featured" type="checkbox" '+(editing?.featured?'checked':'')+'> Destacar en el inicio</label><div class="form-actions wide"><button class="btn primary" type="submit">'+ico('check')+(editing?' Guardar cambios del juego':' Crear juego')+'</button>'+(editing?'<button class="btn ghost" type="button" data-action="cancel-edit-game">Cancelar edición</button>':'')+'</div></form><p class="footer-caption">Primero crea el juego. Después vincula las ofertas que quieras vender desde Central One.</p></section>'
  +'<section class="surface section"><div class="panel-head"><div><h2>Mis juegos</h2><small>'+games.length+' registrados · '+games.filter(g=>g.active).length+' publicados</small></div>'+ico('games')+'</div>'
  +'<div class="toolbar"><input type="search" id="filter-games" placeholder="Buscar juego…" value="'+esc(S.search)+'"><select id="game-filter"><option value="all">Todos</option><option value="active" '+(S.gameFilter==='active'?'selected':'')+'>Publicados</option><option value="archived" '+(S.gameFilter==='archived'?'selected':'')+'>Archivados</option></select></div>'
  +(filtered.length?'<div class="list">'+filtered.map(g=>'<div class="record"><div class="record-main"><img class="thumb" alt="" src="'+esc(/^https:\/\//.test(g.imageUrl||'')?g.imageUrl:'/REFILLSHOP/assets/refills-icon.png')+'"><div><h3>'+esc(g.name)+'</h3><small>'+esc(g.id)+' · '+esc(g.tag||'Juegos')+'</small></div></div><div class="row-actions">'+tag(g.active?'Publicado':'Archivado',g.active?'good':'warn')+'<button class="btn ghost small" data-action="edit-game" data-id="'+esc(g.id)+'">Editar</button>'+(g.active?'<button class="btn secondary small" data-page="offers">Ofertas</button>':'<button class="btn secondary small" data-action="restore-game" data-id="'+esc(g.id)+'">Restaurar</button>')+'<button class="btn danger small" data-action="delete-game" data-id="'+esc(g.id)+'">Eliminar</button></div></div>').join('')+'</div>':empty('Sin resultados','No hay juegos que coincidan.'))+'</section></div>';
@@ -361,10 +362,13 @@ function openModal(title,content){
  $('modal-root').hidden=false;
 }
 function closeModal(){$('modal-root').hidden=true;$('modal-root').innerHTML=''}
-async function changeGame(id){
- const g=(S.cache.games||[]).find(x=>x.id===id);if(!g)return;
- const form=$('game-form');for(const key of ['id','name','imageUrl'])if(form.elements[key])form.elements[key].value=g[key]||'';
- form.elements.category.value=g.tag||'Juegos';form.elements.featured.checked=!!g.featured;form.scrollIntoView({behavior:'smooth',block:'start'});flash('Puedes editar el juego y guardarlo.');
+function changeGame(id){
+ const g=(S.cache.games||[]).find(x=>x.id===id);
+ if(!g)return flash('Juego no encontrado. Actualiza la lista.',true);
+ S.editingGameId=g.id;drawGames();
+ const form=$('game-form');
+ if(form){form.scrollIntoView({behavior:window.matchMedia('(prefers-reduced-motion: reduce)').matches?'auto':'smooth',block:'center'});form.elements.name?.focus({preventScroll:true});}
+ flash('Modifica el nombre y pulsa Guardar cambios. El ID no se puede cambiar.');
 }
 async function openCustomer(id){
  const c=(S.cache.customers||[]).find(x=>x.id===id);if(!c)return;
@@ -387,6 +391,7 @@ async function runAction(action,el){
  if(action==='refresh')return load();
  if(action==='mode-centralone'||action==='mode-manual'){S.offerMode=action.split('-')[1];return drawOffers()}
  if(action==='edit-game')return changeGame(id);
+ if(action==='cancel-edit-game'){S.editingGameId=null;drawGames();flash('Edición cancelada, ningún cambio guardado.');return}
  if(action==='customer-details')return openCustomer(id);
  if(action==='customer-reset')return openCustomerReset(id);
  if(action==='edit-offer')return openOfferEdit(id);
@@ -446,7 +451,7 @@ document.addEventListener('submit',async e=>{
  if(!S.user)return flash('Inicia sesión',true);
  await withBusy(async()=>{
   let r;
-  if(form.id==='game-form'){r=await request('/admin/game',{method:'POST',body:{id:String(data.id||'').trim().toLowerCase(),name:data.name,category:data.category,imageUrl:data.imageUrl,featured:!!data.featured}});}
+  if(form.id==='game-form'){const editingId=S.editingGameId;const gameId=String(data.id||'').trim().toLowerCase();if(editingId&&editingId!==gameId)throw Error('No modifiques el identificador de un juego existente.');r=await request(editingId?'/admin/game-edit':'/admin/game',{method:'POST',body:{id:editingId||gameId,name:String(data.name||'').trim(),category:String(data.category||'').trim(),imageUrl:String(data.imageUrl||'').trim(),featured:!!data.featured}});S.editingGameId=null;}
   else if(form.id==='link-offer-form'){const pid=S.product||data.productId;if(!pid)throw Error('Busca y selecciona un producto real de Central One.');r=await request('/admin/centralone/offer',{method:'POST',body:{gameId:data.gameId,productId:pid,displayName:data.displayName,gainSm:Number(data.gainSm),featured:!!data.featured}});}
   else if(form.id==='manual-offer-form'){r=await request('/admin/offer-manual',{method:'POST',body:{gameId:data.gameId,name:data.name,provider:'centralone',providerPriceUsdt:Number(data.providerPriceUsdt),gainSm:Number(data.gainSm)}});}
   else if(form.id==='edit-offer-form'){r=await request('/admin/offer-edit',{method:'POST',body:{id:data.id,gainSm:Number(data.gainSm)}});closeModal();}
