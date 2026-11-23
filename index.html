@@ -1769,6 +1769,24 @@ async function loadPublicChanges(force=false){
   }
  }catch(err){console.warn('Refills updates:',err?.message||err)}
 }
+
+function formatShopTime(value){
+ const d=new Date(value);
+ return Number.isFinite(d.getTime())?d.toLocaleTimeString('en-US',{hour:'numeric',minute:'2-digit',hour12:true}):'—';
+}
+function formatShopDateTime(value){
+ const d=new Date(value);
+ return Number.isFinite(d.getTime())?d.toLocaleDateString('es-ES',{day:'2-digit',month:'2-digit',year:'numeric'})+' · '+formatShopTime(value):'—';
+}
+function clientOrderStatus(raw){
+ const v=String(raw||'pending').toLowerCase().trim();
+ if(v==='completed'||v==='entregado'||v==='completado')return {key:'complete',label:'Completado'};
+ if(v==='refunded'||v==='reembolsado')return {key:'refunded',label:'Reembolsado'};
+ if(['failed','rejected','cancelled','expired','fallido','rechazado'].includes(v))return {key:'rejected',label:'Fallido'};
+ if(['processing','partially_completed','procesando','en proceso'].includes(v))return {key:'processing',label:'En proceso'};
+ return {key:'pending',label:'Pendiente'};
+}
+
 function recentTopupStatus(value){
  const s=String(value||'pending').toLowerCase();
  if(s==='completed')return {label:'Completada',className:'complete'};
@@ -1778,10 +1796,10 @@ function recentTopupStatus(value){
  return {label:'Pendiente',className:'pending'};
 }
 function recentTopupsMarkup(){
- const rows=Array.isArray(s.recentTopups)?s.recentTopups:[];
+ const rows=Array.isArray(s.recentTopups)?s.recentTopups.filter(x=>String(x.status||'').toLowerCase()==='completed'):[];
  return `<section class="card recent-topups-v1" id="recent-topups">
-  <div class="recent-topups-head"><div><span class="eyebrow">ACTIVIDAD DE HOY</span><h2>Últimas 3 recargas</h2><p>Movimientos recientes de la tienda, sin mostrar datos privados.</p></div><button class="btn ghost small" data-action="refresh-recent-topups" aria-label="Actualizar actividad">↻</button></div>
-  ${rows.length?`<div class="recent-topups-list">${rows.slice(0,3).map(x=>{const st=recentTopupStatus(x.status);return `<article class="recent-topup-row"><span class="recent-topup-icon">${I('game')}</span><span class="recent-topup-copy"><strong>${esc(x.game||'Recarga')}</strong><small>${esc(x.offer||'Producto digital')} · ${x.createdAt?new Date(x.createdAt).toLocaleTimeString('es-ES',{hour:'2-digit',minute:'2-digit'}):'Hoy'}</small></span><span class="recent-topup-status ${st.className}">${st.label}</span></article>`}).join('')}</div>`:`<div class="recent-topups-empty">Todavía no hay recargas registradas hoy.</div>`}
+  <div class="recent-topups-head"><div><span class="eyebrow">ACTIVIDAD DE HOY</span><h2>Últimas 3 recargas entregadas</h2><p>Solo recargas confirmadas como completadas; sin datos privados.</p></div><button class="btn ghost small" data-action="refresh-recent-topups" aria-label="Actualizar actividad">↻</button></div>
+  ${rows.length?`<div class="recent-topups-list">${rows.slice(0,3).map(x=>{const st=recentTopupStatus(x.status);return `<article class="recent-topup-row"><span class="recent-topup-icon">${I('game')}</span><span class="recent-topup-copy"><strong>${esc(x.game||'Recarga')}</strong><small>${esc(x.offer||'Producto digital')} · ${x.createdAt?formatShopTime(x.createdAt):'Hoy'}</small></span><span class="recent-topup-status ${st.className}">${st.label}</span></article>`}).join('')}</div>`:`<div class="recent-topups-empty">Todavía no hay recargas entregadas hoy.</div>`}
  </section>`;
 }
 async function loadRecentTopups(force=false){
@@ -1789,7 +1807,7 @@ async function loadRecentTopups(force=false){
  try{
   const response=await fetch(RS10_BASE+'/recent-topups',{headers:{apikey:RS_SUPABASE_KEY,accept:'application/json'},cache:'no-store'});
   if(!response.ok)throw Error('No se pudo consultar la actividad.');
-  const data=await response.json();s.recentTopups=Array.isArray(data.topups)?data.topups.slice(0,3):[];s.recentTopupsLoaded=true;
+  const data=await response.json();s.recentTopups=Array.isArray(data.topups)?data.topups.filter(x=>String(x.status||'')==='completed').slice(0,3):[];s.recentTopupsLoaded=true;
  }catch(error){console.warn('Recent topups:',error?.message||error)}
  const node=document.getElementById('recent-topups');
  if(node){const temp=document.createElement('div');temp.innerHTML=recentTopupsMarkup();node.replaceWith(temp.firstElementChild)}
@@ -2000,9 +2018,9 @@ function detail(){
 }
 function orders(){
  const list=Array.isArray(s.orders)?s.orders:[];
- const completed=list.filter(o=>/complet|entregad/i.test(String(o.status||''))).length;
- const pending=list.filter(o=>/pend|proces|revisi/i.test(String(o.status||''))).length;
- const rejected=list.filter(o=>/rechaz|cancel|fall/i.test(String(o.status||''))).length;
+ const completed=list.filter(o=>clientOrderStatus(o.status).key==='complete').length;
+ const pending=list.filter(o=>['pending','processing'].includes(clientOrderStatus(o.status).key)).length;
+ const rejected=list.filter(o=>['rejected','refunded'].includes(clientOrderStatus(o.status).key)).length;
  return `<div class="catalog-top orders-page-v4">
   <div class="orders-heading-v4"><div><div class="eyebrow">TU ACTIVIDAD EN REFILLS SHOP</div><h1 class="page-title">Mis pedidos</h1><p class="page-lead">Sigue tus compras, revisa los datos y consulta cada comprobante.</p></div><button class="btn primary orders-new-button" data-action="nav" data-page="recargas">${I('plus','tiny')} Nueva compra</button></div>
   <div class="orders-stats-v4">
@@ -2014,9 +2032,7 @@ function orders(){
   <div class="orders-list-heading"><h2>Historial de compras</h2><span>${list.length} ${list.length===1?'pedido':'pedidos'}</span></div>
   ${!list.length?`<div class="card orders-empty-v4"><div class="orders-empty-icon">${I('file','big')}</div><h3>Tu historial está vacío</h3><p>Cuando realices tu primera compra, aquí podrás seguir su estado y consultar todos sus detalles.</p><button class="btn primary" data-action="nav" data-page="recargas">Explorar recargas ${I('arrow','tiny')}</button></div>`:
   `<div class="orders-list-v4">${list.map(o=>{
-   const g=itemBy(o.id),status=String(o.status||'Pendiente'),low=status.toLowerCase();
-   const statusClass=low==='completed'||/complet|entregad/.test(low)?'complete':low==='refunded'?'refunded':/rechaz|cancel|fall/.test(low)?'rejected':/proces|revisi/.test(low)?'processing':'pending';
-   const statusLabel=low==='completed'?'Completado':low==='refunded'?'Reembolsado':/rechaz|cancel|fall/.test(low)?'Fallido':/proces|revisi/.test(low)?'En proceso':'Pendiente';
+   const g=itemBy(o.id),state=clientOrderStatus(o.status),statusClass=state.key,statusLabel=state.label;
    const title=g?.name||o.gameName||o.id||'Compra digital';
    const total=o.totalText||fmtMoney(o.total)+' '+(o.currency||'CUP');
    return `<article class="order-card-v4">
@@ -2302,8 +2318,7 @@ case 'checkout':
  case 'order':{
   let current=s.orders.find(x=>x.ref===s.selectedOrder);
   const orderGame=current?itemBy(current.id):null;
-  const orderStatus=String(current?.status||'Pendiente');
-  const orderStatusKey=/reembols|refund/i.test(orderStatus)?'refunded':/complet|entregad/i.test(orderStatus)?'complete':/rechaz|cancel|fall/i.test(orderStatus)?'rejected':/proces|revisi/i.test(orderStatus)?'processing':'pending';
+  const orderState=clientOrderStatus(current?.status),orderStatus=orderState.label,orderStatusKey=orderState.key;
   html=modalTitle('Detalle del pedido','Información y seguimiento de tu compra')+(current?`
    <div class="order-detail-hero-v4">${orderGame?`<img src="${photo(orderGame)}" alt="">`:`<span>${I('game')}</span>`}<div><small>PEDIDO #${esc(current.ref)}</small><strong>${esc(orderGame?.name||current.gameName||current.id||'Compra digital')}</strong><span>${esc(current.offer||'')}</span></div><b class="order-status-v4 ${orderStatusKey}">${esc(orderStatus)}</b></div>
    <div class="order-detail-total-v4"><small>TOTAL DEL PEDIDO</small><strong>${esc(current.totalText||fmtMoney(current.total)+' '+(current.currency||'CUP'))}</strong></div>
@@ -2330,7 +2345,7 @@ modal();if(scroll)window.scrollTo({top:0,behavior:'instant'})}
 function navigate(page){
  if(!s.user&&page!=='login'){s.afterAuthPage=page;s.authMode='login';s.page='login';s.modal=null;render(true);toast('Inicia sesión o crea tu cuenta para continuar.');return}
  if(page==='admin'&&s.role!=='admin'){s.page='inicio';render(true);toast('Esta sección requiere permisos de administrador.');return}
- s.modal=null;if(page!=='detalle')s.search='';s.filter='todos';s.showFavs=false;s.page=page;render(true);history.replaceState(null,'','#'+page);if(page==='inicio')void loadRecentTopups();
+ s.modal=null;if(page!=='detalle')s.search='';s.filter='todos';s.showFavs=false;s.page=page;render(true);history.replaceState(null,'','#'+page);if(page==='inicio')void loadRecentTopups(true);if(page==='pedidos')void loadCustomerOrders();
  if(page==='revendedores'&&!s.resellerPortal)void loadResellerPortal(false,true);
 }
 function openDetail(id){let g=itemBy(id);if(!g)return;const regions=gameRegionOptions(g);if(g.category==='juegos'&&regions.length){s.regionPickGame=id;s.modal='region-picker';modal();return}openRegionGame(id,regions[0]?.region||'')}
@@ -2666,8 +2681,9 @@ if(a==='request-wallet-deposit'){
 async function loadCustomerOrders(){
  if(!s.user){s.orders=[];return}
  try{const result=await edgeRequest('rs10-api','/orders',{auth:true});
-  s.orders=(result.orders||[]).map(x=>({id:x.id,ref:x.code,gameName:x.game,offer:x.offer,player:x.playerId||'PIN',payment:x.method==='mobile'?'Saldo móvil':x.method==='card'?'Transfermóvil':x.method==='wallet'?'MiTransfer':x.method==='usdt_wallet'?'USDT Wallet BEP-20':x.method==='usdt_bep20'?'USDT BEP-20':x.method,total:x.amount,currency:x.currency,status:x.status,paymentStatus:x.paymentStatus||'unpaid',paymentReference:x.paymentReference||'',paymentTxHash:x.paymentTxHash||'',refundReference:x.refundReference||'',date:x.created?new Date(x.created).toLocaleString('es-ES'):'',totalText:(Number(x.amount||0).toLocaleString('es-ES')+' '+(x.currency||''))}));
-  if(s.page==='pedidos')render();
+  const oldOrdersJson=JSON.stringify(s.orders||[]);
+  s.orders=(result.orders||[]).map(x=>({id:x.id,ref:x.code,gameName:x.game,offer:x.offer,player:x.playerId||'PIN',payment:x.method==='mobile'?'Saldo móvil':x.method==='card'?'Transfermóvil':x.method==='wallet'?'MiTransfer':x.method==='usdt_wallet'?'USDT Wallet BEP-20':x.method==='usdt_bep20'?'USDT BEP-20':x.method,total:x.amount,currency:x.currency,status:x.status,paymentStatus:x.paymentStatus||'unpaid',paymentReference:x.paymentReference||'',paymentTxHash:x.paymentTxHash||'',refundReference:x.refundReference||'',date:x.created?formatShopDateTime(x.created):'',totalText:(Number(x.amount||0).toLocaleString('es-ES')+' '+(x.currency||''))}));
+  if(s.page==='pedidos'&&JSON.stringify(s.orders)!==oldOrdersJson){const y=window.scrollY;render();window.scrollTo(0,y);if(s.modal==='order')modal()}
  }catch(err){console.warn('No se pudo cargar el historial:',err?.message||err)}
 }
 
@@ -2708,6 +2724,9 @@ s.page='login';
 render();
 loadLiveCatalog();
 window.setInterval(()=>{if(document.visibilityState==='visible'&&s.user)void loadPublicChanges(true)},120000);
+window.setInterval(()=>{if(document.visibilityState==='visible'&&s.user&&s.page==='pedidos')void loadCustomerOrders()},25000);
+window.setInterval(()=>{if(document.visibilityState==='visible'&&s.page==='inicio')void loadRecentTopups(true)},120000);
+document.addEventListener('visibilitychange',()=>{if(document.visibilityState==='visible'&&s.user&&s.page==='pedidos')void loadCustomerOrders()});
 (async function restoreRefillsAccount(){
  try{
   const session=await validAuthSession();
