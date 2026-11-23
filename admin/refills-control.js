@@ -179,78 +179,71 @@ function drawGames(){
 }
 
 function bulkOffersPanel(){
- const games=(S.cache.games||[]).filter(g=>g.active);
- const families=(S.cache.coFamilies||[]);
- const config=S.cache.store?.config||{};
- const g=games[0],margin=Number(g?.marginPercent||0);
- const rate=Number(config.buySmPerUsdt||0),cupRate=Number(config.cupPerSm||0);
- const sample=S.cache.bulkFamilySample&&Number(S.cache.bulkFamilySample.resellerPrice)>0?S.cache.bulkFamilySample:null;
- const unit=sample?Math.floor(Number(sample.resellerPrice)*(1+margin/100)*100+1e-9)/100:0;
- return '<section class="surface section rs-bulk-panel"><div class="panel-head"><div><span class="tag">REFILLS SHOP · GESTIÓN MASIVA</span><h2>Ofertas de un juego con un único margen</h2><small>Importa todas las ofertas de una familia real de Central One o actualiza las que ya vinculaste.</small></div>'+ico('offers')+'</div>'
- +'<div class="form-grid"><label>Juego de Refills Shop<select id="bulk-game" required>'+games.map(x=>'<option value="'+esc(x.id)+'" data-margin="'+Number(x.marginPercent||0)+'">'+esc(x.name)+'</option>').join('')+'</select></label>'
- +'<label>Familia del proveedor<select id="bulk-family" required><option value="">Elige un juego del catálogo Central One</option>'+families.map(x=>'<option value="'+esc(x.id)+'" '+(S.bulkFamily===x.id?'selected':'')+'>'+esc(x.name)+'</option>').join('')+'</select></label>'
- +'<label>Ganancia para todas las ofertas (%)<input id="bulk-margin" type="number" min="0" max="300" step="0.01" value="'+margin+'" required></label>'
- +'<div class="preview rs-bulk-preview" id="bulk-preview"><small>VISTA PREVIA DE PRECIOS</small><strong id="bulk-preview-price">'+(unit?usd(unit)+' USDT':'Selecciona un producto de Central One')+'</strong><span id="bulk-preview-conversion">'+(unit?money(Math.ceil(unit*rate))+' SM · '+money(Math.ceil(Math.ceil(unit*rate)*cupRate))+' CUP':'Se calculará desde el costo real del proveedor')+'</span></div>'
- +'</div><div class="form-actions rs-bulk-actions"><button class="btn secondary" data-action="bulk-apply" type="button" '+(!games.length?'disabled':'')+'>Aplicar margen a ofertas existentes</button><button class="btn primary" data-action="bulk-import" type="button" '+(!games.length||!families.length?'disabled':'')+'>Importar todas las ofertas de esta familia</button></div>'
- +'<div id="bulk-progress" class="alert-note" aria-live="polite">'+(S.bulkNotice?esc(S.bulkNotice):'Los importes se calculan como costo USDT + margen, luego se convierten a SM y CUP usando las tasas globales. No se realizan compras al proveedor al importar.')+'</div>'
- +(!families.length?'<div class="alert-note warn">No se pudo consultar el catálogo de Central One. Revisa su conexión en el apartado Central One.</div>':'')
+ const games=(S.cache.games||[]).filter(g=>g.active),families=S.cache.coFamilies||[],regions=S.cache.bulkRegions||[];
+ const cfg=S.cache.store?.config||{},selectedGame=games.find(g=>g.id===S.bulkGame)||games[0];
+ const selectedMargin=Number.isFinite(S.bulkMargin)?S.bulkMargin:Number(selectedGame?.marginPercent||0);
+ const product=S.cache.bulkFamilySample;
+ const rate=Number(cfg.buySmPerUsdt||0),cup=Number(cfg.cupPerSm||0);
+ const price=product&&Number(product.resellerPrice)>0?Math.floor((Number(product.resellerPrice)*(1+selectedMargin/100)+1e-9)*100)/100:0;
+ const sm=price>0?Math.ceil(price*rate):0;
+ return '<section class="surface section rs-bulk-panel"><div class="panel-head"><div><span class="tag">REFILLS SHOP · IMPORTACIÓN REGIONAL</span><h2>Importar ofertas por juego y región</h2><small>Elige una familia de Central One y exactamente una región. No se alterarán otras regiones.</small></div>'+ico('offers')+'</div>'
+ +'<div class="form-grid"><label>Juego de tu tienda<select id="bulk-game" required>'+games.map(g=>'<option value="'+esc(g.id)+'" '+(selectedGame?.id===g.id?'selected':'')+'>'+esc(g.name)+'</option>').join('')+'</select></label>'
+ +'<label>Juego / familia en Central One<select id="bulk-family" required><option value="">Selecciona la familia</option>'+families.map(f=>'<option value="'+esc(f.id)+'" '+(S.bulkFamily===f.id?'selected':'')+'>'+esc(f.name)+'</option>').join('')+'</select></label>'
+ +'<label>Región exacta<select id="bulk-region" required '+(!S.bulkFamily?'disabled':'')+'><option value="">'+(S.bulkFamily?'Selecciona región':'Selecciona familia primero')+'</option>'+regions.map(r=>'<option value="'+esc(r)+'" '+(S.bulkRegion===r?'selected':'')+'>'+esc(r)+'</option>').join('')+'</select></label>'
+ +'<label>Ganancia para esta región (%)<input id="bulk-margin" type="number" min="0" max="300" step="0.01" value="'+selectedMargin+'" required></label>'
+ +'<div class="preview rs-bulk-preview" id="bulk-preview"><small>EJEMPLO · PRECIO DE UNA OFERTA REAL</small><strong id="bulk-preview-price">'+(price?usd(price)+' USDT':'Selecciona familia y región')+'</strong><span id="bulk-preview-conversion">'+(price?money(sm)+' SM · '+money(Math.ceil(sm*cup))+' CUP':'La vista previa usa precios y tasas de Central One')+'</span></div></div>'
+ +'<div class="form-actions rs-bulk-actions"><button class="btn secondary" data-action="bulk-apply" type="button" '+(!games.length||!S.bulkRegion?'disabled':'')+'>Actualizar precios de esta región</button><button class="btn primary" data-action="bulk-import" type="button" '+(!games.length||!S.bulkRegion?'disabled':'')+'>Importar todas las ofertas de esta región</button></div>'
+ +'<div id="bulk-progress" class="alert-note" aria-live="polite">'+esc(S.bulkNotice||'La importación no realiza compras. Se guardan ofertas en Supabase y se validan los precios con el proveedor; las ventas siguen sujetas a su habilitación.')+'</div>'
+ +(!families.length?'<div class="alert-note warn">No se obtuvo el catálogo de Central One. Comprueba su conexión en el apartado Integraciones.</div>':'')
  +'</section><div class="spacing"></div>';
 }
 function updateBulkPreview(){
- const sel=$('bulk-game'),gm=(S.cache.games||[]).find(g=>g.id===sel?.value);
- const m=Number($('bulk-margin')?.value),p=S.cache.bulkFamilySample;
- const raw=Number(p?.resellerPrice),rate=Number(S.cache.store?.config?.buySmPerUsdt||0),cup=Number(S.cache.store?.config?.cupPerSm||0);
- const valid=Number.isFinite(m)&&m>=0&&m<=300&&raw>0&&rate>0&&cup>0;
- const cost=valid?Math.floor((raw*(1+m/100)+1e-9)*100)/100:0,sm=Math.ceil(cost*rate),finalCup=Math.ceil(sm*cup);
- const caption=$('bulk-preview-price'),conversion=$('bulk-preview-conversion');
- if(caption)caption.textContent=valid?usd(cost)+' USDT':'Introduce un margen válido';
- if(conversion)conversion.textContent=valid?money(sm)+' SM · '+money(finalCup)+' CUP · ejemplo: '+p.name:'No se publica ningún importe inventado';
+ const raw=Number(S.cache.bulkFamilySample?.resellerPrice),margin=Number($('bulk-margin')?.value);
+ const rate=Number(S.cache.store?.config?.buySmPerUsdt||0),cup=Number(S.cache.store?.config?.cupPerSm||0);
+ const valid=!!S.bulkRegion&&Number.isFinite(raw)&&raw>0&&Number.isFinite(margin)&&margin>=0&&margin<=300&&rate>0&&cup>0;
+ const price=valid?Math.floor((raw*(1+margin/100)+1e-9)*100)/100:0,sm=Math.ceil(price*rate);
+ const top=$('bulk-preview-price'),bottom=$('bulk-preview-conversion');
+ if(top)top.textContent=valid?usd(price)+' USDT':'Selecciona una región válida';
+ if(bottom)bottom.textContent=valid?money(sm)+' SM · '+money(Math.ceil(sm*cup))+' CUP · '+S.cache.bulkFamilySample.name:'No hay precios inventados ni mezcla de regiones';
+ const available=!!S.bulkRegion&&valid;
+ for(const action of ['bulk-apply','bulk-import']){const b=document.querySelector('[data-action="'+action+'"]');if(b)b.disabled=!available}
 }
 function bulkArgs(){
- const gameId=$('bulk-game')?.value,familyId=$('bulk-family')?.value,marginPercent=Number($('bulk-margin')?.value);
- if(!gameId||!Number.isFinite(marginPercent)||marginPercent<0||marginPercent>300)throw Error('Elige un juego y un margen de 0 a 300 %.');
- return {gameId,familyId,marginPercent};
+ const gameId=$('bulk-game')?.value,familyId=$('bulk-family')?.value,region=$('bulk-region')?.value,marginPercent=Number($('bulk-margin')?.value);
+ if(!gameId||!familyId||!region||!Number.isFinite(marginPercent)||marginPercent<0||marginPercent>300)throw Error('Selecciona juego, familia, región y margen válido entre 0 y 300 %.');
+ if(!(S.cache.bulkRegions||[]).includes(region))throw Error('Esa región no está disponible en la familia de Central One.');
+ return {gameId,familyId,region,marginPercent};
 }
 async function applyExistingMargin(options){
- const r=await request('/admin/game-offers-bulk',{method:'POST',body:{gameId:options.gameId,marginPercent:options.marginPercent,publish:true}});
- S.bulkNotice='Margen aplicado: '+r.published+' ofertas publicadas, '+r.outOfStock+' sin stock, '+r.missing+' no encontradas.';
+ const r=await request('/admin/game-offers-bulk',{method:'POST',body:{gameId:options.gameId,familyId:options.familyId,region:options.region,marginPercent:options.marginPercent,publish:true}});
+ S.bulkNotice=options.region+': '+r.updated+' ofertas actualizadas, '+r.published+' publicadas, '+r.outOfStock+' agotadas. Otras regiones intactas.';
  flash(S.bulkNotice);return r;
 }
 async function importFamilyOffers(options){
- if(!options.familyId)throw Error('Selecciona una familia del catálogo Central One.');
- if(S.cache.store?.salesEnabled===true)throw Error('Pausa las ventas antes de importar por lote: así ninguna oferta se muestra con un precio temporal.');
- if(!modalConfirm('Se vincularán las ofertas de esta familia al juego y se aplicará un margen de '+options.marginPercent+'%. ¿Continuar?'))return;
- const ui=$('bulk-progress');
- const progress=text=>{S.bulkNotice=text;if(ui)ui.textContent=text};
- let offset=0,processed=0,failed=0,firstError='',all=0,done=false;
- // Un lote por página, sin pagos ni órdenes al proveedor.
- while(!done&&processed<600){
-  const page=await request('/admin/centralone/catalog?kind=all&family='+encodeURIComponent(options.familyId)+'&offset='+offset);
-  const products=Array.isArray(page.products)?page.products:[];
-  all=Number(page.total||products.length);
-  if(!products.length)break;
-  const selected=products.slice(0,Math.min(products.length,600-processed));
-  let nextIndex=0;
-  async function worker(){
-   while(nextIndex<selected.length){
-    const p=selected[nextIndex++];
-    if(!p?.productId){failed++;continue}
-    try{await request('/admin/centralone/offer',{method:'POST',body:{
-      gameId:options.gameId,productId:p.productId,displayName:p.name,gainSm:0,featured:false
-    }})}catch(e){failed++;if(!firstError)firstError=e?.message||'Error en oferta'}
-    processed++;progress('Importando ofertas reales: '+processed+' / '+all+(failed?' · '+failed+' pendientes de revisión':''));
-   }
-  }
+ if(S.cache.store?.salesEnabled===true)throw Error('Pausa las ventas antes de importar un lote para evitar cambios de precio durante las compras.');
+ if(!modalConfirm('Importar SOLO '+options.region+' de la familia seleccionada con '+options.marginPercent+' % de ganancia? Las otras regiones no cambiarán.'))return;
+ const n=$('bulk-progress'),progress=t=>{S.bulkNotice=t;if(n)n.textContent=t};
+ let offset=0,processed=0,failed=0,firstError='',total=0;
+ while(processed<600){
+  const page=await request('/admin/centralone/catalog?kind=all&family='+encodeURIComponent(options.familyId)+'&region='+encodeURIComponent(options.region)+'&offset='+offset);
+  const items=(page.products||[]).filter(p=>p.productId&&p.familyId===options.familyId&&p.region===options.region);
+  total=Number(page.total||0);
+  if(!items.length)break;
+  let next=0;
+  async function worker(){while(next<items.length&&processed<600){
+   const product=items[next++];processed++;
+   try{await request('/admin/centralone/offer',{method:'POST',body:{gameId:options.gameId,productId:product.productId,displayName:product.name,gainSm:0,featured:false}})}
+   catch(err){failed++;if(!firstError)firstError=String(err?.message||'Error al vincular')}
+   progress('Región '+options.region+' · '+processed+' / '+total+' revisadas'+(failed?' · '+failed+' errores':''));
+  }}
   await Promise.all([worker(),worker(),worker()]);
-  if(page.nextOffset===null||page.nextOffset===undefined){done=true}
-  else if(Number(page.nextOffset)<=offset){done=true}
-  else offset=Number(page.nextOffset);
+  if(page.nextOffset===null||page.nextOffset===undefined||Number(page.nextOffset)<=offset)break;
+  offset=Number(page.nextOffset);
  }
- if(processed===0)throw Error('No se encontraron productos de esa familia.');
+ if(!processed)throw Error('La familia y región seleccionadas no tienen ofertas.');
  const result=await applyExistingMargin(options);
- S.bulkNotice='Importación finalizada: '+processed+' productos revisados, '+result.published+' visibles, '+failed+' errores.'+(failed?' '+firstError:'')+(all>600?' Importa el resto en otra operación.':'');
- await load('offers');
- flash(S.bulkNotice,failed>0);
+ S.bulkNotice='Región '+options.region+': '+result.updated+' ofertas actualizadas; '+failed+' errores.'+(total>600?' Solo se procesaron las primeras 600.':'')+(firstError?' '+firstError:'');
+ await load('offers');flash(S.bulkNotice,failed>0);
 }
 
 function drawOffers(){
@@ -359,7 +352,7 @@ async function openOfferEdit(id){
 function modalConfirm(text){return window.confirm(text)}
 async function runAction(action,el){
  const id=el.dataset.id,code=el.dataset.code;
- if(action==='bulk-apply')return withBusy(async()=>{const args=bulkArgs();if(!modalConfirm('¿Aplicar el margen de '+args.marginPercent+' % a todas las ofertas vinculadas de este juego?'))return;await applyExistingMargin(args);await load('offers')});
+ if(action==='bulk-apply')return withBusy(async()=>{const args=bulkArgs();if(!modalConfirm('¿Actualizar SOLO '+args.region+' con ganancia '+args.marginPercent+' %?'))return;await applyExistingMargin(args);await load('offers')});
  if(action==='bulk-import')return withBusy(async()=>{const args=bulkArgs();await importFamilyOffers(args)});
  if(action==='close-modal')return closeModal();
  if(action==='refresh')return load();
@@ -436,7 +429,7 @@ function filterVisibleRecords(value,root){
  }
 }
 document.addEventListener('input',e=>{
- if(e.target?.id==='bulk-margin')updateBulkPreview();
+ if(e.target?.id==='bulk-margin'){S.bulkMargin=Number(e.target.value);updateBulkPreview();}
  const id=e.target.id;
  if(id==='filter-games'){S.search=e.target.value;filterVisibleRecords(e.target.value,e.target.closest('.surface')||$('admin-view'))}
  if(id==='filter-offers'){S.offerSearch=e.target.value;filterVisibleRecords(e.target.value,e.target.closest('.surface')||$('admin-view'))}
@@ -445,12 +438,24 @@ document.addEventListener('input',e=>{
 });
 document.addEventListener('change',e=>{
  if(e.target?.id==='bulk-family'){
-   const family=e.target.value;S.bulkFamily=family;S.cache.bulkFamilySample=null;updateBulkPreview();
-   if(family){void request('/admin/centralone/catalog?kind=all&family='+encodeURIComponent(family)+'&offset=0')
-     .then(data=>{if(S.bulkFamily!==family)return;S.cache.bulkFamilySample=(data.products||[]).find(x=>Number(x.resellerPrice)>0)||null;updateBulkPreview()})
-     .catch(error=>flash(error?.message||'No se pudo consultar la familia.',true))}
+  const family=e.target.value;S.bulkFamily=family;S.bulkRegion='';S.cache.bulkRegions=[];S.cache.bulkFamilySample=null;
+  updateBulkPreview();const select=$('bulk-region');
+  if(select){select.disabled=!family;select.innerHTML='<option value="">'+(family?'Consultando regiones…':'Selecciona familia primero')+'</option>'}
+  if(family){void request('/admin/centralone/catalog?kind=all&family='+encodeURIComponent(family)+'&offset=0')
+   .then(data=>{
+    if(S.bulkFamily!==family)return;
+    S.cache.bulkRegions=(data.regions||[]).filter(x=>typeof x==='string'&&x.trim());
+    if(select){select.disabled=false;select.innerHTML='<option value="">Selecciona región</option>'+S.cache.bulkRegions.map(r=>'<option value="'+esc(r)+'">'+esc(r)+'</option>').join('')}
+    updateBulkPreview();
+   }).catch(err=>flash(err?.message||'No se pudieron consultar las regiones',true))}
  }
- if(e.target?.id==='bulk-game'){$('bulk-margin').value=Number(e.target.selectedOptions?.[0]?.dataset.margin||0);updateBulkPreview()}
+ if(e.target?.id==='bulk-region'){
+  const family=S.bulkFamily,region=e.target.value;S.bulkRegion=region;S.cache.bulkFamilySample=null;updateBulkPreview();
+  if(family&&region){void request('/admin/centralone/catalog?kind=all&family='+encodeURIComponent(family)+'&region='+encodeURIComponent(region)+'&offset=0')
+   .then(data=>{if(S.bulkFamily!==family||S.bulkRegion!==region)return;S.cache.bulkFamilySample=(data.products||[]).find(p=>Number(p.resellerPrice)>0)||null;updateBulkPreview();const n=$('bulk-progress');if(n)n.textContent='Región '+region+': '+data.total+' ofertas del proveedor. Confirma antes de importar.'})
+   .catch(err=>flash(err?.message||'No se pudieron consultar las ofertas de la región',true))}
+ }
+ if(e.target?.id==='bulk-game'){S.bulkGame=e.target.value;S.bulkMargin=Number((S.cache.games||[]).find(g=>g.id===S.bulkGame)?.marginPercent||0);$('bulk-margin').value=S.bulkMargin;updateBulkPreview()}
  if(e.target.id==='game-filter'){S.gameFilter=e.target.value;drawGames();filterVisibleRecords(S.search,$('game-filter')?.closest('.surface'))}
  if(e.target.id==='offer-filter'){S.offerFilter=e.target.value;drawOffers();filterVisibleRecords(S.offerSearch,$('offer-filter')?.closest('.surface'))}
  if(e.target.id==='co-kind')S.coKind=e.target.value;
