@@ -11,7 +11,7 @@ const status=s=>({pending:'Pendiente',processing:'Procesando',completed:'Complet
 const date=s=>s?new Date(s).toLocaleDateString('es-ES',{year:'numeric',month:'short',day:'numeric'}):'Sin vencimiento';
 const timestamp=s=>s?new Date(s).toLocaleString('es-ES'):'—';
 const imageURL=s=>/^https:\/\//i.test(String(s||''))?String(s):'/REFILLSHOP/assets/refills-icon.png';
-const S={client:null,user:null,profile:null,membership:null,wallet:{USDT:0,CUP:0,SM:0},rates:{buySmPerUsdt:0,cupPerSm:0},tiers:[],instructions:{},deposits:[],games:[],offers:[],orders:[],view:'inicio',authMode:'login',selectedGame:'',selectedOffer:'',pinOrder:'',pinValue:null,search:'',kindFilter:'all',tier:'level2',currency:'USDT',pendingPlanId:null,pendingOrderId:null,busy:false,ready:false};
+const S={client:null,user:null,profile:null,membership:null,rememberSession:true,bootstrap:null,wallet:{USDT:0,CUP:0,SM:0},rates:{buySmPerUsdt:0,cupPerSm:0},tiers:[],instructions:{},deposits:[],games:[],offers:[],orders:[],view:'inicio',authMode:'login',selectedGame:'',selectedOffer:'',pinOrder:'',pinValue:null,search:'',kindFilter:'all',tier:'level2',currency:'USDT',pendingPlanId:null,pendingOrderId:null,busy:false,ready:false};
 const BASE='/REFILLSHOP/revendedores';
 const ROUTES=new Set(['inicio','catalogo','planes','billetera','pedidos','cuenta','juego','compra','codigo']);
 function routeURL(view,extra=''){return BASE+'/'+(view==='inicio'?'':view+'/')+(extra?'?'+extra:'')}
@@ -158,7 +158,7 @@ function auth(){
  return `<div class="auth-wrap"><section class="panel auth-intro"><span class="eyebrow">PORTAL INDEPENDIENTE</span><h1>REFILLS <span style="color:#78cfff">PRO</span></h1><h2>Recargas digitales para revendedores.</h2><p>Tu propia entrada para consultar ofertas de reventa, activar planes de 15 días y administrar tu wallet. Sin mezclarte con la tienda para clientes.</p><div class="stats"><div class="stat"><small>LEVEL 2</small><strong>15 días</strong><small>Precios especiales</small></div><div class="stat"><small>LEVEL 3</small><strong>15 días</strong><small>Precios preferentes</small></div><div class="stat"><small>PLAN GRATIS</small><strong>Gratis</strong><small>Sin vencimiento</small></div></div></section>
  <section class="panel auth-card"><span class="eyebrow">ACCESO DE REVENDEDORES</span><h2>${register?'Crear mi cuenta':'Bienvenido de nuevo'}</h2><div class="auth-tabs"><button class="${register?'':'active'}" data-auth="login">Iniciar sesión</button><button class="${register?'active':''}" data-auth="register">Registrarme</button></div><form id="authForm"><input type="hidden" name="mode" value="${register?'register':'login'}">${register?'<label class="field">Nombre completo<input name="fullName" minlength="2" maxlength="90" autocomplete="name" required></label>':''}
  <div class="two"><label class="field">País<select name="prefix" required>${countries()}</select></label><label class="field">Número de teléfono<input name="phone" type="tel" inputmode="tel" autocomplete="tel-national" placeholder="5xxxxxxx" minlength="5" maxlength="15" required></label></div>
- <label class="field">Contraseña<input name="password" type="password" autocomplete="${register?'new-password':'current-password'}" minlength="${register?'10':'1'}" maxlength="72" required></label><input type="text" name="website" autocomplete="off" tabindex="-1" aria-hidden="true" class="sr-only"><button class="button full" type="submit">${register?'Crear cuenta de revendedor':'Acceder a Refills Pro'}</button></form>
+ <label class="field">Contraseña<input name="password" type="password" autocomplete="${register?'new-password':'current-password'}" minlength="${register?'10':'1'}" maxlength="72" required></label>${!register?'<label class="rs-remember"><input type="checkbox" name="rememberSession" '+(S.rememberSession?'checked':'')+'><span><strong>Recordar mi sesión</strong><small>Mantener el acceso en este dispositivo</small></span></label>':''}<input type="text" name="website" autocomplete="off" tabindex="-1" aria-hidden="true" class="sr-only"><button class="button full" type="submit">${register?'Crear cuenta de revendedor':'Acceder a Refills Pro'}</button></form>
  <p class="authentication-note">Si ya tienes una cuenta Refills Shop, puedes usar tus credenciales aquí; <strong>el inicio de sesión de este portal se guarda por separado</strong>. Al registrarte se asigna el plan Gratis.</p></section></div>`;
 }
 function render(){
@@ -193,6 +193,7 @@ async function readProof(file){
  if(!['image/jpeg','image/png','image/webp'].includes(file.type))throw Error('Utiliza imágenes JPG, PNG o WEBP.');
  return new Promise((resolve,reject)=>{const r=new FileReader();r.onload=()=>resolve(r.result);r.onerror=()=>reject(Error('No se pudo leer el comprobante.'));r.readAsDataURL(file)});
 }
+function createResellerClient(bootstrap){return window.supabase.createClient(bootstrap.supabaseUrl||SB,bootstrap.publishableKey||PUB,{auth:{persistSession:true,storage:S.rememberSession?window.localStorage:window.sessionStorage,autoRefreshToken:true,detectSessionInUrl:true,storageKey:'refills-pro-reseller-auth-v1'}})}
 async function signout(){try{await S.client?.auth.signOut()}catch(e){fail(e)}S.user=null;S.profile=null;S.membership=null;S.wallet={USDT:0,CUP:0,SM:0};S.view='inicio';updateURL('inicio');render()}
 async function handleForm(f){
  if(S.busy)return;
@@ -205,6 +206,9 @@ async function handleForm(f){
     if(fullName.length<2||password.length<10||!/[a-záéíóúñ]/i.test(password)||!/\d/.test(password))throw Error('Introduce tu nombre y una contraseña de al menos 10 caracteres con letras y números.');
     await req('rs10-api','/auth/phone-register',{auth:false,method:'POST',body:{fullName,phone:p,password,website:String(f.elements.website.value||'')}});
    }
+   const remember=S.authMode==='register'?S.rememberSession:f.elements.rememberSession?.checked!==false;
+   try{localStorage.setItem('refills_shop_remember_session',String(remember))}catch{}
+   if(remember!==S.rememberSession){await S.client.auth.signOut().catch(()=>{});S.rememberSession=remember;S.client=createResellerClient(S.bootstrap)}
    const {data,error}=await S.client.auth.signInWithPassword({email:alias(p),password});
    if(error)throw Error('No se pudo iniciar sesión. Comprueba el teléfono y la contraseña.');
    S.user=data.user;loading('Preparando tu cuenta de revendedor');await hydrate();S.view='inicio';updateURL('inicio');await loadOrders().catch(()=>{});render();notify('Acceso correcto. Bienvenido a Refills Pro.');
@@ -285,7 +289,8 @@ async function start(){
  try{
   const bootstrap=await req('rs10-api','/bootstrap',{auth:false});
   if(!window.supabase?.createClient)throw Error('No fue posible cargar el acceso seguro.');
-  S.client=window.supabase.createClient(bootstrap.supabaseUrl||SB,bootstrap.publishableKey||PUB,{auth:{persistSession:true,autoRefreshToken:true,detectSessionInUrl:true,storageKey:'refills-pro-reseller-auth-v1'}});
+  S.bootstrap=bootstrap;try{S.rememberSession=localStorage.getItem('refills_shop_remember_session')!=='false'}catch{S.rememberSession=true}
+  S.client=createResellerClient(bootstrap);
   const {data}=await S.client.auth.getUser();S.user=data?.user||null;
   S.ready=true;
   if(S.user){await hydrate();await loadOrders().catch(()=>{});if(S.view==='codigo'&&S.pinOrder)await fetchPin(S.pinOrder).catch(fail);}
