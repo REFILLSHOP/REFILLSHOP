@@ -207,7 +207,7 @@ async function handleForm(f){
     await req('rs10-api','/auth/phone-register',{auth:false,method:'POST',body:{fullName,phone:p,password,website:String(f.elements.website.value||'')}});
    }
    const remember=S.authMode==='register'?S.rememberSession:f.elements.rememberSession?.checked!==false;
-   try{localStorage.setItem('refills_shop_remember_session',String(remember))}catch{}
+   try{localStorage.setItem('refills_shop_remember_session',String(remember));if(!remember)localStorage.removeItem('refills-pro-reseller-auth-v1')}catch{}
    if(remember!==S.rememberSession){await S.client.auth.signOut().catch(()=>{});S.rememberSession=remember;S.client=createResellerClient(S.bootstrap)}
    const {data,error}=await S.client.auth.signInWithPassword({email:alias(p),password});
    if(error)throw Error('No se pudo iniciar sesión. Comprueba el teléfono y la contraseña.');
