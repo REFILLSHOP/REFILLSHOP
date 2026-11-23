@@ -2692,11 +2692,16 @@ async function loadCustomerOrders(){
  }catch(err){console.warn('No se pudo cargar el historial:',err?.message||err)}
 }
 
-async function loadLiveCatalog(){
- s.catalogLoading=true;s.catalogError='';
+let rsCatalogSnapshot='';
+async function loadLiveCatalog(silent=false){
+ if(silent&&(s.modal||['detalle','login'].includes(s.page)))return;
+ if(!silent){s.catalogLoading=true;s.catalogError='';}
  try{
   const data=await edgeRequest('rs10-api','/storefront',{auth:false});
   const games=Array.isArray(data.games)?data.games:[],offers=Array.isArray(data.offers)?data.offers:[];
+  const signature=JSON.stringify({games:[...games].sort((a,b)=>String(a.id).localeCompare(String(b.id))),offers:[...offers].sort((a,b)=>String(a.id).localeCompare(String(b.id))),config:data.config,salesEnabled:data.salesEnabled});
+  if(silent&&signature===rsCatalogSnapshot)return;
+  rsCatalogSnapshot=signature;
   const grouped=new Map();for(const g of games){
    const id=String(g.id||'').trim();if(!id)continue;
    grouped.set(id,{id,name:String(g.name||'Producto'),category:/gift|pin|tarjeta/i.test(String(g.tag||''))?'gift':(/m[oó]vil|internet|nauta|cubacel/i.test(String(g.tag||''))?'movil':'juegos'),photo:'',imageUrl:g.imageUrl||'',featured:g.featured===true,sortOrder:Number(g.sortOrder||99),marginPercent:Number(g.marginPercent||0),region:'Global',desc:'',offers:[]});
@@ -2712,8 +2717,11 @@ async function loadLiveCatalog(){
   }
   const validIds=new Set(ITEMS.map(g=>g.id));s.cart=s.cart.filter(c=>{const game=itemBy(c.id);if(!game||!validIds.has(c.id)||!game.offers.length)return false;return c.offerId?game.offers.some(o=>o.id===c.offerId):Boolean(game.offers[c.offer]);});save('cart',s.cart);
   if(s.page==='detalle'&&!validIds.has(s.detailId))s.page='recargas';
-  render();void loadPublicChanges();if(s.page==='inicio')void loadRecentTopups();
+  const oldScroll=silent?window.scrollY:0;
+  render();if(silent)window.scrollTo(0,oldScroll);
+  void loadPublicChanges();if(s.page==='inicio')void loadRecentTopups();
  }catch(error){
+  if(silent){console.warn('Refills Shop catalog refresh:',error?.message||error);return}
   s.catalogLoading=false;s.catalogError=error?.message||'No se pudo actualizar el catálogo desde Supabase';
   ITEMS.length=0;render();console.warn('Refills Shop storefront:',s.catalogError);
  }
@@ -2730,8 +2738,13 @@ render();
 loadLiveCatalog();
 window.setInterval(()=>{if(document.visibilityState==='visible'&&s.user)void loadPublicChanges(true)},120000);
 window.setInterval(()=>{if(document.visibilityState==='visible'&&s.user&&s.page==='pedidos')void loadCustomerOrders()},25000);
+window.setInterval(()=>{if(document.visibilityState==='visible'&&['inicio','recargas','gift','perfil','pedidos'].includes(s.page)&&!s.modal)void loadLiveCatalog(true)},60000);
 window.setInterval(()=>{if(document.visibilityState==='visible'&&s.page==='inicio')void loadRecentTopups(true)},120000);
-document.addEventListener('visibilitychange',()=>{if(document.visibilityState==='visible'&&s.user&&s.page==='pedidos')void loadCustomerOrders()});
+document.addEventListener('visibilitychange',()=>{
+ if(document.visibilityState!=='visible')return;
+ if(s.user&&s.page==='pedidos')void loadCustomerOrders();
+ if(['inicio','recargas','gift','perfil','pedidos'].includes(s.page)&&!s.modal)void loadLiveCatalog(true);
+});
 (async function restoreRefillsAccount(){
  try{
   const session=await validAuthSession();
