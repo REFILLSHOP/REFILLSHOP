@@ -308,22 +308,23 @@ document.addEventListener('submit',async e=>{
   flash(r?.message||'Cambios confirmados por Supabase.');await load();
  });
 });
-function filterVisibleRecords(value){
+function filterVisibleRecords(value,root){
  const q=String(value||'').trim().toLowerCase();
- for(const item of document.querySelectorAll('#admin-view .list > .record, #admin-view .list > .surface')){
+ const container=root||$('admin-view');
+ for(const item of container.querySelectorAll('.list > .record, .list > .surface')){
   item.hidden=!!q&&!item.textContent.toLowerCase().includes(q);
  }
 }
 document.addEventListener('input',e=>{
  const id=e.target.id;
- if(id==='filter-games'){S.search=e.target.value;filterVisibleRecords(e.target.value)}
- if(id==='filter-offers'){S.offerSearch=e.target.value;filterVisibleRecords(e.target.value)}
- if(id==='filter-orders'){S.search=e.target.value;filterVisibleRecords(e.target.value)}
- if(id==='filter-customers'){S.search=e.target.value;filterVisibleRecords(e.target.value)}
+ if(id==='filter-games'){S.search=e.target.value;filterVisibleRecords(e.target.value,e.target.closest('.surface')||$('admin-view'))}
+ if(id==='filter-offers'){S.offerSearch=e.target.value;filterVisibleRecords(e.target.value,e.target.closest('.surface')||$('admin-view'))}
+ if(id==='filter-orders'){S.search=e.target.value;filterVisibleRecords(e.target.value,e.target.closest('.surface')||$('admin-view'))}
+ if(id==='filter-customers'){S.search=e.target.value;filterVisibleRecords(e.target.value,e.target.closest('.surface')||$('admin-view'))}
 });
 document.addEventListener('change',e=>{
- if(e.target.id==='game-filter'){S.gameFilter=e.target.value;drawGames();filterVisibleRecords(S.search)}
- if(e.target.id==='offer-filter'){S.offerFilter=e.target.value;drawOffers();filterVisibleRecords(S.offerSearch)}
+ if(e.target.id==='game-filter'){S.gameFilter=e.target.value;drawGames();filterVisibleRecords(S.search,$('game-filter')?.closest('.surface'))}
+ if(e.target.id==='offer-filter'){S.offerFilter=e.target.value;drawOffers();filterVisibleRecords(S.offerSearch,$('offer-filter')?.closest('.surface'))}
  if(e.target.id==='co-kind')S.coKind=e.target.value;
  if(e.target.id==='co-selected-product')S.product=e.target.value;
 });
