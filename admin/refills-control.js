@@ -265,11 +265,37 @@ function renderCoResults(){
  const ps=S.cache.coProducts||[];
  return ps.length?'<div class="list">'+ps.slice(0,20).map(p=>'<button type="button" class="record" data-action="select-co" data-id="'+esc(p.productId)+'" style="color:inherit;text-align:left;width:100%"><span><h3>'+esc(p.name)+'</h3><small>'+esc(p.region||'Global')+' · '+esc(p.category||'')+'</small></span><span class="price">'+usd(p.resellerPrice)+' USDT'+(p.inStock?'':' · agotado')+'</span></button>').join('')+'</div>':'<div class="alert-note">Busca y selecciona un producto real de Central One. No se importan ofertas automáticamente.</div>';
 }
+function paymentMethodLabel(method){
+ return ({mobile:'Saldo móvil ETECSA',wallet:'MiTransfer (teléfono)',card:'Transfermóvil (CUP)',usdt_wallet:'USDT BEP-20',usdt_bep20:'Pasarela USDT'})[method]||method||'Sin método';
+}
 function drawOrders(){
- const list=S.cache.orders?.orders||[],q=S.search.toLowerCase();
- const filtered=list;
- $('admin-view').innerHTML='<div class="toolbar"><input type="search" id="filter-orders" placeholder="Buscar por código, cliente o juego" value="'+esc(S.search)+'"><button class="btn secondary" data-action="refresh">Actualizar pedidos ↻</button></div>'
- +'<div class="list">'+(filtered.length?filtered.map(o=>'<article class="surface section"><div class="panel-head"><div><small class="tag">PEDIDO '+esc(o.code)+'</small><h2>'+esc(o.game||'Recarga')+' · '+esc(o.offer||'')+'</h2><small>'+esc(o.customerName||'Cliente')+' · '+esc(o.customerPhone||'')+' · '+date(o.created)+'</small></div>'+status(o.status)+'</div><div class="grid three"><div><span class="tag">DESTINO</span><p>'+esc(o.playerId||'PIN')+'</p></div><div><span class="tag">MONTO</span><p>'+money(o.amount)+' '+esc(o.currency)+'</p></div><div><span class="tag">PAGO</span><p>'+esc(o.paymentStatus||'Sin verificar')+'</p></div></div><div class="form-actions">'+(o.receiptAvailable?'<button class="btn ghost small" data-action="receipt" data-code="'+esc(o.code)+'">'+ico('eye')+' Ver comprobante</button>':'')+(o.paymentStatus!=='paid'&&o.status==='pending'?'<button class="btn secondary small" data-action="verify-payment" data-code="'+esc(o.code)+'">Verificar pago</button>':'')+(o.paymentStatus==='paid'&&o.status==='pending'&&o.kind==='topup'?'<button class="btn primary small" data-action="fulfill" data-code="'+esc(o.code)+'">Enviar a Central One</button>':'')+(o.kind==='pin'&&o.paymentStatus==='paid'?'<button class="btn primary small" data-action="assign-pin" data-code="'+esc(o.code)+'">Entregar PIN</button>':'')+(o.status==='pending'?'<button class="btn danger small" data-action="reject-order" data-code="'+esc(o.code)+'">Rechazar</button>':'')+(o.paymentStatus==='paid'&&o.status!=='refunded'?'<button class="btn ghost small" data-action="refund-order" data-code="'+esc(o.code)+'">Registrar reembolso</button>':'')+'</div></article>').join(''):empty('Sin pedidos','Cuando recibas compras reales, aparecerán aquí.'))+'</div>';
+ const orders=S.cache.orders?.orders||[];
+ const pending=orders.filter(o=>o.status==='pending'),failed=orders.filter(o=>['failed','rejected'].includes(o.status));
+ $('admin-view').innerHTML='<div class="grid three">'
+  +metric('PEDIDOS RECIENTES',orders.length,'Hasta 150 movimientos','orders')
+  +metric('POR REVISAR',pending.length,'Comprobar cobros y entregas','shield')
+  +metric('FALLIDOS',failed.length,'Comprobar incidencias','alert')
+  +'</div><div class="spacing"></div>'
+  +'<section class="surface section"><div class="panel-head"><div><h2>Revisión de pagos</h2><small>Verifica cada ingreso en la cuenta antes de aprobar la compra; la referencia del cliente no es confirmación del banco.</small></div>'+ico('payments')+'</div>'
+  +'<div class="toolbar"><input type="search" id="filter-orders" placeholder="Código, juego, teléfono o referencia…" value="'+esc(S.search)+'"><button type="button" class="btn secondary" data-action="refresh">Actualizar ↻</button></div>'
+  +(orders.length?'<div class="list">'+orders.map(o=>{
+   const card=o.method==='card'||o.method==='wallet',sm=o.method==='mobile',isCrypto=o.method==='usdt_wallet'||o.method==='usdt_bep20';
+   const paymentInfo=card?'<div class="rs-reference"><span>REFERENCIA DECLARADA</span><strong>'+esc(o.paymentReference||'Sin referencia')+'</strong><small>'+esc(o.method==='wallet'?'Comprueba que la transferencia llegó al teléfono MiTransfer.':'Comprueba el ingreso real en la cuenta CUP receptora.')+'</small></div>':
+    sm?'<div class="rs-reference"><span>NÚMERO QUE ENVIÓ SALDO</span><strong>'+esc(o.sourcePhone||'Sin número')+'</strong><small>Revisa la captura y el saldo móvil recibido.</small></div>':
+    isCrypto?'<div class="rs-reference"><span>HASH EN BLOCKCHAIN</span><strong class="code-hint">'+esc(o.paymentTxHash||'Pendiente de envío')+'</strong><small>Los pagos USDT solo se comprueban mediante la verificación del servidor.</small></div>':'';
+   return '<article class="record rs-admin-order-card"><div class="rs-order-head"><div><span class="tag">PEDIDO '+esc(o.code)+'</span><h3>'+esc(o.game||'Recarga')+' · '+esc(o.offer||'')+'</h3><small>'+esc(o.customerName||'Cliente')+' · '+esc(o.customerPhone||'')+' · '+date(o.created)+'</small></div>'+status(o.status)+'</div>'
+   +'<div class="grid three rs-order-meta"><div><span class="tag">DESTINO</span><strong>'+esc(o.playerId||'PIN')+'</strong></div><div><span class="tag">IMPORTE</span><strong>'+money(o.amount)+' '+esc(o.currency)+'</strong></div><div><span class="tag">MÉTODO</span><strong>'+esc(paymentMethodLabel(o.method))+'</strong></div></div>'
+   +paymentInfo
+   +'<div class="rs-payment-status">Estado del cobro: '+status(o.paymentStatus)+'</div>'
+   +'<div class="row-actions">'+(o.receiptAvailable?'<button class="btn ghost small" data-action="receipt" data-code="'+esc(o.code)+'">'+ico('eye')+' Captura</button>':'')
+   +(!isCrypto&&o.paymentStatus!=='paid'&&o.status==='pending'?'<button class="btn secondary small" data-action="verify-payment" data-code="'+esc(o.code)+'">Confirmar ingreso real</button>':'')
+   +(o.paymentStatus==='paid'&&o.status==='pending'&&o.kind==='topup'?'<button class="btn primary small" data-action="fulfill" data-code="'+esc(o.code)+'">Enviar a Central One</button>':'')
+   +(o.kind==='pin'&&o.paymentStatus==='paid'?'<button class="btn primary small" data-action="assign-pin" data-code="'+esc(o.code)+'">Entregar PIN</button>':'')
+   +(o.status==='pending'?'<button class="btn danger small" data-action="reject-order" data-code="'+esc(o.code)+'">Rechazar</button>':'')
+   +(o.paymentStatus==='paid'&&o.status!=='refunded'?'<button class="btn ghost small" data-action="refund-order" data-code="'+esc(o.code)+'">Registrar reembolso</button>':'')
+   +'</div></article>';
+  }).join('')+'</div>':empty('No hay pedidos','Los pedidos aparecerán aquí cuando los clientes compren.'))
+  +'</section>';
 }
 function drawCustomers(){
  const list=S.cache.customers||[];
@@ -371,7 +397,17 @@ async function runAction(action,el){
  if(action==='delete-game')return withBusy(async()=>{if(!modalConfirm('¿Eliminar definitivamente este juego? Los pedidos históricos estarán protegidos.'))return;await request('/admin/delete-game',{method:'POST',body:{id,permanent:true}});flash('Juego eliminado');await load()});
  if(action==='delete-offer')return withBusy(async()=>{if(!modalConfirm('¿Eliminar esta oferta definitivamente?'))return;await request('/admin/delete-offer',{method:'POST',body:{id,permanent:true}});flash('Oferta eliminada');await load()});
  if(action==='toggle-offer')return withBusy(async()=>{const o=(S.cache.offers||[]).find(x=>x.id===id);if(!o)return;if(!modalConfirm((o.active?'Ocultar':'Publicar')+' esta oferta?'))return;await request('/admin/offer-visibility',{method:'POST',body:{id,visible:!o.active}});flash('Visibilidad actualizada');await load()});
- if(action==='verify-payment')return withBusy(async()=>{if(!modalConfirm('¿Has comprobado REALMENTE que recibiste el dinero correspondiente a '+code+'?'))return;await request('/admin/verify-payment',{method:'POST',body:{code,confirmedPayment:true}});flash('Pago verificado');await load()});
+ if(action==='verify-payment')return withBusy(async()=>{
+ const o=(S.cache.orders?.orders||[]).find(x=>x.code===code);
+ if(!o)throw Error('Actualiza los pedidos para consultar el comprobante.');
+ if(o.method==='usdt_wallet'||o.method==='usdt_bep20')throw Error('Los pagos USDT deben verificarse mediante la blockchain.');
+ if(!modalConfirm('¿Has comprobado en tu cuenta el INGRESO REAL de '+money(o.amount)+' '+o.currency+'?\n'+
+   (o.paymentReference?'Referencia aportada: '+o.paymentReference+'\n':'')+
+   (o.sourcePhone?'Remitente saldo móvil: '+o.sourcePhone+'\n':'')+
+   'No apruebes una captura o referencia sin revisar que recibiste el dinero.'))return;
+ await request('/admin/verify-payment',{method:'POST',body:{code,confirmedPayment:true}});
+ flash('Ingreso confirmado. El pedido ya se puede procesar.');await load();
+});
  if(action==='refund-order')return withBusy(async()=>{
    const reference=String(prompt('Registra la referencia REAL del dinero que ya devolviste. No se hará ninguna transferencia desde aquí.')||'').trim();
    if(reference.length<4||reference.length>100)throw Error('La referencia del reembolso es obligatoria (4 a 100 caracteres).');
