@@ -143,7 +143,14 @@ async function publicStorefront(){
 function metric(label,value,subtitle,icon){return '<article class="surface metric"><div class="metric-header"><span class="metric-title">'+esc(label)+'</span><span class="metric-icon">'+ico(icon)+'</span></div><b>'+esc(value)+'</b><small>'+esc(subtitle)+'</small></article>'}
 function empty(title,subtitle){return '<div class="empty">'+ico('orders')+'<b>'+esc(title)+'</b><small>'+esc(subtitle)+'</small></div>'}
 function tag(text,type=''){return '<span class="pill '+type+'">'+esc(text)+'</span>'}
-function status(value){const s=String(value||'pendiente').toLowerCase();return tag(value||'Pendiente',s.includes('complet')||s.includes('paid')||s==='approved'?'good':s.includes('rechaz')||s.includes('failed')||s==='rejected'?'bad':'warn')}
+function status(value){
+ const v=String(value||'pending').toLowerCase();
+ if(v==='refunded'||v.includes('reembols'))return tag('Reembolsado','refund');
+ if(v==='completed'||v.includes('complet')||v.includes('entregad')||v==='paid'||v==='approved')return tag('Completado','good');
+ if(v==='rejected'||v==='failed'||v.includes('fall')||v.includes('cancel')||v.includes('rechaz'))return tag('Fallido','bad');
+ if(v==='processing'||v.includes('proces'))return tag('En proceso','info');
+ return tag('Pendiente','warn');
+}
 function drawOverview(){
  const x=S.cache.overview?.counts||{}, r=S.cache.reseller||{}, co=S.cache.commerce||{},cn=S.cache.central||{};
  $('admin-view').innerHTML='<div class="grid four">'
@@ -267,7 +274,7 @@ function drawOrders(){
  const list=S.cache.orders?.orders||[],q=S.search.toLowerCase();
  const filtered=list;
  $('admin-view').innerHTML='<div class="toolbar"><input type="search" id="filter-orders" placeholder="Buscar por código, cliente o juego" value="'+esc(S.search)+'"><button class="btn secondary" data-action="refresh">Actualizar pedidos ↻</button></div>'
- +'<div class="list">'+(filtered.length?filtered.map(o=>'<article class="surface section"><div class="panel-head"><div><small class="tag">PEDIDO '+esc(o.code)+'</small><h2>'+esc(o.game||'Recarga')+' · '+esc(o.offer||'')+'</h2><small>'+esc(o.customerName||'Cliente')+' · '+esc(o.customerPhone||'')+' · '+date(o.created)+'</small></div>'+status(o.status)+'</div><div class="grid three"><div><span class="tag">DESTINO</span><p>'+esc(o.playerId||'PIN')+'</p></div><div><span class="tag">MONTO</span><p>'+money(o.amount)+' '+esc(o.currency)+'</p></div><div><span class="tag">PAGO</span><p>'+esc(o.paymentStatus||'Sin verificar')+'</p></div></div><div class="form-actions">'+(o.receiptAvailable?'<button class="btn ghost small" data-action="receipt" data-code="'+esc(o.code)+'">'+ico('eye')+' Ver comprobante</button>':'')+(o.paymentStatus!=='paid'&&o.status==='pending'?'<button class="btn secondary small" data-action="verify-payment" data-code="'+esc(o.code)+'">Verificar pago</button>':'')+(o.paymentStatus==='paid'&&o.status==='pending'&&o.kind==='topup'?'<button class="btn primary small" data-action="fulfill" data-code="'+esc(o.code)+'">Enviar a Central One</button>':'')+(o.kind==='pin'&&o.paymentStatus==='paid'?'<button class="btn primary small" data-action="assign-pin" data-code="'+esc(o.code)+'">Entregar PIN</button>':'')+(o.status==='pending'?'<button class="btn danger small" data-action="reject-order" data-code="'+esc(o.code)+'">Rechazar</button>':'')+'</div></article>').join(''):empty('Sin pedidos','Cuando recibas compras reales, aparecerán aquí.'))+'</div>';
+ +'<div class="list">'+(filtered.length?filtered.map(o=>'<article class="surface section"><div class="panel-head"><div><small class="tag">PEDIDO '+esc(o.code)+'</small><h2>'+esc(o.game||'Recarga')+' · '+esc(o.offer||'')+'</h2><small>'+esc(o.customerName||'Cliente')+' · '+esc(o.customerPhone||'')+' · '+date(o.created)+'</small></div>'+status(o.status)+'</div><div class="grid three"><div><span class="tag">DESTINO</span><p>'+esc(o.playerId||'PIN')+'</p></div><div><span class="tag">MONTO</span><p>'+money(o.amount)+' '+esc(o.currency)+'</p></div><div><span class="tag">PAGO</span><p>'+esc(o.paymentStatus||'Sin verificar')+'</p></div></div><div class="form-actions">'+(o.receiptAvailable?'<button class="btn ghost small" data-action="receipt" data-code="'+esc(o.code)+'">'+ico('eye')+' Ver comprobante</button>':'')+(o.paymentStatus!=='paid'&&o.status==='pending'?'<button class="btn secondary small" data-action="verify-payment" data-code="'+esc(o.code)+'">Verificar pago</button>':'')+(o.paymentStatus==='paid'&&o.status==='pending'&&o.kind==='topup'?'<button class="btn primary small" data-action="fulfill" data-code="'+esc(o.code)+'">Enviar a Central One</button>':'')+(o.kind==='pin'&&o.paymentStatus==='paid'?'<button class="btn primary small" data-action="assign-pin" data-code="'+esc(o.code)+'">Entregar PIN</button>':'')+(o.status==='pending'?'<button class="btn danger small" data-action="reject-order" data-code="'+esc(o.code)+'">Rechazar</button>':'')+(o.paymentStatus==='paid'&&o.status!=='refunded'?'<button class="btn ghost small" data-action="refund-order" data-code="'+esc(o.code)+'">Registrar reembolso</button>':'')+'</div></article>').join(''):empty('Sin pedidos','Cuando recibas compras reales, aparecerán aquí.'))+'</div>';
 }
 function drawCustomers(){
  const list=S.cache.customers||[];
@@ -284,12 +291,31 @@ function drawResellers(){
  +'<div class="spacing"></div><section class="surface section"><div class="panel-head"><div><h2>Pedidos de revendedores</h2><small>Los precios se muestran sin detallar márgenes al revendedor</small></div>'+ico('orders')+'</div>'
  +(orders.length?'<div class="list">'+orders.map(o=>'<div class="record"><div><h3>'+esc(o.game||'Pedido')+' · '+esc(o.offer||'')+'</h3><small>'+esc(o.customerName)+' · '+esc(o.code)+' · '+usd(o.totalUsdt)+' USDT</small></div><div class="row-actions">'+status(o.status)+'<button class="btn secondary small" data-action="reseller-order" data-id="'+esc(o.id)+'">Administrar</button></div></div>').join('')+'</div>':empty('Sin pedidos mayoristas','Cuando un revendedor compre, lo verás aquí.'))+'</section>';
 }
+
+function paymentAutomationPanel(){
+ const st=S.cache.settings||{},com=S.cache.commerce||{},cr=S.cache.crypto||{};
+ const mode=(method,details,automatic,color)=>{
+  const good=automatic===true,unknown=automatic===null;
+  return '<div class="rs-payment-method-row"><div><strong>'+esc(method)+'</strong><small>'+esc(details)+'</small></div>'
+    +tag(unknown?'Requiere integración':good?'Automático':'En revisión',unknown?'warn':good?'good':'warn')+'</div>';
+ };
+ return '<section class="surface section rs-payment-control"><div class="panel-head"><div><span class="tag">CONFIGURACIÓN DE COBROS</span><h2>Cómo se valida cada pago</h2><small>Refills Shop no marca compras como pagadas basándose solo en lo que escribe el cliente.</small></div>'+ico('shield')+'</div>'
+ +mode('Saldo móvil ETECSA','Captura y revisión del comprobante',false)
+ +mode('MiTransfer (CUP)','Envío mediante teléfono; referencia del movimiento',st.mitransferAutoEnabled===true?null:false)
+ +mode('Transfermóvil (CUP)','Transferencia a tarjeta; referencia del movimiento',st.transfermovilAutoEnabled===true?null:false)
+ +mode('USDT BEP-20 · wallet propia','El servidor comprueba token, destinatario, importe y 40 confirmaciones',st.storeUsdtWalletEnabled===true)
+ +mode('Saldo Refills Shop','Débito verificado por el servidor; solo revendedores con plan',true)
+ +'<div class="alert-note warn">Automatización de CUP: todavía se necesita una conexión verificable de MiTransfer o Transfermóvil. Un número de transacción por sí solo NO confirma que el dinero llegó. Esos pedidos quedan pendientes de revisión.</div>'
+ +'<div class="alert-note">La wallet USDT puede verificarse automáticamente en BNB Smart Chain cuando esté habilitada. Las ventas generales están '+(com.acceptOrders?'habilitadas':'pausadas')+'. El estado de NOWPayments es '+(cr.configured?'configurado':'sin configurar')+'.</div>'
+ +'</section><div class="spacing"></div>';
+}
+
 function drawPayments(){
  const st=S.cache.settings||{},cfg=S.cache.store?.config||{},com=S.cache.commerce||{},cr=S.cache.crypto||{};
- $('admin-view').innerHTML='<div class="split"><section class="surface section"><div class="panel-head"><div><h2>Tasas y cuentas de cobro</h2><small>Valores compartidos por el catálogo</small></div>'+ico('payments')+'</div><form id="rates-form" class="form-grid">'
+ $('admin-view').innerHTML=paymentAutomationPanel()+'<div class="split"><section class="surface section"><div class="panel-head"><div><h2>Tasas y cuentas de cobro</h2><small>Valores compartidos por el catálogo</small></div>'+ico('payments')+'</div><form id="rates-form" class="form-grid">'
  +field('Tasa USDT → SM','buySmPerUsdt',cfg.buySmPerUsdt,'number')+field('Tasa SM → CUP','cupPerSm',cfg.cupPerSm,'number')+field('Comisión de tarjeta (%)','cardFee',cfg.cardFee,'number')+field('Duración plan base (días)','planDays',cfg.planDays||15,'number')
  +field('Número receptor saldo móvil','mobilePhone',st.mobilePhone,'text')+field('Número de MiTransfer','walletPhone',st.walletPhone,'text')+field('Tarjeta de Transfermóvil','cardNumber',st.cardNumber,'text')+field('Número de confirmación','confirmPhone',st.confirmPhone,'text')
- +field('WhatsApp soporte','supportWhatsapp',st.supportWhatsapp,'text')+field('Email soporte','supportEmail',st.supportEmail,'email')
+ +field('WhatsApp soporte','supportWhatsapp',st.supportWhatsapp,'text')+field('Email soporte','supportEmail',st.supportEmail,'email')+field('Wallet USDT BEP-20 de la tienda','storeUsdtWalletAddress',st.storeUsdtWalletAddress,'text')+'<label class="check wide"><input type="checkbox" name="storeUsdtWalletEnabled" '+(st.storeUsdtWalletEnabled?'checked':'')+'> Preparar wallet USDT propia para verificar transacciones en blockchain</label>'
  +'<input type="hidden" name="planPrice" value=""><input type="hidden" name="operatorName" value="'+esc(st.operatorName||'')+'"><div class="form-actions wide"><button class="btn primary" type="submit">Guardar configuración</button></div></form></section>'
  +'<section class="surface section"><div class="panel-head"><div><h2>Operaciones y seguridad</h2><small>Control de compras con dinero real</small></div>'+ico('shield')+'</div>'
  +'<div class="live-strip"><div><strong>Ventas '+(com.acceptOrders?'habilitadas':'pausadas')+'</strong><p>La comprobación de pagos y los envíos al proveedor son independientes.</p></div>'+tag(com.acceptOrders?'Activas':'Pausadas',com.acceptOrders?'good':'warn')+'</div>'
@@ -349,6 +375,13 @@ async function runAction(action,el){
  if(action==='delete-offer')return withBusy(async()=>{if(!modalConfirm('¿Eliminar esta oferta definitivamente?'))return;await request('/admin/delete-offer',{method:'POST',body:{id,permanent:true}});flash('Oferta eliminada');await load()});
  if(action==='toggle-offer')return withBusy(async()=>{const o=(S.cache.offers||[]).find(x=>x.id===id);if(!o)return;if(!modalConfirm((o.active?'Ocultar':'Publicar')+' esta oferta?'))return;await request('/admin/offer-visibility',{method:'POST',body:{id,visible:!o.active}});flash('Visibilidad actualizada');await load()});
  if(action==='verify-payment')return withBusy(async()=>{if(!modalConfirm('¿Has comprobado REALMENTE que recibiste el dinero correspondiente a '+code+'?'))return;await request('/admin/verify-payment',{method:'POST',body:{code,confirmedPayment:true}});flash('Pago verificado');await load()});
+ if(action==='refund-order')return withBusy(async()=>{
+   const reference=String(prompt('Registra la referencia REAL del dinero que ya devolviste. No se hará ninguna transferencia desde aquí.')||'').trim();
+   if(reference.length<4||reference.length>100)throw Error('La referencia del reembolso es obligatoria (4 a 100 caracteres).');
+   if(!modalConfirm('Confirma que YA devolviste los fondos del pedido '+code+'. Se guardará el estado Reembolsado y la referencia '+reference+'.'))return;
+   await request('/admin/order-status',{method:'POST',body:{code,status:'refunded',refundReference:reference,note:'Reembolso realizado y comprobado por administración.'}});
+   flash('Reembolso registrado. No se ejecutó ninguna transferencia desde el panel.');await load();
+ });
  if(action==='reject-order')return withBusy(async()=>{if(!modalConfirm('¿Rechazar el pedido '+code+'?'))return;await request('/admin/order-status',{method:'POST',body:{code,status:'rejected'}});flash('Pedido rechazado');await load()});
  if(action==='fulfill')return withBusy(async()=>{if(!modalConfirm('¿Enviar el pedido pagado '+code+' a Central One? Esta operación puede gastar fondos REALES del proveedor.'))return;const r=await request('/admin/fulfill-order',{method:'POST',body:{code,paymentVerified:true}});flash(r.message||'Solicitud enviada. Comprueba el estado del proveedor.');await load()});
  if(action==='assign-pin')return openModal('Entregar PIN','<form id="pin-form"><input type="hidden" name="code" value="'+esc(code)+'"><label>PIN real del proveedor<input name="pin" minlength="4" maxlength="500" required autocomplete="off"></label><div class="form-actions"><button class="btn primary" type="submit">Guardar y entregar PIN</button></div></form>');
@@ -386,7 +419,7 @@ document.addEventListener('submit',async e=>{
   else if(form.id==='edit-offer-form'){r=await request('/admin/offer-edit',{method:'POST',body:{id:data.id,gainSm:Number(data.gainSm)}});closeModal();}
   else if(form.id==='reset-customer-form'){if(!data.identityConfirmed)throw Error('Debes verificar la identidad del cliente.');r=await request('/admin/customer-password',{method:'POST',body:{userId:data.userId,password:data.password,identityConfirmed:true}});closeModal();}
   else if(form.id==='pin-form'){if(!modalConfirm('¿Seguro que este es el PIN REAL del pedido?'))return;r=await request('/admin/pin/assign',{method:'POST',body:{code:data.code,pin:data.pin}});closeModal();}
-  else if(form.id==='rates-form'){r=await request('/admin/settings',{method:'POST',body:{buySmPerUsdt:Number(data.buySmPerUsdt),cupPerSm:Number(data.cupPerSm),cardFee:Number(data.cardFee),planDays:Number(data.planDays),mobilePhone:data.mobilePhone,walletPhone:data.walletPhone,cardNumber:data.cardNumber,confirmPhone:data.confirmPhone,supportWhatsapp:data.supportWhatsapp,supportEmail:data.supportEmail,operatorName:data.operatorName,planPrice:null}});}
+  else if(form.id==='rates-form'){r=await request('/admin/settings',{method:'POST',body:{buySmPerUsdt:Number(data.buySmPerUsdt),cupPerSm:Number(data.cupPerSm),cardFee:Number(data.cardFee),planDays:Number(data.planDays),mobilePhone:data.mobilePhone,walletPhone:data.walletPhone,cardNumber:data.cardNumber,confirmPhone:data.confirmPhone,supportWhatsapp:data.supportWhatsapp,supportEmail:data.supportEmail,operatorName:data.operatorName,storeUsdtWalletAddress:data.storeUsdtWalletAddress,storeUsdtWalletEnabled:!!data.storeUsdtWalletEnabled,planPrice:null}});}
   else if(form.id==='commerce-form'){if(data.enabled&&!data.confirmRealFunds)throw Error('Confirma que estás habilitando operaciones con dinero real.');r=await request('/admin/commerce/settings',{method:'POST',body:{enabled:!!data.enabled,confirmRealFunds:!!data.confirmRealFunds,maxSupplierOrderUsdt:Number(data.maxSupplierOrderUsdt)}});}
   else if(form.id==='co-catalog-key'){r=await request('/admin/centralone/connect',{method:'POST',body:{apiKey:data.apiKey}});form.reset();}
   else if(form.id==='co-orders-key'){r=await request('/admin/centralone/orders/connect',{method:'POST',body:{apiKey:data.apiKey}});form.reset();}
