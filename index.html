@@ -1728,7 +1728,7 @@ function headerNav(){
  updateChangeBadge();const count=s.cart.length,b=document.getElementById('cart-count');if(b){b.textContent=count;b.style.display=count?'grid':'none'}const mobileCart=document.getElementById('mobile-cart-shortcut');if(mobileCart)mobileCart.hidden=!s.user;const mobileCount=document.getElementById('mobile-cart-count');if(mobileCount)mobileCount.textContent=String(count);
 }
 function card(g){
- const fav=s.favorites.includes(g.id),o=g.offers?.[0],count=g.offers?.length||0,price=o?displayPrice(o):'Sin ofertas';
+ const fav=s.favorites.includes(g.id),o=[...(g.offers||[])].sort((a,b)=>offerAmountForSorting(a)-offerAmountForSorting(b))[0],count=g.offers?.length||0,price=o?displayPrice(o):'Sin ofertas';
  return `<article class="product product-horizontal product-clickable" data-action="open-item" data-id="${g.id}" role="button" tabindex="0" aria-label="Abrir ${esc(g.name)}">
   <div class="product-cover"><img loading="lazy" decoding="async" src="${photo(g)}" alt="${esc(g.name)}"></div>
   <div class="product-info"><strong class="product-name">${esc(g.name)}</strong><div class="product-kind">${count?count+' '+(count===1?'oferta':'ofertas'):'Próximamente'}${o?' · '+esc(o.title):''}</div><div class="product-desc">${esc(g.desc||'')}</div></div>
@@ -2388,7 +2388,7 @@ case 'reset-filters':s.filter='todos';s.search='';s.showFavs=false;render();brea
 case 'set-payment':changePayment(b.dataset.value);break;
 case 'open-payment-methods':s.paymentReturnModal=s.modal==='checkout'?'checkout':null;s.modal='payment-methods';modal();break;
 case 'choose-payment':changePayment(b.dataset.value);break;
-case 'offer-group':{const id=b.dataset.value,g=itemBy(s.detailId);if(!OFFER_TABS.some(t=>t[0]===id)||!g)break;const first=g.offers.findIndex(o=>offerGroup(o)===id&&(!s.regionChoice||String(o.region||'Global')===s.regionChoice));if(first<0){toast('Esta región no tiene productos de esa categoría.');break}s.offerGroup=id;s.selected=first;s.playerCheck=null;const pos=window.scrollY;render();window.scrollTo(0,pos);break;}
+case 'offer-group':{const id=b.dataset.value,g=itemBy(s.detailId);if(!OFFER_TABS.some(t=>t[0]===id)||!g)break;const choice=sortedOffersForDisplay(g,id)[0];const first=choice?choice.index:-1;if(first<0){toast('Esta región no tiene productos de esa categoría.');break}s.offerGroup=id;s.selected=first;s.playerCheck=null;const pos=window.scrollY;render();window.scrollTo(0,pos);break;}
 case 'select-offer':{let pos=window.scrollY;s.selected=Number(b.dataset.index);s.playerCheck=null;rsPlayerVerifyGeneration++;render();window.scrollTo(0,pos);queuePlayerVerification();break;}
 case 'verify-player':{rsPlayerVerifyGeneration++;if(rsPlayerVerifyDebounce){clearTimeout(rsPlayerVerifyDebounce);rsPlayerVerifyDebounce=null}void verifyPlayerIdentity();break;}
 case 'start-payment':void startPaymentReservation(b);break;
