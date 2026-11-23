@@ -1000,6 +1000,8 @@ const esc=s=>String(s??'').replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&
 const money=n=>Math.round(n).toLocaleString('es-ES');
 const entry=(id,name,category,photo,offers,desc='',region='Global')=>({id,name,category,photo,offers:offers.map(([title,cup,bonus=''])=>({title,cup,bonus})),desc,region});
 const ITEMS=[];
+const labels={inicio:'Inicio',recargas:'Recargas',gift:'Gift Cards',pedidos:'Pedidos',perfil:'Perfil',revendedores:'Mayoristas',admin:'Administración',login:'Entrar'};
+const icons={inicio:'home',recargas:'game',gift:'gift',pedidos:'file',perfil:'user',revendedores:'wallet',admin:'shield',login:'user'};
 /* Los productos publicados provienen exclusivamente de Supabase; no cargar precios ni artículos de ejemplo. */
 const getStored=(key,fallback)=>{try{return JSON.parse(localStorage.getItem('refills_shop_'+key)??localStorage.getItem('refills_mock_'+key))??fallback}catch{return fallback}};
 const save=(key,data)=>{try{localStorage.setItem('refills_shop_'+key,JSON.stringify(data))}catch{}};
