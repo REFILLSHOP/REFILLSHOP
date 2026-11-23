@@ -199,7 +199,7 @@ function startAdminOrderAlerts(){
 
 function drawOverview(){
  const x=S.cache.overview?.counts||{}, r=S.cache.reseller||{}, co=S.cache.commerce||{},cn=S.cache.central||{};
- $('admin-view').innerHTML='<div class="grid four">'
+ $('admin-view').innerHTML='<div id="rs-admin-order-alert-box">'+adminOrderAlertPanel()+'</div><div class="grid four">'
  +metric('JUEGOS PUBLICADOS',x.games||0,'Catálogo actual','games')
  +metric('OFERTAS ACTIVAS',x.offers||0,'Visibles para clientes','offers')
  +metric('PEDIDOS',x.orders||0,(x.pending||0)+' pendientes','orders')
@@ -354,9 +354,11 @@ function paymentMethodLabel(method){
  return ({mobile:'Saldo móvil ETECSA',wallet:'MiTransfer (teléfono)',card:'Transfermóvil (CUP)',usdt_wallet:'USDT BEP-20',usdt_bep20:'Pasarela USDT'})[method]||method||'Sin método';
 }
 function drawOrders(){
- const orders=S.cache.orders?.orders||[];
+ const rawOrders=S.cache.orders?.orders||[];
+ const weights={pending:0,processing:1,uploading:2,completed:3,failed:4,rejected:4,refunded:5};
+ const orders=[...rawOrders].sort((a,b)=>(weights[a.status]??6)-(weights[b.status]??6)||new Date(b.created)-new Date(a.created));
  const pending=orders.filter(o=>o.status==='pending'),processing=orders.filter(o=>o.status==='processing'),failed=orders.filter(o=>['failed','rejected'].includes(o.status)),refundReview=orders.filter(o=>['rejected','failed'].includes(o.status)&&o.paymentStatus==='paid'&&!o.refundReference);
- $('admin-view').innerHTML='<div class="grid three">'
+ $('admin-view').innerHTML='<div id="rs-admin-order-alert-box">'+adminOrderAlertPanel()+'</div><div class="grid three">'
   +metric('PEDIDOS RECIENTES',orders.length,'Hasta 150 movimientos','orders')
   +metric('POR REVISAR',pending.length+processing.length,processing.length+' enviados al proveedor · consultar su entrega','shield')
   +metric('FALLIDOS',failed.length,'Comprobar incidencias','alert')
@@ -507,6 +509,23 @@ async function openOfferEdit(id){
 function modalConfirm(text){return window.confirm(text)}
 async function runAction(action,el){
  const id=el.dataset.id,code=el.dataset.code;
+ if(action==='check-new-orders')return adminPollOrders(true);
+ if(action==='enable-order-notifications'){
+  if(typeof Notification==='undefined')return flash('Este dispositivo no admite notificaciones desde la web. Los pedidos siguen visibles en el ADM.',true);
+  let permission=Notification.permission;
+  if(permission==='default'){try{permission=await Notification.requestPermission()}catch{permission='denied'}}
+  S.notifyOrdersEnabled=permission==='granted';
+  try{localStorage.setItem(ADMIN_NOTIFY_PREF,String(S.notifyOrdersEnabled))}catch{}
+  if(S.page==='overview')drawOverview();else if(S.page==='orders')drawOrders();
+  flash(S.notifyOrdersEnabled?'Avisos activados en este dispositivo, mientras el ADM esté abierto.':'Permiso no concedido. Revisa los ajustes de notificaciones de este sitio.',!S.notifyOrdersEnabled);
+  return;
+ }
+ if(action==='disable-order-notifications'){
+  S.notifyOrdersEnabled=false;try{localStorage.setItem(ADMIN_NOTIFY_PREF,'false')}catch{}
+  if(S.page==='overview')drawOverview();else if(S.page==='orders')drawOrders();
+  flash('Notificaciones del navegador desactivadas en este dispositivo.');
+  return;
+ }
  if(action==='region-margin-save')return withBusy(async()=>{
   const gameId=$('region-margin-game')?.value,region=$('region-margin-region')?.value;
   const raw=$('region-margin-pct')?.value,marginPercent=Number(raw);
