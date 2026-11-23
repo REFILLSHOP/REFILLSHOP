@@ -1285,6 +1285,30 @@ body::after{
 .rs-orders-head-actions{display:flex;gap:9px;flex-wrap:wrap;align-items:center;justify-content:flex-end}
 .rs-orders-head-actions>.btn{min-height:41px;white-space:normal}
 @media(max-width:620px){.rs-orders-head-actions{width:100%;display:grid;grid-template-columns:repeat(2,minmax(0,1fr))}.rs-orders-head-actions>.btn{min-width:0;width:100%;padding:10px 7px;font-size:11px}}
+</style>
+<style id="rs-cup-login-fluid-v36">
+/* Separate Transfermóvil card and confirmation line, with independent mobile copy buttons. */
+.rs-cup-confirm-data{display:grid;gap:8px;margin-top:8px;padding-top:13px;border-top:1px solid rgba(91,154,222,.27);min-width:0}
+.rs-cup-confirm-data>h3{font-size:12px;line-height:1.45;color:#c9e8ff;letter-spacing:0;margin:0}
+.rs-cup-confirm-data .rs-pay-dest-value{min-width:0}
+.rs-cup-confirm-warning{color:#ffcaaf!important;font-size:12px!important;line-height:1.5}
+/* Hide unused shop footer and decorative line while unauthenticated / login. */
+body.rs-auth-screen .footer{display:none!important}
+body.rs-auth-screen .shell{padding-bottom:clamp(12px,4vh,38px)}
+body.rs-auth-screen .bottom-nav,body.rs-auth-screen #mobile-cart-shortcut{display:none!important}
+/* Prefer lighter compositing on phones, without stripping the brand colors. */
+@media(max-width:620px){
+ .rs-pay-dest-value{flex-wrap:wrap;gap:8px}
+ .rs-pay-dest-value>code{flex:1 1 100%;font-size:12px;min-width:0}
+ .rs-pay-dest-value>.btn{min-width:104px;min-height:37px;padding:8px 12px}
+ .content{animation:none}
+ .bottom-nav{backdrop-filter:none;-webkit-backdrop-filter:none}
+ .product-horizontal,.order-card-v4,.recent-topup-row{content-visibility:auto;contain-intrinsic-size:auto 118px}
+ .auth-card-v7{box-shadow:0 10px 32px rgba(0,0,0,.22)}
+}
+@media(prefers-reduced-motion:reduce){
+ .auth-card-v7,.rs-pay-destination,.product-horizontal,.order-card-v4{animation:none!important;transition:none!important}
+}
 </style></head>
 <body>
 <div id="app-loader" role="status" aria-label="Cargando Refills Shop">
@@ -1355,7 +1379,7 @@ const save=(key,data)=>{try{localStorage.setItem('refills_shop_'+key,JSON.string
 const s={page:'inicio',authMode:'login',authBusy:false,authError:'',rememberSession:(()=>{try{return localStorage.getItem('refills_shop_remember_session')!=='false'}catch{return true}})(),afterAuthPage:'inicio',authSession:null,profile:null,member:false,resellerPortal:null,resellerLoading:false,wholesalePrices:{},resellerOrders:[],resellerDeposits:[],resellerCurrency:'USDT',resellerDepositCurrency:'USDT',resellerDepositStage:'methods',detailId:null,search:'',filter:'todos',offerGroup:'recargas',regionChoice:null,playerTargets:{},playerCheck:null,resellerPreview:null,resellerPreviewTier:'free',sort:'name',payment:'cup',selected:0,player:'',checkoutSession:null,qty:1,modal:null,usdtPayment:null,recentTopups:[],recentTopupsLoaded:false,changes:[],changesLoaded:false,changesLastSeen:getStored('changesSeen',0),changesLastToast:0, nickname:getStored('nickname','Invitado'),favorites:getStored('favs',[]),orders:[],cart:getStored('cart',[]),showFavs:false,selectedOrder:null, role:(window.REFILLS_SESSION&&window.REFILLS_SESSION.role)||'guest', user:(window.REFILLS_SESSION&&window.REFILLS_SESSION.user)||null,
 rates:getStored('rates',{usdtSm:300,smCup:3,gainSM:0}), adminTab:'resumen',
 adminOrders:getStored('adminOrders',[]), reseller:getStored('reseller',{plan:null,wallet:{USDT:0,CUP:0,SM:0},ledger:[]}),
-paymentConfig:getStored('paymentConfig',{smReceiver:'',cupCard:'',usdtAddress:'',usdtEnabled:false,whatsappNumber:''}),
+paymentConfig:getStored('paymentConfig',{smReceiver:'',cupCard:'',cupConfirmPhone:'',usdtAddress:'',usdtEnabled:false,whatsappNumber:''}),
 checkoutStep:1,checkoutProof:'',checkoutSource:'',checkoutMethod:'CUP',paymentReturnModal:null,
 adminUsers:getStored('adminUsers',[]), resellerPlans:getStored('resellerPlans',[
 {name:'Gratis',margin:7,price:0,days:0},{name:'Level 2',margin:4,price:.8,days:7},{name:'Level 3',margin:2,price:1.5,days:15}])};
@@ -1697,7 +1721,7 @@ function displayPrice(o,method=s.payment){
  return (p.currency==='USDT'?Number(p.amount).toFixed(2):Number(p.amount).toLocaleString('es-ES',{maximumFractionDigits:2}))+' '+p.currency;
 }
 function paymentConfigText(){
- if(s.payment==='cup')return s.paymentConfig.cupCard?`Transfermóvil · tarjeta receptora: ${esc(s.paymentConfig.cupCard)}`:'Transfermóvil no está configurado todavía.';
+ if(s.payment==='cup')return s.paymentConfig.cupCard?`Transfermóvil · tarjeta receptora: ${esc(s.paymentConfig.cupCard)}${s.paymentConfig.cupConfirmPhone?' · Número de confirmación: '+esc(s.paymentConfig.cupConfirmPhone):''}`:'Transfermóvil no está configurado todavía.';
  if(s.payment==='mitransfer')return s.paymentConfig.mitransferPhone?`MiTransfer · envía al teléfono ${esc(s.paymentConfig.mitransferPhone)}`:'MiTransfer no tiene teléfono receptor configurado.';
  if(s.payment==='sm')return s.paymentConfig.smReceiver?`Saldo móvil · ${esc(s.paymentConfig.smReceiver)}`:'El número receptor de saldo móvil no está configurado todavía.';
  if(s.payment==='balance')return resellerHasPlan()?'Saldo de tu wallet Refills Shop en USDT. El servidor comprobará los fondos y autorizará el débito.':'Necesitas un plan de revendedor activo para utilizar el saldo de la web.';
@@ -2167,14 +2191,17 @@ function checkoutPaymentInstructions(){
  method==='usdt'?{name:'Dirección USDT BEP-20',value:s.paymentConfig.usdtAddress,type:'BNB Smart Chain'}:
  {name:'Saldo de tu cuenta Refills Shop',value:'',type:'Wallet revendedor'};
  const explanation=method==='sm'?'Envía el saldo a esta línea. Adjunta una captura y escribe el número que realizó la transferencia. Comprobaremos el ingreso antes de recargar.':
- method==='cup'?'Transfiere el importe exacto a la tarjeta. Después introduce el número de operación. Se revisará contra los movimientos recibidos, no de forma automática.':
+ method==='cup'?'Transfiere el importe exacto a la tarjeta indicada. El número de confirmación es un dato adicional de Transfermóvil, no otra tarjeta. Adjunta el comprobante; verificaremos el ingreso antes de entregar.':
  method==='mitransfer'?'Envía CUP a este teléfono mediante MiTransfer. Indica el número de la operación para localizarla. Se verificará la recepción antes de entregar.':
  method==='usdt'?'Primero crearemos el pedido y luego verás esta dirección y el campo de hash. Usa solo USDT BEP-20; el servidor comprobará token, importe y confirmaciones.':
  'El importe se descontará del saldo de tu wallet de revendedor después de validar disponibilidad.';
  return '<section class="rs-pay-destination" aria-label="Datos para realizar el pago">'
   +'<div class="rs-pay-dest-head"><span>DATOS PARA PAGAR</span><span class="rs-pay-dest-mode">'+(method==='sm'?'MANUAL':method==='cup'||method==='mitransfer'?'EN REVISIÓN':'VERIFICACIÓN AUTOMÁTICA')+'</span></div>'
   +'<h3>'+esc(data.name)+'</h3>'
-  +(data.value?'<div class="rs-pay-dest-value"><code>'+esc(data.value)+'</code><button class="btn secondary small" type="button" data-action="copy-pay-recipient">Copiar</button></div>':'<div class="rs-pay-dest-value rs-pay-wallet-info">Pago desde tu saldo disponible</div>')
+  +(data.value?'<div class="rs-pay-dest-value"><code>'+esc(data.value)+'</code><button class="btn secondary small" type="button" data-action="copy-pay-recipient">Copiar tarjeta / dato</button></div>':'<div class="rs-pay-dest-value rs-pay-wallet-info">Pago desde tu saldo disponible</div>')
+  +(method==='cup'?'<div class="rs-cup-confirm-data"><h3>Número de confirmación de Transfermóvil</h3>'
+     +(s.paymentConfig.cupConfirmPhone?'<div class="rs-pay-dest-value"><code>'+esc(s.paymentConfig.cupConfirmPhone)+'</code><button class="btn secondary small" type="button" data-action="copy-pay-confirmation">Copiar número</button></div>':'<p class="rs-cup-confirm-warning">El número de confirmación todavía no está disponible. Contacta soporte antes de realizar la transferencia.</p>')
+     +'</div>':'')
   +'<p>'+esc(explanation)+'</p></section>';
 }
 function modal(){
@@ -2255,7 +2282,7 @@ case 'checkout':
   let currency=['USDT','CUP','SM'].includes(s.resellerDepositCurrency)?s.resellerDepositCurrency:'USDT';
   const options={
    USDT:{title:'USDT · BEP-20',subtitle:'Hash de transacción o captura · Revisión de ingreso',name:'Wallet receptora · USDT BEP-20',recipient:String(settings.USDT?.address||''),network:String(settings.USDT?.network||'BEP-20'),visual:paymentVisual('usdt'),note:'Envía únicamente USDT por la red indicada. Introduce el hash o adjunta una captura. El abono se realizará tras verificar el ingreso.'},
-   CUP:{title:'CUP · Transfermóvil',subtitle:'Captura del comprobante · Revisión manual',name:'Tarjeta receptora · Transfermóvil',recipient:String(settings.CUP?.destination||''),network:'CUP',visual:paymentVisual('cup'),note:'Transfiere el importe exacto y adjunta una captura JPG, PNG o WEBP. Comprobaremos que recibimos el dinero antes de acreditar la wallet.'},
+   CUP:{title:'CUP · Transfermóvil',subtitle:'Captura del comprobante · Revisión manual',name:'Tarjeta receptora · Transfermóvil',recipient:String(settings.CUP?.destination||''),confirmPhone:String(settings.CUP?.confirmationPhone||s.paymentConfig.cupConfirmPhone||''),network:'CUP',visual:paymentVisual('cup'),note:'Transfiere el importe exacto a la tarjeta, comprueba el número de confirmación y adjunta una captura JPG, PNG o WEBP. No se acredita la wallet sin verificar el ingreso.'},
    SM:{title:'Saldo móvil ETECSA',subtitle:'Captura y número de origen · Revisión manual',name:'Número receptor · Saldo móvil',recipient:String(settings.SM?.destination||''),network:'SM',visual:paymentVisual('sm'),note:'Envía el saldo a la línea indicada, adjunta una captura e introduce el número desde el que realizaste la transferencia.'}
   };
   let current=options[currency];
@@ -2286,6 +2313,7 @@ case 'checkout':
       '<code>'+esc(current.recipient)+'</code><button type="button" class="btn secondary small" data-action="wallet-copy-recipient">Copiar</button>':
       '<span class="rs-wallet-missing">No hay datos receptores configurados. No envíes dinero.</span>')+'</div>'+
     (currency==='USDT'?'<div class="rs-wallet-network">RED · '+esc(current.network)+'</div>':'')+
+    (currency==='CUP'?'<div class="rs-cup-confirm-data"><h3>Número de confirmación de Transfermóvil</h3>'+(current.confirmPhone?'<div class="rs-pay-dest-value"><code>'+esc(current.confirmPhone)+'</code><button type="button" class="btn secondary small" data-action="wallet-copy-confirmation">Copiar número</button></div>':'<p class="rs-cup-confirm-warning">No se configuró el número de confirmación de CUP. Contacta soporte antes de enviar dinero.</p>')+'</div>':'')+
     '<p>'+esc(current.note)+'</p></section>'+
    '<div class="rs-checkout-inputs rs-wallet-evidence">'+
    (currency==='USDT'?'<label class="sheet-label" for="wallet-txhash">Hash de transacción USDT (recomendado)</label><input id="wallet-txhash" class="field" type="text" autocomplete="off" placeholder="0x…"><small>Si todavía no tienes el hash, puedes adjuntar una captura.</small>':'')+
@@ -2335,7 +2363,7 @@ case 'checkout':
  if(s.modal==='checkout'&&s.payment==='balance')modalRoot.querySelector('.rs-payment-deadline')?.remove();
  if(s.modal==='checkout'||s.modal==='usdt-wallet-pay')startCheckoutCountdown();else if(rsCheckoutClockTimer){clearInterval(rsCheckoutClockTimer);rsCheckoutClockTimer=null}
 }
-function render(scroll=false){headerNav();
+function render(scroll=false){document.body.classList.toggle('rs-auth-screen',s.page==='login'&&!s.user);headerNav();
 if(s.page==='detalle')main.innerHTML=detail();
 else if(s.page==='inicio')main.innerHTML=home();
 else if(s.page==='recargas')main.innerHTML=catalog(false);
@@ -2395,6 +2423,7 @@ case 'nav':navigate(b.dataset.page);break;case 'modal-nav':navigate(b.dataset.pa
 case 'home-wallet-deposit':openDepositCheckout();break;case 'home-wallet-movements':s.modal='reseller-ledger';modal();break;
 case 'wallet-select-currency':{s.resellerDepositCurrency=b.dataset.currency;s.resellerDepositStage='details';modal();break;}
 case 'wallet-change-currency':{s.resellerDepositStage='methods';modal();break;}
+case 'wallet-copy-confirmation':{const val=String(s.resellerPortal?.paymentInstructions?.CUP?.confirmationPhone||s.paymentConfig.cupConfirmPhone||'').trim();if(!val){toast('Falta el número de confirmación de CUP');break;}void navigator.clipboard?.writeText(val).then(()=>toast('Número de confirmación copiado'),()=>toast('Mantén pulsado el número para copiarlo'));break;}
 case 'wallet-copy-recipient':{const data=s.resellerPortal?.paymentInstructions||{};const currency=s.resellerDepositCurrency||'USDT';const val=currency==='USDT'?data.USDT?.address:currency==='CUP'?data.CUP?.destination:data.SM?.destination;if(!val){toast('No hay cuenta receptora configurada');break;}void navigator.clipboard?.writeText(String(val)).then(()=>toast('Datos para pagar copiados'),()=>toast('Mantén pulsado el dato para copiarlo'));break;}
 case 'open-item':openDetail(b.dataset.id);break;
 case 'choose-region':openRegionGame(b.dataset.id,b.dataset.region);break;
@@ -2595,6 +2624,13 @@ document.addEventListener('click',async e=>{
   try{const response=await fetch(endpoint,{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({ref:b.dataset.ref,status:b.dataset.status})});if(!response.ok)throw new Error();toast('Estado actualizado');}catch(err){toast('No se pudo actualizar el pedido.')}
   return;
  }
+ if(a==='copy-pay-confirmation'){
+  const value=String(s.paymentConfig.cupConfirmPhone||'').trim();
+  if(!value){toast('No está configurado el número de confirmación.');return;}
+  try{await navigator.clipboard.writeText(value);toast('Número de confirmación copiado.')}
+  catch{const input=document.createElement('textarea');input.value=value;input.style.position='fixed';input.style.opacity='0';document.body.appendChild(input);input.select();const copied=document.execCommand('copy');input.remove();toast(copied?'Número copiado.':'Mantén pulsado el número para copiarlo.');}
+  return;
+ }
  if(a==='copy-pay-recipient'){
  const value=s.payment==='cup'?s.paymentConfig.cupCard:s.payment==='mitransfer'?s.paymentConfig.mitransferPhone:s.payment==='sm'?s.paymentConfig.smReceiver:s.payment==='usdt'?s.paymentConfig.usdtAddress:'';
  if(!value){toast('No hay datos de pago configurados.');return}
@@ -2713,7 +2749,7 @@ async function loadLiveCatalog(silent=false){
   s.salesEnabled=data.salesEnabled===true;s.catalogLoading=false;
   if(data.config){
    s.rates={...s.rates,usdtSm:Number(data.config.buySmPerUsdt||s.rates.usdtSm),smCup:Number(data.config.cupPerSm||s.rates.smCup)};
-   s.paymentConfig={...s.paymentConfig,smReceiver:data.config.mobilePhone||'',cupCard:data.config.cardNumber||'',mitransferPhone:data.config.walletPhone||'',mitransferEnabled:data.config.mitransferEnabled===true,mitransferAutoEnabled:data.config.mitransferAutoEnabled===true,transfermovilAutoEnabled:data.config.transfermovilAutoEnabled===true,usdtEnabled:data.config.usdtWalletEnabled===true,usdtAddress:data.config.usdtWalletAddress||'',whatsappNumber:data.config.supportWhatsapp||''};
+   s.paymentConfig={...s.paymentConfig,smReceiver:data.config.mobilePhone||'',cupCard:data.config.cardNumber||'',cupConfirmPhone:data.config.confirmPhone||'',mitransferPhone:data.config.walletPhone||'',mitransferEnabled:data.config.mitransferEnabled===true,mitransferAutoEnabled:data.config.mitransferAutoEnabled===true,transfermovilAutoEnabled:data.config.transfermovilAutoEnabled===true,usdtEnabled:data.config.usdtWalletEnabled===true,usdtAddress:data.config.usdtWalletAddress||'',whatsappNumber:data.config.supportWhatsapp||''};
   }
   const validIds=new Set(ITEMS.map(g=>g.id));s.cart=s.cart.filter(c=>{const game=itemBy(c.id);if(!game||!validIds.has(c.id)||!game.offers.length)return false;return c.offerId?game.offers.some(o=>o.id===c.offerId):Boolean(game.offers[c.offer]);});save('cart',s.cart);
   if(s.page==='detalle'&&!validIds.has(s.detailId))s.page='recargas';
