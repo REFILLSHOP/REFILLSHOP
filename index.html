@@ -1934,9 +1934,10 @@ function offerGroup(o){
  if(/tarjeta|membres[ií]a|membership|semanal|mensual|weekly|monthly|suscripci[oó]n/.test(name))return 'membresias';
  if(/pase|pass|temporada|season|battle\s*pass|elite\s*pass/.test(name))return 'pases';
  if(/gift.?card|voucher|regalo|card\s+digital/.test(name))return 'membresias';
+ if(/fragmentos?|cofres?|cajas?|chests?|crates?|objetos?|items?|materiales?|piezas?|skins?|cosm[eé]ticos?|loot|emotes?|gestos?|coleccionables?|evo\s*(?:gun|weapon|arma)|arma\s*evo/i.test(name))return 'coleccionables';
  return 'recargas';
 }
-const OFFER_TABS=[['recargas','Recargas'],['pases','Pases'],['membresias','Membresías'],['pin','PIN']];
+const OFFER_TABS=[['recargas','Recargas'],['pases','Pases'],['membresias','Membresías'],['pin','PIN'],['coleccionables','Coleccionables']];
 
 function primaryTargetField(offer){
  const fields=Array.isArray(offer?.targetSchema)?offer.targetSchema:[];
@@ -2742,7 +2743,7 @@ async function loadLiveCatalog(silent=false){
    const id=String(g.id||'').trim();if(!id)continue;
    grouped.set(id,{id,name:String(g.name||'Producto'),category:/gift|pin|tarjeta/i.test(String(g.tag||''))?'gift':(/m[oó]vil|internet|nauta|cubacel/i.test(String(g.tag||''))?'movil':'juegos'),photo:'',imageUrl:g.imageUrl||'',featured:g.featured===true,sortOrder:Number(g.sortOrder||99),marginPercent:Number(g.marginPercent||0),region:'Global',desc:'',offers:[]});
   }
-  for(const o of offers){const game=grouped.get(String(o.gameId||''));if(!game||o.visible===false)continue;
+  for(const o of offers){const game=grouped.get(String(o.gameId||''));if(!game||o.visible===false||o.inStock!==true)continue;
    game.offers.push({id:String(o.id||''),title:String(o.name||'Oferta'),cup:Number(o.cup||0),card:Number(o.card||o.cup||0),sm:Number(o.sm||0),usdt:Number(o.usdt||0),kind:o.kind||'topup',region:o.region||'Global',targetSchema:Array.isArray(o.targetSchema)?o.targetSchema:[],inStock:o.inStock===true,purchasable:o.purchasable===true,bonus:''});
   }
   ITEMS.splice(0,ITEMS.length,...[...grouped.values()].sort((a,b)=>Number(b.featured)-Number(a.featured)||a.sortOrder-b.sortOrder||a.name.localeCompare(b.name)));
