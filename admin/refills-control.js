@@ -26,7 +26,7 @@ alert:'<path d="M12 2 2 21h20z"/><path d="M12 9v5M12 17h.01"/>'
 };
 const ico=(name)=>'<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" width="19" height="19" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">'+(paths[name]||paths.shield)+'</svg>';
 const MENU=[['overview','Resumen','overview','Indicadores y accesos'],['games','Juegos','games','Tu catálogo'],['offers','Ofertas','offers','Precios y productos'],['orders','Pedidos','orders','Compras y entregas'],['customers','Clientes','customers','Cuentas y seguridad'],['resellers','Revendedores','resellers','Planes y depósitos'],['payments','Pagos y tasas','payments','Configuración comercial'],['centralone','Central One','centralone','Integración proveedor']];
-const S={client:null,user:null,page:'overview',busy:false,cache:{},search:'',offerSearch:'',gameFilter:'all',offerFilter:'all',coFilter:'',coKind:'all',product:null,offerMode:'centralone'};
+const S={client:null,user:null,page:'overview',busy:false,rememberSession:true,cache:{},search:'',offerSearch:'',gameFilter:'all',offerFilter:'all',coFilter:'',coKind:'all',product:null,offerMode:'centralone'};
 function flash(message,error=false){
  const el=$('notify');el.textContent=String(message||'');el.classList.toggle('error',error);el.hidden=false;
  clearTimeout(flash.timer);flash.timer=setTimeout(()=>el.hidden=true,5000);
@@ -53,6 +53,9 @@ async function request(path,options={}){
  if(!res.ok)throw Error(json.error||json.message||'Error del servidor HTTP '+res.status);
  return json;
 }
+function createAdminClient(){
+ return window.supabase.createClient(SB,KEY,{auth:{persistSession:true,storage:S.rememberSession?window.localStorage:window.sessionStorage,autoRefreshToken:true,detectSessionInUrl:true,storageKey:'sb-kcgjlnymhmxylrjchcvl-auth-token'}});
+}
 async function verifyAdmin(){
  const user=(await S.client.auth.getUser()).data.user;
  if(!user)throw Error('Necesitas iniciar sesión.');
@@ -62,6 +65,7 @@ async function verifyAdmin(){
 function pageFromHash(){const page=location.hash.replace(/^#/,'').split('?')[0];return MENU.some(m=>m[0]===page)?page:'overview'}
 function showLogin(message){
  S.user=null;$('auth-shell').hidden=false;$('console').hidden=true;
+ const remember=$('admin-login')?.elements.rememberSession;if(remember)remember.checked=S.rememberSession;
  if(message)flash(message,true);
 }
 function showConsole(){
@@ -284,6 +288,9 @@ document.addEventListener('submit',async e=>{
  const form=e.target;if(!form?.id)return;e.preventDefault();
  const data=Object.fromEntries(new FormData(form).entries());
  if(form.id==='admin-login')return withBusy(async()=>{
+  const remember=form.elements.rememberSession?.checked!==false;
+  try{localStorage.setItem('refills_shop_remember_session',String(remember))}catch{}
+  if(remember!==S.rememberSession){await S.client.auth.signOut().catch(()=>{});S.rememberSession=remember;S.client=createAdminClient()}
   const phone=String(form.elements.country.value).replace(/\D/g,'')+String(form.elements.phone.value).replace(/\D/g,'');
   const email=phoneAlias(phone),password=String(data.password||'');
   const result=await S.client.auth.signInWithPassword({email,password});
@@ -337,7 +344,8 @@ window.addEventListener('hashchange',()=>{if(S.user){S.page=pageFromHash();navig
 async function start(){
  try{
   if(!window.supabase?.createClient)throw Error('No se cargó el módulo de Supabase.');
-  S.client=window.supabase.createClient(SB,KEY,{auth:{persistSession:true,autoRefreshToken:true,detectSessionInUrl:true,storageKey:'sb-kcgjlnymhmxylrjchcvl-auth-token'}});
+  try{S.rememberSession=localStorage.getItem('refills_shop_remember_session')!=='false'}catch{S.rememberSession=true}
+  S.client=createAdminClient();
   const session=(await S.client.auth.getSession()).data.session;
   if(!session)return showLogin();
   try{await verifyAdmin();showConsole()}catch(err){showLogin(err.message)}
