@@ -1066,6 +1066,22 @@ button,a,input,select{touch-action:manipulation}
 .rs-checkout-confirmed>strong{font-size:12px;color:#c6e7ff}
 .rs-checkout-confirmed b{color:#e9f7ff;overflow-wrap:anywhere}
 .rs-checkout-confirmed small{color:#8bafce;line-height:1.45}
+</style><style id="refills-reseller-preview-v12">
+.rs-plan-preview-btn{width:100%;min-height:41px;margin-top:10px;border-color:rgba(94,170,244,.35);font-weight:750;font-size:11px}
+.rs-preview-only-sheet{display:grid;gap:12px}
+.rs-preview-only-head{display:flex;gap:10px;justify-content:space-between;align-items:center;padding:12px;border-radius:12px;border:1px solid #31577b;background:rgba(12,39,77,.75)}
+.rs-preview-only-head strong{font-size:12px;color:#e2f3ff}
+.rs-preview-only-head span{flex:none;font-size:9px;color:#a5eadd;border:1px solid #227b77;background:#103e41;padding:5px 8px;border-radius:20px;font-weight:850}
+.rs-preview-offers-list{display:grid;gap:9px;max-height:min(52vh,460px);overflow-y:auto;overscroll-behavior:contain;scrollbar-width:thin}
+.rs-preview-offer{display:flex;align-items:center;justify-content:space-between;gap:11px;border-radius:12px;padding:11px 13px;border:1px solid #274b70;background:rgba(8,27,55,.8);min-width:0}
+.rs-preview-offer>div:first-child{min-width:0;display:grid;gap:4px}
+.rs-preview-offer strong{font-size:12px;color:#f1f7ff}
+.rs-preview-offer small{display:block;font-size:10px;color:#9bbad5;overflow-wrap:anywhere}
+.rs-preview-offer-prices{text-align:right;flex:0 0 auto}
+.rs-preview-offer-prices b{font-size:14px;color:#8bd6ff}
+.rs-preview-footer,.rs-preview-empty-state{font-size:11px;line-height:1.6;color:#abc9e7;background:rgba(11,34,65,.6);border-radius:11px;padding:12px}
+.rs-preview-empty-state{text-align:center;padding:25px 12px}
+@media(max-width:480px){.rs-preview-offer{align-items:flex-start;flex-direction:column}.rs-preview-offer-prices{text-align:left}.rs-preview-offers-list{max-height:55vh}.rs-preview-only-head span{font-size:8px}.rs-plan-preview-btn{min-height:44px}}
 </style></head>
 <body>
 <div id="app-loader" role="status" aria-label="Cargando Refills Shop">
@@ -1783,6 +1799,16 @@ function modal(){
  let html='';const g=itemBy(s.detailId),o=g?.offers[s.selected]||g?.offers[0],p=o?currentPrice(o):null;
  const total=p?{...p,amount:p.amount*s.qty}:null;
  switch(s.modal){
+ case 'reseller-preview':{
+  const tier=s.resellerPreviewTier||'free',name=tier==='level2'?'Level 2':tier==='level3'?'Level 3':'Gratis';
+  const data=s.resellerPreview,items=Array.isArray(data?.offers)?data.offers:[];
+  html=modalTitle('Ofertas de '+name,'VISTA PREVIA · Sin activar plan ni comprar')+
+    '<div class="rs-preview-only-sheet"><div class="rs-preview-only-head"><strong>Precios que tendrías con '+esc(name)+'</strong><span>SOLO CONSULTA</span></div>'
+    +(data===null?'<div class="rs-preview-empty-state">Cargando precios del proveedor…</div>':data.error?'<div class="rs-preview-empty-state">'+esc(data.error)+'</div>':items.length?
+    '<div class="rs-preview-offers-list">'+items.slice(0,150).map(item=>'<article class="rs-preview-offer"><div><strong>'+esc(item.name)+'</strong><small>'+esc(item.game)+' · '+esc(item.region||'Global')+' · '+esc(offerGroup(item))+'</small></div><div class="rs-preview-offer-prices"><b>'+Number(item.usdt||0).toFixed(2)+' USDT</b><small>'+Number(item.sm||0).toLocaleString('es-ES')+' SM · '+Number(item.cup||0).toLocaleString('es-ES')+' CUP</small></div></article>').join('')+'</div>':'<div class="rs-preview-empty-state">Aún no hay ofertas publicadas para mostrar. La vista previa se llenará cuando el ADM publique ofertas reales.</div>')
+    +'<div class="rs-preview-footer">No se puede comprar desde esta vista. Para comprar debes activar un plan y tener saldo disponible.</div></div>';
+  break;
+ }
  case 'payment-methods':
   html=modalTitle('Cambiar método de pago','Selecciona cómo quieres pagar tu compra')+
   paymentChoiceList();
@@ -1921,6 +1947,7 @@ case 'auth-mode':s.authMode=b.dataset.mode==='register'?'register':'login';s.aut
 case 'auth-logout':void signOutRefills();break;
 case 'reseller-refresh':void loadResellerPortal(false,true);break;
 case 'reseller-subscribe':void activateResellerPlan(b.dataset.tier);break;
+case 'reseller-preview':void openResellerPlanPreview(b.dataset.tier);break;
 case 'reseller-deposit-submit':void submitResellerDeposit();break;
 
 case 'nav':navigate(b.dataset.page);break;case 'modal-nav':navigate(b.dataset.page);break;
@@ -1974,6 +2001,21 @@ function authPage(){
  </section></div>`;
 }
 
+
+async function openResellerPlanPreview(tier){
+ if(!['free','level2','level3'].includes(tier)){toast('Plan no reconocido.');return}
+ s.resellerPreviewTier=tier;s.resellerPreview=null;s.modal='reseller-preview';modal();
+ try{
+  const result=await edgeRequest('rs12-reseller','/offers/preview?tier='+encodeURIComponent(tier),{auth:true});
+  if(s.modal!=='reseller-preview'||s.resellerPreviewTier!==tier)return;
+  s.resellerPreview=result;modal();
+ }catch(err){
+  if(s.modal!=='reseller-preview')return;
+  s.resellerPreview={previewOnly:true,tier,offers:[],error:err?.message||'Vista previa no disponible.'};
+  modal();
+ }
+}
+
 function resellerPage(){
  if(!s.user)return authPage();
  if(s.resellerLoading&&!s.resellerPortal)return `<div class="catalog-top"><div class="eyebrow">REFILLS SHOP / MAYORISTAS</div><h1 class="page-title">Portal de revendedores</h1><div class="card panel reseller-v7-empty">Cargando tus planes, wallet y datos de la cuenta…</div></div>`;
@@ -2015,6 +2057,7 @@ function resellerPage(){
     <div class="plan-kicker">${isCurrent?'TU PLAN ACTUAL':'PLAN DE REVENDEDOR'}</div><h3>${esc(plan.name)}</h3>
     <div class="plan-margin">${examplePrice!==null?`${examplePrice.toFixed(2)} USDT`:'Sin ofertas'}</div><div class="muted small">VISTA PREVIA${example?` · ${esc(example.name)}`:' · Publica una oferta para ver precios'}</div><p>${priceLabel} · ${duration}<br>${update}</p>
     ${isCurrent?(isFree?`<span class="current-pill">Activo</span>`:`<button class="btn secondary" data-action="reseller-subscribe" data-tier="${esc(plan.tier)}">Renovar ${esc(plan.name)}</button>`):blockedLower?`<button class="btn secondary" disabled>Requiere bajar de nivel al vencer</button>`:isFree?`<span class="muted small">Plan gratuito</span>`:`<button class="btn primary" data-action="reseller-subscribe" data-tier="${esc(plan.tier)}">Activar ${esc(plan.name)}</button>`}
+    <button type="button" class="btn ghost rs-plan-preview-btn" data-action="reseller-preview" data-tier="${esc(plan.tier)}">${I('eye','tiny')} Ver todas las ofertas de ${esc(plan.name)}</button>
    </article>`;
   }).join('')}</div>
   <div class="card panel" style="margin:18px 0">
