@@ -1675,6 +1675,18 @@ function currentPrice(o,method=s.payment){
  }
  return priceFor(o,method);
 }
+
+function offerAmountForSorting(o,method=s.payment){
+ const quote=currentPrice(o,method);
+ const amount=Number(quote?.amount);
+ return Number.isFinite(amount)&&amount>0?amount:Number.POSITIVE_INFINITY;
+}
+function sortedOffersForDisplay(g,group=s.offerGroup){
+ return (g?.offers||[]).map((offer,index)=>({offer,index}))
+  .filter(({offer})=>offerGroup(offer)===group&&(!s.regionChoice||String(offer.region||'Global')===s.regionChoice))
+  .sort((a,b)=>offerAmountForSorting(a.offer)-offerAmountForSorting(b.offer)||
+   String(a.offer.title||'').localeCompare(String(b.offer.title||''),'es'));
+}
 function displayPrice(o,method=s.payment){
  const p=currentPrice(o,method);
  if(!p)return 'Costo pendiente';
@@ -1840,7 +1852,7 @@ function openRegionGame(id,region=''){
  const g=itemBy(id);if(!g)return;
  s.detailId=id;s.selected=0;s.checkoutSession=null;s.regionChoice=region||null;s.player='';s.offerGroup='recargas';s.playerTargets={};s.playerCheck=null;s.qty=1;s.modal=null;s.page='detalle';
  const matches=(g.offers||[]).map((o,i)=>({o,i})).filter(x=>!s.regionChoice||String(x.o.region||'Global')===s.regionChoice);
- const selected=matches.find(x=>offerGroup(x.o)==='recargas')||matches[0];
+ const selected=[...matches].filter(x=>offerGroup(x.o)==='recargas').sort((a,b)=>offerAmountForSorting(a.o)-offerAmountForSorting(b.o))[0]||[...matches].sort((a,b)=>offerAmountForSorting(a.o)-offerAmountForSorting(b.o))[0];
  if(selected){s.selected=selected.i;s.offerGroup=offerGroup(selected.o)}
  render(true);history.replaceState(null,'','#producto/'+id);
 }
@@ -1966,7 +1978,7 @@ function detail(){
  if(!g.offers?.length)return `<button class="detail-back" data-action="nav" data-page="recargas">${I('back','tiny')} Volver al catálogo</button><div class="card empty"><h3>Próximamente</h3><p>Este juego ya está en el catálogo. Sus ofertas aparecerán aquí cuando estén publicadas y verificadas.</p></div>`;
  const o=g.offers[s.selected]||g.offers[0],p=currentPrice(o);
  const selectedPrice=p?displayPrice(o):'Costo pendiente';
- const filteredOffers=g.offers.map((offer,index)=>({offer,index})).filter(({offer})=>offerGroup(offer)===s.offerGroup&&(!s.regionChoice||String(offer.region||'Global')===s.regionChoice));
+ const filteredOffers=sortedOffersForDisplay(g);
  const methodAvailable=s.payment==='usdt'?(s.paymentConfig.usdtEnabled&&!!s.paymentConfig.usdtAddress):s.payment==='mitransfer'?!!s.paymentConfig.mitransferPhone:s.payment==='balance'?(resellerHasPlan()&&!!currentPrice(o,'balance')):true;
  return `<button class="detail-back" data-action="nav" data-page="${g.category==='gift'?'gift':'recargas'}">${I('back','tiny')} Volver al catálogo</button>
  <div class="detail-head"><div class="detail-icon"><img src="${photo(g)}" alt="${esc(g.name)}"></div><div><h1>${esc(g.name)}</h1><p>${esc(g.region)} · ${esc(g.desc)}</p></div></div>
