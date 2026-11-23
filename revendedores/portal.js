@@ -7,9 +7,9 @@ const esc=s=>String(s??'').replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&
 const num=x=>Number.isFinite(Number(x))?Number(x):0;
 const usdt=x=>num(x).toLocaleString('es-ES',{minimumFractionDigits:2,maximumFractionDigits:2});
 const integer=x=>Math.ceil(num(x)).toLocaleString('es-ES',{maximumFractionDigits:0});
-const status=s=>({pending:'Pendiente',processing:'Procesando',completed:'Completado',approved:'Aprobado',rejected:'Rechazado',failed:'Fallido'})[String(s)]||String(s||'Pendiente');
+const status=s=>({pending:'Pendiente',processing:'En proceso',partially_completed:'Entrega parcial',completed:'Completado',approved:'Aprobado',rejected:'Rechazado',failed:'Fallido',refunded:'Reembolsado'})[String(s)]||String(s||'Pendiente');
 const date=s=>s?new Date(s).toLocaleDateString('es-ES',{year:'numeric',month:'short',day:'numeric'}):'Sin vencimiento';
-const timestamp=s=>s?new Date(s).toLocaleString('es-ES'):'—';
+const timestamp=s=>{const d=new Date(s);return s&&Number.isFinite(d.getTime())?d.toLocaleDateString('es-ES',{day:'2-digit',month:'2-digit',year:'numeric'})+' · '+d.toLocaleTimeString('en-US',{hour:'numeric',minute:'2-digit',hour12:true}):'—'};
 const imageURL=s=>/^https:\/\//i.test(String(s||''))?String(s):'/REFILLSHOP/assets/refills-icon.png';
 const S={client:null,user:null,profile:null,membership:null,rememberSession:true,bootstrap:null,wallet:{USDT:0,CUP:0,SM:0},rates:{buySmPerUsdt:0,cupPerSm:0},tiers:[],instructions:{},deposits:[],games:[],offers:[],orders:[],view:'inicio',authMode:'login',selectedGame:'',selectedOffer:'',pinOrder:'',pinValue:null,search:'',kindFilter:'recargas',depositStage:'methods',depositCurrency:'USDT',tier:'level2',currency:'USDT',pendingPlanId:null,pendingOrderId:null,busy:false,ready:false};
 const BASE='/REFILLSHOP/revendedores';
