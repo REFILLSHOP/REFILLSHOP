@@ -1991,7 +1991,7 @@ function modal(){
  break;
 }
 case 'checkout':
-  html=modalTitle('Realizar pago','Envía el comprobante dentro del plazo de 20 minutos')+
+  html=modalTitle('Realizar pago',s.payment==='balance'?'Confirmación con saldo de revendedor':'Envía el comprobante dentro del plazo de 20 minutos')+
   `<div class="rs-checkout-simple"><div class="rs-payment-deadline"><span>TIEMPO RESTANTE</span><strong id="rs-deadline-clock">20:00</strong><small>Si no envías el comprobante, la solicitud vencerá automáticamente.</small></div>
    <div class="rs-checkout-total"><div><span>IMPORTE EXACTO</span><strong>${total?formatPriceValue(total.amount,total.currency):'No disponible'}</strong></div><div><small>${esc(g?.name||'Recarga')} · ${esc(o?.title||'Paquete')}</small><small>Destino: ${esc(s.player||'Según producto')}</small></div></div>
    <div class="rs-checkout-method"><span>${paymentVisual(s.payment)}<strong>${esc(paymentName())}</strong></span><span class="rs-payment-fixed">CONFIRMADO</span></div>
@@ -2073,6 +2073,7 @@ case 'checkout':
  }
  }
  modalRoot.innerHTML=`<div class="overlay" data-action="backdrop"><section class="modal" role="dialog" aria-modal="true" aria-label="${esc(s.modal)}"><div class="sheet-grabber" aria-hidden="true"></div>${html}</section></div>`;
+ if(s.modal==='checkout'&&s.payment==='balance')modalRoot.querySelector('.rs-payment-deadline')?.remove();
  if(s.modal==='checkout'||s.modal==='usdt-wallet-pay')startCheckoutCountdown();else if(rsCheckoutClockTimer){clearInterval(rsCheckoutClockTimer);rsCheckoutClockTimer=null}
 }
 function render(scroll=false){headerNav();
