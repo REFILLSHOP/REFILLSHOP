@@ -1309,6 +1309,17 @@ body.rs-auth-screen .bottom-nav,body.rs-auth-screen #mobile-cart-shortcut{displa
 @media(prefers-reduced-motion:reduce){
  .auth-card-v7,.rs-pay-destination,.product-horizontal,.order-card-v4{animation:none!important;transition:none!important}
 }
+</style><style id="rs-preview-game-region-groups-v37">
+.rs-preview-game-group{border:1px solid rgba(92,153,237,.24);border-radius:15px;padding:12px;margin:0 0 12px;background:rgba(4,18,42,.55)}
+.rs-preview-game-heading{display:flex;align-items:center;justify-content:space-between;gap:10px;padding:3px 2px 10px;border-bottom:1px solid rgba(92,153,237,.2)}
+.rs-preview-game-heading strong{font-size:14px;color:#e4f2ff}
+.rs-preview-game-heading small{font-size:10px;color:#8eb6dd}
+.rs-preview-region-group{padding-top:10px}
+.rs-preview-region-group h4{font-size:11px;letter-spacing:.08em;text-transform:uppercase;color:#7dc8ff;margin:0 0 7px}
+.rs-preview-region-group .rs-preview-offer{margin:0 0 7px}
+.rs-preview-region-group .rs-preview-offer:last-child{margin-bottom:0}
+.rs-cup-confirm-caption{display:block;color:#9db9d9;font-size:11px;line-height:1.4}
+@media(max-width:620px){.rs-preview-game-group{padding:9px}.rs-preview-game-heading strong{font-size:13px}}
 </style></head>
 <body>
 <div id="app-loader" role="status" aria-label="Cargando Refills Shop">
@@ -2214,10 +2225,23 @@ function modal(){
  case 'reseller-preview':{
   const tier=s.resellerPreviewTier||'free',name=tier==='level2'?'Level 2':tier==='level3'?'Level 3':'Gratis';
   const data=s.resellerPreview,items=Array.isArray(data?.offers)?data.offers:[];
-  html=modalTitle('Ofertas de '+name,'VISTA PREVIA · Sin activar plan ni comprar')+
+  const byGame=new Map();
+  for(const item of items.slice(0,150)){
+   const game=String(item.game||'Otros juegos'),region=String(item.region||'Global');
+   if(!byGame.has(game))byGame.set(game,new Map());
+   const regions=byGame.get(game);if(!regions.has(region))regions.set(region,[]);
+   regions.get(region).push(item);
+  }
+  const groupedMarkup=[...byGame.entries()].sort((a,b)=>a[0].localeCompare(b[0],'es')).map(([game,regions])=>
+   '<section class="rs-preview-game-group"><div class="rs-preview-game-heading"><strong>'+esc(game)+'</strong><small>'+[...regions.values()].reduce((n,list)=>n+list.length,0)+' ofertas</small></div>'+
+   [...regions.entries()].sort((a,b)=>a[0].localeCompare(b[0],'es')).map(([region,list])=>
+    '<div class="rs-preview-region-group"><h4>'+esc(region)+'</h4>'+list.map(item=>'<article class="rs-preview-offer"><div><strong>'+esc(item.name)+'</strong><small>'+esc(offerGroup(item))+'</small></div><div class="rs-preview-offer-prices"><b>'+Number(item.usdt||0).toFixed(2)+' USDT</b><small>'+Number(item.sm||0).toLocaleString('es-ES')+' SM · '+Number(item.cup||0).toLocaleString('es-ES')+' CUP</small></div></article>').join('')+'</div>'
+   ).join('')+'</section>'
+  ).join('');
+  html=modalTitle('Ofertas de '+name,'VISTA PREVIA · Separada por juego y región')+
     '<div class="rs-preview-only-sheet"><div class="rs-preview-only-head"><strong>Precios que tendrías con '+esc(name)+'</strong><span>SOLO CONSULTA</span></div>'
     +(data===null?'<div class="rs-preview-empty-state">Cargando precios del proveedor…</div>':data.error?'<div class="rs-preview-empty-state">'+esc(data.error)+'</div>':items.length?
-    '<div class="rs-preview-offers-list">'+items.slice(0,150).map(item=>'<article class="rs-preview-offer"><div><strong>'+esc(item.name)+'</strong><small>'+esc(item.game)+' · '+esc(item.region||'Global')+' · '+esc(offerGroup(item))+'</small></div><div class="rs-preview-offer-prices"><b>'+Number(item.usdt||0).toFixed(2)+' USDT</b><small>'+Number(item.sm||0).toLocaleString('es-ES')+' SM · '+Number(item.cup||0).toLocaleString('es-ES')+' CUP</small></div></article>').join('')+'</div>':'<div class="rs-preview-empty-state">Aún no hay ofertas publicadas para mostrar. La vista previa se llenará cuando el ADM publique ofertas reales.</div>')
+    '<div class="rs-preview-offers-list">'+groupedMarkup+'</div>':'<div class="rs-preview-empty-state">Aún no hay ofertas publicadas para mostrar. La vista previa se llenará cuando el ADM publique ofertas reales.</div>')
     +'<div class="rs-preview-footer">No se puede comprar desde esta vista. Para comprar debes activar un plan y tener saldo disponible.</div></div>';
   break;
  }
