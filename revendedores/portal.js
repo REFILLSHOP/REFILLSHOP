@@ -11,7 +11,7 @@ const status=s=>({pending:'Pendiente',processing:'Procesando',completed:'Complet
 const date=s=>s?new Date(s).toLocaleDateString('es-ES',{year:'numeric',month:'short',day:'numeric'}):'Sin vencimiento';
 const timestamp=s=>s?new Date(s).toLocaleString('es-ES'):'—';
 const imageURL=s=>/^https:\/\//i.test(String(s||''))?String(s):'/REFILLSHOP/assets/refills-icon.png';
-const S={client:null,user:null,profile:null,membership:null,rememberSession:true,bootstrap:null,wallet:{USDT:0,CUP:0,SM:0},rates:{buySmPerUsdt:0,cupPerSm:0},tiers:[],instructions:{},deposits:[],games:[],offers:[],orders:[],view:'inicio',authMode:'login',selectedGame:'',selectedOffer:'',pinOrder:'',pinValue:null,search:'',kindFilter:'recargas',tier:'level2',currency:'USDT',pendingPlanId:null,pendingOrderId:null,busy:false,ready:false};
+const S={client:null,user:null,profile:null,membership:null,rememberSession:true,bootstrap:null,wallet:{USDT:0,CUP:0,SM:0},rates:{buySmPerUsdt:0,cupPerSm:0},tiers:[],instructions:{},deposits:[],games:[],offers:[],orders:[],view:'inicio',authMode:'login',selectedGame:'',selectedOffer:'',pinOrder:'',pinValue:null,search:'',kindFilter:'recargas',depositStage:'methods',depositCurrency:'USDT',tier:'level2',currency:'USDT',pendingPlanId:null,pendingOrderId:null,busy:false,ready:false};
 const BASE='/REFILLSHOP/revendedores';
 const ROUTES=new Set(['inicio','catalogo','planes','billetera','pedidos','cuenta','juego','compra','codigo']);
 function routeURL(view,extra=''){return BASE+'/'+(view==='inicio'?'':view+'/')+(extra?'?'+extra:'')}
@@ -157,11 +157,30 @@ function instructions(currency){
  return `<div class="payment-instructions"><b>${currency==='USDT'?'USDT · '+esc(i.network||'BEP-20'):currency==='CUP'?'CUP · Transfermóvil':'SM · Saldo móvil ETECSA'}</b><small class="dim">Datos de pago configurados por administración</small><code>${esc(v||'Pendiente de configurar')}</code>${v?`<button type="button" class="ghost small-button" data-copy="${esc(v)}">Copiar dato</button>`:''}<p class="help">Verifica la moneda, red, importe y destino antes de enviar fondos. Un comprobante no acredita automáticamente tu wallet.</p></div>`;
 }
 function wallet(){
- return `<span class="eyebrow">SALDO DEL REVENDEDOR</span><h1 class="heading">Mi billetera</h1><p class="sub">Recarga tu cuenta en USDT, CUP o saldo móvil. Administración verifica las transferencias antes de acreditar los fondos.</p>${balanceSummary()}
- <div class="grid grid-2 section"><section class="panel pad"><h2>Solicitar recarga</h2><form id="depositForm">
- <label class="field">Moneda<select name="currency" id="depositCurrency"><option value="USDT">USDT · BEP-20</option><option value="CUP">CUP · Transfermóvil</option><option value="SM">SM · ETECSA</option></select></label><div id="paymentDetails">${instructions('USDT')}</div><label class="field">Importe a acreditar<input name="amount" type="number" min="0.01" step="0.01" required placeholder="Importe exacto"></label><label class="field">Número desde el que transferiste (para SM)<input name="senderPhone" type="tel" maxlength="20" placeholder="+5351234567"></label><label class="field">Hash de transferencia USDT (si corresponde)<input name="txHash" type="text" maxlength="66" placeholder="0x…"></label><label class="field">Comprobante (JPG, PNG o WEBP, máximo 5 MB)<input name="proof" type="file" accept="image/jpeg,image/png,image/webp"></label>
- <button class="button full" type="submit">Enviar solicitud</button><p class="help">Necesitas un comprobante o un hash de USDT. El saldo aparece disponible solo después de su aprobación.</p></form></section>
- <section class="panel pad"><h2>Recargas recientes</h2>${S.deposits.length?S.deposits.map(d=>`<div class="deposit-row"><div><strong>${integer(d.amount)} ${esc(d.currency)}</strong><small>${timestamp(d.createdAt)}</small></div><span class="status ${esc(d.status)}">${esc(status(d.status))}</span></div>`).join(''):'<p class="empty">Aún no hay recargas registradas.</p>'}</section></div>`;
+ const currency=['USDT','CUP','SM'].includes(S.depositCurrency)?S.depositCurrency:'USDT';
+ const currencyInfo={
+  USDT:{title:'USDT · BEP-20',subtitle:'Hash o captura · revisión de pago',address:S.instructions.USDT?.address||'',method:'USDT'},
+  CUP:{title:'CUP · Transfermóvil',subtitle:'Captura de pantalla · revisión manual',address:S.instructions.CUP?.destination||'',method:'CUP'},
+  SM:{title:'Saldo móvil ETECSA',subtitle:'Captura y número emisor · revisión manual',address:S.instructions.SM?.destination||'',method:'SM'}
+ };
+ const selected=currencyInfo[currency];
+ const depositStep=S.depositStage==='details'?
+  '<div class="rs-pro-payflow"><div class="rs-pro-checkout-total"><small>IMPORTE A DEPOSITAR</small><strong id="depositAmountPreview">0.00 <em>'+currency+'</em></strong><p>Saldo actual: '+usdt(S.wallet.USDT)+' USDT · Se acreditará tras verificar el ingreso.</p></div>'+
+  '<div class="rs-pro-selected-method"><div><span class="rs-pro-method-mark">'+(currency==='USDT'?'₮':currency==='CUP'?'CUP':'SM')+'</span><strong>'+esc(selected.title)+'</strong></div><button type="button" class="ghost small-button" data-deposit-back>Cambiar</button></div>'+
+  '<div class="rs-pro-checkout-destination"><div class="rs-pro-checkout-overline"><small>DATOS PARA PAGAR</small><span>EN REVISIÓN</span></div>'+instructions(currency)+'</div>'+
+  '<form id="depositForm" class="rs-pro-checkout-form"><input type="hidden" id="depositCurrency" name="currency" value="'+currency+'">'+
+  '<label class="field">¿Cuánto deseas depositar? ('+currency+')<input id="depositAmount" name="amount" type="number" inputmode="decimal" min="'+(currency==='USDT'?'0.01':'1')+'" step="'+(currency==='USDT'?'0.01':'1')+'" required placeholder="Importe exacto"></label>'+
+  (currency==='SM'?'<label class="field">Número desde el que transferiste<input name="senderPhone" type="tel" inputmode="tel" maxlength="20" autocomplete="off" required placeholder="Número de la línea que realizó el envío"></label>':'<input type="hidden" name="senderPhone" value="">')+
+  (currency==='USDT'?'<label class="field">Hash de transacción USDT (recomendado)<input name="txHash" type="text" maxlength="66" autocomplete="off" placeholder="0x…"></label>':'<input type="hidden" name="txHash" value="">')+
+  '<label class="field">Captura del comprobante '+(currency==='USDT'?'(si no envías hash)':'(obligatoria)')+'<input name="proof" type="file" accept="image/jpeg,image/png,image/webp" '+(currency==='USDT'?'':'required')+'></label>'+
+  '<p class="help">JPG, PNG o WEBP · máximo 5 MB. La captura o el hash no acreditan fondos por sí solos.</p>'+
+  '<button class="button full rs-pro-deposit-submit" type="submit" '+(!selected.address?'disabled':'')+'>Enviar solicitud de depósito</button></form></div>':
+  '<div class="rs-pro-payflow"><div class="rs-pro-checkout-total"><small>TU SALDO DISPONIBLE</small><strong>'+usdt(S.wallet.USDT)+' <em>USDT</em></strong><p>Elige el método con el que deseas depositar.</p></div>'+
+  '<div class="rs-pro-choice-heading"><strong>Selecciona un método de depósito</strong><small>Después podrás copiar los datos y adjuntar el comprobante.</small></div>'+
+  '<div class="rs-pro-deposit-methods">'+Object.entries(currencyInfo).map(([value,item])=>'<button type="button" class="rs-pro-deposit-method" data-deposit-method="'+value+'" '+(!item.address?'disabled':'')+'><span class="rs-pro-method-mark">'+(value==='USDT'?'₮':value==='CUP'?'CUP':'SM')+'</span><span class="rs-pro-deposit-method-copy"><strong>'+esc(item.title)+'</strong><small>'+esc(item.address?item.subtitle:'Cuenta receptora no configurada')+'</small></span><b>›</b></button>').join('')+'</div><p class="rs-pro-pay-notice">Las transferencias se confirman en el servidor antes de acreditar saldo en tu wallet.</p></div>';
+ return '<span class="eyebrow">SALDO DEL REVENDEDOR</span><h1 class="heading">Mi billetera</h1><p class="sub">Deposita con los mismos pasos claros que al pagar una oferta. Puedes consultar aquí tus solicitudes recientes.</p>'+balanceSummary()+
+ '<div class="grid grid-2 section rs-pro-wallet-layout"><section class="panel pad rs-pro-wallet-main"><div class="rs-pro-section-head"><h2>Depositar en wallet</h2><span class="pill">PAGO SEGURO</span></div>'+depositStep+'</section>'+
+ '<section class="panel pad rs-pro-wallet-history"><h2>Recargas recientes</h2>'+(S.deposits.length?S.deposits.map(d=>'<div class="deposit-row"><div><strong>'+integer(d.amount)+' '+esc(d.currency)+'</strong><small>'+timestamp(d.createdAt)+'</small></div><span class="status '+esc(d.status)+'">'+esc(status(d.status))+'</span></div>').join(''):'<p class="empty">Aún no hay recargas registradas.</p>')+'</section></div>';
 }
 function ordersRows(rows){
  return rows?.length?rows.map(o=>{
@@ -216,7 +235,7 @@ function render(){
 
  $('content').innerHTML=!authed?auth():(S.view==='inicio'?home():S.view==='catalogo'?catalog():S.view==='juego'?gamePage():S.view==='compra'?checkout():S.view==='planes'?plans():S.view==='billetera'?wallet():S.view==='pedidos'?orders():S.view==='codigo'?pinPage():account());
 }
-async function go(view){if(!ROUTES.has(view))return;S.view=view;updateURL(view);S.search='';if(view==='pedidos'){loading('Buscando tus pedidos');try{await loadOrders()}catch(e){fail(e)}}render();scrollTo({top:0,behavior:'instant'})}
+async function go(view){if(!ROUTES.has(view))return;if(view==='billetera')S.depositStage='methods';S.view=view;updateURL(view);S.search='';if(view==='pedidos'){loading('Buscando tus pedidos');try{await loadOrders()}catch(e){fail(e)}}render();scrollTo({top:0,behavior:'instant'})}
 async function readProof(file){
  if(!file)return null;
  if(file.size>5*1024*1024)throw Error('La imagen no puede superar 5 MB.');
@@ -273,7 +292,7 @@ async function handleForm(f){
    const proofData=await readProof(f.elements.proof.files?.[0]);
    if(!proofData&&!txHash)throw Error('Adjunta el comprobante o indica el hash USDT.');
    await req('rs12-reseller','/wallet/deposits',{method:'POST',body:{currency,amount,txHash,senderPhone,proofData}});
-   await hydrate();render();notify('Solicitud enviada. Administración verificará tu recarga.');
+   S.depositStage='methods';await hydrate();render();notify('Solicitud enviada. Administración verificará tu recarga.');
   }else if(id==='profileForm'){
    const fullName=f.elements.fullName.value.trim(),phoneValue=f.elements.phone.value.trim();
    if(!fullName||!phoneValue)throw Error('Completa tu nombre y teléfono.');
@@ -288,7 +307,7 @@ async function handleForm(f){
  finally{S.busy=false;if(button?.isConnected)button.disabled=false}
 }
 document.addEventListener('submit',e=>{if(e.target instanceof HTMLFormElement){e.preventDefault();void handleForm(e.target)}});
-document.addEventListener('change',e=>{if(e.target.id==='depositCurrency'){$('paymentDetails').innerHTML=instructions(e.target.value)}});
+document.addEventListener('input',e=>{if(e.target?.id==='depositAmount'){const el=$('depositAmountPreview');if(!el)return;const curr=S.depositCurrency;const amount=Number(e.target.value);el.innerHTML=(amount>0&&Number.isFinite(amount)?amount.toLocaleString('es-ES',{minimumFractionDigits:curr==='USDT'?2:0,maximumFractionDigits:curr==='USDT'?2:0}):'0.00')+' <em>'+curr+'</em>';}});
 document.addEventListener('change',e=>{if(e.target?.id==='planPreviewProduct'){S.planPreviewId=e.target.value;render();}});
 document.addEventListener('click',e=>{if(e.target?.id==='rsPricePreview'||e.target?.id==='rsTierReadOnlyPreview'){e.target.remove();}});
 document.addEventListener('click',async e=>{
@@ -296,6 +315,8 @@ document.addEventListener('click',async e=>{
  if(b.id==='signout'||b.id==='accountSignout')return void signout();
  if(b.dataset.auth){S.authMode=b.dataset.auth;render();return}
  if(b.dataset.view)return void go(b.dataset.view);
+ if(b.dataset.depositMethod){if(['USDT','CUP','SM'].includes(b.dataset.depositMethod)){S.depositCurrency=b.dataset.depositMethod;S.depositStage='details';render();}return;}
+ if(b.hasAttribute('data-deposit-back')){S.depositStage='methods';render();return;}
  if(b.dataset.proKind){
   S.kindFilter=PRO_OFFER_GROUPS.some(x=>x[0]===b.dataset.proKind)?b.dataset.proKind:'recargas';
   updateURL('catalogo','tipo='+encodeURIComponent(S.kindFilter),true);
