@@ -63,3 +63,18 @@
 .rs-remember strong{font-size:11px;color:#e6f4ff}
 .rs-remember small{font-size:9px;color:#91afd1}
 @media(prefers-reduced-motion:reduce){.rs-remember{transition:none!important}}
+
+
+/* Read-only plan offers + compact category tabs */
+.rs-pro-kind-tabs{display:flex;gap:7px;overflow-x:auto;scrollbar-width:none;overscroll-behavior-x:contain;padding:3px 0 10px;margin-bottom:11px}
+.rs-pro-kind-tabs::-webkit-scrollbar{display:none}
+.rs-pro-kind-tabs button{white-space:nowrap;flex:none;touch-action:manipulation}
+.rs-tier-view-offers{margin-top:12px;width:100%;border-color:#407cb8;color:#b6e0ff;font-weight:800;min-height:40px}
+.rs-tier-offer-list{display:grid;gap:8px;max-height:56dvh;overflow-y:auto;overscroll-behavior:contain;margin:16px 0 12px}
+.rs-tier-offer{display:flex;justify-content:space-between;align-items:center;gap:11px;padding:12px;background:#0b213f;border:1px solid #2f517d;border-radius:12px}
+.rs-tier-offer>div:first-child{flex:1;min-width:0}
+.rs-tier-offer strong{display:block;font-size:12px;color:#e8f5ff;overflow-wrap:anywhere}
+.rs-tier-offer small{display:block;font-size:10px;color:#9cbadc;margin-top:4px;overflow-wrap:anywhere}
+.rs-tier-offer>div:last-child{flex:none;text-align:right}
+.rs-tier-offer>div:last-child strong{color:#86dcff}
+@media(max-width:480px){.rs-tier-offer{align-items:flex-start;flex-direction:column}.rs-tier-offer>div:last-child{text-align:left}.rs-tier-offer-list{max-height:59dvh}}
