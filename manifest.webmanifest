@@ -11,13 +11,7 @@
   "lang": "es",
   "icons": [
     {
-      "src": "/REFILLSHOP/assets/refills-icon-192.png",
-      "sizes": "192x192",
-      "type": "image/png",
-      "purpose": "any"
-    },
-    {
-      "src": "/REFILLSHOP/assets/refills-icon.png",
+      "src": "/REFILLSHOP/assets/refills-icon.png?brand=20261123",
       "sizes": "512x512",
       "type": "image/png",
       "purpose": "any"
