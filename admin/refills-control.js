@@ -74,7 +74,7 @@ function renderMenu(){
 }
 function navigate(page,first=false){
  if(!MENU.some(m=>m[0]===page))page='overview';
- S.page=page;if(!first)history.replaceState(null,'','#'+page);
+ if(S.page!==page){S.search='';S.offerSearch=''}S.page=page;if(!first)history.replaceState(null,'','#'+page);
  renderMenu();
  const meta=MENU.find(m=>m[0]===page);$('crumb-name').textContent=meta[1];
  $('view-title').textContent=meta[1]==='Resumen'?'Vista general':meta[1];
@@ -157,7 +157,7 @@ function drawOverview(){
 }
 function drawGames(){
  const games=S.cache.games||[];
- const filtered=games.filter(g=>(S.gameFilter==='all'||(S.gameFilter==='active')===!!g.active)&&(!S.search||[g.name,g.id,g.tag].join(' ').toLowerCase().includes(S.search.toLowerCase())));
+ const filtered=games.filter(g=>(S.gameFilter==='all'||(S.gameFilter==='active')===!!g.active));
  $('admin-view').innerHTML='<div class="split">'
  +'<section class="surface section"><div class="panel-head"><div><h2>Crear o editar juego</h2><small>El producto se guarda en Supabase</small></div>'+ico('plus')+'</div><form id="game-form" class="form-grid"><label>ID único (sin espacios)<input name="id" placeholder="ej: mobile-legends" pattern="[a-z0-9-]{2,60}" required></label><label>Nombre del juego<input name="name" maxlength="90" placeholder="Nombre del producto" required></label><label>Categoría<input name="category" value="Juegos" maxlength="70" required></label><label>Imagen HTTPS<input name="imageUrl" type="url" placeholder="https://…"></label><label class="check wide"><input name="featured" type="checkbox"> Destacar en el inicio</label><div class="form-actions wide"><button class="btn primary" type="submit">'+ico('plus')+' Guardar juego</button></div></form><p class="footer-caption">Primero crea el juego. Después vincula las ofertas que quieras vender desde Central One.</p></section>'
  +'<section class="surface section"><div class="panel-head"><div><h2>Mis juegos</h2><small>'+games.length+' registrados · '+games.filter(g=>g.active).length+' publicados</small></div>'+ico('games')+'</div>'
@@ -167,7 +167,7 @@ function drawGames(){
 function drawOffers(){
  const games=(S.cache.games||[]).filter(g=>g.active),offers=S.cache.offers||[];
  const q=S.offerSearch.toLowerCase();
- const filtered=offers.filter(o=>(S.offerFilter==='all'||(S.offerFilter==='active')===!!o.active)&&(!q||[o.name,o.display_name,o.game_id,o.provider_name].join(' ').toLowerCase().includes(q)));
+ const filtered=offers.filter(o=>(S.offerFilter==='all'||(S.offerFilter==='active')===!!o.active));
  const settings=S.cache.store?.config||{};
  const previews=o=>{const sm=Math.ceil(Number(o.provider_price_usdt||0)*Number(settings.buySmPerUsdt||0)+Number(o.gain_sm||0));const cup=Math.ceil(sm*Number(settings.cupPerSm||0));return sm>0&&cup>0?money(sm)+' SM / '+money(cup)+' CUP':'Revisar tasas'};
  $('admin-view').innerHTML='<div class="surface section"><div class="panel-head"><div><h2>Crear oferta</h2><small>Selecciona un producto de Central One o crea un borrador manual</small></div>'+ico('plus')+'</div><div class="tabs"><button data-action="mode-centralone" class="'+(S.offerMode==='centralone'?'active':'')+'">Catálogo Central One</button><button data-action="mode-manual" class="'+(S.offerMode==='manual'?'active':'')+'">Borrador manual</button></div>'
@@ -184,13 +184,13 @@ function renderCoResults(){
 }
 function drawOrders(){
  const list=S.cache.orders?.orders||[],q=S.search.toLowerCase();
- const filtered=list.filter(o=>!q||[o.code,o.customerName,o.game,o.offer,o.playerId].join(' ').toLowerCase().includes(q));
+ const filtered=list;
  $('admin-view').innerHTML='<div class="toolbar"><input type="search" id="filter-orders" placeholder="Buscar por código, cliente o juego" value="'+esc(S.search)+'"><button class="btn secondary" data-action="refresh">Actualizar pedidos ↻</button></div>'
  +'<div class="list">'+(filtered.length?filtered.map(o=>'<article class="surface section"><div class="panel-head"><div><small class="tag">PEDIDO '+esc(o.code)+'</small><h2>'+esc(o.game||'Recarga')+' · '+esc(o.offer||'')+'</h2><small>'+esc(o.customerName||'Cliente')+' · '+esc(o.customerPhone||'')+' · '+date(o.created)+'</small></div>'+status(o.status)+'</div><div class="grid three"><div><span class="tag">DESTINO</span><p>'+esc(o.playerId||'PIN')+'</p></div><div><span class="tag">MONTO</span><p>'+money(o.amount)+' '+esc(o.currency)+'</p></div><div><span class="tag">PAGO</span><p>'+esc(o.paymentStatus||'Sin verificar')+'</p></div></div><div class="form-actions">'+(o.receiptAvailable?'<button class="btn ghost small" data-action="receipt" data-code="'+esc(o.code)+'">'+ico('eye')+' Ver comprobante</button>':'')+(o.paymentStatus!=='paid'&&o.status==='pending'?'<button class="btn secondary small" data-action="verify-payment" data-code="'+esc(o.code)+'">Verificar pago</button>':'')+(o.paymentStatus==='paid'&&o.status==='pending'&&o.kind==='topup'?'<button class="btn primary small" data-action="fulfill" data-code="'+esc(o.code)+'">Enviar a Central One</button>':'')+(o.kind==='pin'&&o.paymentStatus==='paid'?'<button class="btn primary small" data-action="assign-pin" data-code="'+esc(o.code)+'">Entregar PIN</button>':'')+(o.status==='pending'?'<button class="btn danger small" data-action="reject-order" data-code="'+esc(o.code)+'">Rechazar</button>':'')+'</div></article>').join(''):empty('Sin pedidos','Cuando recibas compras reales, aparecerán aquí.'))+'</div>';
 }
 function drawCustomers(){
  const list=S.cache.customers||[];
- const filtered=list.filter(x=>!S.search||[x.name,x.phone].join(' ').toLowerCase().includes(S.search.toLowerCase()));
+ const filtered=list;
  $('admin-view').innerHTML='<div class="toolbar"><input type="search" id="filter-customers" value="'+esc(S.search)+'" placeholder="Buscar nombre o teléfono"><span class="tiny-note">'+list.length+' clientes</span></div><section class="surface section"><div class="panel-head"><div><h2>Cuentas registradas</h2><small>Las cuentas existentes permanecen en Supabase</small></div>'+ico('customers')+'</div><div class="list">'+(filtered.length?filtered.map(x=>'<div class="record"><div class="record-main"><span class="avatar">'+esc(String(x.name||'RS').slice(0,2).toUpperCase())+'</span><div><h3>'+esc(x.name||'Cliente')+'</h3><small>'+esc(x.phone||'')+' · '+(x.orders||0)+' pedidos · '+usd(x.balanceUsdt||0)+' USDT</small></div></div><div class="row-actions"><button class="btn ghost small" data-action="customer-details" data-id="'+esc(x.id)+'">Detalles</button><button class="btn secondary small" data-action="customer-reset" data-id="'+esc(x.id)+'">Contraseña</button></div></div>').join(''):empty('Sin resultados','No se encontraron cuentas coincidentes.'))+'</div></section>';
 }
 function drawResellers(){
@@ -267,7 +267,7 @@ async function runAction(action,el){
  if(action==='toggle-offer')return withBusy(async()=>{const o=(S.cache.offers||[]).find(x=>x.id===id);if(!o)return;if(!modalConfirm((o.active?'Ocultar':'Publicar')+' esta oferta?'))return;await request('/admin/offer-visibility',{method:'POST',body:{id,visible:!o.active}});flash('Visibilidad actualizada');await load()});
  if(action==='verify-payment')return withBusy(async()=>{if(!modalConfirm('¿Has comprobado REALMENTE que recibiste el dinero correspondiente a '+code+'?'))return;await request('/admin/verify-payment',{method:'POST',body:{code,confirmedPayment:true}});flash('Pago verificado');await load()});
  if(action==='reject-order')return withBusy(async()=>{if(!modalConfirm('¿Rechazar el pedido '+code+'?'))return;await request('/admin/order-status',{method:'POST',body:{code,status:'rejected'}});flash('Pedido rechazado');await load()});
- if(action==='fulfill')return withBusy(async()=>{if(!modalConfirm('¿Enviar el pedido pagado '+code+' a Central One? Esta operación puede gastar fondos REALES del proveedor.'))return;const r=await request('/admin/fulfill-order',{method:'POST',body:{code}});flash(r.message||'Solicitud enviada. Comprueba el estado del proveedor.');await load()});
+ if(action==='fulfill')return withBusy(async()=>{if(!modalConfirm('¿Enviar el pedido pagado '+code+' a Central One? Esta operación puede gastar fondos REALES del proveedor.'))return;const r=await request('/admin/fulfill-order',{method:'POST',body:{code,paymentVerified:true}});flash(r.message||'Solicitud enviada. Comprueba el estado del proveedor.');await load()});
  if(action==='assign-pin')return openModal('Entregar PIN','<form id="pin-form"><input type="hidden" name="code" value="'+esc(code)+'"><label>PIN real del proveedor<input name="pin" minlength="4" maxlength="500" required autocomplete="off"></label><div class="form-actions"><button class="btn primary" type="submit">Guardar y entregar PIN</button></div></form>');
  if(action==='receipt')return withBusy(async()=>{const blob=await request('/admin/receipt?code='+encodeURIComponent(code),{blob:true});const url=URL.createObjectURL(blob);window.open(url,'_blank','noopener,noreferrer');setTimeout(()=>URL.revokeObjectURL(url),60000);});
  if(action==='approve-deposit'||action==='reject-deposit')return withBusy(async()=>{if(!modalConfirm(action==='approve-deposit'?'¿Comprobaste el pago REAL? Se acreditará saldo al revendedor.':'¿Rechazar este depósito pendiente?'))return;await request('/admin/wallet-deposit/'+(action==='approve-deposit'?'approve':'reject'),{service:'reseller',method:'POST',body:{id}});flash('Depósito actualizado');await load()});
@@ -308,16 +308,22 @@ document.addEventListener('submit',async e=>{
   flash(r?.message||'Cambios confirmados por Supabase.');await load();
  });
 });
+function filterVisibleRecords(value){
+ const q=String(value||'').trim().toLowerCase();
+ for(const item of document.querySelectorAll('#admin-view .list > .record, #admin-view .list > .surface')){
+  item.hidden=!!q&&!item.textContent.toLowerCase().includes(q);
+ }
+}
 document.addEventListener('input',e=>{
  const id=e.target.id;
- if(id==='filter-games'){S.search=e.target.value;drawGames()}
- if(id==='filter-offers'){S.offerSearch=e.target.value;drawOffers()}
- if(id==='filter-orders'){S.search=e.target.value;drawOrders()}
- if(id==='filter-customers'){S.search=e.target.value;drawCustomers()}
+ if(id==='filter-games'){S.search=e.target.value;filterVisibleRecords(e.target.value)}
+ if(id==='filter-offers'){S.offerSearch=e.target.value;filterVisibleRecords(e.target.value)}
+ if(id==='filter-orders'){S.search=e.target.value;filterVisibleRecords(e.target.value)}
+ if(id==='filter-customers'){S.search=e.target.value;filterVisibleRecords(e.target.value)}
 });
 document.addEventListener('change',e=>{
- if(e.target.id==='game-filter'){S.gameFilter=e.target.value;drawGames()}
- if(e.target.id==='offer-filter'){S.offerFilter=e.target.value;drawOffers()}
+ if(e.target.id==='game-filter'){S.gameFilter=e.target.value;drawGames();filterVisibleRecords(S.search)}
+ if(e.target.id==='offer-filter'){S.offerFilter=e.target.value;drawOffers();filterVisibleRecords(S.offerSearch)}
  if(e.target.id==='co-kind')S.coKind=e.target.value;
  if(e.target.id==='co-selected-product')S.product=e.target.value;
 });
