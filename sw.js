@@ -1,5 +1,5 @@
 // Refills Shop PWA. Solo guarda recursos públicos: nunca pedidos, sesiones, pagos ni saldos.
-const CACHE='refills-shop-pwa-shell-v3';
+const CACHE='refills-shop-pwa-shell-v4';
 const ROOT='/REFILLSHOP/';
 const OFFLINE=ROOT+'offline.html';
 const STATIC=[OFFLINE,ROOT+'manifest.webmanifest',ROOT+'assets/refills-app-192.png',ROOT+'assets/refills-app-512.png',ROOT+'assets/refills-app-maskable-512.png'];
