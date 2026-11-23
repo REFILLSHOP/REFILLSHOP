@@ -173,7 +173,7 @@ function wallet(){
  const currency=['USDT','CUP','SM'].includes(S.depositCurrency)?S.depositCurrency:'USDT';
  const currencyInfo={
   USDT:{title:'USDT · BEP-20',subtitle:'Hash o captura · revisión de pago',address:S.instructions.USDT?.address||'',method:'USDT'},
-  CUP:{title:'CUP · Transfermóvil',subtitle:'Captura de pantalla · revisión manual',address:S.instructions.CUP?.destination||'',method:'CUP'},
+  CUP:{title:'CUP · Transfermóvil',subtitle:'Tarjeta y número de confirmación · revisión manual',address:S.instructions.CUP?.destination&&S.instructions.CUP?.confirmPhone?S.instructions.CUP.destination:'',method:'CUP'},
   SM:{title:'Saldo móvil ETECSA',subtitle:'Captura y número emisor · revisión manual',address:S.instructions.SM?.destination||'',method:'SM'}
  };
  const selected=currencyInfo[currency];
