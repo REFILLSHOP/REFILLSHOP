@@ -2154,7 +2154,7 @@ case 'qty-minus':s.qty=Math.max(1,s.qty-1);modal();break;case 'qty-plus':s.qty=M
 
 
 case 'remove-cart':{s.cart.splice(Number(b.dataset.index),1);save('cart',s.cart);headerNav();modal();break;}
-case 'cart-first':{const c=s.cart[0];if(!c)return;openRegionGame(c.id,c.region||'');const game=itemBy(c.id),index=game?.offers?.findIndex(o=>o.id===c.offerId);s.selected=index>=0?index:c.offer;s.player=String(c.player||'');const offerId=c.offerId||game?.offers?.[s.selected]?.id;if(offerId)s.playerTargets[offerId]={...(c.targets||{})};if(!game?.offers?.[s.selected]){toast('La oferta guardada ya no está disponible.');render();return}s.modal='checkout';render();break;}
+case 'cart-first':{const c=s.cart[0];if(!c)return;openRegionGame(c.id,c.region||'');const game=itemBy(c.id),index=game?.offers?.findIndex(o=>o.id===c.offerId);s.selected=index>=0?index:c.offer;s.player=String(c.player||'');const offer=game?.offers?.[s.selected],offerId=c.offerId||offer?.id;if(offerId)s.playerTargets[offerId]={...(c.targets||{})};if(!offer){toast('Esta oferta guardada ya no está disponible.');render();return}s.offerGroup=offerGroup(offer);s.playerCheck=null;s.modal=null;render(true);toast(offer.kind==='pin'?'Revisa la oferta y confirma la compra.':'Revisa y valida tu ID antes de continuar al pago.');break;}
 case 'save-profile':{const name=(document.getElementById('profile-name')?.value||'').trim();if(!name){toast('Escribe un nombre');return}s.nickname=name.slice(0,32);save('nickname',s.nickname);render();toast('Nombre guardado');break;}
 case 'order-details':s.selectedOrder=b.dataset.ref;s.modal='order';modal();break;
 case 'delete-order':s.orders=s.orders.filter(o=>o.ref!==b.dataset.ref);save('orders',s.orders);s.modal=null;render();toast('Pedido eliminado');break;
