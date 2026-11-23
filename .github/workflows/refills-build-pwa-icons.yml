@@ -26,4 +26,12 @@ jobs:
           git add assets/refills-app-192.png assets/refills-app-512.png assets/refills-app-maskable-512.png
           if git diff --cached --quiet; then exit 0; fi
           git commit -m "Generar iconos PWA con el logo oficial de Refills Shop"
-          git push
+          # Mantener todos los cambios que hayan llegado a main mientras se generaban.
+          for attempt in 1 2 3; do
+            git fetch origin main
+            git rebase origin/main
+            if git push origin HEAD:main; then exit 0; fi
+            sleep 3
+          done
+          echo "No fue posible publicar los iconos sin conflictos" >&2
+          exit 1
