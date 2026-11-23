@@ -289,7 +289,7 @@ document.addEventListener('submit',async e=>{
  const data=Object.fromEntries(new FormData(form).entries());
  if(form.id==='admin-login')return withBusy(async()=>{
   const remember=form.elements.rememberSession?.checked!==false;
-  try{localStorage.setItem('refills_shop_remember_session',String(remember))}catch{}
+  try{localStorage.setItem('refills_shop_remember_session',String(remember));if(!remember)localStorage.removeItem('sb-kcgjlnymhmxylrjchcvl-auth-token')}catch{}
   if(remember!==S.rememberSession){await S.client.auth.signOut().catch(()=>{});S.rememberSession=remember;S.client=createAdminClient()}
   const phone=String(form.elements.country.value).replace(/\D/g,'')+String(form.elements.phone.value).replace(/\D/g,'');
   const email=phoneAlias(phone),password=String(data.password||'');
