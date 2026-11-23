@@ -271,10 +271,10 @@ function paymentMethodLabel(method){
 }
 function drawOrders(){
  const orders=S.cache.orders?.orders||[];
- const pending=orders.filter(o=>o.status==='pending'),failed=orders.filter(o=>['failed','rejected'].includes(o.status));
+ const pending=orders.filter(o=>o.status==='pending'),processing=orders.filter(o=>o.status==='processing'),failed=orders.filter(o=>['failed','rejected'].includes(o.status));
  $('admin-view').innerHTML='<div class="grid three">'
   +metric('PEDIDOS RECIENTES',orders.length,'Hasta 150 movimientos','orders')
-  +metric('POR REVISAR',pending.length,'Comprobar cobros y entregas','shield')
+  +metric('POR REVISAR',pending.length+processing.length,processing.length+' enviados al proveedor · consultar su entrega','shield')
   +metric('FALLIDOS',failed.length,'Comprobar incidencias','alert')
   +'</div><div class="spacing"></div>'
   +'<section class="surface section"><div class="panel-head"><div><h2>Revisión de pagos</h2><small>Verifica cada ingreso en la cuenta antes de aprobar la compra; la referencia del cliente no es confirmación del banco.</small></div>'+ico('payments')+'</div>'
@@ -291,6 +291,7 @@ function drawOrders(){
    +'<div class="row-actions">'+(o.receiptAvailable?'<button class="btn ghost small" data-action="receipt" data-code="'+esc(o.code)+'">'+ico('eye')+' Captura</button>':'')
    +(!isCrypto&&o.paymentStatus!=='paid'&&o.status==='pending'?'<button class="btn secondary small" data-action="verify-payment" data-code="'+esc(o.code)+'">Confirmar ingreso real</button>':'')
    +(o.paymentStatus==='paid'&&o.status==='pending'&&o.kind==='topup'?'<button class="btn primary small" data-action="fulfill" data-code="'+esc(o.code)+'">Enviar a Central One</button>':'')
+   +(o.paymentStatus==='paid'&&o.status==='processing'&&o.kind==='topup'?'<button class="btn secondary small" data-action="reconcile-order" data-id="'+esc(o.id)+'">Consultar estado del proveedor</button>':'')
    +(o.kind==='pin'&&o.paymentStatus==='paid'?'<button class="btn primary small" data-action="assign-pin" data-code="'+esc(o.code)+'">Entregar PIN</button>':'')
    +(o.status==='pending'?'<button class="btn danger small" data-action="reject-order" data-code="'+esc(o.code)+'">Rechazar</button>':'')
    +(o.paymentStatus==='paid'&&o.status!=='refunded'?'<button class="btn ghost small" data-action="refund-order" data-code="'+esc(o.code)+'">Registrar reembolso</button>':'')
@@ -427,6 +428,7 @@ async function runAction(action,el){
  if(action==='refresh')return load();
  if(action==='mode-centralone'||action==='mode-manual'){S.offerMode=action.split('-')[1];return drawOffers()}
  if(action==='save-game')return submitGameChanges();
+ if(action==='reconcile-order')return withBusy(async()=>{const r=await request('/admin/reconcile-order',{method:'POST',body:{orderId:id}});flash('Estado del proveedor: '+(r.providerStatus||'desconocido')+'. Pedido: '+(r.orderStatus||'en revisión')+'.');await load('orders')});
  if(action==='edit-game')return changeGame(id);
  if(action==='cancel-edit-game'){S.editingGameId=null;drawGames();flash('Edición cancelada, ningún cambio guardado.');return}
  if(action==='customer-details')return openCustomer(id);
