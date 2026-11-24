@@ -1246,7 +1246,7 @@ case 'checkout':
   }
   const balance=Number(s.reseller.wallet?.USDT||0),minimumDeposit=currency==='USDT'?5:currency==='SM'?Math.ceil(5*smRate):Math.ceil(5*smRate*cupRate);
   html=modalTitle('Depositar en wallet',activationRequired?'Activa Gratis con un depósito verificado':'Datos para transferir y enviar comprobante')+
-   '<div class="rs-checkout-simple rs-wallet-deposit-ui"><div class="rs-checkout-total"><div><span>IMPORTE A DEPOSITAR</span><strong id="wallet-deposit-preview">0.00 <small>'+currency+'</small></strong><small id="wallet-usdt-estimate">Saldo estimado: 0.00 USDT</small></div><div><small>Saldo actual: '+balance.toFixed(2)+' USDT</small><small>La acreditación no es instantánea: se verificará el pago primero.</small></div></div>'+
+   '<div class="rs-checkout-simple rs-wallet-deposit-ui"><div class="rs-checkout-total"><div><span>IMPORTE A DEPOSITAR</span><strong id="wallet-deposit-preview">0.00 <small>'+currency+'</small></strong><small id="wallet-usdt-estimate">Saldo estimado: 0.00 USDT</small></div><div><small>Saldo actual: '+balance.toFixed(2)+' USDT</small><small>USDT: acreditación automática al confirmar la transferencia en la red.</small></div></div>'+
    '<div class="rs-checkout-method"><span>'+current.visual+'<strong>'+esc(current.title)+'</strong></span><button type="button" class="btn ghost small" data-action="wallet-change-currency">Cambiar</button></div>'+
    '<div class="rs-checkout-inputs rs-wallet-amount-field"><label class="sheet-label" for="wallet-amount">¿Cuánto deseas depositar? ('+currency+')</label>'+
     '<input id="wallet-amount" class="field" type="number" inputmode="decimal" min="'+(activationRequired?minimumDeposit:(currency==='USDT'?'0.01':'1'))+'" step="'+(currency==='USDT'?'0.01':'1')+'" autocomplete="off" placeholder="'+(activationRequired?minimumDeposit.toLocaleString('es-ES'):(currency==='USDT'?'Ejemplo: 5.00':'Ejemplo: 500'))+'" required>'+
@@ -1262,9 +1262,7 @@ case 'checkout':
    '<div class="rs-checkout-inputs rs-wallet-evidence">'+
    (currency==='USDT'?'<label class="sheet-label" for="wallet-txhash">Hash de transacción (obligatorio para acreditar)</label><input id="wallet-txhash" class="field" type="text" autocomplete="off" placeholder="0x…" required><small>La acreditación se realiza automáticamente tras 40 confirmaciones en BNB Smart Chain.</small>':'')+
    (method==='SM'?'<label class="sheet-label" for="wallet-sender">Número desde el que transferiste</label><input id="wallet-sender" class="field" type="tel" inputmode="numeric" maxlength="20" placeholder="Número de la línea emisora" required>':'')+
-   '<label class="sheet-label" for="wallet-proof">Captura del comprobante '+(currency==='USDT'?'(si no envías hash)':'(obligatoria)')+'</label>'+
-   '<input id="wallet-proof" class="field rs-proof-input" type="file" accept="image/png,image/jpeg,image/webp" '+(currency==='USDT'?'':'required')+'>'+
-   '<small>JPG, PNG o WEBP · tamaño máximo 5 MB.</small></div>'+
+   (currency==='USDT'?'':'<label class="sheet-label" for="wallet-proof">Captura del comprobante (obligatoria)</label><input id="wallet-proof" class="field rs-proof-input" type="file" accept="image/png,image/jpeg,image/webp" required><small>JPG, PNG o WEBP · tamaño máximo 5 MB.</small>')+'</div>'+
    '<button class="btn primary full rs-checkout-submit" data-action="reseller-deposit-submit" '+(!current.recipient?'disabled':'')+'>'+
      I('check','tiny')+' Enviar solicitud de depósito</button>'+
    '<p class="rs-checkout-footnote">La captura o el hash no significan que el dinero ya esté acreditado. Consulta su estado en Movimientos.</p></div>';
