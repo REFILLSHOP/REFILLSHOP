@@ -25,7 +25,7 @@ const RS_NOTICE_TTL=86400000;
  }catch{}
 })();
 /* El catálogo antiguo guardado en localStorage no se reintroduce. */
-const s={page:'inicio',authMode:'login',authBusy:false,authError:'',rememberSession:(()=>{try{return localStorage.getItem('refills_shop_remember_session')!=='false'}catch{return true}})(),afterAuthPage:'inicio',authSession:null,profile:null,member:false,resellerPortal:null,resellerLoading:false,wholesalePrices:{},resellerOrders:[],resellerDeposits:[],resellerCurrency:'USDT',resellerDepositCurrency:'USDT',resellerDepositStage:'methods',detailId:null,search:'',filter:'todos',offerGroup:'recargas',regionChoice:null,playerTargets:{},playerCheck:null,resellerPreview:null,resellerPreviewTier:'free',sort:'name',payment:'cup',selected:0,player:'',checkoutSession:null,qty:1,modal:null,usdtPayment:null,recentTopups:[],recentTopupsLoaded:false,changes:[],changesLoaded:false,changesLastSeen:getStored('changesSeen',0),changesLastToast:0, nickname:getStored('nickname','Invitado'),favorites:getStored('favs',[]),orders:[],cart:getStored('cart',[]),showFavs:false,selectedOrder:null, role:(window.REFILLS_SESSION&&window.REFILLS_SESSION.role)||'guest', user:(window.REFILLS_SESSION&&window.REFILLS_SESSION.user)||null,
+const s={page:'inicio',authMode:'login',authBusy:false,authError:'',rememberSession:(()=>{try{return localStorage.getItem('refills_shop_remember_session')!=='false'}catch{return true}})(),afterAuthPage:'inicio',authSession:null,profile:null,member:false,resellerPortal:null,resellerLoading:false,wholesalePrices:{},resellerOrders:[],resellerDeposits:[],resellerCurrency:'USDT',resellerDepositCurrency:'USDT',resellerDepositMethod:'USDT',resellerDepositStage:'methods',detailId:null,search:'',filter:'todos',offerGroup:'recargas',regionChoice:null,playerTargets:{},playerCheck:null,resellerPreview:null,resellerPreviewTier:'free',sort:'name',payment:'cup',selected:0,player:'',checkoutSession:null,qty:1,modal:null,usdtPayment:null,recentTopups:[],recentTopupsLoaded:false,changes:[],changesLoaded:false,changesLastSeen:getStored('changesSeen',0),changesLastToast:0, nickname:getStored('nickname','Invitado'),favorites:getStored('favs',[]),orders:[],cart:getStored('cart',[]),showFavs:false,selectedOrder:null, role:(window.REFILLS_SESSION&&window.REFILLS_SESSION.role)||'guest', user:(window.REFILLS_SESSION&&window.REFILLS_SESSION.user)||null,
 rates:getStored('rates',{usdtSm:300,smCup:3,gainSM:0}), adminTab:'resumen',
 adminOrders:getStored('adminOrders',[]), reseller:getStored('reseller',{plan:null,wallet:{USDT:0,CUP:0,SM:0},ledger:[]}),
 paymentConfig:getStored('paymentConfig',{smReceiver:'',cupCard:'',cupConfirmPhone:'',usdtAddress:'',usdtEnabled:false,whatsappNumber:''}),
@@ -500,6 +500,7 @@ function readFileAsDataUrl(file){
 }
 async function submitResellerDeposit(){
  const currency=document.getElementById('wallet-currency')?.value||'USDT';
+ const paymentMethod=document.getElementById('wallet-payment-method')?.value||'USDT';
  const amount=Number(document.getElementById('wallet-amount')?.value||0);
  const senderPhone=String(document.getElementById('wallet-sender')?.value||'').trim();
  const txHash=String(document.getElementById('wallet-txhash')?.value||'').trim();
@@ -510,11 +511,11 @@ async function submitResellerDeposit(){
  if(currency!=='USDT'&&!Number.isInteger(amount)){toast('Los importes en CUP y saldo móvil deben ser números enteros.');return}
  if(currency==='USDT'&&!txHash&&!file){toast('Adjunta el comprobante o introduce el hash USDT BEP-20.');return}
  if(currency!=='USDT'&&!file){toast('Adjunta el comprobante de pago.');return}
- if(currency==='SM'&&!senderPhone){toast('Introduce el número desde el que realizaste la transferencia de saldo móvil.');return}
+ if(paymentMethod==='SM'&&!senderPhone){toast('Introduce el número desde el que realizaste la transferencia de saldo móvil.');return}
  if(button){button.disabled=true;button.textContent='Enviando solicitud…'}
  try{
   const proofData=await readFileAsDataUrl(file);
-  const result=await edgeRequest('rs12-reseller','/wallet/deposits',{method:'POST',auth:true,body:{currency,amount,senderPhone,txHash,proofData}});
+  const result=await edgeRequest('rs12-reseller','/wallet/deposits',{method:'POST',auth:true,body:{currency,amount,paymentMethod,senderPhone,txHash,proofData}});
   if(result?.ok)rsAddNotice('wallet','Depósito solicitado','Solicitud de '+amount+' '+currency+' registrada. Espera la confirmación del administrador.','silent');
   await loadResellerPortal(true,false);
   s.modal=null;modal();if(s.page==='revendedores')render();
@@ -1101,10 +1102,7 @@ function openDepositCheckout(){
  // Payment UI mirrors the offer checkout, while deposit approval remains server-controlled.
  const settings=s.resellerPortal?.paymentInstructions||{};
  const chosen=['USDT','CUP','SM'].includes(s.resellerDepositCurrency)?s.resellerDepositCurrency:'USDT';
- if(!(chosen==='USDT'?settings.USDT?.address:chosen==='CUP'?settings.CUP?.destination:settings.SM?.destination)){
-  const preferred=[['USDT',settings.USDT?.address],['CUP',settings.CUP?.destination],['SM',settings.SM?.destination]].find(x=>!!x[1]);
-  if(preferred)s.resellerDepositCurrency=preferred[0];
- }
+ if(!(chosen==='USDT'?settings.USDT?.address:chosen==='CUP'?settings.CUP?.destination:settings.SM?.destination))s.resellerDepositCurrency='USDT';
  s.resellerDepositStage='details';
  s.modal='wallet';
  modal();
@@ -1229,24 +1227,26 @@ case 'checkout':
   const activationRequired=!!s.resellerPortal?.membership?.activationRequired;
   const smRate=Number(s.resellerPortal?.rates?.buySmPerUsdt||0),cupRate=Number(s.resellerPortal?.rates?.cupPerSm||0);
   let currency=['USDT','CUP','SM'].includes(s.resellerDepositCurrency)?s.resellerDepositCurrency:'USDT';
+  const method=s.resellerDepositMethod||'USDT';
   const options={
-   USDT:{title:'USDT · BEP-20',subtitle:'Hash de transacción o captura · Revisión de ingreso',name:'Wallet receptora · USDT BEP-20',recipient:String(settings.USDT?.address||''),network:String(settings.USDT?.network||'BEP-20'),visual:paymentVisual('usdt'),note:'Envía únicamente USDT por la red indicada. Introduce el hash o adjunta una captura. El abono se realizará tras verificar el ingreso.'},
-   CUP:{title:'CUP · Transfermóvil',subtitle:'Captura del comprobante · Revisión manual',name:'Tarjeta receptora · Transfermóvil',recipient:String(settings.CUP?.destination||''),confirmPhone:String(settings.CUP?.confirmPhone||settings.CUP?.confirmationPhone||s.paymentConfig.cupConfirmPhone||''),network:'CUP',visual:paymentVisual('cup'),note:'Transfiere el importe exacto a la tarjeta, comprueba el número de confirmación y adjunta una captura JPG, PNG o WEBP. No se acredita la wallet sin verificar el ingreso.'},
-   SM:{title:'Saldo móvil ETECSA',subtitle:'Captura y número de origen · Revisión manual',name:'Número receptor · Saldo móvil',recipient:String(settings.SM?.destination||''),network:'SM',visual:paymentVisual('sm'),note:'Envía el saldo a la línea indicada, adjunta una captura e introduce el número desde el que realizaste la transferencia.'}
+   USDT:{currency:'USDT',title:'USDT · BEP-20',subtitle:'Hash de transacción o captura · Revisión de ingreso',name:'Wallet receptora · USDT BEP-20',recipient:String(settings.USDT?.address||''),network:String(settings.USDT?.network||'BEP-20'),visual:paymentVisual('usdt'),note:'Envía únicamente USDT por la red indicada. Introduce el hash o adjunta una captura. El abono se realizará tras verificar el ingreso.'},
+   SM:{currency:'SM',title:'Saldo móvil ETECSA',subtitle:'Captura y número de origen · Revisión manual',name:'Número receptor · Saldo móvil',recipient:String(settings.SM?.destination||''),network:'SM',visual:paymentVisual('sm'),note:'Envía el saldo a la línea indicada, adjunta una captura e introduce el número desde el que realizaste la transferencia.'},
+   CARD:{currency:'CUP',title:'Tarjeta · Transfermóvil',subtitle:'Transferencia a tarjeta · Revisión manual',name:'Tarjeta receptora',recipient:String(settings.CARD?.destination||''),confirmPhone:String(settings.CARD?.confirmPhone||''),visual:paymentVisual('cup'),note:'Transfiere CUP a la tarjeta indicada y adjunta el comprobante. El abono se convierte a USDT al tipo de cambio configurado.'},
+   MITRANSFER:{currency:'CUP',title:'MiTransfer',subtitle:'Transferencia a teléfono · Revisión manual',name:'Teléfono receptor · MiTransfer',recipient:String(settings.MITRANSFER?.destination||''),visual:paymentVisual('cup'),note:'Envía CUP mediante MiTransfer al teléfono indicado y adjunta el comprobante. El abono se convierte a USDT al tipo de cambio configurado.'}
   };
-  let current=options[currency];
-  if(s.resellerDepositStage==='details'&&!current.recipient){const available=Object.entries(options).find(([,opt])=>!!opt.recipient);if(available){currency=available[0];current=available[1];s.resellerDepositCurrency=currency}else s.resellerDepositStage='methods'}
+  let current=options[method];currency=current.currency;s.resellerDepositCurrency=currency;
+  if(s.resellerDepositStage==='details'&&!current.recipient)s.resellerDepositStage='methods'
   if(s.resellerDepositStage!=='details'){
    html=modalTitle('Depositar en wallet','Elige cómo deseas recargar tu cuenta de revendedor')+
     '<div class="rs-checkout-simple rs-wallet-deposit-ui"><div class="rs-checkout-total"><div><span>TU SALDO DISPONIBLE</span><strong>'+
     Number(s.reseller.wallet?.USDT||0).toFixed(2)+' <small>USDT</small></strong></div><div><small>Recarga en USDT, CUP o saldo móvil. La acreditación requiere confirmación del ingreso.</small></div></div>'+
     '<div class="rs-wallet-stage-head"><strong>Selecciona un método de depósito</strong><small>Los datos para pagar aparecerán en el siguiente paso.</small></div>'+
     '<div class="payment-choice-list">'+Object.entries(options).map(([code,item])=>{
-     const available=!!item.recipient&&(code!=='CUP'||!!item.confirmPhone);
+     const available=!!item.recipient;
      return '<button type="button" class="payment-choice rs-wallet-method" data-action="wallet-select-currency" data-currency="'+code+'" '+(!available?'disabled':'')+'>'+
        '<span class="payment-choice-icon">'+item.visual+'</span><span class="payment-choice-copy"><strong>'+esc(item.title)+'</strong><small>'+esc(available?item.subtitle:'Método sin cuenta receptora configurada')+'</small></span><span class="payment-choice-arrow">'+I('arrow','tiny')+'</span></button>';
     }).join('')+'</div>'+
-    '<div class="rs-wallet-review-note">Las solicitudes se acreditan solamente después de verificar la transferencia. No compartas datos de tu cuenta con terceros.</div></div>';
+    '<div class="rs-wallet-review-note">Todos los depósitos se convierten y acreditan en USDT después de verificar la transferencia. No compartas datos de tu cuenta con terceros.</div></div>';
    break;
   }
   const balance=Number(s.reseller.wallet?.USDT||0),minimumDeposit=currency==='USDT'?5:currency==='SM'?Math.ceil(5*smRate):Math.ceil(5*smRate*cupRate);
@@ -1262,11 +1262,11 @@ case 'checkout':
       '<code>'+esc(current.recipient)+'</code><button type="button" class="btn secondary small" data-action="wallet-copy-recipient">Copiar</button>':
       '<span class="rs-wallet-missing">No hay datos receptores configurados. No envíes dinero.</span>')+'</div>'+
     (currency==='USDT'?'<div class="rs-wallet-network">RED · '+esc(current.network)+'</div>':'')+
-    (currency==='CUP'?'<div class="rs-cup-confirm-data"><h3>Número de confirmación de Transfermóvil</h3>'+(current.confirmPhone?'<div class="rs-pay-dest-value"><code>'+esc(current.confirmPhone)+'</code><button type="button" class="btn secondary small" data-action="wallet-copy-confirmation">Copiar número</button></div>':'<p class="rs-cup-confirm-warning">No se configuró el número de confirmación de CUP. Contacta soporte antes de enviar dinero.</p>')+'</div>':'')+
+    
     '<p>'+esc(current.note)+'</p></section>'+
    '<div class="rs-checkout-inputs rs-wallet-evidence">'+
    (currency==='USDT'?'<label class="sheet-label" for="wallet-txhash">Hash de transacción USDT (recomendado)</label><input id="wallet-txhash" class="field" type="text" autocomplete="off" placeholder="0x…"><small>Si todavía no tienes el hash, puedes adjuntar una captura.</small>':'')+
-   (currency==='SM'?'<label class="sheet-label" for="wallet-sender">Número desde el que transferiste</label><input id="wallet-sender" class="field" type="tel" inputmode="numeric" maxlength="20" placeholder="Número de la línea emisora" required>':'')+
+   (method==='SM'?'<label class="sheet-label" for="wallet-sender">Número desde el que transferiste</label><input id="wallet-sender" class="field" type="tel" inputmode="numeric" maxlength="20" placeholder="Número de la línea emisora" required>':'')+
    '<label class="sheet-label" for="wallet-proof">Captura del comprobante '+(currency==='USDT'?'(si no envías hash)':'(obligatoria)')+'</label>'+
    '<input id="wallet-proof" class="field rs-proof-input" type="file" accept="image/png,image/jpeg,image/webp" '+(currency==='USDT'?'':'required')+'>'+
    '<small>JPG, PNG o WEBP · tamaño máximo 5 MB.</small></div>'+
@@ -1447,10 +1447,10 @@ case 'reseller-deposit-submit':void submitResellerDeposit();break;
 case 'nav':navigate(b.dataset.page);break;case 'modal-nav':navigate(b.dataset.page);break;
 case 'home-wallet-deposit':if(resellerHasPlan())openDepositCheckout();else{s.modal='wallet';modal()}break;
 case 'install-refills':requestRefillsInstallation();break;case 'check-install-app':void checkRefillsInstall();break;case 'home-wallet-movements':s.modal='reseller-ledger';modal();break;
-case 'wallet-select-currency':{s.resellerDepositCurrency=b.dataset.currency;s.resellerDepositStage='details';modal();break;}
+case 'wallet-select-currency':{s.resellerDepositMethod=b.dataset.currency;s.resellerDepositCurrency=b.dataset.currency==='SM'?'SM':b.dataset.currency==='USDT'?'USDT':'CUP';s.resellerDepositStage='details';modal();break;}
 case 'wallet-change-currency':{s.resellerDepositStage='methods';modal();break;}
 case 'wallet-copy-confirmation':{const val=String(s.resellerPortal?.paymentInstructions?.CUP?.confirmationPhone||s.paymentConfig.cupConfirmPhone||'').trim();if(!val){toast('Falta el número de confirmación de CUP');break;}void navigator.clipboard?.writeText(val).then(()=>toast('Número de confirmación copiado'),()=>toast('Mantén pulsado el número para copiarlo'));break;}
-case 'wallet-copy-recipient':{const data=s.resellerPortal?.paymentInstructions||{};const currency=s.resellerDepositCurrency||'USDT';const val=currency==='USDT'?data.USDT?.address:currency==='CUP'?data.CUP?.destination:data.SM?.destination;if(!val){toast('No hay cuenta receptora configurada');break;}void navigator.clipboard?.writeText(String(val)).then(()=>toast('Datos para pagar copiados'),()=>toast('Mantén pulsado el dato para copiarlo'));break;}
+case 'wallet-copy-recipient':{const data=s.resellerPortal?.paymentInstructions||{};const method=s.resellerDepositMethod||'USDT';const val=method==='USDT'?data.USDT?.address:method==='SM'?data.SM?.destination:method==='CARD'?data.CARD?.destination:data.MITRANSFER?.destination;if(!val){toast('No hay cuenta receptora configurada');break;}void navigator.clipboard?.writeText(String(val)).then(()=>toast('Datos para pagar copiados'),()=>toast('Mantén pulsado el dato para copiarlo'));break;}
 case 'open-item':openDetail(b.dataset.id);break;
 case 'choose-region':openRegionGame(b.dataset.id,b.dataset.region);break;
 case 'modal':s.modal=b.dataset.modal;if(s.modal==='wallet'){openDepositCheckout();break}if(s.modal==='alerts'){rsNoticeAccount();rsMarkNoticesRead();void loadPublicChanges(true);}modal();break;
