@@ -780,7 +780,7 @@ function home(){
   ${!hasPlan?`<p class="home-wallet-hint">Activa tu plan Gratis, Level 2 o Level 3 para utilizar el monedero.</p>`:''}
  </section>`;
  return `${walletHero}
- <button type="button" class="rs-install-entry" data-action="install-refills" aria-label="Instalar Refills Shop en este dispositivo"><img class="rs-install-logo" src="/REFILLSHOP/assets/refills-app-192.png" alt=""><span>Instalar Refills Shop</span></button>
+ <button type="button" class="rs-install-entry" data-action="install-refills" aria-label="Instalar Refills Shop en este dispositivo"><svg width="19" height="19" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" aria-hidden="true"><path d="M12 3v12m-5-5 5 5 5-5M4 16v4h16v-4"/></svg><span>Instalar app</span></button>
  <div class="notice-grid"><button class="notice" data-action="modal" data-modal="news"><span class="notice-icon">${I('spark')}</span><span><strong>Ofertas y novedades</strong><small>Descubre recargas y productos</small></span>${I('arrow','tiny arrow')}</button><button class="notice" data-action="modal" data-modal="help"><span class="notice-icon">${I('headset')}</span><span><strong>Centro de ayuda</strong><small>Conoce cómo funciona la tienda</small></span>${I('arrow','tiny arrow')}</button></div>
  ${sectionMini('Móvil, internet y más',['nauta','cubacel','vpn','sms'],'recargas')}
  ${sectionMini('Juegos disponibles',ITEMS.filter(g=>g.category==='juegos').sort((a,b)=>Number(b.featured)-Number(a.featured)||a.sortOrder-b.sortOrder||a.name.localeCompare(b.name)).slice(0,4).map(g=>g.id),'recargas')}
@@ -1141,19 +1141,7 @@ function modal(){
   const ios=/iPad|iPhone|iPod/.test(navigator.userAgent);
   const android=/Android/i.test(navigator.userAgent);
   const isChrome=android&&/Chrome\//.test(navigator.userAgent);
-  html=modalTitle('Instalar Refills Shop','Icono oficial en tu pantalla de inicio')+
-   '<div class="card panel rs-install-help">'+
-   '<img src="/REFILLSHOP/assets/refills-app-192.png" alt="Logo Refills Shop" width="64" height="64" style="width:64px;height:64px;border-radius:17px;margin:0 auto 12px;display:block">'+
-   (ios?'<p>Abre la web en <strong>Safari</strong>, toca <strong>Compartir</strong> y luego <strong>Añadir a pantalla de inicio</strong>.</p>':
-    android?'<p><strong>1.</strong> Abre el menú <strong>⋮</strong> de Chrome y entra a <strong>Instalar y crear acceso directo</strong>.</p>'+
-     '<p><strong>2.</strong> Si <strong>Instalar</strong> está disponible, tócalo para abrir la app sin la barra del navegador.</p>'+
-     '<p><strong>3.</strong> Si aparece <strong>«Esta aplicación no se puede instalar»</strong>, selecciona <strong>Crear acceso directo</strong>. Tendrás el mismo logo en tu inicio, aunque la tienda se abrirá en Chrome.</p>'+
-     '<p>La instalación completa depende de Chrome y los servicios de Android. Si está bloqueada, revisa actualizaciones de Chrome y Servicios de Google Play; también puedes probar sin VPN o con otra conexión de confianza.</p>':
-     '<p>Usa el menú de Chrome o Edge y elige <strong>Instalar aplicación</strong> o <strong>Crear acceso directo</strong>.</p>')+
-   '<div id="rs-install-check" class="rs-install-check" role="status">Comprobando compatibilidad de tu navegador…</div>'+
-   '<button type="button" class="btn secondary full" data-action="check-install-app">Volver a comprobar instalación</button>'+
-   '<p class="helper">Refills Shop es una aplicación web (PWA), no una descarga APK. Para comprar, ver saldo y consultar pedidos sigue siendo necesaria la conexión a internet.</p></div>';
-  queueMicrotask(()=>{void checkRefillsInstall();});
+  html=modalTitle('Instalar app','Refills Shop')+'<div class="card panel rs-install-help">'+(ios?'<p>En Safari, toca Compartir y luego Añadir a pantalla de inicio.</p>':'<p>Abre el menú ⋮ de tu navegador y selecciona Instalar aplicación o Añadir a pantalla de inicio.</p>')+'<p class="helper">Si no aparece Instalar, puedes crear un acceso directo.</p></div>';
   break;
  }
   case 'reseller-preview':{
@@ -1520,7 +1508,7 @@ function authPage(){
    ${s.authError?`<div class="auth-error-v7" role="alert">${esc(s.authError)}</div>`:''}
    <button class="btn primary auth-submit-v7" type="submit" ${s.authBusy?'disabled':''}>${s.authBusy?'Conectando…':registering?'Crear mi cuenta':'Iniciar sesión'}</button>
   </form>
-  <button type="button" class="rs-install-entry" data-action="install-refills"><img class="rs-install-logo" src="/REFILLSHOP/assets/refills-app-192.png" alt=""><span>Instalar Refills Shop</span></button>
+  <button type="button" class="rs-install-entry" data-action="install-refills"><svg width="19" height="19" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" aria-hidden="true"><path d="M12 3v12m-5-5 5 5 5-5M4 16v4h16v-4"/></svg><span>Instalar app</span></button>
  </section></div>`;
 }
 
