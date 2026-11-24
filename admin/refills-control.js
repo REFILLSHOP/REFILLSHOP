@@ -718,7 +718,7 @@ document.addEventListener('change',e=>{
 });
 $('refresh-view').addEventListener('click',()=>load());
 $('refresh-all').addEventListener('click',()=>load());
-$('sign-out').addEventListener('click',async()=>{await S.client.auth.signOut();showLogin();flash('Sesión cerrada.');});
+$('sign-out').addEventListener('click',async()=>{await S.client.auth.signOut();for(const storage of [localStorage,sessionStorage]){storage.removeItem('refills_shop_supabase_session_v1');storage.removeItem('sb-kcgjlnymhmxylrjchcvl-auth-token');}location.replace('/REFILLSHOP/');});
 $('modal-root').addEventListener('click',e=>{if(e.target.id==='modal-root')closeModal()});
 document.addEventListener('keydown',e=>{if(e.key==='Escape')closeModal()});
 window.addEventListener('hashchange',()=>{if(S.user){S.page=pageFromHash();navigate(S.page,true)}});
@@ -728,7 +728,12 @@ async function start(){
   try{S.rememberSession=localStorage.getItem('refills_shop_remember_session')!=='false'}catch{S.rememberSession=true}
   S.client=createAdminClient();
   const session=(await S.client.auth.getSession()).data.session;
-  if(!session)return showLogin();
+  if(!session){
+   const storage=S.rememberSession?localStorage:sessionStorage;
+   const shared=JSON.parse(storage.getItem('refills_shop_supabase_session_v1')||'null');
+   if(shared?.access_token&&shared?.refresh_token){const restored=await S.client.auth.setSession({access_token:shared.access_token,refresh_token:shared.refresh_token});if(restored.error)throw restored.error;}
+   else return showLogin('Inicia sesión en Refills Shop con tu cuenta de administrador.');
+  }
   try{await verifyAdmin();showConsole()}catch(err){showLogin(err.message)}
  }catch(err){showLogin(err.message)}
 }
