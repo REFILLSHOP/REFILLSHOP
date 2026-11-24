@@ -509,17 +509,15 @@ async function submitResellerDeposit(){
  if(!Number.isFinite(amount)||amount<=0){toast('Introduce un importe válido.');return}
  if(s.resellerPortal?.membership?.activationRequired){const sm=Number(s.resellerPortal.rates?.buySmPerUsdt||0),cup=Number(s.resellerPortal.rates?.cupPerSm||0),equiv=currency==='USDT'?amount:currency==='SM'?amount/sm:amount/(sm*cup);if(!Number.isFinite(equiv)||equiv<5){toast('El primer depósito debe ser equivalente a 5.00 USDT o más.');return}}
  if(currency!=='USDT'&&!Number.isInteger(amount)){toast('Los importes en CUP y saldo móvil deben ser números enteros.');return}
- if(paymentMethod==='USDT'&&!txHash&&!file){toast('Adjunta el comprobante o introduce el hash USDT BEP-20.');return}
+ if(paymentMethod==='USDT'&&!txHash){toast('Pega el hash de la transferencia BEP-20 para verificarla automáticamente.');return}
  if(currency!=='USDT'&&!file){toast('Adjunta el comprobante de pago.');return}
  if(paymentMethod==='SM'&&!senderPhone){toast('Introduce el número desde el que realizaste la transferencia de saldo móvil.');return}
  if(button){button.disabled=true;button.textContent='Enviando solicitud…'}
  try{
-  const proofData=await readFileAsDataUrl(file);
-  const result=await edgeRequest('rs12-reseller','/wallet/deposits',{method:'POST',auth:true,body:{currency,amount,paymentMethod,senderPhone,txHash,proofData}});
-  if(result?.ok)rsAddNotice('wallet','Depósito solicitado','Solicitud de '+amount+' '+currency+' registrada. Espera la confirmación del administrador.','silent');
+  let result;if(paymentMethod==='USDT'){const created=await edgeRequest('rs12-reseller','/wallet/crypto/create',{method:'POST',auth:true,body:{amount}});result=await edgeRequest('rs12-reseller','/wallet/crypto/verify',{method:'POST',auth:true,body:{id:created.deposit.id,txHash}});if(result?.status==='confirmed')rsAddNotice('wallet','Wallet recargada','Se acreditaron '+amount.toFixed(2)+' USDT automáticamente.','silent');else if(result?.status==='pending')throw Error(result.message||'El pago todavía no tiene las confirmaciones necesarias. Vuelve a comprobarlo en unos segundos.');}else{const proofData=await readFileAsDataUrl(file);result=await edgeRequest('rs12-reseller','/wallet/deposits',{method:'POST',auth:true,body:{currency,amount,paymentMethod,senderPhone,txHash,proofData}});if(result?.ok)rsAddNotice('wallet','Depósito solicitado','Solicitud registrada. Espera la confirmación del administrador.','silent');}
   await loadResellerPortal(true,false);
   s.modal=null;modal();if(s.page==='revendedores')render();
-  toast(result.ok?'Solicitud de recarga enviada.':'Solicitud registrada.');
+  toast(paymentMethod==='USDT'&&result?.status==='confirmed'?'¡Wallet recargada automáticamente!':'Solicitud registrada.');
  }catch(error){toast(error.message||'No se pudo enviar la solicitud.')}
  finally{const current=document.querySelector('[data-action="reseller-deposit-submit"]');if(current)current.disabled=false}
 }
