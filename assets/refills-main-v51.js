@@ -509,7 +509,7 @@ async function submitResellerDeposit(){
  if(!Number.isFinite(amount)||amount<=0){toast('Introduce un importe válido.');return}
  if(s.resellerPortal?.membership?.activationRequired){const sm=Number(s.resellerPortal.rates?.buySmPerUsdt||0),cup=Number(s.resellerPortal.rates?.cupPerSm||0),equiv=currency==='USDT'?amount:currency==='SM'?amount/sm:amount/(sm*cup);if(!Number.isFinite(equiv)||equiv<5){toast('El primer depósito debe ser equivalente a 5.00 USDT o más.');return}}
  if(currency!=='USDT'&&!Number.isInteger(amount)){toast('Los importes en CUP y saldo móvil deben ser números enteros.');return}
- if(currency==='USDT'&&!txHash&&!file){toast('Adjunta el comprobante o introduce el hash USDT BEP-20.');return}
+ if(paymentMethod==='USDT'&&!txHash&&!file){toast('Adjunta el comprobante o introduce el hash USDT BEP-20.');return}
  if(currency!=='USDT'&&!file){toast('Adjunta el comprobante de pago.');return}
  if(paymentMethod==='SM'&&!senderPhone){toast('Introduce el número desde el que realizaste la transferencia de saldo móvil.');return}
  if(button){button.disabled=true;button.textContent='Enviando solicitud…'}
@@ -1099,11 +1099,8 @@ async function startPaymentReservation(button){
 }
 
 function openDepositCheckout(){
- // Payment UI mirrors the offer checkout, while deposit approval remains server-controlled.
- const settings=s.resellerPortal?.paymentInstructions||{};
- const chosen=['USDT','CUP','SM'].includes(s.resellerDepositCurrency)?s.resellerDepositCurrency:'USDT';
- if(!(chosen==='USDT'?settings.USDT?.address:chosen==='CUP'?settings.CUP?.destination:settings.SM?.destination))s.resellerDepositCurrency='USDT';
- s.resellerDepositStage='details';
+ // Select one of the configured deposit channels; all approved deposits credit USDT.
+ s.resellerDepositStage='methods';
  s.modal='wallet';
  modal();
 }
@@ -1432,7 +1429,7 @@ document.addEventListener('change',e=>{
   const target=document.querySelector('#modal-root .payment-instructions p');if(target)target.textContent=message;
  }
 });
-document.addEventListener('input',e=>{if(e.target?.id==='wallet-amount'){const el=document.getElementById('wallet-deposit-preview');const curr=s.resellerDepositCurrency||'USDT';const v=Number(e.target.value);if(el)el.innerHTML=(Number.isFinite(v)&&v>0?v.toLocaleString('es-ES',{minimumFractionDigits:curr==='USDT'?2:0,maximumFractionDigits:curr==='USDT'?2:0}):'0.00')+' <small>'+curr+'</small>';}
+document.addEventListener('input',e=>{if(e.target?.id==='wallet-amount'){const el=document.getElementById('wallet-deposit-preview');const est=document.getElementById('wallet-usdt-estimate');const curr=s.resellerDepositCurrency||'USDT';const v=Number(e.target.value);const sm=Number(s.resellerPortal?.rates?.buySmPerUsdt||0),cup=Number(s.resellerPortal?.rates?.cupPerSm||0);const usdt=curr==='USDT'?v:curr==='SM'?v/sm:v/(sm*cup);if(el)el.innerHTML=(Number.isFinite(v)&&v>0?v.toLocaleString('es-ES',{minimumFractionDigits:curr==='USDT'?2:0,maximumFractionDigits:curr==='USDT'?2:0}):'0.00')+' <small>'+curr+'</small>';if(est)est.textContent='Saldo estimado: '+(Number.isFinite(usdt)&&usdt>0?usdt.toFixed(2):'0.00')+' USDT';}
 if(e.target.id==='catalog-search'){s.search=e.target.value;refreshCatalog()}if(e.target.id==='player-input'){s.player=e.target.value;s.playerCheck=null;queuePlayerVerification()}if(e.target.matches('.rs-target-field')){const offer=itemBy(s.detailId)?.offers?.[s.selected];if(offer){s.playerTargets[offer.id]||={};s.playerTargets[offer.id][e.target.dataset.targetKey]=e.target.value;s.playerCheck=null;queuePlayerVerification()}}});
 document.addEventListener('change',e=>{if(e.target.id==='sort-catalog'){s.sort=e.target.value;refreshCatalog()}});
 document.addEventListener('keydown',e=>{if(e.key==='Escape'&&s.modal){s.modal=null;modal()}if((e.key==='Enter'||e.key===' ')&&e.target.classList.contains('brand')){e.preventDefault();navigate('inicio')}if((e.key==='Enter'||e.key===' ')&&e.target.classList.contains('product-clickable')){e.preventDefault();openDetail(e.target.dataset.id)}});
