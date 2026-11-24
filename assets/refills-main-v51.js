@@ -1224,7 +1224,7 @@ case 'checkout':
   let currency=['USDT','CUP','SM'].includes(s.resellerDepositCurrency)?s.resellerDepositCurrency:'USDT';
   const method=s.resellerDepositMethod||'USDT';
   const options={
-   USDT:{currency:'USDT',title:'USDT · BEP-20',subtitle:'Hash de transacción o captura · Revisión de ingreso',name:'Wallet receptora · USDT BEP-20',recipient:String(settings.USDT?.address||''),network:String(settings.USDT?.network||'BEP-20'),visual:paymentVisual('usdt'),note:'Envía únicamente USDT por la red indicada. Introduce el hash o adjunta una captura. El abono se realizará tras verificar el ingreso.'},
+   USDT:{currency:'USDT',title:'USDT · BEP-20',subtitle:'Verificación automática en BNB Smart Chain',name:'Wallet receptora · USDT BEP-20',recipient:String(settings.USDT?.address||''),network:String(settings.USDT?.network||'BEP-20'),visual:paymentVisual('usdt'),note:'Envía el importe exacto en USDT BEP-20 a esta dirección. Después pega el hash de la transacción: la web comprobará automáticamente la red, el token, el importe y las confirmaciones antes de acreditar tu wallet.'},
    SM:{currency:'SM',title:'Saldo móvil ETECSA',subtitle:'Captura y número de origen · Revisión manual',name:'Número receptor · Saldo móvil',recipient:String(settings.SM?.destination||''),network:'SM',visual:paymentVisual('sm'),note:'Envía el saldo a la línea indicada, adjunta una captura e introduce el número desde el que realizaste la transferencia.'},
    CARD:{currency:'CUP',title:'Tarjeta · Transfermóvil',subtitle:'Transferencia a tarjeta · Revisión manual',name:'Tarjeta receptora',recipient:String(settings.CARD?.destination||''),confirmPhone:String(settings.CARD?.confirmPhone||''),visual:paymentVisual('cup'),note:'Transfiere CUP a la tarjeta indicada y adjunta el comprobante. El abono se convierte a USDT al tipo de cambio configurado.'},
    MITRANSFER:{currency:'CUP',title:'MiTransfer',subtitle:'Transferencia a teléfono · Revisión manual',name:'Teléfono receptor · MiTransfer',recipient:String(settings.MITRANSFER?.destination||''),visual:paymentVisual('mitransfer'),note:'Envía CUP mediante MiTransfer al teléfono indicado y adjunta el comprobante. El abono se convierte a USDT al tipo de cambio configurado.'}
@@ -1260,7 +1260,7 @@ case 'checkout':
     
     '<p>'+esc(current.note)+'</p></section>'+
    '<div class="rs-checkout-inputs rs-wallet-evidence">'+
-   (currency==='USDT'?'<label class="sheet-label" for="wallet-txhash">Hash de transacción USDT (recomendado)</label><input id="wallet-txhash" class="field" type="text" autocomplete="off" placeholder="0x…"><small>Si todavía no tienes el hash, puedes adjuntar una captura.</small>':'')+
+   (currency==='USDT'?'<label class="sheet-label" for="wallet-txhash">Hash de transacción (obligatorio para acreditar)</label><input id="wallet-txhash" class="field" type="text" autocomplete="off" placeholder="0x…" required><small>La acreditación se realiza automáticamente tras 40 confirmaciones en BNB Smart Chain.</small>':'')+
    (method==='SM'?'<label class="sheet-label" for="wallet-sender">Número desde el que transferiste</label><input id="wallet-sender" class="field" type="tel" inputmode="numeric" maxlength="20" placeholder="Número de la línea emisora" required>':'')+
    '<label class="sheet-label" for="wallet-proof">Captura del comprobante '+(currency==='USDT'?'(si no envías hash)':'(obligatoria)')+'</label>'+
    '<input id="wallet-proof" class="field rs-proof-input" type="file" accept="image/png,image/jpeg,image/webp" '+(currency==='USDT'?'':'required')+'>'+
