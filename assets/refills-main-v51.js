@@ -31,7 +31,7 @@ adminOrders:getStored('adminOrders',[]), reseller:getStored('reseller',{plan:nul
 paymentConfig:getStored('paymentConfig',{smReceiver:'',cupCard:'',cupConfirmPhone:'',usdtAddress:'',usdtEnabled:false,whatsappNumber:''}),
 checkoutStep:1,checkoutProof:'',checkoutSource:'',checkoutMethod:'CUP',paymentReturnModal:null,
 adminUsers:getStored('adminUsers',[]), resellerPlans:getStored('resellerPlans',[
-{name:'Gratis',margin:7,price:0,days:0},{name:'Level 2',margin:4,price:.8,days:7},{name:'Level 3',margin:2,price:1.5,days:15}])};
+{name:'Gratis',margin:7,price:0,days:0},{name:'Level 2',margin:4,price:.8,days:15},{name:'Level 3',margin:2,price:1.5,days:15}])};
 
 /* REFILLS SHOP v51 · Avisos verificados para pedidos, catálogo y cuenta. */
 const rsNotice={
@@ -323,7 +323,7 @@ function saveAuthSession(data,remember=s.rememberSession!==false){
 }
 function clearAuthSession(){
  s.authSession=null;
- try{localStorage.removeItem(RS_AUTH_STORE);localStorage.removeItem('sb-kcgjlnymhmxylrjchcvl-auth-token');sessionStorage.removeItem(RS_AUTH_STORE)}catch{}
+ try{localStorage.removeItem(RS_AUTH_STORE);localStorage.removeItem('sb-kcgjlnymhmxylrjchcvl-auth-token');sessionStorage.removeItem(RS_AUTH_STORE);sessionStorage.removeItem('sb-kcgjlnymhmxylrjchcvl-auth-token')}catch{}
 }
 async function authRequest(path,{method='GET',body,token}={}){
  const headers={apikey:RS_SUPABASE_KEY,Accept:'application/json'};
