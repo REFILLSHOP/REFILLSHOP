@@ -1279,7 +1279,7 @@ case 'checkout':
   else{
    const deposits=(s.resellerDeposits||[]).slice(0,15),orders=(s.resellerOrders||[]).slice(0,15);
    html=modalTitle('Movimientos de wallet','Recargas, compras y suscripciones registradas')+
-    `<div class="section-head"><h3>Recargas</h3></div>${deposits.length?deposits.map(d=>`<div class="summary-row"><span>${esc(d.payment_method||d.method||'Recarga')} · ${esc(d.status||'pendiente')}<small style="display:block;color:var(--muted)">${formatShopDateTime(d.created_at||d.createdAt||Date.now())}</small></span><strong>${fmtMoney(d.amount)} ${esc(d.currency||'')}</strong></div>`).join(''):`<div class="reseller-v7-empty">No tienes recargas registradas.</div>`}
+    `<div class="section-head"><h3>Recargas</h3></div>${deposits.length?deposits.map(d=>`<div class="summary-row"><span>${esc(d.payment_method||d.method||'Recarga')} · ${esc(d.status||'pendiente')}<small style="display:block;color:var(--muted)">${formatShopDateTime(d.created_at||d.createdAt||Date.now())} · Acreditación: ${fmtMoney(d.creditedUsdt||0)} USDT</small></span><strong>${fmtMoney(d.amount)} ${esc(d.currency||'')}</strong></div>`).join(''):`<div class="reseller-v7-empty">No tienes recargas registradas.</div>`}
     <div class="section-head"><h3>Compras mayoristas</h3></div>${orders.length?orders.map(o=>`<div class="summary-row"><span>${esc(o.game_name||o.gameName||'Compra')} · ${esc(o.code||'')}<small style="display:block;color:var(--muted)">${esc(o.status||'Pendiente')}</small></span><strong>${fmtMoney(o.wallet_amount)} ${esc(o.wallet_currency||'')}</strong></div>`).join(''):`<div class="reseller-v7-empty">No tienes compras mayoristas registradas.</div>`}`;
   }
   break;
