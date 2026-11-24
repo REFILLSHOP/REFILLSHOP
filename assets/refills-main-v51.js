@@ -549,7 +549,7 @@ function paymentChoiceList(){
  const selectedOffer=itemBy(s.detailId)?.offers?.[s.selected];
  const balancePrice=selectedOffer?currentPrice(selectedOffer,'balance'):null;
  const balanceAvailable=Number(s.reseller?.wallet?.USDT||0);
- const methods=Object.entries(PAYMENT_METHODS).filter(([id])=>id!=='balance'||s.role==='reseller');
+ const methods=resellerHasPlan()?[['balance',PAYMENT_METHODS.balance]]:Object.entries(PAYMENT_METHODS).filter(([id])=>id!=='balance'||s.role==='reseller');
  return `<div class="payment-choice-list">${methods.map(([id,m])=>{
   const noPlan=id==='balance'&&!resellerHasPlan(),noCost=id==='balance'&&!!selectedOffer&&!balancePrice;
   const missing=(id==='sm'&&!s.paymentConfig.smReceiver)||(id==='cup'&&(!s.paymentConfig.cupCard||!s.paymentConfig.cupConfirmPhone))||(id==='mitransfer'&&!s.paymentConfig.mitransferPhone)||(id==='usdt'&&(!s.paymentConfig.usdtEnabled||!s.paymentConfig.usdtAddress));
@@ -1252,7 +1252,7 @@ case 'checkout':
    '<div class="rs-checkout-method"><span>'+current.visual+'<strong>'+esc(current.title)+'</strong></span><button type="button" class="btn ghost small" data-action="wallet-change-currency">Cambiar</button></div>'+
    '<div class="rs-checkout-inputs rs-wallet-amount-field"><label class="sheet-label" for="wallet-amount">¿Cuánto deseas depositar? ('+currency+')</label>'+
     '<input id="wallet-amount" class="field" type="number" inputmode="decimal" min="'+(activationRequired?minimumDeposit:(currency==='USDT'?'0.01':'1'))+'" step="'+(currency==='USDT'?'0.01':'1')+'" autocomplete="off" placeholder="'+(activationRequired?minimumDeposit.toLocaleString('es-ES'):(currency==='USDT'?'Ejemplo: 5.00':'Ejemplo: 500'))+'" required>'+
-    '<small>'+(activationRequired?'Para activar Gratis, deposita al menos '+minimumDeposit.toLocaleString('es-ES')+' '+currency+' (equivalente a 5 USDT). Se activa cuando administración apruebe el ingreso.':'Envía exactamente el importe que indicas aquí.')+'</small><input id="wallet-currency" type="hidden" value="'+currency+'"></div>'+
+    '<small>'+(activationRequired?'Para activar Gratis, deposita al menos '+minimumDeposit.toLocaleString('es-ES')+' '+currency+' (equivalente a 5 USDT). Se activa cuando administración apruebe el ingreso.':'Envía exactamente el importe que indicas aquí.')+'</small><input id="wallet-currency" type="hidden" value="'+currency+'"><input id="wallet-payment-method" type="hidden" value="'+method+'"></div>'+
    '<section class="rs-pay-destination"><div class="rs-pay-dest-head"><span>DATOS PARA PAGAR</span><span class="rs-pay-dest-mode">EN REVISIÓN</span></div>'+
     '<h3>'+esc(current.name)+'</h3>'+
     '<div class="rs-pay-dest-value">'+(current.recipient?
@@ -1537,7 +1537,7 @@ function resellerPage(){
  const plans=(p.tiers||[]).map(t=>({...t,name:t.tier==='free'?'Gratis':t.name,markupPercent:Number(t.markupPercent||0),priceUsdt:Number(t.priceUsdt||0),days:Number(t.days||0)}));
  const smRate=Number(p.rates?.buySmPerUsdt||0),cupRate=Number(p.rates?.cupPerSm||0);
  const deposits=(s.resellerDeposits||[]).slice(0,5);
- const balance=p.wallet||{USDT:0,CUP:0,SM:0};
+ const balance=p.wallet||{USDT:0};
  return `<div class="catalog-top">
   <div class="reseller-v7-head"><div><div class="eyebrow">PORTAL INDEPENDIENTE / REVENDEDORES</div><h1 class="page-title">Panel de revendedores</h1><p class="page-lead">Tus planes, precios mayoristas y wallet en un solo lugar.</p></div><button class="reseller-v7-refresh" data-action="reseller-refresh">${I('arrow','tiny')} Actualizar</button></div>
   <section class="card wallet-hero" style="margin-top:16px">
