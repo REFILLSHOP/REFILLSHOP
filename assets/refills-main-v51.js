@@ -1229,14 +1229,14 @@ case 'checkout':
    USDT:{currency:'USDT',title:'USDT · BEP-20',subtitle:'Hash de transacción o captura · Revisión de ingreso',name:'Wallet receptora · USDT BEP-20',recipient:String(settings.USDT?.address||''),network:String(settings.USDT?.network||'BEP-20'),visual:paymentVisual('usdt'),note:'Envía únicamente USDT por la red indicada. Introduce el hash o adjunta una captura. El abono se realizará tras verificar el ingreso.'},
    SM:{currency:'SM',title:'Saldo móvil ETECSA',subtitle:'Captura y número de origen · Revisión manual',name:'Número receptor · Saldo móvil',recipient:String(settings.SM?.destination||''),network:'SM',visual:paymentVisual('sm'),note:'Envía el saldo a la línea indicada, adjunta una captura e introduce el número desde el que realizaste la transferencia.'},
    CARD:{currency:'CUP',title:'Tarjeta · Transfermóvil',subtitle:'Transferencia a tarjeta · Revisión manual',name:'Tarjeta receptora',recipient:String(settings.CARD?.destination||''),confirmPhone:String(settings.CARD?.confirmPhone||''),visual:paymentVisual('cup'),note:'Transfiere CUP a la tarjeta indicada y adjunta el comprobante. El abono se convierte a USDT al tipo de cambio configurado.'},
-   MITRANSFER:{currency:'CUP',title:'MiTransfer',subtitle:'Transferencia a teléfono · Revisión manual',name:'Teléfono receptor · MiTransfer',recipient:String(settings.MITRANSFER?.destination||''),visual:paymentVisual('cup'),note:'Envía CUP mediante MiTransfer al teléfono indicado y adjunta el comprobante. El abono se convierte a USDT al tipo de cambio configurado.'}
+   MITRANSFER:{currency:'CUP',title:'MiTransfer',subtitle:'Transferencia a teléfono · Revisión manual',name:'Teléfono receptor · MiTransfer',recipient:String(settings.MITRANSFER?.destination||''),visual:paymentVisual('mitransfer'),note:'Envía CUP mediante MiTransfer al teléfono indicado y adjunta el comprobante. El abono se convierte a USDT al tipo de cambio configurado.'}
   };
   let current=options[method];currency=current.currency;s.resellerDepositCurrency=currency;
   if(s.resellerDepositStage==='details'&&!current.recipient)s.resellerDepositStage='methods'
   if(s.resellerDepositStage!=='details'){
    html=modalTitle('Depositar en wallet','Elige cómo deseas recargar tu cuenta de revendedor')+
     '<div class="rs-checkout-simple rs-wallet-deposit-ui"><div class="rs-checkout-total"><div><span>TU SALDO DISPONIBLE</span><strong>'+
-    Number(s.reseller.wallet?.USDT||0).toFixed(2)+' <small>USDT</small></strong></div><div><small>Recarga en USDT, CUP o saldo móvil. La acreditación requiere confirmación del ingreso.</small></div></div>'+
+    Number(s.reseller.wallet?.USDT||0).toFixed(2)+' <small>USDT</small></strong></div><div><small>Recarga con USDT, saldo móvil, tarjeta o MiTransfer. Todo se convierte a USDT y se acredita tras verificar el pago.</small></div></div>'+
     '<div class="rs-wallet-stage-head"><strong>Selecciona un método de depósito</strong><small>Los datos para pagar aparecerán en el siguiente paso.</small></div>'+
     '<div class="payment-choice-list">'+Object.entries(options).map(([code,item])=>{
      const available=!!item.recipient;
