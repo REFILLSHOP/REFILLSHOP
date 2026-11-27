@@ -1,8 +1,8 @@
 // Refills Shop PWA. Solo guarda recursos públicos: nunca pedidos, sesiones, pagos ni saldos.
-const CACHE='refills-shop-pwa-shell-v7';
+const CACHE='refills-shop-pwa-shell-v8';
 const ROOT='/REFILLSHOP/';
 const OFFLINE=ROOT+'offline.html';
-const STATIC=[OFFLINE,ROOT+'manifest.webmanifest',ROOT+'assets/refills-app-192.png',ROOT+'assets/refills-app-512.png',ROOT+'assets/refills-app-maskable-512.png'];
+const STATIC=[OFFLINE,ROOT+'manifest.webmanifest',ROOT+'assets/refills-app-192.png',ROOT+'assets/refills-icon.png',ROOT+'assets/refills-app-maskable-512.png'];
 self.addEventListener('install',event=>{
  event.waitUntil((async()=>{
   const cache=await caches.open(CACHE);
@@ -32,6 +32,7 @@ self.addEventListener('fetch',event=>{
   return;
  }
  // Sólo iconos públicos: no interceptar datos de la tienda.
+ if(url.pathname===ROOT+'manifest.webmanifest')return;
  const isStatic=STATIC.some(p=>new URL(p,self.location.origin).pathname===url.pathname);
  if(isStatic){
   event.respondWith((async()=>{

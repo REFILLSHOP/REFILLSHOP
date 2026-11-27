@@ -671,7 +671,7 @@ function card(g){
   <button class="favorite ${fav?'active':''}" data-action="fav" data-id="${g.id}" title="${fav?'Eliminar de favoritos':'Añadir a favoritos'}" aria-label="Favorito ${esc(g.name)}">${I('star')}</button>
  </article>`;
 }
-function minitile(g){return `<button class="tile" data-action="open-item" data-id="${g.id}"><div class="tile-image"><img loading="lazy" src="${photo(g)}" alt=""></div><span class="tile-name">${esc(g.name)}</span></button>`}
+function minitile(g){return `<button class="tile" data-action="open-item" data-id="${g.id}"><div class="tile-image"><img loading="lazy" decoding="async" src="${photo(g)}" alt=""></div><span class="tile-name">${esc(g.name)}</span></button>`}
 function homeGameTile(g){
  if(!g)return '';
  const count=g.offers?.length||0;
@@ -1044,26 +1044,53 @@ function profile(){
 function modalTitle(title,desc=''){return `<div class="modal-title"><div><h2>${title}</h2>${desc?`<p>${desc}</p>`:''}</div><button class="xbtn" data-action="close" aria-label="Cerrar">${I('close')}</button></div>`}
 
 let rsCheckoutClockTimer=null;
+function paymentClock(expiresAt,serverNow,receivedAt=performance.now()){
+ const end=Date.parse(expiresAt),now=Date.parse(serverNow);
+ if(!Number.isFinite(end)||!Number.isFinite(now))return null;
+ return {expiresAt,deadlineMono:receivedAt+Math.max(0,end-now)};
+}
+function paymentRemaining(clock,now=performance.now()){
+ return Number.isFinite(clock?.deadlineMono)?Math.max(0,Math.ceil((clock.deadlineMono-now)/1000)):null;
+}
+function activePaymentClock(){return s.modal==='usdt-wallet-pay'?s.usdtPayment:s.checkoutSession;}
+let rsClockSync=null;
+async function syncPaymentClock(){
+ const current=activePaymentClock();if(!current?.code||!['checkout','usdt-wallet-pay'].includes(s.modal)||rsClockSync)return;
+ rsClockSync=(async()=>{
+  try{
+   const data=await edgeRequest('rs10-api','/orders/clock?code='+encodeURIComponent(current.code),{auth:true});
+   if(activePaymentClock()!==current)return;
+   const clock=paymentClock(data.expiresAt,data.serverNow);
+   if(clock)Object.assign(current,clock);
+   if(data.hashRegistered&&s.modal==='usdt-wallet-pay')current.hashRegistered=true;
+   if(['failed','rejected','refunded','completed'].includes(data.status)||data.paymentStatus==='paid')current.closed=true;
+   startCheckoutCountdown();
+  }catch(error){if(paymentRemaining(current)===null){const t=document.getElementById('rs-deadline-clock');if(t)t.textContent='Sin conexión';}}
+ })().finally(()=>{rsClockSync=null});
+ return rsClockSync;
+}
 function startCheckoutCountdown(){
  if(rsCheckoutClockTimer){clearInterval(rsCheckoutClockTimer);rsCheckoutClockTimer=null}
- const expiration=Date.parse(s.checkoutSession?.expiresAt||s.usdtPayment?.expiresAt||'');
  const clock=document.getElementById('rs-deadline-clock');
- if(!clock||!Number.isFinite(expiration))return;
+ if(!clock||s.payment==='balance'&&s.modal==='checkout')return;
  function updateClock(){
   const target=document.getElementById('rs-deadline-clock');
   if(!target){clearInterval(rsCheckoutClockTimer);rsCheckoutClockTimer=null;return}
-  const remaining=Math.max(0,Math.ceil((expiration-Date.now())/1000));
+  const current=activePaymentClock();const remaining=current?.closed?0:paymentRemaining(current);
+  if(remaining===null){target.textContent='Sincronizando…';for(const action of ['send-order','verify-usdt-payment']){const button=modalRoot.querySelector('[data-action="'+action+'"]');if(button){if(!button.disabled)button.dataset.clockBlocked="true";button.disabled=true}}return}
+  if(current?.hashRegistered&&!current.closed&&s.modal==='usdt-wallet-pay'){target.textContent='Registrado';const small=target.closest('.rs-payment-deadline')?.querySelector('small');if(small)small.textContent='El hash ya está registrado. Puedes consultar sus confirmaciones.';const button=modalRoot.querySelector('[data-action="verify-usdt-payment"]');if(button&&!button.dataset.busy)button.disabled=false;return}
   target.textContent=String(Math.floor(remaining/60)).padStart(2,'0')+':'+String(remaining%60).padStart(2,'0');
   const panel=target.closest('.rs-payment-deadline');
   panel?.classList.toggle('is-urgent',remaining>0&&remaining<=120);
   panel?.classList.toggle('is-expired',remaining===0);
+  if(remaining>0){const retry=panel?.querySelector('[data-action="restart-expired-order"]');if(retry){retry.remove();const small=panel?.querySelector('small');if(small)small.textContent='Confirma el envío antes de que termine el plazo.';}for(const action of ['send-order','verify-usdt-payment']){const button=modalRoot.querySelector('[data-action="'+action+'"]');if(button&&button.dataset.clockBlocked==='true'){button.disabled=false;delete button.dataset.clockBlocked;}}}
   if(remaining<=0){
-   for(const action of ['send-order','verify-usdt-payment']){const button=modalRoot.querySelector('[data-action="'+action+'"]');if(button)button.disabled=true}
+   for(const action of ['send-order','verify-usdt-payment']){const button=modalRoot.querySelector('[data-action="'+action+'"]');if(button){if(!button.disabled)button.dataset.clockBlocked="true";button.disabled=true}}
    clearInterval(rsCheckoutClockTimer);rsCheckoutClockTimer=null;
    const small=panel?.querySelector('small');if(small)small.textContent='Reserva vencida. No envíes dinero. Si ya pagaste, contacta soporte antes de repetir el pago.';if(panel&&!panel.querySelector('[data-action="restart-expired-order"]')){const retry=document.createElement('button');retry.type='button';retry.className='btn primary full';retry.dataset.action='restart-expired-order';retry.textContent='Iniciar otro pedido';panel.appendChild(retry);}
   }
  }
- updateClock();if(rsCheckoutClockTimer===null&&expiration>Date.now())rsCheckoutClockTimer=setInterval(updateClock,1000);
+ updateClock();const current=activePaymentClock();if(paymentRemaining(current)===null&&!current?.closed){void syncPaymentClock();return}if(rsCheckoutClockTimer===null&&!current?.closed&&paymentRemaining(current)>0)rsCheckoutClockTimer=setInterval(updateClock,1000);
 }
 async function startPaymentReservation(button){
  const g=itemBy(s.detailId),o=g?.offers?.[s.selected],player=String(s.player||'').trim();
@@ -1086,11 +1113,12 @@ async function startPaymentReservation(button){
     targetPayload,quotedAmount:amount,quotedCurrency:currency
   }});
   if(!result?.order?.code||!result?.expiresAt)throw Error('No se confirmó el plazo de pago en el servidor.');
-  s.checkoutSession={requestId,code:result.order.code,expiresAt:result.expiresAt,method,offerId:o.id,gameId:g.id,player};
+  const timing=paymentClock(result.expiresAt,result.serverNow);if(!timing)throw Error('No se pudo sincronizar el plazo. No realices transferencias.');
+  s.checkoutSession={requestId,code:result.order.code,...timing,method,offerId:o.id,gameId:g.id,player};
   if(method==='usdt_wallet'){
    s.usdtPayment={code:result.order.code,amount:Number(result.payment?.amount||amount),
      address:result.payment?.address||s.paymentConfig.usdtAddress||'',network:'BEP-20',
-     txHash:'',message:'',expiresAt:result.expiresAt};
+     txHash:'',message:'',...timing};
    s.modal='usdt-wallet-pay';
   }else{s.modal='checkout'}
   modal();
@@ -1104,6 +1132,16 @@ function openDepositCheckout(){
  modal();
 }
 
+async function copyPaymentValue(value,button){
+ const text=String(value??'').trim();if(!text){toast('No hay datos disponibles para copiar.');return}
+ let copied=false;
+ try{await navigator.clipboard.writeText(text);copied=true}catch{
+  const input=document.createElement('textarea');input.value=text;input.readOnly=true;input.style.cssText='position:fixed;left:-9999px;top:0;';document.body.appendChild(input);
+  try{input.select();input.setSelectionRange(0,text.length);copied=document.execCommand('copy')}catch{}finally{input.remove()}
+ }
+ if(!copied){toast('Mantén pulsado el dato para copiarlo.');return}
+ if(button){const old=button.textContent;button.textContent='Copiado';button.classList.add('rs-copied');clearTimeout(button.rsCopyTimer);button.rsCopyTimer=setTimeout(()=>{button.textContent=old==='Copiado'?'Copiar':old;button.classList.remove('rs-copied')},1600)}
+}
 function checkoutPaymentInstructions(){
  const method=s.payment;
  const data=method==='cup'?{name:'Tarjeta receptora · Transfermóvil',value:s.paymentConfig.cupCard,type:'Tarjeta CUP'}:
@@ -1118,9 +1156,9 @@ function checkoutPaymentInstructions(){
  'El importe se descontará del saldo de tu wallet de revendedor después de validar disponibilidad.';
  return '<section class="rs-pay-destination" aria-label="Datos para realizar el pago">'
   +'<div class="rs-pay-dest-head"><span>DATOS PARA PAGAR</span><span class="rs-pay-dest-mode">'+(['sm','cup','mitransfer'].includes(method)?'DETECCIÓN AUTOMÁTICA · EN REVISIÓN':'VERIFICACIÓN AUTOMÁTICA')+'</span></div>'
-  +'<h3>'+esc(data.name)+'</h3>'
-  +(data.value?'<div class="rs-pay-dest-value"><code>'+esc(data.value)+'</code><button class="btn secondary small" type="button" data-action="copy-pay-recipient">Copiar tarjeta / dato</button></div>':'<div class="rs-pay-dest-value rs-pay-wallet-info">Pago desde tu saldo disponible</div>')
-  +(method==='cup'?'<div class="rs-cup-confirm-data"><h3>Número de confirmación de Transfermóvil</h3>'
+  +'<div class="rs-pay-copy-card"><h3>'+esc(data.name)+'</h3>'
+  +(data.value?'<div class="rs-pay-dest-value"><code>'+esc(data.value)+'</code><button class="btn secondary small" type="button" data-action="copy-pay-recipient">'+(method==='cup'?'Copiar tarjeta':method==='usdt'?'Copiar dirección':'Copiar número')+'</button></div>':'<div class="rs-pay-dest-value rs-pay-wallet-info">Pago desde tu saldo disponible</div>')+'</div>'
+  +(method==='cup'?'<div class="rs-cup-confirm-data rs-pay-copy-card"><h3>Número de confirmación de Transfermóvil</h3>'
      +(s.paymentConfig.cupConfirmPhone?'<div class="rs-pay-dest-value"><code>'+esc(s.paymentConfig.cupConfirmPhone)+'</code><button class="btn secondary small" type="button" data-action="copy-pay-confirmation">Copiar número</button></div>':'<p class="rs-cup-confirm-warning">El número de confirmación todavía no está disponible. Contacta soporte antes de realizar la transferencia.</p>')
      +'</div>':'')
   +'<p>'+esc(explanation)+'</p></section>';
@@ -1184,8 +1222,8 @@ function modal(){
 }
 case 'checkout':
   html=modalTitle('Realizar pago',s.payment==='balance'?'Confirmación con saldo de revendedor':s.payment==='sm'?'Transfiere el saldo y confirma el envío dentro de 20 minutos':'Envía el comprobante dentro del plazo de 20 minutos')+
-  `<div class="rs-checkout-simple"><div class="rs-payment-deadline"><span>TIEMPO RESTANTE</span><strong id="rs-deadline-clock">20:00</strong><small>${s.payment==='sm'?'Si no confirmas el envío, la solicitud vencerá automáticamente.':'Si no envías el comprobante, la solicitud vencerá automáticamente.'}</small></div>
-   <div class="rs-checkout-total"><div><span>IMPORTE EXACTO</span><strong>${total?formatPriceValue(total.amount,total.currency):'No disponible'}</strong></div><div><small>${esc(g?.name||'Recarga')} · ${esc(o?.title||'Paquete')}</small><small>Destino: ${esc(s.player||'Según producto')}</small></div></div>
+  `<div class="rs-checkout-simple"><div class="rs-payment-deadline" ${s.payment==='balance'?'hidden':''}><span>TIEMPO RESTANTE</span><strong id="rs-deadline-clock">--:--</strong><small>${s.payment==='sm'?'Si no confirmas el envío, la solicitud vencerá automáticamente.':'Si no envías el comprobante, la solicitud vencerá automáticamente.'}</small></div>
+   <div class="rs-checkout-total"><div><span>IMPORTE EXACTO</span><strong>${total?formatPriceValue(total.amount,total.currency):'No disponible'}</strong>${total&&s.payment!=='balance'?'<button class="btn secondary small" type="button" data-action="copy-pay-amount">Copiar importe</button>':''}</div><div><small>${esc(g?.name||'Recarga')} · ${esc(o?.title||'Paquete')}</small><small>Destino: ${esc(s.player||'Según producto')}</small></div></div>
    <div class="rs-checkout-method"><span>${paymentVisual(s.payment)}<strong>${esc(paymentName())}</strong></span><span class="rs-payment-fixed">CONFIRMADO</span></div>
    ${checkoutPaymentInstructions()}
    ${Array.isArray(o?.targetSchema)&&o.targetSchema.length?'<div class="rs-checkout-confirmed"><strong>Datos de jugador guardados</strong>'+Object.entries(playerTargetData(o)).map(([key,value])=>'<span>'+esc((o.targetSchema.find(f=>f.key===key)||{}).label||key)+': <b>'+esc(value)+'</b></span>').join('')+'<small>Se tomaron de la pantalla anterior. Para cambiarlos, cierra el pago y vuelve al juego.</small></div>':''}
@@ -1200,9 +1238,9 @@ case 'checkout':
  case 'usdt-wallet-pay':{
   const pay=s.usdtPayment||{};
   html=modalTitle('Pagar con USDT BEP-20','Envía el importe exacto desde tu wallet')+
-   `<div class="usdt-wallet-pay-v1"><div class="rs-payment-deadline"><span>TIEMPO PARA REGISTRAR EL HASH</span><strong id="rs-deadline-clock">20:00</strong><small>El pedido vencerá si no envías el hash a tiempo.</small></div>
+   `<div class="usdt-wallet-pay-v1"><div class="rs-payment-deadline"><span>TIEMPO PARA REGISTRAR EL HASH</span><strong id="rs-deadline-clock">--:--</strong><small>El pedido vencerá si no envías el hash a tiempo.</small></div>
     <div class="usdt-pay-order"><small>PEDIDO</small><strong>${esc(pay.code||'—')}</strong></div>
-    <div class="usdt-pay-amount"><small>IMPORTE EXACTO</small><strong>${Number(pay.amount||0).toFixed(2)} USDT</strong></div>
+    <div class="usdt-pay-amount"><small>IMPORTE EXACTO</small><strong>${Number(pay.amount||0).toFixed(2)} USDT</strong><button class="btn secondary small" data-action="copy-pay-amount">Copiar importe</button></div>
     <div class="usdt-pay-network"><span>Red</span><strong>BNB Smart Chain · BEP-20</strong></div>
     <label class="sheet-label" for="usdt-wallet-address">Wallet receptora</label><textarea id="usdt-wallet-address" class="field" rows="2" readonly>${esc(pay.address||'')}</textarea>
     <button class="btn secondary full" data-action="copy-usdt-address">Copiar dirección</button>
@@ -1454,7 +1492,7 @@ case 'rs-notice-refresh':void Promise.allSettled([loadCustomerOrders(),loadPubli
 case 'rs-notice-smooth':rsNotice.smoothMode=!rsNotice.smoothMode;save('smooth_mode',rsNotice.smoothMode);rsApplyPerformancePreference();modal();break;
 case 'rs-notice-open':s.modal=null;navigate(b.dataset.page==='revendedores'?'revendedores':'pedidos');break;
 case 'rs-test-fps':rsMeasureFPS();break;
-case 'restart-expired-order':{const expiry=Date.parse(s.checkoutSession?.expiresAt||s.usdtPayment?.expiresAt||'');if(!Number.isFinite(expiry)||expiry>Date.now())break;s.checkoutSession=null;s.usdtPayment=null;s.checkoutProof='';s.checkoutSource='';s.modal=null;modal();void loadCustomerOrders();toast('Puedes iniciar otra compra. Si pagaste la anterior, contacta soporte.');break;}
+case 'restart-expired-order':{const current=activePaymentClock();if(!current?.closed&&paymentRemaining(current)!==0)break;s.checkoutSession=null;s.usdtPayment=null;s.checkoutProof='';s.checkoutSource='';s.modal=null;modal();void loadCustomerOrders();toast('Puedes iniciar otra compra. Si pagaste la anterior, contacta soporte.');break;}
 case 'close':case 'backdrop':s.modal=null;modal();break;
 case 'fav':{let idx=s.favorites.indexOf(b.dataset.id);if(idx>=0)s.favorites.splice(idx,1);else s.favorites.push(b.dataset.id);save('favs',s.favorites);if(s.page==='perfil'||s.showFavs)render();else{b.classList.toggle('active');b.title=idx>=0?'Añadir a favoritos':'Eliminar de favoritos'}toast(idx>=0?'Eliminado de favoritos':'Guardado en favoritos');break;}
 case 'only-favs':s.showFavs=!s.showFavs;render();break;
@@ -1654,40 +1692,32 @@ document.addEventListener('click',async e=>{
   try{const response=await fetch(endpoint,{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({ref:b.dataset.ref,status:b.dataset.status})});if(!response.ok)throw new Error();toast('Estado actualizado');}catch(err){toast('No se pudo actualizar el pedido.')}
   return;
  }
- if(a==='copy-pay-confirmation'){
-  const value=String(s.paymentConfig.cupConfirmPhone||'').trim();
-  if(!value){toast('No está configurado el número de confirmación.');return;}
-  try{await navigator.clipboard.writeText(value);toast('Número de confirmación copiado.')}
-  catch{const input=document.createElement('textarea');input.value=value;input.style.position='fixed';input.style.opacity='0';document.body.appendChild(input);input.select();const copied=document.execCommand('copy');input.remove();toast(copied?'Número copiado.':'Mantén pulsado el número para copiarlo.');}
-  return;
- }
- if(a==='copy-pay-recipient'){
+ if(a==='copy-pay-amount'){
+ const offer=itemBy(s.detailId)?.offers?.[s.selected];const amount=s.modal==='usdt-wallet-pay'?s.usdtPayment?.amount:(offer?currentPrice(offer)?.amount*s.qty:null);
+ if(Number.isFinite(amount)&&amount>0)await copyPaymentValue(String(amount),b);else toast('Importe no disponible.');return;
+}
+if(a==='copy-pay-confirmation'){await copyPaymentValue(s.paymentConfig.cupConfirmPhone,b);return;}
+if(a==='copy-pay-recipient'){
  const value=s.payment==='cup'?s.paymentConfig.cupCard:s.payment==='mitransfer'?s.paymentConfig.mitransferPhone:s.payment==='sm'?s.paymentConfig.smReceiver:s.payment==='usdt'?s.paymentConfig.usdtAddress:'';
- if(!value){toast('No hay datos de pago configurados.');return}
- try{await navigator.clipboard.writeText(value);toast('Datos para pagar copiados.')}
- catch{const node=document.querySelector('.rs-pay-dest-value code');if(node){const range=document.createRange();range.selectNodeContents(node);getSelection()?.removeAllRanges();getSelection()?.addRange(range);document.execCommand('copy');getSelection()?.removeAllRanges();toast('Datos copiados.')}else toast('No se pudieron copiar los datos.')}
- return;
+ await copyPaymentValue(value,b);return;
 }
-if(a==='copy-usdt-address'){
- const address=s.usdtPayment?.address||'';if(!address){toast('No hay una wallet configurada.');return}
- try{await navigator.clipboard.writeText(address);toast('Dirección USDT copiada.')}catch{const input=document.getElementById('usdt-wallet-address');if(input){input.focus();input.select();document.execCommand('copy');toast('Dirección copiada.')}else toast('No se pudo copiar la dirección.')}
- return;
-}
+if(a==='copy-usdt-address'){await copyPaymentValue(s.usdtPayment?.address,b);return;}
 if(a==='resume-usdt'){
  const order=s.orders.find(x=>x.ref===b.dataset.ref);if(!order||order.paymentStatus==='paid')return;
- s.usdtPayment={code:order.ref,amount:Number(order.total||0),address:s.paymentConfig.usdtAddress||'',network:'BEP-20',txHash:order.paymentTxHash||'',message:''};s.modal='usdt-wallet-pay';modal();return;
+ s.checkoutSession=null;s.usdtPayment={code:order.ref,amount:Number(order.total||0),address:s.paymentConfig.usdtAddress||'',network:'BEP-20',txHash:order.paymentTxHash||'',message:'',hashRegistered:!!order.paymentTxHash};s.modal='usdt-wallet-pay';modal();void syncPaymentClock();return;
 }
 if(a==='verify-usdt-payment'){
  const code=s.usdtPayment?.code,txHash=String(document.getElementById('usdt-tx-hash')?.value||'').trim();
  if(!code||!/^0x[0-9a-fA-F]{64}$/.test(txHash)){toast('Introduce un hash BEP-20 válido.');return}
- b.disabled=true;b.textContent='Comprobando blockchain…';
+ if(s.usdtPayment?.closed||(!s.usdtPayment?.hashRegistered&&!(paymentRemaining(s.usdtPayment)>0))){toast('Comprueba el plazo del pedido antes de enviar.');return}
+ b.dataset.busy='true';b.disabled=true;b.textContent='Comprobando blockchain…';
  try{
   const result=await edgeRequest('rs10-api','/usdt-wallet/verify',{method:'POST',auth:true,body:{code,txHash}});
   s.usdtPayment={...s.usdtPayment,txHash,message:result.message||''};
   if(result.status==='confirmed'){s.modal=null;await loadCustomerOrders();navigate('pedidos');toast('Pago USDT confirmado automáticamente.');}
   else{modal();toast(result.message||'El pago todavía está pendiente de confirmación.')}
  }catch(err){toast(err?.message||'No se pudo verificar el hash.')}
- finally{b.disabled=false;b.textContent='Verificar pago automáticamente'}
+ finally{delete b.dataset.busy;b.disabled=false;b.textContent='Verificar pago automáticamente';if(s.modal==='usdt-wallet-pay')void syncPaymentClock()}
  return;
 }
 if(a==='refresh-recent-topups'){s.recentTopupsLoaded=false;await loadRecentTopups(true);return}
@@ -1696,7 +1726,7 @@ if(a==='send-order'){
  if(!s.user||!g||!o?.id){toast('Selecciona una oferta publicada.');return}
  if(!s.salesEnabled||!o.purchasable||!o.inStock){toast('La tienda todavía no acepta compras. No transfieras dinero.');return}
  if(s.qty!==1){toast('Realiza un pedido por oferta.');return}
- if(s.payment!=='balance'&&(!s.checkoutSession||s.checkoutSession.offerId!==o.id||Date.parse(s.checkoutSession.expiresAt)<=Date.now())){toast('La reserva de pago ya no es válida. Inicia de nuevo el pedido.');return}
+ if(s.payment!=='balance'&&(!s.checkoutSession||s.checkoutSession.offerId!==o.id||paymentRemaining(s.checkoutSession)===null||paymentRemaining(s.checkoutSession)<=0)){toast('La reserva de pago ya no es válida. Inicia de nuevo el pedido.');return}
  let targetPayload;
  try{targetPayload=playerTargetData(o,true)}catch(err){toast(err.message);return}
  const player=String(s.player||'').trim();
@@ -1825,16 +1855,16 @@ s.page='login';
 render();
 loadLiveCatalog();
 /* Un solo programador, sin hacer consultas ni repintar mientras la app está oculta. */
-const rsPollLast={orders:0,changes:0,catalog:0,recent:0,reseller:0};
+const rsPollLast={orders:-Infinity,changes:-Infinity,catalog:-Infinity,recent:-Infinity,reseller:-Infinity};const rsPollActive=new Set();
 function rsUpdateCycle(force=false){
  if(document.visibilityState!=='visible'||navigator.onLine===false)return;
- const now=Date.now();
+ const now=performance.now();
  const slow=!!navigator.connection?.saveData||/^(slow-2g|2g)$/.test(String(navigator.connection?.effectiveType||''));
  const multiplier=slow?1.6:1;
  const due=(key,delay,work)=>{
-  if(!force&&now-rsPollLast[key]<delay*multiplier)return;
-  rsPollLast[key]=now;
-  void Promise.resolve().then(work).catch(error=>console.warn('Sincronización:',error?.message||error));
+  if(rsPollActive.has(key)||(!force&&now-rsPollLast[key]<delay*multiplier))return;
+  rsPollLast[key]=now;rsPollActive.add(key);
+  void Promise.resolve().then(work).catch(error=>console.warn('Sincronización:',error?.message||error)).finally(()=>rsPollActive.delete(key));
  };
  if(s.user){
   due('orders',s.page==='pedidos'?27000:50000,()=>loadCustomerOrders());
@@ -1847,8 +1877,8 @@ function rsUpdateCycle(force=false){
  if(s.page==='inicio')due('recent',90000,()=>loadRecentTopups(true));
 }
 window.setInterval(()=>rsUpdateCycle(false),12000);
-document.addEventListener('visibilitychange',()=>{if(document.visibilityState==='visible')rsUpdateCycle(false)});
-window.addEventListener('online',()=>rsUpdateCycle(true));
+document.addEventListener('visibilitychange',()=>{if(document.visibilityState==='visible'){void syncPaymentClock();rsUpdateCycle(false)}});
+window.addEventListener('online',()=>{void syncPaymentClock();rsUpdateCycle(true)});
 
 (async function restoreRefillsAccount(){
  try{
