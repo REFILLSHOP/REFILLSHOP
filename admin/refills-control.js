@@ -152,7 +152,7 @@ async function load(page=S.page){
    return drawOffers();
   }
   if(page==='orders'){
-   const x=await request('/admin/orders');S.cache.orders=x;return drawOrders();
+   const [x,sm,cup]=await Promise.all([request('/admin/orders'),request('/admin/refills-pay/events').catch(()=>null),request('/admin/refills-pay/cup-events').catch(()=>null)]);S.cache.orders=x;S.cache.orderPaymentMatches=[...(sm?.events||[]),...(cup?.events||[])];return drawOrders();
   }
   if(page==='customers'){
    const x=await request('/admin/customers');S.cache.customers=x.clients||[];return drawCustomers();
@@ -428,6 +428,9 @@ function drawOrders(){
    const card=o.method==='card'||o.method==='wallet';
    const sm=o.method==='mobile';
    const pay=o.paymentStatus==='paid'?'<span class="rs-admin-paid">Pago confirmado</span>':'<span class="rs-admin-unpaid">Pago sin confirmar</span>';
+   const matches=(S.cache.orderPaymentMatches||[]).filter(e=>e.orderCode===o.code&&e.matchCount===1);
+   const matched=matches.length===1?matches[0]:null;
+   const matchInfo=matched?'<div><span>Refills Pay · coincidencia de aviso</span><strong>'+esc(money(matched.amount)+' '+o.currency)+'</strong><small>'+esc(matched.timeBasis==='server_arrival'?'Hora del servidor (reloj SMS desajustado)':'Aviso coincidente')+' · '+esc(new Date(matched.receivedAt).toLocaleString('es-CU',{timeZone:'America/Havana'}))+'</small></div>':'';
    const paymentInfo=card?'<div><span>Referencia</span><strong>'+esc(o.paymentReference||'Sin referencia')+'</strong></div>':
     sm?'<div><span>Línea de origen</span><strong>'+esc(o.sourcePhone||'No informada')+'</strong></div>':
     isCrypto?'<div><span>Hash blockchain</span><strong class="code-hint">'+esc(o.paymentTxHash||'Pendiente')+'</strong></div>':'';
@@ -446,12 +449,12 @@ function drawOrders(){
     '<div class="rs-hor-primary"><span class="rs-hor-code">'+esc(o.code||'Pedido')+'</span><strong>'+esc(o.game||'Recarga')+'</strong><small title="'+esc(o.offer||'')+'">'+esc(o.offer||'')+'</small></div>'+
     '<div class="rs-hor-customer"><span>'+esc(o.customerName||'Cliente')+'</span><small>ID: '+esc(o.playerId||'PIN')+'</small></div>'+
     '<div class="rs-hor-money"><strong>'+money(o.amount)+' '+esc(o.currency||'')+'</strong><small>'+esc(paymentMethodLabel(o.method))+'</small></div>'+
-    '<div class="rs-hor-state">'+status(o.status)+pay+'</div>'+
+    '<div class="rs-hor-state">'+status(o.status)+pay+(matched&&o.paymentStatus!=='paid'?'<small class="rs-admin-unpaid">SMS coincidente · revisar</small>':'')+'</div>'+
     '<button type="button" class="btn secondary small rs-hor-toggle" data-action="toggle-order-row" data-id="'+esc(o.id)+'" aria-expanded="false" aria-label="Ver acciones del pedido '+esc(o.code||'')+'">Gestionar <span aria-hidden="true">⌄</span></button>'+
     '</div>'+
     '<div class="rs-hor-expanded" hidden>'+
     '<div class="rs-hor-extra-line"><span><b>Cliente:</b> '+esc(o.customerName||'Cliente')+'</span><span><b>Teléfono:</b> '+esc(o.customerPhone||'—')+'</span><span><b>Destino:</b> '+esc(o.playerId||'—')+'</span><span><b>Fecha:</b> '+date(o.created)+'</span></div>'+
-    (paymentInfo?'<div class="rs-hor-extra-payment">'+paymentInfo+'</div>':'')+
+    ((paymentInfo||matchInfo)?'<div class="rs-hor-extra-payment">'+paymentInfo+matchInfo+'</div>':'')+
     '<div class="row-actions rs-hor-action-buttons">'+actions+'</div>'+
     '</div></article>';
   }).join('')+'</div>':empty('No hay pedidos en este filtro','Selecciona Todos o actualiza para consultar el historial.'))+
@@ -482,7 +485,7 @@ function refillsCupEventsPanel(){
 function refillsPayEventsPanel(){
  const data=S.cache.payEvents, events=data?.events||[];
  return '<section class="surface section"><div class="panel-head"><div><span class="tag">REFILLS PAY</span><h2>Ingresos detectados por SMS</h2><small>Últimos 50 eventos. Detectar no equivale a confirmar un ingreso real.</small></div><button class="btn secondary small" data-action="refresh">Actualizar</button></div>'
- +(!data?'<div class="alert-note warn">No se pudo consultar el registro. Reintenta.</div>':!events.length?'<p class="muted">Todavía no hay transferencias detectadas.</p>':events.map(e=>'<div class="record spacer"><div><h3>'+esc(String(e.amount))+' SM · '+esc(e.senderPhone)+'</h3><small>'+esc(new Date(e.smsAt).toLocaleString('es-CU',{timeZone:'America/Havana'}))+' · '+esc(e.orderCode||'Sin pedido vinculado')+'</small></div>'+tag(e.paymentStatus==='paid'?'Pedido pagado':e.matchCount===1?'Coincidencia por revisar':e.matchCount>1?'Ambiguo':'Sin coincidencia',e.paymentStatus==='paid'?'good':'warn')+'</div>').join(''))
+ +(!data?'<div class="alert-note warn">No se pudo consultar el registro. Reintenta.</div>':!events.length?'<p class="muted">Todavía no hay transferencias detectadas.</p>':events.map(e=>'<div class="record spacer"><div><h3>'+esc(String(e.amount))+' SM · '+esc(e.senderPhone)+'</h3><small>'+esc(new Date(e.receivedAt).toLocaleString('es-CU',{timeZone:'America/Havana'}))+' · '+esc(e.orderCode||'Sin pedido vinculado')+(e.clockSkew?' · Reloj SMS desajustado':'')+'</small></div>'+tag(e.paymentStatus==='paid'?'Pedido pagado':e.matchCount===1?'Coincidencia por revisar':e.matchCount>1?'Ambiguo':'Sin coincidencia',e.paymentStatus==='paid'?'good':'warn')+'</div>').join(''))
  +'<div class="alert-note warn">Comprueba el ingreso real antes de confirmar el cobro o entregar una recarga. CUP y MiTransfer requieren integración comercial.</div></section><div class="spacing"></div>';
 }
 function paymentAutomationPanel(){
