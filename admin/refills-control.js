@@ -50,11 +50,48 @@ async function request(path,options={}){
  if(options.blob){if(!res.ok)throw Error('No se pudo abrir el comprobante.');return res.blob()}
  if(!type.includes('application/json'))throw Error('El servidor devolvió una respuesta inesperada (HTTP '+res.status+').');
  const json=await res.json();
- if(!res.ok)throw Error(json.error||json.message||'Error del servidor HTTP '+res.status);
+ if(!res.ok){const err=Error(json.error||json.message||'Error del servidor HTTP '+res.status);err.status=res.status;throw err}
  return json;
 }
+const AUTH_KEYS=['refills_shop_supabase_session_v1','sb-kcgjlnymhmxylrjchcvl-auth-token'];
+let adminSession=null,refreshInFlight=null,sessionCheckedAt=-Infinity;
+function readAdminSession(){
+ for(const storage of [localStorage,sessionStorage]){
+  for(const key of AUTH_KEYS){try{const raw=JSON.parse(storage.getItem(key)||'null');const v=raw?.currentSession||raw?.session||raw;if(v?.access_token&&v?.refresh_token){S.rememberSession=storage===localStorage;return v}}catch{}}
+ }
+ return null;
+}
+function persistAdminSession(data){
+ if(!data?.access_token||!data?.refresh_token)throw Error('Respuesta de sesión inválida.');
+ adminSession=data;sessionCheckedAt=performance.now();
+ try{const store=S.rememberSession?localStorage:sessionStorage,other=S.rememberSession?sessionStorage:localStorage;for(const key of AUTH_KEYS){store.setItem(key,JSON.stringify(data));other.removeItem(key)}localStorage.setItem('refills_shop_remember_session',String(S.rememberSession))}catch{}
+ return data;
+}
+function clearAdminSession(){
+ adminSession=null;sessionCheckedAt=-Infinity;for(const storage of [localStorage,sessionStorage])for(const key of AUTH_KEYS)try{storage.removeItem(key)}catch{}
+}
+async function adminAuth(path,{method='GET',body,token}={}){
+ const headers={apikey:KEY,Accept:'application/json'};if(token)headers.Authorization='Bearer '+token;if(body!==undefined)headers['Content-Type']='application/json';
+ let r;try{r=await fetch(SB+'/auth/v1'+path,{method,headers,body:body===undefined?undefined:JSON.stringify(body),cache:'no-store',credentials:'omit'})}catch{throw Error('No se pudo conectar con el servicio de cuentas. Comprueba Internet y reintenta.')}
+ const data=await r.json().catch(()=>({}));
+ if(!r.ok){const e=Error(data.msg||data.message||data.error_description||'No se pudo validar la sesión.');e.status=r.status;throw e}return data;
+}
+async function refreshAdminSession(){
+ if(refreshInFlight)return refreshInFlight;
+ refreshInFlight=(async()=>{const latest=readAdminSession()||adminSession;if(!latest?.refresh_token)throw Error('Inicia sesión con tu cuenta Refills Shop.');try{return persistAdminSession(await adminAuth('/token?grant_type=refresh_token',{method:'POST',body:{refresh_token:latest.refresh_token}}))}catch(e){if([400,401,403].includes(e.status))clearAdminSession();throw e}})().finally(()=>refreshInFlight=null);
+ return refreshInFlight;
+}
+async function checkedAdminUser(){
+ adminSession=readAdminSession()||adminSession;if(!adminSession)throw Error('Inicia sesión con tu cuenta Refills Shop.');
+ try{const user=await adminAuth('/user',{token:adminSession.access_token});sessionCheckedAt=performance.now();return user}catch(e){if(e.status!==401&&e.status!==403)throw e;const renewed=await refreshAdminSession();const user=await adminAuth('/user',{token:renewed.access_token});sessionCheckedAt=performance.now();return user}
+}
 function createAdminClient(){
- return window.supabase.createClient(SB,KEY,{auth:{persistSession:true,storage:S.rememberSession?window.localStorage:window.sessionStorage,autoRefreshToken:true,detectSessionInUrl:true,storageKey:'sb-kcgjlnymhmxylrjchcvl-auth-token'}});
+ return {auth:{
+  async getSession(){const stored=readAdminSession();if(stored&&stored.access_token!==adminSession?.access_token){adminSession=stored;sessionCheckedAt=-Infinity}if(adminSession&&performance.now()-sessionCheckedAt>240000)await checkedAdminUser();return {data:{session:adminSession}}},
+  async getUser(){return {data:{user:await checkedAdminUser()}}},
+  async signInWithPassword({email,password}){try{const data=await adminAuth('/token?grant_type=password',{method:'POST',body:{email,password}});persistAdminSession(data);return {data:{session:data,user:data.user},error:null}}catch(error){return {error}}},
+  async signOut(){const current=adminSession||readAdminSession();try{if(current?.access_token)await adminAuth('/logout?scope=local',{method:'POST',token:current.access_token})}catch{}finally{clearAdminSession()}}
+ }};
 }
 async function verifyAdmin(){
  const user=(await S.client.auth.getUser()).data.user;
@@ -65,7 +102,7 @@ async function verifyAdmin(){
 function pageFromHash(){const page=location.hash.replace(/^#/,'').split('?')[0];return MENU.some(m=>m[0]===page)?page:'overview'}
 function showLogin(message){
  S.user=null;if(S.orderAlertTimer){clearInterval(S.orderAlertTimer);S.orderAlertTimer=null}$('auth-shell').hidden=false;$('console').hidden=true;
- const remember=$('admin-login')?.elements.rememberSession;if(remember)remember.checked=S.rememberSession;
+ const form=$('admin-login');const embedded=/\bwv\b/i.test(navigator.userAgent)||new URLSearchParams(location.search).get('app')==='adm';if(form){form.hidden=!embedded;form.elements.rememberSession.checked=true}const help=$('auth-help');if(help)help.textContent=embedded?'Usa la misma cuenta de Refills Shop. No necesitas otra contraseña.':'Entra con tu cuenta en la tienda. Si ya tienes sesión, vuelve a abrir el ADM. No hay una contraseña separada.';
  if(message)flash(message,true);
 }
 function showConsole(){
@@ -661,13 +698,13 @@ document.addEventListener('submit',async e=>{
  if(form.id==='admin-login')return withBusy(async()=>{
   const remember=form.elements.rememberSession?.checked!==false;
   try{localStorage.setItem('refills_shop_remember_session',String(remember));if(!remember)localStorage.removeItem('sb-kcgjlnymhmxylrjchcvl-auth-token')}catch{}
-  if(remember!==S.rememberSession){await S.client.auth.signOut().catch(()=>{});S.rememberSession=remember;S.client=createAdminClient()}
+  S.rememberSession=remember;if(!S.client)S.client=createAdminClient();
   const phone=String(form.elements.country.value).replace(/\D/g,'')+String(form.elements.phone.value).replace(/\D/g,'');
   const email=phoneAlias(phone),password=String(data.password||'');
   const result=await S.client.auth.signInWithPassword({email,password});
   if(result.error)throw result.error;
-  try{await verifyAdmin()}catch(err){await S.client.auth.signOut();throw err}
-  showConsole();flash('Acceso administrativo verificado.');
+  try{await verifyAdmin()}catch(err){if(err.status===403)await S.client.auth.signOut();throw err}
+  form.reset();showConsole();flash('Acceso administrativo verificado.');
  });
  if(!S.user)return flash('Inicia sesión',true);
  await withBusy(async()=>{
@@ -735,19 +772,13 @@ $('modal-root').addEventListener('click',e=>{if(e.target.id==='modal-root')close
 document.addEventListener('keydown',e=>{if(e.key==='Escape')closeModal()});
 window.addEventListener('hashchange',()=>{if(S.user){S.page=pageFromHash();navigate(S.page,true)}});
 async function start(){
+ S.client=createAdminClient();
  try{
-  if(!window.supabase?.createClient)throw Error('No se cargó el módulo de Supabase.');
-  try{S.rememberSession=localStorage.getItem('refills_shop_remember_session')!=='false'}catch{S.rememberSession=true}
-  S.client=createAdminClient();
-  const session=(await S.client.auth.getSession()).data.session;
-  if(!session){
-   const storage=S.rememberSession?localStorage:sessionStorage;
-   const shared=JSON.parse(storage.getItem('refills_shop_supabase_session_v1')||'null');
-   if(shared?.access_token&&shared?.refresh_token){const restored=await S.client.auth.setSession({access_token:shared.access_token,refresh_token:shared.refresh_token});if(restored.error)throw restored.error;}
-   else return showLogin('Inicia sesión en Refills Shop con tu cuenta de administrador.');
-  }
-  try{await verifyAdmin();showConsole()}catch(err){showLogin(err.message)}
+  adminSession=readAdminSession();
+  if(!adminSession)return showLogin('');
+  await verifyAdmin();showConsole();
  }catch(err){showLogin(err.message)}
 }
+$('retry-auth').addEventListener('click',()=>void start());
 start();
 })();
