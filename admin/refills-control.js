@@ -418,7 +418,7 @@ function drawOrders(){
  const tabs=[['all','Todos',orders.length],['active','Por atender',pending.length+processing.length],['completed','Completados',complete.length],['failed','Incidencias',failed.length]];
  $('admin-view').innerHTML=
   '<div id="rs-admin-order-alert-box">'+adminOrderAlertPanel()+'</div>'+
-  '<section class="surface section rs-admin-order-simple"><div class="panel-head"><div><h2>Pedidos</h2><small>Pago y entrega por separado. Central One actualiza sus entregas automáticamente.</small></div>'+ico('orders')+'</div>'+
+  '<section class="surface section rs-admin-order-simple"><div class="panel-head"><div><h2>Pedidos</h2><small>Confirma el ingreso real: las recargas elegibles se envían automáticamente a Central One.</small></div>'+ico('orders')+'</div>'+
   '<div class="rs-admin-orders-summary"><span><strong>'+pending.length+'</strong> por verificar</span><span><strong>'+processing.length+'</strong> en proveedor</span><span><strong>'+complete.length+'</strong> entregados</span></div>'+
   (refundReview.length?'<div class="rs-admin-order-warning" role="alert">'+refundReview.length+' pedido(s) pagados y fallidos requieren revisar el reembolso. No vuelvas a enviar la compra.</div>':'')+
   '<div class="rs-admin-order-tabs">'+tabs.map(t=>'<button type="button" class="'+(filter===t[0]?'active':'')+'" data-action="admin-order-filter" data-filter="'+t[0]+'">'+t[1]+' <b>'+t[2]+'</b></button>').join('')+'</div>'+
@@ -433,7 +433,7 @@ function drawOrders(){
     isCrypto?'<div><span>Hash blockchain</span><strong class="code-hint">'+esc(o.paymentTxHash||'Pendiente')+'</strong></div>':'';
    const actions=
     (o.receiptAvailable?'<button class="btn ghost small" data-action="receipt" data-code="'+esc(o.code)+'">'+ico('eye')+' Captura</button>':'')+
-    (!isCrypto&&o.paymentStatus!=='paid'&&o.status==='pending'?'<button class="btn secondary small" data-action="verify-payment" data-code="'+esc(o.code)+'">Confirmar cobro</button>':'')+
+    (!isCrypto&&o.paymentStatus!=='paid'&&o.status==='pending'?'<button class="btn secondary small" data-action="verify-payment" data-code="'+esc(o.code)+'" >'+(o.kind==='topup'?'Confirmar y enviar recarga':'Confirmar cobro')+'</button>':'')+
     (o.paymentStatus==='paid'&&o.status==='pending'&&o.kind==='topup'?'<button class="btn primary small" data-action="fulfill" data-code="'+esc(o.code)+'">Entregar con Central One</button>':'')+
     (o.paymentStatus==='paid'&&['processing','partially_completed'].includes(o.status)&&o.kind==='topup'?'<button class="btn secondary small" data-action="reconcile-order" data-id="'+esc(o.id)+'">Revisar proveedor</button>':'')+
     (o.kind==='pin'&&o.paymentStatus==='paid'&&o.status!=='completed'?'<button class="btn primary small" data-action="assign-pin" data-code="'+esc(o.code)+'">Entregar PIN</button>':'')+
@@ -492,7 +492,7 @@ function paymentAutomationPanel(){
   return '<div class="rs-payment-method-row"><div><strong>'+esc(method)+'</strong><small>'+esc(details)+'</small></div>'
     +tag(unknown?'Requiere integración':good?'Automático':'En revisión',unknown?'warn':good?'good':'warn')+'</div>';
  };
- return '<section class="surface section rs-payment-control"><div class="panel-head"><div><span class="tag">CONFIGURACIÓN DE COBROS</span><h2>Cómo se valida cada pago</h2><small>Refills Shop no marca compras como pagadas basándose solo en lo que escribe el cliente.</small></div>'+ico('shield')+'</div>'
+ return '<section class="surface section rs-payment-control"><div class="panel-head"><div><span class="tag">CONFIGURACIÓN DE COBROS</span><h2>Cómo se valida cada pago</h2><small>La entrega de recargas elegibles se inicia al confirmar un ingreso real. Los avisos SMS no son comprobación bancaria.</small></div>'+ico('shield')+'</div>'
  +mode('Saldo móvil ETECSA','Refills Pay detecta ingresos; confirmación real en revisión',false)
  +mode('MiTransfer (CUP)','Avisos PAGOxMOVIL y referencia; ingreso por verificar',false)
  +mode('Transfermóvil (CUP)','Avisos PAGOxMOVIL y referencia; ingreso por verificar',false)
@@ -511,7 +511,7 @@ function drawPayments(){
  +field('WhatsApp soporte','supportWhatsapp',st.supportWhatsapp,'text')+field('Email soporte','supportEmail',st.supportEmail,'email')+field('Wallet USDT BEP-20 de la tienda','storeUsdtWalletAddress',st.storeUsdtWalletAddress,'text')+'<label class="check wide"><input type="checkbox" name="storeUsdtWalletEnabled" '+(st.storeUsdtWalletEnabled?'checked':'')+'> Preparar wallet USDT propia para verificar transacciones en blockchain</label>'
  +'<input type="hidden" name="planPrice" value=""><input type="hidden" name="operatorName" value="'+esc(st.operatorName||'')+'"><div class="form-actions wide"><button class="btn primary" type="submit">Guardar configuración</button></div></form></section>'
  +'<section class="surface section"><div class="panel-head"><div><h2>Operaciones y seguridad</h2><small>Control de compras con dinero real</small></div>'+ico('shield')+'</div>'
- +'<div class="live-strip"><div><strong>Ventas '+(com.acceptOrders?'habilitadas':'pausadas')+'</strong><p>La comprobación de pagos y los envíos al proveedor son independientes.</p></div>'+tag(com.acceptOrders?'Activas':'Pausadas',com.acceptOrders?'good':'warn')+'</div>'
+ +'<div class="live-strip"><div><strong>Ventas '+(com.acceptOrders?'habilitadas':'pausadas')+'</strong><p>Al confirmar un cobro real, las recargas elegibles se envían al proveedor respetando el límite de seguridad.</p></div>'+tag(com.acceptOrders?'Activas':'Pausadas',com.acceptOrders?'good':'warn')+'</div>'
  +'<form id="commerce-form" class="form-grid spacer">'+field('Límite por pedido en USDT','maxSupplierOrderUsdt',com.maxSupplierOrderUsdt||10,'number')
  +'<label class="check wide"><input type="checkbox" name="enabled" '+(com.acceptOrders?'checked':'')+'> Aceptar pedidos reales</label>'
  +'<label class="check wide"><input type="checkbox" name="confirmRealFunds"> Confirmo que las compras usarán dinero real y que he verificado las cuentas y permisos</label>'
@@ -666,9 +666,9 @@ async function runAction(action,el){
  if(!modalConfirm('¿Has comprobado en tu cuenta el INGRESO REAL de '+money(o.amount)+' '+o.currency+'?\n'+
    (o.paymentReference?'Referencia aportada: '+o.paymentReference+'\n':'')+
    (o.sourcePhone?'Remitente saldo móvil: '+o.sourcePhone+'\n':'')+
-   'No apruebes una captura o referencia sin revisar que recibiste el dinero.'))return;
- await request('/admin/verify-payment',{method:'POST',body:{code,confirmedPayment:true}});
- flash('Ingreso confirmado. El pedido ya se puede procesar.');await load();
+   'No apruebes una captura o referencia sin revisar que recibiste el dinero. '+(o.kind==='topup'?'Al confirmar se intentará enviar la recarga a Central One con dinero real.':'')))return;
+ const result=await request('/admin/verify-payment',{method:'POST',body:{code,confirmedPayment:true}});
+ await load();flash(result.message||'Ingreso confirmado.',o.kind==='topup'&&result.autoDelivery!==true);
 });
  if(action==='refund-order')return withBusy(async()=>{
    const reference=String(prompt('Registra la referencia REAL del dinero que ya devolviste. No se hará ninguna transferencia desde aquí.')||'').trim();
