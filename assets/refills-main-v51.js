@@ -552,7 +552,7 @@ function paymentChoiceList(){
   const noPlan=id==='balance'&&!resellerHasPlan(),noCost=id==='balance'&&!!selectedOffer&&!balancePrice;
   const missing=(id==='sm'&&!s.paymentConfig.smReceiver)||(id==='cup'&&(!s.paymentConfig.cupCard||!s.paymentConfig.cupConfirmPhone))||(id==='mitransfer'&&!s.paymentConfig.mitransferPhone)||(id==='usdt'&&(!s.paymentConfig.usdtEnabled||!s.paymentConfig.usdtAddress));
   const disabled=missing||noPlan||noCost,active=s.payment===id;
-  const description=id==='sm'?'Manual · envío de saldo móvil y comprobante':
+  const description=id==='sm'?'Manual · envío de saldo móvil y número emisor':
    id==='cup'?'Transfermóvil · número de transacción (pago en revisión)':
    id==='mitransfer'?'MiTransfer · envío por teléfono (pago en revisión)':
    id==='balance'?(noPlan?'Disponible al activar Gratis, Level 2 o Level 3':noCost?'Esta oferta no tiene costo de proveedor configurado':`Wallet de revendedor · ${balanceAvailable.toFixed(2)} USDT disponibles`):
@@ -1110,7 +1110,7 @@ function checkoutPaymentInstructions(){
  method==='sm'?{name:'Línea que recibe saldo móvil',value:s.paymentConfig.smReceiver,type:'Saldo móvil'}:
  method==='usdt'?{name:'Dirección USDT BEP-20',value:s.paymentConfig.usdtAddress,type:'BNB Smart Chain'}:
  {name:'Saldo de tu cuenta Refills Shop',value:'',type:'Wallet revendedor'};
- const explanation=method==='sm'?'Envía el saldo a esta línea. Adjunta una captura y escribe el número que realizó la transferencia. Comprobaremos el ingreso antes de recargar.':
+ const explanation=method==='sm'?'Envía el saldo a esta línea. Escribe el número desde el que transferiste y pulsa Ya envié el saldo. Comprobaremos el ingreso antes de recargar.':
  method==='cup'?'Transfiere el importe exacto a la tarjeta indicada. El número de confirmación es un dato adicional de Transfermóvil, no otra tarjeta. Adjunta el comprobante; verificaremos el ingreso antes de entregar.':
  method==='mitransfer'?'Envía CUP a este teléfono mediante MiTransfer. Indica el número de la operación para localizarla. Se verificará la recepción antes de entregar.':
  method==='usdt'?'Primero crearemos el pedido y luego verás esta dirección y el campo de hash. Usa solo USDT BEP-20; el servidor comprobará token, importe y confirmaciones.':
@@ -1177,23 +1177,23 @@ function modal(){
   +'<small>DESTINATARIO</small><strong>'+esc(o?.kind==='pin'?'Código digital':s.player||'Sin ID')+'</strong>'
   +'<small>MÉTODO</small><strong>'+esc(paymentName())+'</strong>'
   +'<small>TOTAL</small><strong class="rs-confirm-total">'+(total?formatPriceValue(total.amount,total.currency):'No disponible')+'</strong></div>'
-  +'<p class="rs-confirm-warning">Después de confirmar tendrás 20 minutos para enviar la captura o el hash. Si no lo envías, el pedido pasará a fallido.</p>'
+  +'<p class="rs-confirm-warning">Después de confirmar tendrás 20 minutos para registrar el envío del pago. Si no lo haces, el pedido pasará a fallido.</p>'
   +'<button class="btn primary full" data-action="start-payment">Confirmar y continuar al pago</button><button class="btn ghost full" data-action="close">Corregir datos</button></div>';
  break;
 }
 case 'checkout':
-  html=modalTitle('Realizar pago',s.payment==='balance'?'Confirmación con saldo de revendedor':'Envía el comprobante dentro del plazo de 20 minutos')+
-  `<div class="rs-checkout-simple"><div class="rs-payment-deadline"><span>TIEMPO RESTANTE</span><strong id="rs-deadline-clock">20:00</strong><small>Si no envías el comprobante, la solicitud vencerá automáticamente.</small></div>
+  html=modalTitle('Realizar pago',s.payment==='balance'?'Confirmación con saldo de revendedor':s.payment==='sm'?'Transfiere el saldo y confirma el envío dentro de 20 minutos':'Envía el comprobante dentro del plazo de 20 minutos')+
+  `<div class="rs-checkout-simple"><div class="rs-payment-deadline"><span>TIEMPO RESTANTE</span><strong id="rs-deadline-clock">20:00</strong><small>${s.payment==='sm'?'Si no confirmas el envío, la solicitud vencerá automáticamente.':'Si no envías el comprobante, la solicitud vencerá automáticamente.'}</small></div>
    <div class="rs-checkout-total"><div><span>IMPORTE EXACTO</span><strong>${total?formatPriceValue(total.amount,total.currency):'No disponible'}</strong></div><div><small>${esc(g?.name||'Recarga')} · ${esc(o?.title||'Paquete')}</small><small>Destino: ${esc(s.player||'Según producto')}</small></div></div>
    <div class="rs-checkout-method"><span>${paymentVisual(s.payment)}<strong>${esc(paymentName())}</strong></span><span class="rs-payment-fixed">CONFIRMADO</span></div>
    ${checkoutPaymentInstructions()}
    ${Array.isArray(o?.targetSchema)&&o.targetSchema.length?'<div class="rs-checkout-confirmed"><strong>Datos de jugador guardados</strong>'+Object.entries(playerTargetData(o)).map(([key,value])=>'<span>'+esc((o.targetSchema.find(f=>f.key===key)||{}).label||key)+': <b>'+esc(value)+'</b></span>').join('')+'<small>Se tomaron de la pantalla anterior. Para cambiarlos, cierra el pago y vuelve al juego.</small></div>':''}
-   ${s.payment==='sm'?'<div class="rs-checkout-inputs"><label class="sheet-label" for="payment-source-phone">Número que transfirió el saldo móvil</label><input id="payment-source-phone" class="field" type="tel" inputmode="numeric" pattern="[0-9]{8}" maxlength="8" placeholder="8 dígitos" required><label class="sheet-label" for="payment-proof">Captura del pago realizado</label><input id="payment-proof" class="field rs-proof-input" type="file" accept="image/png,image/jpeg,image/webp" required><small>JPG, PNG o WEBP · máximo 5 MB</small></div>':''}
+   ${s.payment==='sm'?'<div class="rs-checkout-inputs"><label class="sheet-label" for="payment-source-phone">Número que transfirió el saldo móvil</label><input id="payment-source-phone" class="field" type="tel" inputmode="numeric" pattern="[0-9]{8}" maxlength="8" placeholder="8 dígitos" required><small>Confirma solo después de transferir el importe exacto.</small></div>':''}
    ${s.payment==='cup'?'<div class="rs-checkout-inputs"><label class="sheet-label" for="payment-proof">Captura del comprobante</label><input id="payment-proof" class="field rs-proof-input" type="file" accept="image/png,image/jpeg,image/webp" required><small>JPG, PNG o WEBP · máximo 5 MB.</small><label class="sheet-label" for="payment-reference">Número de confirmación de la transferencia</label><input id="payment-reference" class="field" type="text" autocomplete="off" minlength="4" maxlength="80" placeholder="Código que aparece en Transfermóvil" required><small>Es obligatorio para identificar y revisar el pago.</small></div>':s.payment==='mitransfer'?'<div class="rs-checkout-inputs"><label class="sheet-label" for="payment-proof">Captura del comprobante</label><input id="payment-proof" class="field rs-proof-input" type="file" accept="image/png,image/jpeg,image/webp" required><small>JPG, PNG o WEBP · máximo 5 MB.</small><label class="sheet-label" for="payment-reference">Número de operación (opcional)</label><input id="payment-reference" class="field" type="text" autocomplete="off" maxlength="80" placeholder="Si aparece en tu comprobante"><small>Confirmaremos que el importe llegó a la cuenta receptora.</small></div>':''}
    ${s.payment==='usdt'?'<div class="rs-checkout-safe">Primero registra el pedido para reservar su identificador. Después envía USDT y pega el hash en la siguiente pantalla. No transfieras antes de crear el pedido.</div>':''}
    ${s.payment==='balance'?'<div class="rs-checkout-safe">Solo revendedores con suscripción activa y saldo suficiente pueden utilizar esta opción.</div>':''}
-   <button class="btn primary full rs-checkout-submit" data-action="send-order">${I('check','tiny')} ${s.payment==='usdt'?'Crear pedido y continuar al hash':s.payment==='balance'?'Confirmar compra con saldo':'Enviar comprobante y crear pedido'}</button>
-   <p class="rs-checkout-footnote">${s.payment==='usdt'?'La recarga comenzará cuando la blockchain confirme el pago.':s.payment==='balance'?'El servidor verificará tu saldo disponible.':'Enviar el número o la captura no significa que el pago esté aprobado.'}</p>
+   <button class="btn primary full rs-checkout-submit" data-action="send-order">${I('check','tiny')} ${s.payment==='usdt'?'Crear pedido y continuar al hash':s.payment==='balance'?'Confirmar compra con saldo':s.payment==='sm'?'Ya envié el saldo':'Enviar comprobante y crear pedido'}</button>
+   <p class="rs-checkout-footnote">${s.payment==='usdt'?'La recarga comenzará cuando la blockchain confirme el pago.':s.payment==='balance'?'El servidor verificará tu saldo disponible.':s.payment==='sm'?'Comprobaremos que recibimos el saldo antes de entregar la recarga.':'Enviar la captura no significa que el pago esté aprobado.'}</p>
   </div>`;
   break;
  case 'usdt-wallet-pay':{
@@ -1722,7 +1722,7 @@ if(a==='send-order'){
    if(method==='card'&&!paymentReference)throw Error('Escribe el número de confirmación que aparece en el comprobante de Transfermóvil.');
    if(paymentReference&&!/^[A-Za-z0-9][A-Za-z0-9._/-]{3,79}$/.test(paymentReference))throw Error('La referencia del comprobante contiene caracteres no válidos.');
    let receipt='';
-   if(['mobile','card','wallet'].includes(method)){
+   if(['card','wallet'].includes(method)){
     const file=document.getElementById('payment-proof')?.files?.[0];
     if(!file)throw Error('Adjunta la captura del pago realizado.');
     if(file.size>5242880||!['image/jpeg','image/png','image/webp'].includes(file.type))throw Error('La captura debe ser JPG, PNG o WEBP y pesar como máximo 5 MB.');
@@ -1737,7 +1737,7 @@ if(a==='send-order'){
   if(!result?.ok&&!result?.order)throw Error('El servidor no confirmó el pedido.');
   s.checkoutSession=null;s.modal=null;s.orderJustSent=String(result?.order?.code||'');if(s.orderJustSent)rsAddNotice('order','Pedido registrado','Solicitud '+s.orderJustSent+' recibida. Consulta su entrega en Mis pedidos.','silent');await loadCustomerOrders();navigate('pedidos');toast('Pedido recibido. Puedes compartir el resumen desde Mis pedidos.');
  }catch(err){toast(err?.message||'No se pudo registrar la compra.');}
- finally{b.disabled=false;b.textContent='Enviar solicitud de compra';}
+ finally{b.disabled=false;b.textContent=s.payment==='sm'?'Ya envié el saldo':'Enviar solicitud de compra';}
  return;
 }
 if(a==='request-wallet-deposit'){
