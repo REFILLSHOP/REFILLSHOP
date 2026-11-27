@@ -401,7 +401,7 @@ async function loadAccountProfile(authUser=s.authSession?.user){
  s.user={id:authUser.id,name,phone:data.profile?.phone||'',email:'',app_metadata:authUser.app_metadata||{}};
  rsNoticeAccount();
  s.role=authUser.app_metadata?.role==='refills_admin'?'admin':(s.member?'reseller':'customer');
- void loadCustomerOrders();
+ void loadCustomerOrders();void loadMyRewards();
  if(s.member)await loadResellerPortal(true,false);
  else{s.resellerPortal=null;s.wholesalePrices={};s.reseller={...s.reseller,plan:null,wallet:{USDT:0,CUP:0,SM:0}}}
  return data;
@@ -1098,7 +1098,7 @@ async function startPaymentReservation(button){
   const timing=paymentClock(result.expiresAt,result.serverNow);if(!timing)throw Error('No se pudo sincronizar el plazo. No realices transferencias.');
   s.checkoutSession={requestId,code:result.order.code,...timing,method,offerId:o.id,gameId:g.id,player,amount:Number(result.amount??amount),currency:result.currency||currency,couponCode:result.couponCode||null};
   if(method==='usdt_wallet'){
-   s.usdtPayment={code:result.order.code,amount:Number(result.payment?.amount||amount),
+   s.usdtPayment={code:result.order.code,amount:Number(result.payment?.amount??result.amount??amount),
      address:result.payment?.address||s.paymentConfig.usdtAddress||'',network:'BEP-20',
      txHash:'',message:'',...timing};
    s.modal='usdt-wallet-pay';
@@ -1205,7 +1205,7 @@ function modal(){
 case 'checkout':
   html=modalTitle('Realizar pago',s.payment==='balance'?'Confirmación con saldo de revendedor':s.payment==='sm'?'Transfiere el saldo y confirma el envío dentro de 20 minutos':'Envía el comprobante dentro del plazo de 20 minutos')+
   `<div class="rs-checkout-simple"><div class="rs-payment-deadline" ${s.payment==='balance'?'hidden':''}><span>TIEMPO RESTANTE</span><strong id="rs-deadline-clock">--:--</strong><small>${s.payment==='sm'?'Si no confirmas el envío, la solicitud vencerá automáticamente.':'Si no envías el comprobante, la solicitud vencerá automáticamente.'}</small></div>
-   <div class="rs-checkout-total"><div><span>IMPORTE EXACTO</span><strong>${total?formatPriceValue(total.amount,total.currency):'No disponible'}</strong>${total&&s.payment!=='balance'?'<button class="btn secondary small" type="button" data-action="copy-pay-amount">Copiar importe</button>':''}</div><div><small>${esc(g?.name||'Recarga')} · ${esc(o?.title||'Paquete')}</small><small>Destino: ${esc(s.player||'Según producto')}</small></div></div>
+   <div class="rs-checkout-total"><div><span>IMPORTE EXACTO</span><strong>${total?formatPriceValue(total.amount,total.currency):'No disponible'}</strong>${total&&s.payment!=='balance'?'<button class="btn secondary small" type="button" data-action="copy-pay-amount">Copiar importe</button>':''}</div><div><small>${esc(g?.name||'Recarga')} · ${esc(o?.title||'Paquete')}</small><small>Destino: ${esc(s.player||'Según producto')}</small>${s.checkoutSession?.couponCode?'<small>Cupón aplicado: '+esc(s.checkoutSession.couponCode)+'</small>':''}</div></div>
    <div class="rs-checkout-method"><span>${paymentVisual(s.payment)}<strong>${esc(paymentName())}</strong></span><span class="rs-payment-fixed">CONFIRMADO</span></div>
    ${checkoutPaymentInstructions()}
    ${Array.isArray(o?.targetSchema)&&o.targetSchema.length?'<div class="rs-checkout-confirmed"><strong>Datos de jugador guardados</strong>'+Object.entries(playerTargetData(o)).map(([key,value])=>'<span>'+esc((o.targetSchema.find(f=>f.key===key)||{}).label||key)+': <b>'+esc(value)+'</b></span>').join('')+'<small>Se tomaron de la pantalla anterior. Para cambiarlos, cierra el pago y vuelve al juego.</small></div>':''}
@@ -1677,7 +1677,7 @@ document.addEventListener('click',async e=>{
   return;
  }
  if(a==='copy-pay-amount'){
- const offer=itemBy(s.detailId)?.offers?.[s.selected];const amount=s.modal==='usdt-wallet-pay'?s.usdtPayment?.amount:(offer?currentPrice(offer)?.amount*s.qty:null);
+ const offer=itemBy(s.detailId)?.offers?.[s.selected];const amount=s.modal==='usdt-wallet-pay'?s.usdtPayment?.amount:(s.checkoutSession?.amount??(offer?currentPrice(offer)?.amount*s.qty:null));
  if(Number.isFinite(amount)&&amount>0)await copyPaymentValue(String(amount),b);else toast('Importe no disponible.');return;
 }
 if(a==='copy-pay-confirmation'){await copyPaymentValue(s.paymentConfig.cupConfirmPhone,b);return;}
