@@ -485,9 +485,9 @@ function refillsCupEventsPanel(){
 }
 function refillsPayEventsPanel(){
  const data=S.cache.payEvents, events=data?.events||[];
- return '<section class="surface section"><div class="panel-head"><div><span class="tag">REFILLS PAY</span><h2>Ingresos detectados por SMS</h2><small>Últimos 50 eventos · misma línea y tolerancia de ±5 SM. El aviso no confirma el ingreso.</small></div><button class="btn secondary small" data-action="refresh">Actualizar</button></div>'
- +(!data?'<div class="alert-note warn">No se pudo consultar el registro. Reintenta.</div>':!events.length?'<p class="muted">Todavía no hay transferencias detectadas.</p>':events.map(e=>'<div class="record spacer"><div><h3>'+esc(String(e.amount))+' SM · '+esc(e.senderPhone)+'</h3><small>'+esc(new Date(e.receivedAt).toLocaleString('es-CU',{timeZone:'America/Havana'}))+' · '+esc(e.orderCode||'Sin pedido vinculado')+refillsDifference(e,'SM')+(e.late?' · Aviso tardío':'')+'</small></div>'+tag(e.paymentStatus==='paid'?'Pedido pagado':e.matchCount===1?(Number(e.amountDifference)===0?'Coincidencia exacta · verificar':'Coincidencia ±5 · verificar'):e.matchCount>1?'Ambiguo':'Sin coincidencia',e.paymentStatus==='paid'?'good':'warn')+'</div>').join(''))
- +'<div class="alert-note warn">Comprueba el ingreso real antes de confirmar el cobro o entregar una recarga. CUP y MiTransfer requieren integración comercial.</div></section><div class="spacing"></div>';
+ return '<section class="surface section"><div class="panel-head"><div><span class="tag">REFILLS PAY</span><h2>Ingresos detectados por SMS</h2><small>Últimos 50 eventos · misma línea y tolerancia de ±5 SM · entrega automática para coincidencias únicas elegibles.</small></div><button class="btn secondary small" data-action="refresh">Actualizar</button></div>'
+ +(!data?'<div class="alert-note warn">No se pudo consultar el registro. Reintenta.</div>':!events.length?'<p class="muted">Todavía no hay transferencias detectadas.</p>':events.map(e=>'<div class="record spacer"><div><h3>'+esc(String(e.amount))+' SM · '+esc(e.senderPhone)+'</h3><small>'+esc(new Date(e.receivedAt).toLocaleString('es-CU',{timeZone:'America/Havana'}))+' · '+esc(e.orderCode||'Sin pedido vinculado')+refillsDifference(e,'SM')+(e.late?' · Aviso tardío':'')+'</small></div>'+tag(e.paymentStatus==='paid'?'Pedido pagado':e.matchCount===1?(Number(e.amountDifference)===0?'Coincidencia exacta · pendiente':'Coincidencia ±5 · pendiente'):e.matchCount>1?'Ambiguo':'Sin coincidencia',e.paymentStatus==='paid'?'good':'warn')+'</div>').join(''))
+ +'<div class="alert-note warn">Los SMS nuevos de saldo móvil pueden activar recargas automáticamente. Los avisos ambiguos, antiguos o fuera de los límites requieren revisión.</div></section><div class="spacing"></div>';
 }
 function paymentAutomationPanel(){
  const st=S.cache.settings||{},com=S.cache.commerce||{},cr=S.cache.crypto||{};
@@ -497,7 +497,7 @@ function paymentAutomationPanel(){
     +tag(unknown?'Requiere integración':good?'Automático':'En revisión',unknown?'warn':good?'good':'warn')+'</div>';
  };
  return '<section class="surface section rs-payment-control"><div class="panel-head"><div><span class="tag">CONFIGURACIÓN DE COBROS</span><h2>Cómo se valida cada pago</h2><small>La entrega de recargas elegibles se inicia al confirmar un ingreso real. Los avisos SMS no son comprobación bancaria.</small></div>'+ico('shield')+'</div>'
- +mode('Saldo móvil ETECSA','Refills Pay detecta ingresos; confirmación real en revisión',false)
+ +mode('Saldo móvil ETECSA','SMS del dispositivo autorizado · ±5 SM · coincidencia única · máximo 30 USDT automáticos por día',S.cache.payEvents?.mode==='sms_auto_delivery'&&com.acceptOrders===true)
  +mode('MiTransfer (CUP)','Avisos PAGOxMOVIL y referencia; ingreso por verificar',false)
  +mode('Transfermóvil (CUP)','Avisos PAGOxMOVIL y referencia; ingreso por verificar',false)
  +mode('USDT BEP-20 · wallet propia','El servidor comprueba token, destinatario, importe y 40 confirmaciones',st.storeUsdtWalletEnabled===true)
