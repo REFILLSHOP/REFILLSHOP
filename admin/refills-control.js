@@ -124,8 +124,8 @@ async function load(page=S.page){
    const x=await request('/admin/summary',{service:'reseller'});S.cache.reseller=x;return drawResellers();
   }
   if(page==='payments'){
-   const [s,store,commerce,crypto,payEvents]=await Promise.all([request('/admin/settings'),publicStorefront(),request('/admin/commerce/settings'),request('/admin/crypto/status'),request('/admin/refills-pay/events').catch(()=>null)]);
-   Object.assign(S.cache,{settings:s.config,store,commerce,crypto,payEvents});return drawPayments();
+   const [s,store,commerce,crypto,payEvents,cupEvents]=await Promise.all([request('/admin/settings'),publicStorefront(),request('/admin/commerce/settings'),request('/admin/crypto/status'),request('/admin/refills-pay/events').catch(()=>null),request('/admin/refills-pay/cup-events').catch(()=>null)]);
+   Object.assign(S.cache,{settings:s.config,store,commerce,crypto,payEvents,cupEvents});return drawPayments();
   }
   if(page==='centralone'){
    const [central,orderStatus,commerce]=await Promise.all([request('/admin/centralone/status'),request('/admin/centralone/orders/status'),request('/admin/commerce/settings')]);
@@ -436,6 +436,12 @@ function drawResellers(){
  +(orders.length?'<div class="list">'+orders.map(o=>'<div class="record"><div><h3>'+esc(o.game||'Pedido')+' · '+esc(o.offer||'')+'</h3><small>'+esc(o.customerName)+' · '+esc(o.code)+' · '+usd(o.totalUsdt)+' USDT</small></div><div class="row-actions">'+status(o.status)+'<button class="btn secondary small" data-action="reseller-order" data-id="'+esc(o.id)+'">Administrar</button></div></div>').join('')+'</div>':empty('Sin pedidos mayoristas','Cuando un revendedor compre, lo verás aquí.'))+'</section>';
 }
 
+function refillsCupEventsPanel(){
+ const data=S.cache.cupEvents,events=data?.events||[];
+ return '<section class="surface section"><div class="panel-head"><div><span class="tag">PAGOxMOVIL</span><h2>Avisos CUP detectados</h2><small>Transfermóvil y MiTransfer · comparación por método, importe y referencia</small></div><button class="btn secondary small" data-action="refresh">Actualizar</button></div>'
+ +(!data?'<div class="alert-note warn">No se pudo consultar el registro CUP.</div>':!events.length?'<p class="muted">No hay avisos CUP registrados.</p>':events.map(e=>'<div class="record spacer"><div><h3>'+esc(String(e.amount))+' CUP · '+esc(e.method==='card'?'Transfermóvil':'MiTransfer')+'</h3><small>'+esc(e.reference)+' · '+esc(new Date(e.smsAt).toLocaleString('es-CU',{timeZone:'America/Havana'}))+' · '+esc(e.orderCode||'Sin pedido vinculado')+'</small></div>'+tag(e.paymentStatus==='paid'?'Pedido pagado':e.matchCount===1?'Coincidencia por revisar':e.matchCount>1?'Ambiguo':'Sin coincidencia',e.paymentStatus==='paid'?'good':'warn')+'</div>').join(''))
+ +'<div class="alert-note warn">El aviso no confirma un ingreso. Revisa el movimiento en tu cuenta o monedero antes de aprobar el pedido.</div></section><div class="spacing"></div>';
+}
 function refillsPayEventsPanel(){
  const data=S.cache.payEvents, events=data?.events||[];
  return '<section class="surface section"><div class="panel-head"><div><span class="tag">REFILLS PAY</span><h2>Ingresos detectados por SMS</h2><small>Últimos 50 eventos. Detectar no equivale a confirmar un ingreso real.</small></div><button class="btn secondary small" data-action="refresh">Actualizar</button></div>'
@@ -451,8 +457,8 @@ function paymentAutomationPanel(){
  };
  return '<section class="surface section rs-payment-control"><div class="panel-head"><div><span class="tag">CONFIGURACIÓN DE COBROS</span><h2>Cómo se valida cada pago</h2><small>Refills Shop no marca compras como pagadas basándose solo en lo que escribe el cliente.</small></div>'+ico('shield')+'</div>'
  +mode('Saldo móvil ETECSA','Refills Pay detecta ingresos; confirmación real en revisión',false)
- +mode('MiTransfer (CUP)','Envío mediante teléfono; referencia del movimiento',st.mitransferAutoEnabled===true?null:false)
- +mode('Transfermóvil (CUP)','Transferencia a tarjeta; referencia del movimiento',st.transfermovilAutoEnabled===true?null:false)
+ +mode('MiTransfer (CUP)','Avisos PAGOxMOVIL y referencia; ingreso por verificar',false)
+ +mode('Transfermóvil (CUP)','Avisos PAGOxMOVIL y referencia; ingreso por verificar',false)
  +mode('USDT BEP-20 · wallet propia','El servidor comprueba token, destinatario, importe y 40 confirmaciones',st.storeUsdtWalletEnabled===true)
  +mode('Saldo Refills Shop','Débito verificado por el servidor; solo revendedores con plan',true)
  +'<div class="alert-note warn">Automatización de CUP: todavía se necesita una conexión verificable de MiTransfer o Transfermóvil. Un número de transacción por sí solo NO confirma que el dinero llegó. Esos pedidos quedan pendientes de revisión.</div>'
@@ -462,7 +468,7 @@ function paymentAutomationPanel(){
 
 function drawPayments(){
  const st=S.cache.settings||{},cfg=S.cache.store?.config||{},com=S.cache.commerce||{},cr=S.cache.crypto||{};
- $('admin-view').innerHTML=refillsPayEventsPanel()+paymentAutomationPanel()+'<div class="split"><section class="surface section"><div class="panel-head"><div><h2>Tasas y cuentas de cobro</h2><small>Valores compartidos por el catálogo</small></div>'+ico('payments')+'</div><form id="rates-form" class="form-grid">'
+ $('admin-view').innerHTML=refillsPayEventsPanel()+refillsCupEventsPanel()+paymentAutomationPanel()+'<div class="split"><section class="surface section"><div class="panel-head"><div><h2>Tasas y cuentas de cobro</h2><small>Valores compartidos por el catálogo</small></div>'+ico('payments')+'</div><form id="rates-form" class="form-grid">'
  +field('Tasa USDT → SM','buySmPerUsdt',cfg.buySmPerUsdt,'number')+field('Tasa SM → CUP','cupPerSm',cfg.cupPerSm,'number')+field('Comisión de tarjeta (%)','cardFee',cfg.cardFee,'number')+field('Duración plan base (días)','planDays',cfg.planDays||15,'number')
  +field('Número receptor saldo móvil','mobilePhone',st.mobilePhone,'text')+field('Número de MiTransfer','walletPhone',st.walletPhone,'text')+field('Tarjeta de Transfermóvil','cardNumber',st.cardNumber,'text')+field('Número de confirmación del destinatario (Transfermóvil)','confirmPhone',st.confirmPhone,'text')
  +field('WhatsApp soporte','supportWhatsapp',st.supportWhatsapp,'text')+field('Email soporte','supportEmail',st.supportEmail,'email')+field('Wallet USDT BEP-20 de la tienda','storeUsdtWalletAddress',st.storeUsdtWalletAddress,'text')+'<label class="check wide"><input type="checkbox" name="storeUsdtWalletEnabled" '+(st.storeUsdtWalletEnabled?'checked':'')+'> Preparar wallet USDT propia para verificar transacciones en blockchain</label>'
