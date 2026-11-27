@@ -123,6 +123,7 @@ function rsSystemNotice(title,detail,id,kind='order'){
 function rsAddNotice(kind,title,detail,sound='message'){
  if(!s.user)return;
  rsNoticeAccount();
+ if(kind==='order'||kind==='payment'||kind==='membership'||kind==='store')sound='silent';
  const ts=Date.now(),id=String(ts)+'-'+(++rsNotice.sequence);
  const notice={id,kind:String(kind||'store').slice(0,30),title:String(title||'Refills Shop').slice(0,120),
   detail:String(detail||'').slice(0,230),ts};
@@ -132,7 +133,7 @@ function rsAddNotice(kind,title,detail,sound='message'){
  updateChangeBadge();
  if(s.modal==='alerts'&&document.activeElement?.tagName!=='BUTTON')modal();
  if(sound!=='silent')rsPlayNoticeSound(sound);
- rsSystemNotice(notice.title,notice.detail,id,kind);
+ if(sound!=='silent'&&['completed','warning','wallet'].includes(kind))rsSystemNotice(notice.title,notice.detail,id,kind);
  if(kind==='completed')toast(notice.title+' · '+notice.detail);
 }
 function rsTrackOrders(list){
@@ -552,19 +553,19 @@ function paymentChoiceList(){
   const noPlan=id==='balance'&&!resellerHasPlan(),noCost=id==='balance'&&!!selectedOffer&&!balancePrice;
   const missing=(id==='sm'&&!s.paymentConfig.smReceiver)||(id==='cup'&&(!s.paymentConfig.cupCard||!s.paymentConfig.cupConfirmPhone))||(id==='mitransfer'&&!s.paymentConfig.mitransferPhone)||(id==='usdt'&&(!s.paymentConfig.usdtEnabled||!s.paymentConfig.usdtAddress));
   const disabled=missing||noPlan||noCost,active=s.payment===id;
-  const description=id==='sm'?'Manual · envío de saldo móvil y número emisor':
-   id==='cup'?'Transfermóvil · número de transacción (pago en revisión)':
-   id==='mitransfer'?'MiTransfer · envío por teléfono (pago en revisión)':
+  const description=id==='sm'?'Detección automática · confirma el número emisor':
+   id==='cup'?'Transfermóvil · detección de avisos y revisión del ingreso':
+   id==='mitransfer'?'MiTransfer · detección de avisos y revisión del ingreso':
    id==='balance'?(noPlan?'Disponible al activar Gratis, Level 2 o Level 3':noCost?'Esta oferta no tiene costo de proveedor configurado':`Wallet de revendedor · ${balanceAvailable.toFixed(2)} USDT disponibles`):
    'Verificación automática BEP-20 después de enviar el hash';
-  const modeText=id==='sm'?'MANUAL':id==='balance'?'WALLET AUTOMÁTICA':id==='usdt'?'BLOCKCHAIN AUTOMÁTICA':'REFERENCIA · REVISIÓN';
-  const modeClass=id==='sm'?'manual':id==='balance'||id==='usdt'?'auto':'review';
+  const modeText=id==='balance'?'WALLET AUTOMÁTICA':id==='usdt'?'BLOCKCHAIN AUTOMÁTICA':'DETECCIÓN AUTOMÁTICA';
+  const modeClass=id==='balance'||id==='usdt'?'auto':'review';
   return `<button type="button" class="payment-choice ${active?'active':''} ${id==='balance'?'payment-choice-balance':''}" data-action="choose-payment" data-value="${id}" ${disabled?'disabled':''} ${active?'aria-pressed="true"':'aria-pressed="false"'}>
    <span class="payment-choice-icon">${paymentVisual(id)}</span>
    <span class="payment-choice-copy"><strong>${esc(m.name)}</strong><small>${disabled?(noPlan?'Activa un plan de revendedor':noCost?'Costo del proveedor no disponible':'No habilitado o sin datos de cobro'):description}</small><em class="payment-mode-label ${modeClass}">${modeText}</em></span>
    <span class="payment-choice-state">${active?'✓':''}</span>
   </button>`;
- }).join('')}</div><p class="payment-choice-note">USDT se comprueba automáticamente en BEP-20. Transfermóvil y MiTransfer necesitan conexión comercial de consulta para validar referencias automáticamente. Saldo móvil permanece manual.</p>`;
+ }).join('')}</div><p class="payment-choice-note">Refills Pay detecta avisos de SM y CUP automáticamente. La tienda comprueba el ingreso real antes de entregar. USDT se verifica en BEP-20.</p>`;
 }
 function priceFor(o,method=s.payment){
  if(!o)return null;
@@ -707,7 +708,7 @@ async function loadPublicChanges(force=false){
    }
   }else if(force&&s.user&&newest>rsNotice.publicSeenId){
    const fresh=s.changes.filter(x=>Number(x.id)>rsNotice.publicSeenId);
-   if(fresh.length){rsPlayNoticeSound('message');rsSystemNotice('Novedades en Refills Shop',fresh.length===1?String(fresh[0].title||'Nueva oferta'):fresh.length+' cambios nuevos en el catálogo','catalog-'+newest,'store');}
+   // Las novedades se conservan en la campana, sin avisos de sistema ni sonidos.
   }
   if(newest>rsNotice.publicSeenId){
    rsNotice.publicSeenId=newest;
@@ -1059,7 +1060,7 @@ function startCheckoutCountdown(){
   if(remaining<=0){
    for(const action of ['send-order','verify-usdt-payment']){const button=modalRoot.querySelector('[data-action="'+action+'"]');if(button)button.disabled=true}
    clearInterval(rsCheckoutClockTimer);rsCheckoutClockTimer=null;
-   const small=panel?.querySelector('small');if(small)small.textContent='Tiempo agotado. No envíes más dinero; el pedido se marcará como fallido. Contacta soporte si ya pagaste.';
+   const small=panel?.querySelector('small');if(small)small.textContent='Reserva vencida. No envíes dinero. Si ya pagaste, contacta soporte antes de repetir el pago.';if(panel&&!panel.querySelector('[data-action="restart-expired-order"]')){const retry=document.createElement('button');retry.type='button';retry.className='btn primary full';retry.dataset.action='restart-expired-order';retry.textContent='Iniciar otro pedido';panel.appendChild(retry);}
   }
  }
  updateClock();if(rsCheckoutClockTimer===null&&expiration>Date.now())rsCheckoutClockTimer=setInterval(updateClock,1000);
@@ -1116,7 +1117,7 @@ function checkoutPaymentInstructions(){
  method==='usdt'?'Primero crearemos el pedido y luego verás esta dirección y el campo de hash. Usa solo USDT BEP-20; el servidor comprobará token, importe y confirmaciones.':
  'El importe se descontará del saldo de tu wallet de revendedor después de validar disponibilidad.';
  return '<section class="rs-pay-destination" aria-label="Datos para realizar el pago">'
-  +'<div class="rs-pay-dest-head"><span>DATOS PARA PAGAR</span><span class="rs-pay-dest-mode">'+(method==='sm'?'MANUAL':method==='cup'||method==='mitransfer'?'EN REVISIÓN':'VERIFICACIÓN AUTOMÁTICA')+'</span></div>'
+  +'<div class="rs-pay-dest-head"><span>DATOS PARA PAGAR</span><span class="rs-pay-dest-mode">'+(['sm','cup','mitransfer'].includes(method)?'DETECCIÓN AUTOMÁTICA · EN REVISIÓN':'VERIFICACIÓN AUTOMÁTICA')+'</span></div>'
   +'<h3>'+esc(data.name)+'</h3>'
   +(data.value?'<div class="rs-pay-dest-value"><code>'+esc(data.value)+'</code><button class="btn secondary small" type="button" data-action="copy-pay-recipient">Copiar tarjeta / dato</button></div>':'<div class="rs-pay-dest-value rs-pay-wallet-info">Pago desde tu saldo disponible</div>')
   +(method==='cup'?'<div class="rs-cup-confirm-data"><h3>Número de confirmación de Transfermóvil</h3>'
@@ -1381,7 +1382,7 @@ if('serviceWorker' in navigator&&location.protocol==='https:'){
  if(document.readyState==='complete')void registerRefillsWorker();
  else window.addEventListener('load',()=>{void registerRefillsWorker()},{once:true});
 }
-function render(scroll=false){document.body.classList.toggle('rs-auth-screen',s.page==='login'&&!s.user);rsApplyPerformancePreference();headerNav();
+function render(scroll=false){document.body.dataset.rsPage=s.page;document.body.classList.toggle('rs-auth-screen',s.page==='login'&&!s.user);rsApplyPerformancePreference();headerNav();
 if(s.page==='detalle')main.innerHTML=detail();
 else if(s.page==='inicio')main.innerHTML=home();
 else if(s.page==='recargas')main.innerHTML=catalog(false);
@@ -1453,6 +1454,7 @@ case 'rs-notice-refresh':void Promise.allSettled([loadCustomerOrders(),loadPubli
 case 'rs-notice-smooth':rsNotice.smoothMode=!rsNotice.smoothMode;save('smooth_mode',rsNotice.smoothMode);rsApplyPerformancePreference();modal();break;
 case 'rs-notice-open':s.modal=null;navigate(b.dataset.page==='revendedores'?'revendedores':'pedidos');break;
 case 'rs-test-fps':rsMeasureFPS();break;
+case 'restart-expired-order':{const expiry=Date.parse(s.checkoutSession?.expiresAt||s.usdtPayment?.expiresAt||'');if(!Number.isFinite(expiry)||expiry>Date.now())break;s.checkoutSession=null;s.usdtPayment=null;s.checkoutProof='';s.checkoutSource='';s.modal=null;modal();void loadCustomerOrders();toast('Puedes iniciar otra compra. Si pagaste la anterior, contacta soporte.');break;}
 case 'close':case 'backdrop':s.modal=null;modal();break;
 case 'fav':{let idx=s.favorites.indexOf(b.dataset.id);if(idx>=0)s.favorites.splice(idx,1);else s.favorites.push(b.dataset.id);save('favs',s.favorites);if(s.page==='perfil'||s.showFavs)render();else{b.classList.toggle('active');b.title=idx>=0?'Añadir a favoritos':'Eliminar de favoritos'}toast(idx>=0?'Eliminado de favoritos':'Guardado en favoritos');break;}
 case 'only-favs':s.showFavs=!s.showFavs;render();break;

@@ -1,6 +1,6 @@
 {
-  "name": "Refills Shop",
-  "short_name": "Refills Shop",
+  "name": "REFILLS SHOP",
+  "short_name": "REFILLS SHOP",
   "description": "Recargas de juegos y productos digitales en Cuba.",
   "id": "/REFILLSHOP/",
   "start_url": "/REFILLSHOP/",
@@ -11,19 +11,19 @@
   "lang": "es",
   "icons": [
     {
-      "src": "/REFILLSHOP/assets/refills-app-fullbleed.svg",
+      "src": "/REFILLSHOP/assets/refills-app-maskable-512.png?v=shop53",
       "sizes": "512x512",
-      "type": "image/svg+xml",
+      "type": "image/png",
       "purpose": "maskable"
     },
     {
-      "src": "/REFILLSHOP/assets/refills-app-192.png?v=round-v5",
+      "src": "/REFILLSHOP/assets/refills-app-192.png?v=shop53",
       "sizes": "192x192",
       "type": "image/png",
       "purpose": "any"
     },
     {
-      "src": "/REFILLSHOP/assets/refills-app-512.png?v=round-v5",
+      "src": "/REFILLSHOP/assets/refills-app-512.png?v=shop53",
       "sizes": "512x512",
       "type": "image/png",
       "purpose": "any"
@@ -38,7 +38,7 @@
       "url": "/REFILLSHOP/#pedidos",
       "icons": [
         {
-          "src": "/REFILLSHOP/assets/refills-app-192.png?v=round-v5",
+          "src": "/REFILLSHOP/assets/refills-app-192.png?v=shop53",
           "sizes": "192x192",
           "type": "image/png"
         }
@@ -50,7 +50,7 @@
       "url": "/REFILLSHOP/#recargas",
       "icons": [
         {
-          "src": "/REFILLSHOP/assets/refills-app-192.png?v=round-v5",
+          "src": "/REFILLSHOP/assets/refills-app-192.png?v=shop53",
           "sizes": "192x192",
           "type": "image/png"
         }

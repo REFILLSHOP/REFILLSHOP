@@ -184,8 +184,8 @@ async function adminPollOrders(visibleStatus=false){
   S.orderAlerts={orders,pendingCount:Number(data.pendingCount)||0};
   adminSaveSeen(orders.map(o=>o.id));
   if(S.notifyOrdersEnabled&&typeof Notification!=='undefined'&&Notification.permission==='granted'){
-   for(const o of added.slice(0,3)){try{
-    const n=new Notification('Nuevo pedido · Refills Shop',{body:(o.game||'Recarga')+' · '+(o.offer||'Oferta')+' · '+(o.code||''),icon:'/REFILLSHOP/assets/refills-icon.png',tag:'rs-order-'+o.id});
+   for(const o of added.filter(o=>o.status==='pending').slice(0,1)){try{
+    const n=new Notification('Pedidos nuevos · Refills Shop',{body:added.length+' nuevo(s). Revisa el panel de pedidos.',icon:'/REFILLSHOP/assets/refills-icon.png',tag:'rs-order-batch',renotify:false});
     n.onclick=()=>{window.focus();navigate('orders');n.close()};
    }catch{}}
   }
