@@ -394,7 +394,7 @@ async function signInWithPhone(phone,password,remember=s.rememberSession){
 async function loadAccountProfile(authUser=s.authSession?.user){
  if(!authUser)return null;
  const data=await edgeRequest('rs10-api','/profile',{auth:true});
- s.profile=data.profile||null;
+ s.profile=data.profile||null;s.rewardCoupons=[];s.rewardsLoaded=false;
  s.member=!!data.resellerActive;
  const name=data.profile?.fullName||authUser.user_metadata?.full_name||'Cliente';
  s.nickname=name;
@@ -476,7 +476,7 @@ async function handleAuthSubmit(form){
 }
 async function signOutRefills(){
  try{const session=await validAuthSession();if(session?.access_token)await authRequest('/auth/v1/logout',{method:'POST',token:session.access_token})}catch{}
- clearAuthSession();s.user=null;rsNoticeAccount();s.profile=null;s.member=false;s.role='guest';s.resellerPortal=null;s.reseller={...s.reseller,plan:null,wallet:{USDT:0,CUP:0,SM:0}};s.page='login';s.authMode='login';s.afterAuthPage='inicio';s.modal=null;render(true);toast('Has cerrado tu sesión.');
+ clearAuthSession();s.user=null;s.rewardCoupons=[];s.rewardsLoaded=false;s.orders=[];rsNoticeAccount();s.profile=null;s.member=false;s.role='guest';s.resellerPortal=null;s.reseller={...s.reseller,plan:null,wallet:{USDT:0,CUP:0,SM:0}};s.page='login';s.authMode='login';s.afterAuthPage='inicio';s.modal=null;render(true);toast('Has cerrado tu sesión.');
 }
 async function activateResellerPlan(tier){
  if(!s.user){s.afterAuthPage='revendedores';navigate('login');return}
@@ -745,18 +745,18 @@ function recentTopupStatus(value){
  return {label:'Pendiente',className:'pending'};
 }
 function recentTopupsMarkup(){
- const rows=Array.isArray(s.recentTopups)?s.recentTopups.filter(x=>String(x.status||'').toLowerCase()==='completed'):[];
- return `<section class="card recent-topups-v1" id="recent-topups">
-  <div class="recent-topups-head"><div><span class="eyebrow">ACTIVIDAD DE HOY</span><h2>Últimas 3 recargas entregadas</h2><p>Solo recargas confirmadas como completadas; sin datos privados.</p></div><button class="btn ghost small" data-action="refresh-recent-topups" aria-label="Actualizar actividad">↻</button></div>
-  ${rows.length?`<div class="recent-topups-list">${rows.slice(0,3).map(x=>{const st=recentTopupStatus(x.status);return `<article class="recent-topup-row"><span class="recent-topup-icon">${I('game')}</span><span class="recent-topup-copy"><strong>${esc(x.game||'Recarga')}</strong><small>${esc(x.offer||'Producto digital')} · ${x.createdAt?formatShopTime(x.createdAt):'Hoy'}</small></span><span class="recent-topup-status ${st.className}">${st.label}</span></article>`}).join('')}</div>`:`<div class="recent-topups-empty">Todavía no hay recargas entregadas hoy.</div>`}
- </section>`;
+ const rows=s.recentTopups||[],ranking=s.weekRanking||[];
+ const iconFor=x=>/^https?:\/\//i.test(String(x.imageUrl||''))||String(x.imageUrl||'').startsWith('/REFILLSHOP/')?'<img src="'+esc(x.imageUrl)+'" alt="" loading="lazy">':I('game');
+ return '<section class="card recent-topups-v1 rs-activity-v55" id="recent-topups"><div class="recent-topups-head"><div><span class="eyebrow">ACTIVIDAD DE HOY · CUBA</span><h2>Últimas recargas</h2><p>Pedidos pagados y entregados.</p></div><div class="rs-day-total"><strong>'+esc(s.dayTotal??'—')+'</strong><small>Recargas hoy</small></div></div>'
+ + (rows.length?'<div class="recent-topups-list">'+rows.map(x=>'<article class="recent-topup-row"><span class="recent-topup-icon">'+iconFor(x)+'</span><span class="recent-topup-copy"><strong>'+esc(x.game||'Recarga')+'</strong><small>'+esc(x.offer||'Producto digital')+'</small><small>'+esc(x.customer||'Cliente')+' · '+esc(x.createdAt?formatShopTime(x.createdAt):'Hoy')+'</small></span><span class="recent-topup-status completed">Entregada</span></article>').join('')+'</div>':'<div class="recent-topups-empty">'+(s.recentTopupsLoaded?'Todavía no hay recargas entregadas hoy.':'Consultando actividad…')+'</div>')
+ + '<div class="rs-rank-head"><div><span class="eyebrow">COMPETICIÓN SEMANAL</span><h2>Ranking de la semana</h2><p>El número 1 recibe un cupón del 8%.</p></div><span class="rs-reward-tag">−8%</span></div><div class="rs-rank-list">'+(ranking.length?ranking.map(x=>'<div class="rs-rank-row '+(x.rank===1?'rs-rank-first':'')+'"><b>#'+esc(x.rank)+'</b><strong>'+esc(x.customer)+'</strong><small>'+esc(x.count)+' recargas</small></div>').join(''):'<p class="muted">'+(s.recentTopupsLoaded?'Todavía no hay participantes.':'Consultando clasificación…')+'</p>')+'</div><p class="rs-rank-note">Lunes a domingo · hora de Cuba. Solo cuentan recargas pagadas y completadas. En empate, gana quien compró primero.</p><button class="btn secondary small" data-action="refresh-recent-topups">Actualizar actividad</button></section>';
 }
 async function loadRecentTopups(force=false){
  if(s.recentTopupsLoaded&&!force)return;
  try{
   const response=await fetch(RS10_BASE+'/recent-topups',{headers:{apikey:RS_SUPABASE_KEY,accept:'application/json'},cache:'no-store'});
   if(!response.ok)throw Error('No se pudo consultar la actividad.');
-  const data=await response.json();s.recentTopups=Array.isArray(data.topups)?data.topups.filter(x=>String(x.status||'')==='completed').slice(0,3):[];s.recentTopupsLoaded=true;
+  const data=await response.json();s.recentTopups=Array.isArray(data.topups)?data.topups.filter(x=>String(x.status||'')==='completed').slice(0,3):[];s.dayTotal=Number.isFinite(Number(data.totalToday))?Number(data.totalToday):null;s.weekRanking=Array.isArray(data.ranking)?data.ranking:[];s.recentTopupsLoaded=true;
  }catch(error){console.warn('Recent topups:',error?.message||error)}
  const node=document.getElementById('recent-topups');
  if(node){const temp=document.createElement('div');temp.innerHTML=recentTopupsMarkup();node.replaceWith(temp.firstElementChild)}
@@ -1004,42 +1004,24 @@ function orders(){
     }).join('')+'</div>')+
   '<p class="rs-order-help">Los pedidos con Central One se comprueban automáticamente. Un pago confirmado no significa que el paquete ya esté entregado.</p></div>';
 }
+async function loadMyRewards(){if(!s.user)return;const uid=s.user.id;try{const x=await edgeRequest('rs10-api','/rewards/me',{auth:true});if(s.user?.id!==uid)return;s.rewardCoupons=x.coupons||[];s.rewardsLoaded=true;if(s.page==='perfil'&&!s.modal)render()}catch{if(s.user?.id===uid){s.rewardsLoaded=false;if(s.page==='perfil'&&!s.modal)render()}}}
 function profile(){
- const displayName=s.user?.name||s.nickname||'Mi cuenta';
- const identity=s.user?.email||s.user?.phone||'Cuenta Refills Shop';
- const roleLabel=s.role==='reseller'?'Revendedor':s.role==='admin'?'Administrador':'Cliente';
- const wallet=s.reseller?.wallet||{};
- const activePlan=resellerHasPlan();
- const initial=String(displayName).trim().slice(0,2).toUpperCase()||'RS';
+ const displayName=s.user?.name||'Mi cuenta',identity=s.user?.phone||'Cuenta Refills Shop',roleLabel=s.role==='reseller'?'Revendedor':s.role==='admin'?'Administrador':'Cliente',wallet=s.reseller?.wallet||{},activePlan=resellerHasPlan(),initial=String(displayName).trim().slice(0,2).toUpperCase()||'RS';
  const walletPanel=activePlan?`<section class="profile-wallet-v4">
   <div class="profile-wallet-head"><div><small>WALLET DE REVENDEDOR</small><span class="profile-plan-tag">${esc(s.reseller.plan)}</span></div><span class="profile-wallet-symbol">${I('wallet','big')}</span></div>
   <div class="profile-wallet-total"><strong>${Number(wallet.USDT||0).toFixed(2)}</strong><em>USDT</em><small>Saldo disponible</small></div>
   <div class="profile-wallet-secondary"><span>Saldo CUP <strong>${fmtMoney(wallet.CUP||0)}</strong></span><span>Saldo móvil <strong>${fmtMoney(wallet.SM||0)}</strong></span></div>
   <div class="profile-wallet-actions"><button class="btn primary" data-action="modal" data-modal="wallet">${I('plus','tiny')} Depositar</button><button class="btn secondary" data-action="modal" data-modal="reseller-ledger">${I('file','tiny')} Movimientos</button></div>
  </section>`:s.user?`<section class="profile-plan-locked-v4"><div><small>WALLET DE REVENDEDOR</small><strong>Activa uno de tus tres planes</strong><p>Consulta Gratis, Level 2 y Level 3 para habilitar los precios mayoristas y la wallet.</p></div><button class="btn primary" data-action="nav" data-page="revendedores">Ver planes</button></section>`:'';
- return `<div class="catalog-top profile-page-v4">
-  <div class="eyebrow">CUENTA Y PREFERENCIAS</div><h1 class="page-title">Mi perfil</h1><p class="page-lead">Tu información, tu actividad y la configuración de tu cuenta.</p>
-  <section class="profile-hero-v4">
-   <div class="profile-avatar-v4">${esc(initial)}</div>
-   <div class="profile-identity-v4"><small>CUENTA REFILLS SHOP</small><strong>${esc(displayName)}</strong><span>${esc(identity)}</span></div>
-   <span class="profile-role-v4">${I('shield','tiny')} ${roleLabel}</span>
-  </section>
-  ${walletPanel}
-  <div class="profile-layout-v4">
-   <section class="card profile-panel-v4"><div class="profile-panel-title"><span>${I('user')}</span><div><h2>Mis datos</h2><p>Actualiza cómo aparece tu cuenta en la tienda.</p></div></div><div class="profile-form"><label for="profile-name">Nombre o apodo</label><input class="field" id="profile-name" maxlength="32" placeholder="Nombre que se mostrará" value="${esc(s.nickname)}"><button class="btn primary full" data-action="save-profile">Guardar cambios</button></div><div class="profile-data-line"><span>Tipo de cuenta</span><strong>${roleLabel}</strong></div><div class="profile-data-line"><span>Identificación</span><strong>${esc(identity)}</strong></div></section>
-   <section class="card profile-panel-v4 profile-settings-v4"><div class="profile-panel-title"><span>${I('settings')}</span><div><h2>Configuración</h2><p>Accesos rápidos de tu cuenta.</p></div></div>
-    <button class="setting" data-action="nav" data-page="pedidos"><span class="set-icon">${I('file')}</span><span class="set-copy"><strong>Mis pedidos</strong><small>Consulta compras, estados y comprobantes.</small></span>${I('arrow','tiny')}</button>
-    <button class="setting" data-action="nav" data-page="revendedores"><span class="set-icon">${I('wallet')}</span><span class="set-copy"><strong>Planes de revendedor</strong><small>Consulta Gratis, Level 2 y Level 3.</small></span>${I('arrow','tiny')}</button>
-    ${activePlan?`<button class="setting" data-action="modal" data-modal="wallet"><span class="set-icon">${I('wallet')}</span><span class="set-copy"><strong>Mi wallet</strong><small>Depositar y consultar tus saldos.</small></span>${I('arrow','tiny')}</button>`:''}
-    ${s.role==='admin'?`<a class="setting" href="/REFILLSHOP/admin/"><span class="set-icon">${I('shield')}</span><span class="set-copy"><strong>Panel de administración</strong><small>Administrar juegos, precios y pedidos</small></span>${I('arrow','tiny')}</a>`:''}
-    <button class="setting" data-action="modal" data-modal="alerts"><span class="set-icon">${I('bell')}</span><span class="set-copy"><strong>Notificaciones y sonidos</strong><small>Recargas, pagos, wallet y novedades del catálogo.</small></span>${I('arrow','tiny')}</button>
-    <button class="setting" data-action="rs-test-fps"><span class="set-icon">${I('settings')}</span><span class="set-copy"><strong>Medir fluidez</strong><small id="rs-fps-result">Comprueba cuántos fotogramas muestra este teléfono.</small></span>${I('arrow','tiny')}</button>
-    <button class="setting" data-action="modal" data-modal="help"><span class="set-icon">${I('headset')}</span><span class="set-copy"><strong>Ayuda y soporte</strong><small>Información del proceso de compra.</small></span>${I('arrow','tiny')}</button>
-    <button class="setting" data-action="auth-logout"><span class="set-icon">${I('shield')}</span><span class="set-copy"><strong>Cerrar sesión</strong><small>Salir de tu cuenta en este dispositivo.</small></span>${I('arrow','tiny')}</button>
-   </section>
-  </div>
-  <section class="card profile-favorites-v4"><div class="profile-panel-title"><span>${I('star')}</span><div><h2>Mis favoritos</h2><p>Tus juegos y productos guardados.</p></div></div>${s.favorites.length?`<div class="grid-media">${s.favorites.map(id=>itemBy(id)).filter(Boolean).map(minitile).join('')}</div>`:`<div class="profile-favorites-empty">Todavía no has guardado productos. Usa la estrella del catálogo para añadir tus favoritos.</div>`}</section>
- </div>`;
+
+ const orders=s.orders||[],completed=orders.filter(o=>o.status==='completed'&&o.paymentStatus==='paid').length,pending=orders.filter(o=>['pending','processing'].includes(o.status)).length;
+ const link=(icon,title,sub,attrs)=>'<button class="setting" '+attrs+'><span class="set-icon">'+I(icon)+'</span><span class="set-copy"><strong>'+esc(title)+'</strong><small>'+esc(sub)+'</small></span>'+I('arrow','tiny')+'</button>';
+ const coupons=s.rewardCoupons||[];
+ return '<div class="catalog-top rs-profile-v55"><div class="eyebrow">REFILLS SHOP / MI ESPACIO</div><h1 class="page-title">Mi cuenta</h1><section class="rs-profile-banner"><div class="profile-avatar-v4">'+esc(initial)+'</div><div><span class="rs-reward-tag">'+esc(roleLabel)+'</span><h2>'+esc(displayName)+'</h2><small>'+esc(identity)+'</small></div></section><div class="rs-profile-stats"><article><strong>'+completed+'</strong><small>Entregadas</small></article><article><strong>'+pending+'</strong><small>En curso</small></article><article><strong>'+coupons.length+'</strong><small>Cupones</small></article></div>'
+ +'<section class="card rs-profile-section"><h2>Mis recompensas</h2><p>Los cupones ganados aparecen aquí. Úsalos antes de pagar.</p>'+(coupons.length?coupons.map(x=>'<div class="rs-coupon-card"><div><strong>−'+esc(x.percent)+'%</strong><small>Vence '+esc(formatShopDateTime(x.expiresAt))+'</small><code>'+esc(x.code)+'</code></div><button class="btn secondary small" data-action="copy-reward" data-code="'+esc(x.code)+'">Copiar</button></div>').join(''):'<p class="rs-rank-note">'+(s.rewardsLoaded?'No tienes cupones personales disponibles.':'Consulta tus recompensas con el botón de actualizar.')+'</p>')+'<button class="btn secondary small" data-action="refresh-rewards">Actualizar cupones</button></section>'
+ +'<section class="card rs-profile-section"><h2>Mi actividad</h2>'+link('file','Historial de compras','Ver recargas y comprobantes','data-action="nav" data-page="pedidos"')+link('star','Ranking semanal','Consulta el top y gana un descuento','data-action="nav" data-page="inicio"')+link('wallet','Planes mayoristas','Precios y wallet de revendedor','data-action="nav" data-page="revendedores"')+'</section>'+walletPanel
+ +'<section class="card rs-profile-section"><h2>Cuenta y preferencias</h2><div class="profile-data-line"><span>Nombre registrado</span><strong>'+esc(displayName)+'</strong></div><div class="profile-data-line"><span>Teléfono</span><strong>'+esc(identity)+'</strong></div>'+link('bell','Notificaciones y sonidos','Avisos de compras y pagos','data-action="modal" data-modal="alerts"')+link('settings','Rendimiento','Medir fluidez de la web','data-action="rs-test-fps"')+link('headset','Ayuda y soporte','Preguntas sobre tu cuenta','data-action="modal" data-modal="help"')+(s.role==='admin'?'<a class="setting" href="/REFILLSHOP/admin/">'+I('shield')+' Panel de administración</a>':'')+'</section>'
+ +'<section class="card rs-profile-section"><h2>Mis favoritos</h2>'+(s.favorites.length?'<div class="grid-media">'+s.favorites.map(id=>itemBy(id)).filter(Boolean).map(minitile).join('')+'</div>':'<p class="rs-rank-note">Guarda tus juegos favoritos desde el catálogo.</p>')+'</section><button class="btn secondary full" data-action="auth-logout">Cerrar sesión</button></div>';
 }
 function modalTitle(title,desc=''){return `<div class="modal-title"><div><h2>${title}</h2>${desc?`<p>${desc}</p>`:''}</div><button class="xbtn" data-action="close" aria-label="Cerrar">${I('close')}</button></div>`}
 
@@ -1110,11 +1092,11 @@ async function startPaymentReservation(button){
  try{
   const result=await edgeRequest('rs10-api','/orders/start',{method:'POST',auth:true,body:{
     gameId:g.id,offerId:o.id,clientRequestId:requestId,method,playerId:player||'PIN',
-    targetPayload,quotedAmount:amount,quotedCurrency:currency
+    targetPayload,quotedAmount:amount,quotedCurrency:currency,couponCode:String(document.getElementById('rs-coupon-input')?.value||'').trim().toUpperCase()
   }});
   if(!result?.order?.code||!result?.expiresAt)throw Error('No se confirmó el plazo de pago en el servidor.');
   const timing=paymentClock(result.expiresAt,result.serverNow);if(!timing)throw Error('No se pudo sincronizar el plazo. No realices transferencias.');
-  s.checkoutSession={requestId,code:result.order.code,...timing,method,offerId:o.id,gameId:g.id,player};
+  s.checkoutSession={requestId,code:result.order.code,...timing,method,offerId:o.id,gameId:g.id,player,amount:Number(result.amount??amount),currency:result.currency||currency,couponCode:result.couponCode||null};
   if(method==='usdt_wallet'){
    s.usdtPayment={code:result.order.code,amount:Number(result.payment?.amount||amount),
      address:result.payment?.address||s.paymentConfig.usdtAddress||'',network:'BEP-20',
@@ -1167,7 +1149,7 @@ function modal(){
  if(!s.modal){modalRoot.innerHTML='';document.body.classList.remove('modal-open');return}
  document.body.classList.add('modal-open');
  let html='';const g=itemBy(s.detailId),o=g?.offers[s.selected]||g?.offers[0],p=o?currentPrice(o):null;
- const total=p?{...p,amount:p.amount*s.qty}:null;
+ const total=p?{...p,amount:s.modal==='checkout'&&s.checkoutSession?Number(s.checkoutSession.amount??p.amount*s.qty):p.amount*s.qty}:null;
  switch(s.modal){
  case 'install-guide':{
   const ios=/iPad|iPhone|iPod/.test(navigator.userAgent);
@@ -1216,7 +1198,7 @@ function modal(){
   +'<small>DESTINATARIO</small><strong>'+esc(o?.kind==='pin'?'Código digital':s.player||'Sin ID')+'</strong>'
   +'<small>MÉTODO</small><strong>'+esc(paymentName())+'</strong>'
   +'<small>TOTAL</small><strong class="rs-confirm-total">'+(total?formatPriceValue(total.amount,total.currency):'No disponible')+'</strong></div>'
-  +'<p class="rs-confirm-warning">Después de confirmar tendrás 20 minutos para registrar el envío del pago. Si no lo haces, el pedido pasará a fallido.</p>'
+  + (s.payment==='balance'?'':'<label class="rs-coupon-label">Cupón de descuento (opcional)<input id="rs-coupon-input" class="field" maxlength="40" autocomplete="off" placeholder="Introduce tu código"></label><small class="rs-rank-note">El servidor comprueba el cupón y muestra el total definitivo antes de pagar.</small>')+'<p class="rs-confirm-warning">Después de confirmar tendrás 20 minutos para registrar el envío del pago. Si no lo haces, el pedido pasará a fallido.</p>'
   +'<button class="btn primary full" data-action="start-payment">Confirmar y continuar al pago</button><button class="btn ghost full" data-action="close">Corregir datos</button></div>';
  break;
 }
@@ -1434,7 +1416,7 @@ modal();if(scroll)window.scrollTo({top:0,behavior:'instant'})}
 function navigate(page){
  if(!s.user&&page!=='login'){s.afterAuthPage=page;s.authMode='login';s.page='login';s.modal=null;render(true);toast('Inicia sesión o crea tu cuenta para continuar.');return}
  if(page==='admin'&&s.role!=='admin'){s.page='inicio';render(true);toast('Esta sección requiere permisos de administrador.');return}
- s.modal=null;if(page!=='detalle')s.search='';s.filter='todos';s.showFavs=false;s.page=page;render(true);history.replaceState(null,'','#'+page);if(page==='inicio')void loadRecentTopups(true);if(page==='pedidos')void loadCustomerOrders();
+ s.modal=null;if(page!=='detalle')s.search='';s.filter='todos';s.showFavs=false;s.page=page;render(true);history.replaceState(null,'','#'+page);if(page==='inicio')void loadRecentTopups(true);if(page==='pedidos')void loadCustomerOrders();if(page==='perfil'){void loadMyRewards();void loadCustomerOrders();}
  if(page==='revendedores'&&!s.resellerPortal)void loadResellerPortal(false,true);
 }
 function openDetail(id){let g=itemBy(id);if(!g)return;const regions=gameRegionOptions(g);if(g.category==='juegos'&&regions.length){s.regionPickGame=id;s.modal='region-picker';modal();return}openRegionGame(id,regions[0]?.region||'')}
@@ -1471,6 +1453,8 @@ document.addEventListener('keydown',e=>{if(e.key==='Escape'&&s.modal){s.modal=nu
 document.addEventListener('click',e=>{rsUnlockNoticeSound();let b=e.target.closest('[data-action]');if(!b)return;const action=b.dataset.action;if(action==='backdrop'&&e.target!==b)return;e.preventDefault();switch(action){
 case 'auth-mode':s.authMode=b.dataset.mode==='register'?'register':'login';s.authError='';render();break;
 case 'auth-logout':void signOutRefills();break;
+case 'refresh-rewards':void loadMyRewards();break;
+case 'copy-reward':void copyPaymentValue(b.dataset.code,b);break;
 case 'reseller-refresh':void loadResellerPortal(false,true);break;
 case 'reseller-subscribe':void activateResellerPlan(b.dataset.tier);break;
 case 'reseller-preview':void openResellerPlanPreview(b.dataset.tier);break;
@@ -1745,7 +1729,7 @@ if(a==='send-order'){
   }else{
    const method=s.payment==='sm'?'mobile':s.payment==='cup'?'card':s.payment==='mitransfer'?'wallet':s.payment==='usdt'?'usdt_wallet':null;
    if(!method)throw Error('Método de pago no disponible.');
-   const quotedAmount=Number(method==='mobile'?o.sm:method==='card'?o.card:method==='wallet'?o.cup:o.usdt);
+   const quotedAmount=Number(s.checkoutSession?.amount??(method==='mobile'?o.sm:method==='card'?o.card:method==='wallet'?o.cup:o.usdt));
    const quotedCurrency=method==='mobile'?'SM':method==='usdt_wallet'?'USDT':'CUP';
    if(!Number.isFinite(quotedAmount)||quotedAmount<=0)throw Error('El precio no está disponible.');
    const sourcePhone=method==='mobile'?String(document.getElementById('payment-source-phone')?.value||'').trim():'';
@@ -1799,7 +1783,7 @@ async function loadCustomerOrders(){
    }));
    s.orders=items;
    rsTrackOrders(items);
-   if(s.page==='pedidos'&&JSON.stringify(items)!==oldOrdersJson){
+   if((s.page==='pedidos'||s.page==='perfil')&&JSON.stringify(items)!==oldOrdersJson){
     const y=window.scrollY;render();window.scrollTo(0,y);
     if(s.modal==='order')modal();
    }
