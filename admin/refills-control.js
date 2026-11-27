@@ -25,7 +25,7 @@ check:'<path d="m4 12 5 5 11-11"/>',
 alert:'<path d="M12 2 2 21h20z"/><path d="M12 9v5M12 17h.01"/>'
 };
 const ico=(name)=>'<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" width="19" height="19" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">'+(paths[name]||paths.shield)+'</svg>';
-const MENU=[['overview','Resumen','overview','Indicadores y accesos'],['games','Juegos','games','Tu catálogo'],['offers','Ofertas','offers','Precios y productos'],['orders','Pedidos','orders','Compras y entregas'],['customers','Clientes','customers','Cuentas y seguridad'],['resellers','Revendedores','resellers','Planes y depósitos'],['payments','Pagos y tasas','payments','Configuración comercial'],['centralone','Central One','centralone','Integración proveedor']];
+const MENU=[['overview','Resumen','overview','Indicadores y accesos'],['games','Juegos','games','Tu catálogo'],['offers','Ofertas','offers','Precios y productos'],['orders','Pedidos','orders','Compras y entregas'],['customers','Clientes','customers','Cuentas y seguridad'],['resellers','Revendedores','resellers','Planes y depósitos'],['payments','Pagos y tasas','payments','Configuración comercial'],['centralone','Central One','centralone','Integración proveedor'],['rewards','Cupones y API','offers','Promociones y acceso de distribuidores']];
 const S={client:null,user:null,page:'overview',busy:false,rememberSession:true,cache:{},search:'',offerSearch:'',editingGameId:null,gameFilter:'all',offerFilter:'all',coFilter:'',coKind:'all',product:null,offerMode:'centralone',bulkNotice:'',bulkFamily:'',regionGame:'',regionName:'',regionMarginPct:null,orderAlertTimer:null,orderAlertBusy:false,orderAlerts:{orders:[],pendingCount:0},notifyOrdersEnabled:false};
 function flash(message,error=false){
  const el=$('notify');el.textContent=String(message||'');el.classList.toggle('error',error);el.hidden=false;
@@ -164,6 +164,7 @@ async function load(page=S.page){
    const [s,store,commerce,crypto,payEvents,cupEvents]=await Promise.all([request('/admin/settings'),publicStorefront(),request('/admin/commerce/settings'),request('/admin/crypto/status'),request('/admin/refills-pay/events').catch(()=>null),request('/admin/refills-pay/cup-events').catch(()=>null)]);
    Object.assign(S.cache,{settings:s.config,store,commerce,crypto,payEvents,cupEvents});return drawPayments();
   }
+  if(page==='rewards'){S.cache.rewards=await request('/admin/rewards');return drawRewards();}
   if(page==='centralone'){
    const [central,orderStatus,commerce]=await Promise.all([request('/admin/centralone/status'),request('/admin/centralone/orders/status'),request('/admin/commerce/settings')]);
    Object.assign(S.cache,{central,orderStatus,commerce});return drawCentral();
@@ -176,6 +177,10 @@ async function publicStorefront(){
  const data=await res.json().catch(()=>({}));
  if(!res.ok)throw Error(data.error||'No se pudieron obtener las tasas de la tienda.');
  return data;
+}
+function drawRewards(){
+ const d=S.cache.rewards||{},coupons=d.coupons||[],keys=d.keys||[];
+ $('admin-view').innerHTML='<section class="surface section"><div class="panel-head"><div><h2>Cupones de descuento</h2><small>El ganador semanal recibe un cupón personal de 8% durante 7 días. Los demás códigos se crean aquí.</small></div>'+ico('offers')+'</div><form id="reward-coupon-form" class="form-grid">'+field('Código (4–40 caracteres)','code','','text')+field('Descuento % (máx. 20)','percent',8,'number')+field('Usos totales','maxUses',1,'number')+field('Vigencia en días','days',7,'number')+'<div class="form-actions wide"><button class="btn primary" type="submit">Crear cupón</button></div></form><div class="spacing"></div>'+ (coupons.length?coupons.map(x=>'<div class="record spacer"><div><h3>'+esc(x.reward_week?'Premio semanal · código privado':x.code)+' · '+esc(x.percent)+'%</h3><small>Vence '+esc(new Date(x.expires_at).toLocaleDateString('es-CU',{timeZone:'America/Havana'}))+' · Máximo '+esc(x.max_uses)+' usos</small></div>'+tag(x.active?'Activo':'Desactivado',x.active?'good':'warn')+(x.active?'<button class="btn ghost small" data-action="disable-reward-coupon" data-code="'+esc(x.code)+'">Desactivar</button>':'')+'</div>').join(''):empty('Sin cupones','Crea una promoción.'))+'</section><div class="spacing"></div><section class="surface section"><div class="panel-head"><div><h2>API Refills Shop v1</h2><small>Consulta de catálogo y precios. Sin permisos de compra ni de administración.</small></div>'+ico('centralone')+'</div><p>GET <code style="overflow-wrap:anywhere">https://kcgjlnymhmxylrjchcvl.supabase.co/functions/v1/rs10-api/partner/v1/catalog</code></p><p>Authorization: Bearer TU_CLAVE_API</p><form id="partner-key-form" class="form-grid">'+field('Nombre de distribuidor','label','','text')+'<div class="form-actions wide"><button class="btn primary" type="submit">Generar clave API</button></div></form><div id="partner-new-key" hidden></div><div class="spacing"></div>'+ (keys.length?keys.map(x=>'<div class="record spacer"><div><h3>'+esc(x.label)+'</h3><small>Solo lectura</small></div>'+tag(x.active?'Activa':'Revocada',x.active?'good':'warn')+(x.active?'<button class="btn ghost small" data-action="revoke-partner-key" data-id="'+esc(x.id)+'">Revocar</button>':'')+'</div>').join(''):empty('Sin claves API','Genera una clave por distribuidor.'))+'</section>';
 }
 function metric(label,value,subtitle,icon){return '<article class="surface metric"><div class="metric-header"><span class="metric-title">'+esc(label)+'</span><span class="metric-icon">'+ico(icon)+'</span></div><b>'+esc(value)+'</b><small>'+esc(subtitle)+'</small></article>'}
 function empty(title,subtitle){return '<div class="empty">'+ico('orders')+'<b>'+esc(title)+'</b><small>'+esc(subtitle)+'</small></div>'}
@@ -596,6 +601,8 @@ async function openOfferEdit(id){
 function modalConfirm(text){return window.confirm(text)}
 async function runAction(action,el){
  const id=el.dataset.id,code=el.dataset.code;
+ if(action==='disable-reward-coupon')return withBusy(async()=>{if(!confirm('¿Desactivar este cupón?'))return;await request('/admin/rewards/coupon/disable',{method:'POST',body:{code}});await load();flash('Cupón desactivado');});
+ if(action==='revoke-partner-key')return withBusy(async()=>{if(!confirm('¿Revocar esta clave API?'))return;await request('/admin/rewards/api-key/revoke',{method:'POST',body:{id}});await load();flash('Clave revocada');});
  if(action==='check-new-orders')return adminPollOrders(true);
  if(action==='enable-order-notifications'){
   if(typeof Notification==='undefined')return flash('Este dispositivo no admite notificaciones desde la web. Los pedidos siguen visibles en el ADM.',true);
@@ -713,7 +720,9 @@ document.addEventListener('submit',async e=>{
  if(!S.user)return flash('Inicia sesión',true);
  await withBusy(async()=>{
   let r;
-  if(form.id==='link-offer-form'){const pid=S.product||data.productId;if(!pid)throw Error('Busca y selecciona un producto real de Central One.');r=await request('/admin/centralone/offer',{method:'POST',body:{gameId:data.gameId,productId:pid,displayName:data.displayName,gainSm:Number(data.gainSm),featured:!!data.featured}});}
+  if(form.id==='reward-coupon-form'){r=await request('/admin/rewards/coupon',{method:'POST',body:{code:data.code,percent:Number(data.percent),maxUses:Number(data.maxUses),days:Number(data.days)}});}
+  else if(form.id==='partner-key-form'){r=await request('/admin/rewards/api-key',{method:'POST',body:{label:data.label}});await load();const box=$('partner-new-key');if(box){box.hidden=false;box.innerHTML='<div class="alert-note"><strong>Guarda esta clave: se muestra una sola vez.</strong><input class="field" readonly value="'+esc(r.key)+'" style="width:100%;margin-top:8px" aria-label="Nueva clave API"></div>';}return;}
+  else if(form.id==='link-offer-form'){const pid=S.product||data.productId;if(!pid)throw Error('Busca y selecciona un producto real de Central One.');r=await request('/admin/centralone/offer',{method:'POST',body:{gameId:data.gameId,productId:pid,displayName:data.displayName,gainSm:Number(data.gainSm),featured:!!data.featured}});}
   else if(form.id==='manual-offer-form'){r=await request('/admin/offer-manual',{method:'POST',body:{gameId:data.gameId,name:data.name,provider:'centralone',providerPriceUsdt:Number(data.providerPriceUsdt),gainSm:Number(data.gainSm)}});}
   else if(form.id==='edit-offer-form'){r=await request('/admin/offer-edit',{method:'POST',body:{id:data.id,gainSm:Number(data.gainSm)}});closeModal();}
   else if(form.id==='reset-customer-form'){if(!data.identityConfirmed)throw Error('Debes verificar la identidad del cliente.');r=await request('/admin/customer-password',{method:'POST',body:{userId:data.userId,password:data.password,identityConfirmed:true}});closeModal();}
