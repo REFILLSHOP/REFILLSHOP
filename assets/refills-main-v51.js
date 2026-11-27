@@ -394,7 +394,7 @@ async function signInWithPhone(phone,password,remember=s.rememberSession){
 async function loadAccountProfile(authUser=s.authSession?.user){
  if(!authUser)return null;
  const data=await edgeRequest('rs10-api','/profile',{auth:true});
- s.profile=data.profile||null;s.rewardCoupons=[];s.rewardsLoaded=false;
+ s.profile=data.profile||null;s.rewardCoupons=[];s.rewardsLoaded=false;s.myWeekRank=null;s.recentTopupsLoaded=false;
  s.member=!!data.resellerActive;
  const name=data.profile?.fullName||authUser.user_metadata?.full_name||'Cliente';
  s.nickname=name;
@@ -476,7 +476,7 @@ async function handleAuthSubmit(form){
 }
 async function signOutRefills(){
  try{const session=await validAuthSession();if(session?.access_token)await authRequest('/auth/v1/logout',{method:'POST',token:session.access_token})}catch{}
- clearAuthSession();s.user=null;s.rewardCoupons=[];s.rewardsLoaded=false;s.orders=[];rsNoticeAccount();s.profile=null;s.member=false;s.role='guest';s.resellerPortal=null;s.reseller={...s.reseller,plan:null,wallet:{USDT:0,CUP:0,SM:0}};s.page='login';s.authMode='login';s.afterAuthPage='inicio';s.modal=null;render(true);toast('Has cerrado tu sesión.');
+ clearAuthSession();s.user=null;s.myWeekRank=null;s.recentTopupsLoaded=false;s.rewardCoupons=[];s.rewardsLoaded=false;s.orders=[];rsNoticeAccount();s.profile=null;s.member=false;s.role='guest';s.resellerPortal=null;s.reseller={...s.reseller,plan:null,wallet:{USDT:0,CUP:0,SM:0}};s.page='login';s.authMode='login';s.afterAuthPage='inicio';s.modal=null;render(true);toast('Has cerrado tu sesión.');
 }
 async function activateResellerPlan(tier){
  if(!s.user){s.afterAuthPage='revendedores';navigate('login');return}
@@ -745,20 +745,23 @@ function recentTopupStatus(value){
  return {label:'Pendiente',className:'pending'};
 }
 function recentTopupsMarkup(){
- const rows=s.recentTopups||[],ranking=s.weekRanking||[];
+ const rows=s.recentTopups||[],ranking=(s.weekRanking||[]).slice(0,3),mine=s.myWeekRank;
+ const medal=n=>'<svg viewBox="0 0 32 36" width="28" height="30" aria-hidden="true"><path d="M5 2h9l5 13H10zM18 2h9l-5 13h-9z" fill="currentColor" opacity=".55"/><circle cx="16" cy="23" r="11" fill="currentColor"/><circle cx="16" cy="23" r="8.5" fill="none" stroke="#101b2e" stroke-opacity=".38"/><text x="16" y="27" text-anchor="middle" font-size="12" font-weight="900" fill="#142033">'+esc(n)+'</text></svg>';
+ const fmt=n=>Number(n||0).toLocaleString('es-CU',{maximumFractionDigits:2});
  const iconFor=x=>/^https?:\/\//i.test(String(x.imageUrl||''))||String(x.imageUrl||'').startsWith('/REFILLSHOP/')?'<img src="'+esc(x.imageUrl)+'" alt="" loading="lazy">':I('game');
  return '<div class="rs-community-v56" id="recent-topups"><section class="card recent-topups-v1 rs-activity-v55"><div class="recent-topups-head"><div><span class="eyebrow">ACTIVIDAD DE HOY · CUBA</span><h2>Últimas recargas</h2><p>Pedidos pagados y entregados.</p></div><div class="rs-day-total"><strong>'+esc(s.dayTotal??'—')+'</strong><small>Recargas hoy</small></div></div>'
  + (rows.length?'<div class="recent-topups-list">'+rows.map(x=>'<article class="recent-topup-row"><span class="recent-topup-icon">'+iconFor(x)+'</span><span class="recent-topup-copy"><strong>'+esc(x.game||'Recarga')+'</strong><small>'+esc(x.offer||'Producto digital')+'</small><small>'+esc(x.customer||'Cliente')+' · '+esc(x.createdAt?formatShopTime(x.createdAt):'Hoy')+'</small></span><span class="recent-topup-status completed">Entregada</span></article>').join('')+'</div>':'<div class="recent-topups-empty">'+(s.recentTopupsLoaded?'Todavía no hay recargas entregadas hoy.':'Consultando actividad…')+'</div>')
  + '</section><section class="card recent-topups-v1 rs-activity-v55 rs-customer-ranking"><div class="recent-topups-head"><div><span class="eyebrow">CLASIFICACIÓN SEMANAL</span><h2>RANKING DE CLIENTE</h2><p>Clientes con mayor gasto durante la semana.</p></div><button class="btn ghost small" data-action="refresh-recent-topups" aria-label="Actualizar ranking">'+I('refresh')+'</button></div>'
- + (ranking.length?'<div class="recent-topups-list">'+ranking.map(x=>'<article class="recent-topup-row rs-customer-rank-row '+(Number(x.rank)===1?'rs-customer-rank-leader':'')+'"><span class="recent-topup-icon rs-rank-position">#'+esc(x.rank)+'</span><span class="recent-topup-copy"><strong>'+esc(x.customer||'Cliente')+'</strong><small>Gasto de la semana</small></span><span class="rs-customer-spent">'+esc(Number(x.spentCup||0).toLocaleString('es-CU',{maximumFractionDigits:2,minimumFractionDigits:0}))+' <small>CUP</small></span></article>').join('')+'</div>':'<div class="recent-topups-empty">'+(s.recentTopupsLoaded?'Todavía no hay participantes.':'Consultando clasificación…')+'</div>')
- + '<p class="rs-rank-note">Lunes a domingo · hora de Cuba. Importes equivalentes en CUP de recargas pagadas y completadas.</p></section></div>';
+ + (ranking.length?'<div class="recent-topups-list">'+ranking.map(x=>'<article class="recent-topup-row rs-customer-rank-row '+(Number(x.rank)===1?'rs-customer-rank-leader':'')+'"><span class="recent-topup-icon rs-rank-position rs-medal-'+esc(x.rank)+'" aria-label="Puesto '+esc(x.rank)+'">'+medal(x.rank)+'</span><span class="recent-topup-copy"><strong>'+esc(x.customer||'Cliente')+'</strong><small>Gasto de la semana</small></span><span class="rs-customer-spent">'+esc(Number(x.spentCup||0).toLocaleString('es-CU',{maximumFractionDigits:2,minimumFractionDigits:0}))+' <small>CUP</small></span></article>').join('')+'</div>':'<div class="recent-topups-empty">'+(s.recentTopupsLoaded?'Todavía no hay participantes.':'Consultando clasificación…')+'</div>')
+ + '<div class="rs-rank-self"><article class="recent-topup-row"><span class="recent-topup-icon rs-rank-position">'+(mine?.rank?'#'+esc(mine.rank):'—')+'</span><span class="recent-topup-copy"><strong>Tu posición</strong><small>'+(!s.user?'Inicia sesión para ver tu posición':!mine?'Consultando tu clasificación…':mine.rank?'De '+esc(mine.participants)+' participantes':'Aún no tienes recargas completadas esta semana')+'</small></span><span class="rs-customer-spent">'+(mine?fmt(mine.spentCup)+' <small>CUP</small>':'—')+'</span></article></div><p class="rs-rank-note">Lunes a domingo · hora de Cuba. Importes equivalentes en CUP de recargas pagadas y completadas.</p></section></div>';
 }
 async function loadRecentTopups(force=false){
  if(s.recentTopupsLoaded&&!force)return;
  try{
   const response=await fetch(RS10_BASE+'/recent-topups',{headers:{apikey:RS_SUPABASE_KEY,accept:'application/json'},cache:'no-store'});
   if(!response.ok)throw Error('No se pudo consultar la actividad.');
-  const data=await response.json();s.recentTopups=Array.isArray(data.topups)?data.topups.filter(x=>String(x.status||'')==='completed').slice(0,3):[];s.dayTotal=Number.isFinite(Number(data.totalToday))?Number(data.totalToday):null;s.weekRanking=Array.isArray(data.ranking)?data.ranking:[];s.recentTopupsLoaded=true;
+  const data=await response.json();s.recentTopups=Array.isArray(data.topups)?data.topups.filter(x=>String(x.status||'')==='completed').slice(0,3):[];s.dayTotal=Number.isFinite(Number(data.totalToday))?Number(data.totalToday):null;s.weekRanking=Array.isArray(data.ranking)?data.ranking.slice(0,3):[];s.recentTopupsLoaded=true;
+  const uid=s.user?.id;if(uid){try{const mine=await edgeRequest('rs10-api','/rewards/rank/me',{auth:true});if(s.user?.id===uid)s.myWeekRank=mine;}catch{if(s.user?.id===uid)s.myWeekRank=null;}}else s.myWeekRank=null;
  }catch(error){console.warn('Recent topups:',error?.message||error)}
  const node=document.getElementById('recent-topups');
  if(node){const temp=document.createElement('div');temp.innerHTML=recentTopupsMarkup();node.replaceWith(temp.firstElementChild)}
@@ -1090,15 +1093,17 @@ async function startPaymentReservation(button){
  let targetPayload;
  try{targetPayload=playerTargetData(o,true)}catch(err){toast(err.message);return}
  const requestId=newRequestId();
+ const sourcePhone=method==='mobile'?String(document.getElementById('rs-sm-source-reserve')?.value||'').trim():'';
+ if(method==='mobile'&&!/^[56][0-9]{7}$/.test(sourcePhone)){toast('Escribe los 8 dígitos de la línea que enviará el saldo.');return;}
  button.disabled=true;button.textContent='Preparando pago seguro…';
  try{
   const result=await edgeRequest('rs10-api','/orders/start',{method:'POST',auth:true,body:{
     gameId:g.id,offerId:o.id,clientRequestId:requestId,method,playerId:player||'PIN',
-    targetPayload,quotedAmount:amount,quotedCurrency:currency,couponCode:String(document.getElementById('rs-coupon-input')?.value||'').trim().toUpperCase()
+    targetPayload,quotedAmount:amount,quotedCurrency:currency,sourcePhone,couponCode:String(document.getElementById('rs-coupon-input')?.value||'').trim().toUpperCase()
   }});
   if(!result?.order?.code||!result?.expiresAt)throw Error('No se confirmó el plazo de pago en el servidor.');
   const timing=paymentClock(result.expiresAt,result.serverNow);if(!timing)throw Error('No se pudo sincronizar el plazo. No realices transferencias.');
-  s.checkoutSession={requestId,code:result.order.code,...timing,method,offerId:o.id,gameId:g.id,player,amount:Number(result.amount??amount),currency:result.currency||currency,couponCode:result.couponCode||null};
+  s.checkoutSession={requestId,code:result.order.code,...timing,method,offerId:o.id,gameId:g.id,player,amount:Number(result.amount??amount),currency:result.currency||currency,couponCode:result.couponCode||null,sourcePhone};
   if(method==='usdt_wallet'){
    s.usdtPayment={code:result.order.code,amount:Number(result.payment?.amount??result.amount??amount),
      address:result.payment?.address||s.paymentConfig.usdtAddress||'',network:'BEP-20',
@@ -1200,6 +1205,7 @@ function modal(){
   +'<small>DESTINATARIO</small><strong>'+esc(o?.kind==='pin'?'Código digital':s.player||'Sin ID')+'</strong>'
   +'<small>MÉTODO</small><strong>'+esc(paymentName())+'</strong>'
   +'<small>TOTAL</small><strong class="rs-confirm-total">'+(total?formatPriceValue(total.amount,total.currency):'No disponible')+'</strong></div>'
+  + (s.payment==='sm'?'<label class="rs-coupon-label">Número desde el que enviarás el saldo<input id="rs-sm-source-reserve" class="field" type="tel" inputmode="numeric" maxlength="8" placeholder="8 dígitos" required></label><small class="rs-rank-note">Se comprueba antes de transferir para evitar pedidos duplicados de la misma línea.</small>':'')
   + (s.payment==='balance'?'':'<label class="rs-coupon-label">Cupón de descuento (opcional)<input id="rs-coupon-input" class="field" maxlength="40" autocomplete="off" placeholder="Introduce tu código"></label><small class="rs-rank-note">El servidor comprueba el cupón y muestra el total definitivo antes de pagar.</small>')+'<p class="rs-confirm-warning">Después de confirmar tendrás 20 minutos para registrar el envío del pago. Si no lo haces, el pedido pasará a fallido.</p>'
   +'<button class="btn primary full" data-action="start-payment">Confirmar y continuar al pago</button><button class="btn ghost full" data-action="close">Corregir datos</button></div>';
  break;
@@ -1211,7 +1217,7 @@ case 'checkout':
    <div class="rs-checkout-method"><span>${paymentVisual(s.payment)}<strong>${esc(paymentName())}</strong></span><span class="rs-payment-fixed">CONFIRMADO</span></div>
    ${checkoutPaymentInstructions()}
    ${Array.isArray(o?.targetSchema)&&o.targetSchema.length?'<div class="rs-checkout-confirmed"><strong>Datos de jugador guardados</strong>'+Object.entries(playerTargetData(o)).map(([key,value])=>'<span>'+esc((o.targetSchema.find(f=>f.key===key)||{}).label||key)+': <b>'+esc(value)+'</b></span>').join('')+'<small>Se tomaron de la pantalla anterior. Para cambiarlos, cierra el pago y vuelve al juego.</small></div>':''}
-   ${s.payment==='sm'?'<div class="rs-checkout-inputs"><label class="sheet-label" for="payment-source-phone">Número que transfirió el saldo móvil</label><input id="payment-source-phone" class="field" type="tel" inputmode="numeric" pattern="[0-9]{8}" maxlength="8" placeholder="8 dígitos" required><small>Confirma solo después de transferir el importe exacto.</small></div>':''}
+   ${s.payment==='sm'?'<div class="rs-checkout-inputs"><label class="sheet-label" for="payment-source-phone">Número que transfirió el saldo móvil</label><input id="payment-source-phone" class="field" type="tel" inputmode="numeric" pattern="[0-9]{8}" maxlength="8" placeholder="8 dígitos" value="'+esc(s.checkoutSession?.sourcePhone||'')+'" '+(s.checkoutSession?.sourcePhone?'readonly':'')+' required><small>Confirma solo después de transferir el importe exacto.</small></div>':''}
    ${s.payment==='cup'?'<div class="rs-checkout-inputs"><label class="sheet-label" for="payment-proof">Captura del comprobante</label><input id="payment-proof" class="field rs-proof-input" type="file" accept="image/png,image/jpeg,image/webp" required><small>JPG, PNG o WEBP · máximo 5 MB.</small><label class="sheet-label" for="payment-reference">Número de confirmación de la transferencia</label><input id="payment-reference" class="field" type="text" autocomplete="off" minlength="4" maxlength="80" placeholder="Código que aparece en Transfermóvil" required><small>Es obligatorio para identificar y revisar el pago.</small></div>':s.payment==='mitransfer'?'<div class="rs-checkout-inputs"><label class="sheet-label" for="payment-proof">Captura del comprobante</label><input id="payment-proof" class="field rs-proof-input" type="file" accept="image/png,image/jpeg,image/webp" required><small>JPG, PNG o WEBP · máximo 5 MB.</small><label class="sheet-label" for="payment-reference">Número de operación (opcional)</label><input id="payment-reference" class="field" type="text" autocomplete="off" maxlength="80" placeholder="Si aparece en tu comprobante"><small>Confirmaremos que el importe llegó a la cuenta receptora.</small></div>':''}
    ${s.payment==='usdt'?'<div class="rs-checkout-safe">Primero registra el pedido para reservar su identificador. Después envía USDT y pega el hash en la siguiente pantalla. No transfieras antes de crear el pedido.</div>':''}
    ${s.payment==='balance'?'<div class="rs-checkout-safe">Solo revendedores con suscripción activa y saldo suficiente pueden utilizar esta opción.</div>':''}
