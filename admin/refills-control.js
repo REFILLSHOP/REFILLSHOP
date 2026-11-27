@@ -430,7 +430,7 @@ function drawOrders(){
    const pay=o.paymentStatus==='paid'?'<span class="rs-admin-paid">Pago confirmado</span>':'<span class="rs-admin-unpaid">Pago sin confirmar</span>';
    const matches=(S.cache.orderPaymentMatches||[]).filter(e=>e.orderCode===o.code&&e.matchCount===1);
    const matched=matches.length===1?matches[0]:null;
-   const matchInfo=matched?'<div><span>Refills Pay · coincidencia de aviso</span><strong>'+esc(money(matched.amount)+' '+o.currency)+'</strong><small>'+esc(matched.timeBasis==='server_arrival'?'Hora del servidor (reloj SMS desajustado)':'Aviso coincidente')+' · '+esc(new Date(matched.receivedAt).toLocaleString('es-CU',{timeZone:'America/Havana'}))+'</small></div>':'';
+   const matchInfo=matched?'<div><span>Refills Pay · coincidencia de aviso</span><strong>'+esc(money(matched.amount)+' '+o.currency)+'</strong><small>'+esc(matched.late?'Aviso recibido después del plazo · revisar':'Aviso coincidente')+' · '+esc(new Date(matched.receivedAt).toLocaleString('es-CU',{timeZone:'America/Havana'}))+'</small></div>':'';
    const paymentInfo=card?'<div><span>Referencia</span><strong>'+esc(o.paymentReference||'Sin referencia')+'</strong></div>':
     sm?'<div><span>Línea de origen</span><strong>'+esc(o.sourcePhone||'No informada')+'</strong></div>':
     isCrypto?'<div><span>Hash blockchain</span><strong class="code-hint">'+esc(o.paymentTxHash||'Pendiente')+'</strong></div>':'';
@@ -485,7 +485,7 @@ function refillsCupEventsPanel(){
 function refillsPayEventsPanel(){
  const data=S.cache.payEvents, events=data?.events||[];
  return '<section class="surface section"><div class="panel-head"><div><span class="tag">REFILLS PAY</span><h2>Ingresos detectados por SMS</h2><small>Últimos 50 eventos. Detectar no equivale a confirmar un ingreso real.</small></div><button class="btn secondary small" data-action="refresh">Actualizar</button></div>'
- +(!data?'<div class="alert-note warn">No se pudo consultar el registro. Reintenta.</div>':!events.length?'<p class="muted">Todavía no hay transferencias detectadas.</p>':events.map(e=>'<div class="record spacer"><div><h3>'+esc(String(e.amount))+' SM · '+esc(e.senderPhone)+'</h3><small>'+esc(new Date(e.receivedAt).toLocaleString('es-CU',{timeZone:'America/Havana'}))+' · '+esc(e.orderCode||'Sin pedido vinculado')+(e.clockSkew?' · Reloj SMS desajustado':'')+'</small></div>'+tag(e.paymentStatus==='paid'?'Pedido pagado':e.matchCount===1?'Coincidencia por revisar':e.matchCount>1?'Ambiguo':'Sin coincidencia',e.paymentStatus==='paid'?'good':'warn')+'</div>').join(''))
+ +(!data?'<div class="alert-note warn">No se pudo consultar el registro. Reintenta.</div>':!events.length?'<p class="muted">Todavía no hay transferencias detectadas.</p>':events.map(e=>'<div class="record spacer"><div><h3>'+esc(String(e.amount))+' SM · '+esc(e.senderPhone)+'</h3><small>'+esc(new Date(e.receivedAt).toLocaleString('es-CU',{timeZone:'America/Havana'}))+' · '+esc(e.orderCode||'Sin pedido vinculado')+(e.late?' · Aviso tardío':'')+'</small></div>'+tag(e.paymentStatus==='paid'?'Pedido pagado':e.matchCount===1?'Coincidencia por revisar':e.matchCount>1?'Ambiguo':'Sin coincidencia',e.paymentStatus==='paid'?'good':'warn')+'</div>').join(''))
  +'<div class="alert-note warn">Comprueba el ingreso real antes de confirmar el cobro o entregar una recarga. CUP y MiTransfer requieren integración comercial.</div></section><div class="spacing"></div>';
 }
 function paymentAutomationPanel(){
