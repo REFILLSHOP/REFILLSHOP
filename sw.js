@@ -1,5 +1,5 @@
 // Refills Shop PWA. Solo guarda recursos públicos: nunca pedidos, sesiones, pagos ni saldos.
-const CACHE='refills-shop-pwa-shell-v15';
+const CACHE='refills-shop-pwa-shell-v16';
 const ROOT='/REFILLSHOP/';
 const OFFLINE=ROOT+'offline.html';
 const STATIC=[OFFLINE,ROOT+'manifest.webmanifest',ROOT+'assets/refills-app-192.png',ROOT+'assets/refills-icon.png',ROOT+'assets/refills-app-maskable-512.png'];
@@ -26,7 +26,7 @@ self.addEventListener('fetch',event=>{
  if(url.pathname.startsWith(ROOT+'admin/')||/\/(api|auth|checkout|orders)\//i.test(url.pathname))return;
  if(req.mode==='navigate'){
   event.respondWith((async()=>{
-   try {return await fetch(req);}
+   try {return await fetch(req,{cache:'no-store'});}
    catch{return await caches.match(OFFLINE)||new Response('Conéctate a internet para utilizar Refills Shop',{status:503,headers:{'content-type':'text/plain; charset=utf-8'}});}
   })());
   return;
