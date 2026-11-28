@@ -402,3 +402,17 @@ body::before{content:"";position:fixed;inset:0;pointer-events:none;z-index:0;opa
 .rs-provider-compact{display:flex;align-items:center;justify-content:space-between;flex-wrap:wrap;gap:10px;padding:13px 16px}
 .rs-provider-compact>div{display:grid;gap:3px;flex:1}.rs-provider-compact small{color:#9eb6d0;font-size:11px}.rs-provider-compact strong{font-size:19px;font-variant-numeric:tabular-nums}
 @media(max-width:740px){#rs-admin-subnav:not([hidden]){gap:4px;padding:4px;margin-bottom:12px}.rs-admin-tab{flex:1 1 auto;min-width:0;padding:9px 7px;font-size:11px;gap:5px}.rs-admin-tab svg{width:14px;height:14px}.rs-provider-compact{padding:12px}}
+
+/* Refills OS — compact daily-work navigation */
+#admin-view .rs-work-tabs{display:flex;gap:6px;overflow-x:auto;align-items:center;padding:5px;background:#081426;border:1px solid #29415d;border-radius:12px;margin:0 0 16px;scrollbar-width:thin}
+#admin-view .rs-work-tabs button{flex:1 0 auto;padding:11px 15px;min-height:42px;border:1px solid transparent;background:transparent;color:#a5bdd7;border-radius:8px;font-size:12px;font-weight:750;white-space:nowrap}
+#admin-view .rs-work-tabs button.active{background:#1a3b60;border-color:#365f89;color:#e3f3ff}
+#admin-view .rs-work-tabs button:focus-visible{outline:2px solid #70bfff}
+#admin-view [data-payment-panel][hidden],#admin-view .rs-offer-create[hidden],#admin-view .rs-offer-list[hidden],#admin-view .rs-offer-advanced[hidden],#admin-view .record[hidden]{display:none!important}
+#admin-view .rs-form-heading{font-size:14px;color:#b8d5f2;margin:8px 0 2px;padding-top:12px;border-top:1px solid #28425e}
+#admin-view .rs-offer-list .toolbar{display:grid;grid-template-columns:minmax(0,1.5fr) minmax(0,1fr) minmax(0,0.8fr);gap:8px}
+#admin-view .rs-offer-list .record>div:first-child{min-width:0;overflow-wrap:anywhere}
+#admin-view .rs-offer-create{max-width:920px}
+#admin-view [data-payment-panel="settings"]{max-width:1080px}
+#admin-view #rs-rate-preview{font-weight:700;color:#a8dcff;min-height:48px}
+@media(max-width:640px){#admin-view .rs-work-tabs{gap:3px;margin-bottom:12px}#admin-view .rs-work-tabs button{padding:10px 11px;font-size:11px;min-height:40px}#admin-view .rs-offer-list .toolbar{grid-template-columns:1fr 1fr}#admin-view #filter-offers{grid-column:1/-1}#admin-view .rs-offer-list .record{flex-wrap:wrap}#admin-view .rs-offer-list .row-actions{flex-wrap:wrap;gap:6px}}
