@@ -25,7 +25,7 @@ check:'<path d="m4 12 5 5 11-11"/>',
 alert:'<path d="M12 2 2 21h20z"/><path d="M12 9v5M12 17h.01"/>'
 };
 const ico=(name)=>'<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" width="19" height="19" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">'+(paths[name]||paths.shield)+'</svg>';
-const MENU=[['overview','Resumen','overview','Indicadores y accesos'],['games','Juegos','games','Tu catálogo'],['offers','Ofertas','offers','Precios y productos'],['orders','Pedidos','orders','Compras y entregas'],['customers','Clientes','customers','Cuentas y seguridad'],['resellers','Revendedores','resellers','Planes y depósitos'],['payments','Pagos y tasas','payments','Configuración comercial'],['centralone','Central One','centralone','Integración proveedor'],['rewards','Cupones y API','offers','Promociones y acceso de distribuidores']];
+const MENU=[['overview','Resumen','overview','Indicadores y accesos'],['games','Juegos','games','Tu catálogo'],['offers','Ofertas','offers','Precios y productos'],['orders','Pedidos','orders','Compras y entregas'],['customers','Clientes','customers','Cuentas y seguridad'],['resellers','Revendedores','resellers','Planes y depósitos'],['payments','Pagos y tasas','payments','Configuración comercial'],['centralone','Central One','centralone','Integración proveedor'],['rewards','Cupones y API','offers','Promociones y acceso de distribuidores'],['tickets','Soporte','customers','Solicitudes de clientes'],['sales','Ganancias','payments','Ventas y margen estimado']];
 const S={client:null,user:null,page:'overview',busy:false,rememberSession:true,cache:{},search:'',offerSearch:'',editingGameId:null,gameFilter:'all',offerFilter:'all',coFilter:'',coKind:'all',product:null,offerMode:'centralone',bulkNotice:'',bulkFamily:'',regionGame:'',regionName:'',regionMarginPct:null,orderAlertTimer:null,orderAlertBusy:false,orderAlerts:{orders:[],pendingCount:0},notifyOrdersEnabled:false};
 function flash(message,error=false){
  const el=$('notify');el.textContent=String(message||'');el.classList.toggle('error',error);el.hidden=false;
@@ -38,7 +38,7 @@ function phoneAlias(value){
  return (digits.startsWith('53')&&digits.length===10?'cu':'tel')+digits+'@refillshop.pages.dev';
 }
 async function request(path,options={}){
- const service=options.service==='reseller'?'rs12-reseller':'rs10-api';
+ const service=options.service==='reseller'?'rs12-reseller':options.service==='engagement'?'rs15-engagement':'rs10-api';
  const session=(await S.client.auth.getSession()).data.session;
  if(!session?.access_token)throw Error('Tu sesión terminó. Inicia sesión otra vez.');
  const headers={'Accept':'application/json','apikey':KEY,'Authorization':'Bearer '+session.access_token};
@@ -165,6 +165,8 @@ async function load(page=S.page){
    Object.assign(S.cache,{settings:s.config,store,commerce,crypto,payEvents,cupEvents});return drawPayments();
   }
   if(page==='rewards'){S.cache.rewards=await request('/admin/rewards');return drawRewards();}
+   if(page==='tickets'){S.cache.tickets=await request('/admin/tickets',{service:'engagement'});return drawTickets();}
+   if(page==='sales'){S.cache.sales=await request('/admin/stats',{service:'engagement'});return drawSales();}
   if(page==='centralone'){
    const [central,orderStatus,commerce]=await Promise.all([request('/admin/centralone/status'),request('/admin/centralone/orders/status'),request('/admin/commerce/settings')]);
    Object.assign(S.cache,{central,orderStatus,commerce});return drawCentral();
@@ -245,11 +247,39 @@ function startAdminOrderAlerts(){
  try{S.notifyOrdersEnabled=localStorage.getItem(ADMIN_NOTIFY_PREF)==='true'}catch{}
  void adminPollOrders();
  S.orderAlertTimer=window.setInterval(()=>{if(S.user)void adminPollOrders()},15000);
+ try{const v=localStorage.getItem('rs_provider_balance_threshold');if(v!==null&&Number.isFinite(Number(v))&&Number(v)>=0)S.balanceThreshold=Number(v)}catch{}
+ void pollProviderBalance();S.providerTimer=window.setInterval(()=>{if(S.user)void pollProviderBalance()},120000);
 }
 
+function drawTickets(){
+ const rows=S.cache.tickets?.tickets||[];
+ $('admin-view').innerHTML='<section class="surface section"><div class="panel-head"><div><h2>Tickets de soporte</h2><small>'+rows.filter(t=>t.status==='open').length+' pendientes · últimos 100</small></div>'+ico('customers')+'</div>'+(rows.length?rows.map(t=>'<div class="record"><div style="min-width:0"><h3>'+esc(t.subject)+'</h3><small>'+date(t.created_at)+' · '+esc(t.user_id)+'</small><p style="white-space:pre-wrap;overflow-wrap:anywhere">'+esc(t.message)+'</p>'+(t.reply?'<p style="white-space:pre-wrap;overflow-wrap:anywhere"><strong>Respuesta:</strong> '+esc(t.reply)+'</p>':'')+'</div><div class="row-actions">'+tag(t.status==='open'?'Pendiente':t.status==='answered'?'Respondido':'Cerrado')+'<button class="btn secondary small" data-action="reply-ticket" data-id="'+esc(t.id)+'">Responder</button></div></div>').join(''):empty('Sin tickets','Las solicitudes de tus clientes aparecerán aquí.'))+'</section>';
+}
+function drawSales(){
+ const x=S.cache.sales||{};
+ $('admin-view').innerHTML='<div class="grid three">'+metric('PEDIDOS PAGADOS Y ENTREGADOS',Number(x.count||0),'Últimos 30 días · clientes','orders')+metric('COSTO ESTIMADO',usd(x.estimatedCostUsdt)+' USDT','Costo actual de las ofertas','payments')+metric('MARGEN BRUTO ESTIMADO',usd(x.estimatedMarginUsdt)+' USDT','No incluye gastos ni comisiones','overview')+'</div><div class="spacing"></div><section class="surface section"><h2>Ingresos por moneda</h2>'+Object.entries(x.revenue||{}).map(([k,v])=>'<div class="record"><strong>'+esc(k)+'</strong><strong>'+money(v)+'</strong></div>').join('')+'<p class="footer-caption">El margen usa las tasas y los costos actuales, no los históricos. Incluye '+Number(x.knownCount||0)+' de '+Number(x.count||0)+' pedidos con costo y conversión conocidos. No representa la ganancia neta real ni incluye ventas mayoristas.</p></section>';
+}
+function providerBalancePanel(){
+ const x=S.providerBalance;
+ if(!x)return '<section class="surface section"><h2>Saldo del proveedor</h2><p>Consultando Central One…</p></section>';
+ const limit=Number(S.balanceThreshold??10),verified=x.verified===true&&Number.isFinite(x.available),low=verified&&x.available<=limit;
+ return '<section class="surface section"><div class="panel-head"><div><h2>Saldo Central One</h2><small>Consulta de solo lectura · cada 2 minutos con ADM abierto</small></div>'+ico('payments')+'</div><div class="record"><div><h3>'+(verified?usd(x.available)+' USDT':'No disponible')+'</h3><small>'+esc(verified?date(x.checkedAt):x.reason||'No se pudo confirmar el saldo')+'</small></div>'+tag(verified?(low?'Saldo bajo':'Saldo suficiente'):'Sin verificar',low||!verified?'warn':'good')+'</div><form id="provider-threshold-form" class="form-grid spacer">'+field('Avisarme al bajar de (USDT)','threshold',limit,'number')+'<button type="submit" class="btn secondary small">Guardar umbral en este dispositivo</button></form><button type="button" class="btn ghost small" data-action="check-provider-balance">Actualizar ahora</button></section>';
+}
+async function pollProviderBalance(){
+ if(!S.user||S.providerBusy)return;
+ S.providerBusy=true;
+ try{
+  S.providerBalance=await request('/admin/balance',{service:'engagement'});
+  const x=S.providerBalance,limit=Number(S.balanceThreshold??10);
+  const low=x.verified===true&&Number.isFinite(x.available)&&x.available<=limit;
+  if(low&&!S.providerLow){flash('Saldo bajo de Central One: '+usd(x.available)+' USDT.',true)}
+  S.providerLow=low;
+ }catch(e){S.providerBalance={verified:false,reason:e.message||'No se pudo consultar el saldo'};}
+ finally{S.providerBusy=false;const box=$('rs-provider-balance-box');if(box&&!box.contains(document.activeElement))box.innerHTML=providerBalancePanel();}
+}
 function drawOverview(){
  const x=S.cache.overview?.counts||{}, r=S.cache.reseller||{}, co=S.cache.commerce||{},cn=S.cache.central||{};
- $('admin-view').innerHTML='<div id="rs-admin-order-alert-box">'+adminOrderAlertPanel()+'</div><div class="grid four">'
+ $('admin-view').innerHTML='<div id="rs-admin-order-alert-box">'+adminOrderAlertPanel()+'</div><div id="rs-provider-balance-box">'+providerBalancePanel()+'</div><div class="spacing"></div><div class="grid four">'
  +metric('JUEGOS PUBLICADOS',x.games||0,'Catálogo actual','games')
  +metric('OFERTAS ACTIVAS',x.offers||0,'Visibles para clientes','offers')
  +metric('PEDIDOS',x.orders||0,(x.pending||0)+' pendientes','orders')
@@ -603,6 +633,8 @@ async function runAction(action,el){
  const id=el.dataset.id,code=el.dataset.code;
  if(action==='disable-reward-coupon')return withBusy(async()=>{if(!await RSDialog.confirm('¿Desactivar este cupón?'))return;await request('/admin/rewards/coupon/disable',{method:'POST',body:{code}});await load();flash('Cupón desactivado');});
  if(action==='revoke-partner-key')return withBusy(async()=>{if(!await RSDialog.confirm('¿Revocar esta clave API?'))return;await request('/admin/rewards/api-key/revoke',{method:'POST',body:{id}});await load();flash('Clave revocada');});
+ if(action==='check-provider-balance'){await pollProviderBalance();const box=$('rs-provider-balance-box');if(box)box.innerHTML=providerBalancePanel();return}
+ if(action==='reply-ticket'){const t=(S.cache.tickets?.tickets||[]).find(t=>t.id===id);if(!t)return;return openModal('Responder ticket','<form id="rs-ticket-reply-form" class="form-grid"><input type="hidden" name="id" value="'+esc(t.id)+'"><label class="wide">Respuesta<textarea name="reply" rows="5" maxlength="2000" required>'+esc(t.reply||'')+'</textarea></label><label>Estado<select name="status"><option value="answered">Respondido</option><option value="closed">Cerrado</option></select></label><button class="btn primary" type="submit">Guardar respuesta</button></form>')}
  if(action==='check-new-orders')return adminPollOrders(true);
  if(action==='enable-order-notifications'){
   if(typeof Notification==='undefined')return flash('Este dispositivo no admite notificaciones desde la web. Los pedidos siguen visibles en el ADM.',true);
@@ -720,6 +752,8 @@ document.addEventListener('submit',async e=>{
  if(!S.user)return flash('Inicia sesión',true);
  await withBusy(async()=>{
   let r;
+  if(form.id==='provider-threshold-form'){const v=Number(data.threshold);if(!Number.isFinite(v)||v<0||v>100000)throw Error('Umbral inválido');S.balanceThreshold=v;S.providerLow=false;try{localStorage.setItem('rs_provider_balance_threshold',String(v))}catch{}await pollProviderBalance();const box=$('rs-provider-balance-box');if(box)box.innerHTML=providerBalancePanel();return}
+  if(form.id==='rs-ticket-reply-form'){await request('/admin/tickets',{service:'engagement',method:'POST',body:{id:data.id,reply:data.reply,status:data.status}});closeModal();await load('tickets');flash('Respuesta guardada.');return}
   if(form.id==='reward-coupon-form'){r=await request('/admin/rewards/coupon',{method:'POST',body:{code:data.code,percent:Number(data.percent),maxUses:Number(data.maxUses),days:Number(data.days)}});}
   else if(form.id==='partner-key-form'){r=await request('/admin/rewards/api-key',{method:'POST',body:{label:data.label,ownerId:data.ownerId||''}});await load();const box=$('partner-new-key');if(box){box.hidden=false;box.innerHTML='<div class="alert-note"><strong>Guarda esta clave: se muestra una sola vez.</strong><input class="field" readonly value="'+esc(r.key)+'" style="width:100%;margin-top:8px" aria-label="Nueva clave API"></div>';}return;}
   else if(form.id==='link-offer-form'){const pid=S.product||data.productId;if(!pid)throw Error('Busca y selecciona un producto real de Central One.');r=await request('/admin/centralone/offer',{method:'POST',body:{gameId:data.gameId,productId:pid,displayName:data.displayName,gainSm:Number(data.gainSm),featured:!!data.featured}});}
