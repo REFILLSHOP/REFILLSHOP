@@ -480,7 +480,7 @@ async function handleAuthSubmit(form){
 }
 async function signOutRefills(){
  try{const session=await validAuthSession();if(session?.access_token)await authRequest('/auth/v1/logout',{method:'POST',token:session.access_token})}catch{}
- clearAuthSession();s.profileTab='activity';s.engageData=null;s.ticketData=null;s.promoData=null;s.user=null;s.myWeekRank=null;s.recentTopupsLoaded=false;s.rewardCoupons=[];s.rewardsLoaded=false;s.orders=[];rsNoticeAccount();s.profile=null;s.member=false;s.role='guest';s.resellerPortal=null;s.reseller={...s.reseller,plan:null,wallet:{USDT:0,CUP:0,SM:0}};s.page='login';s.authMode='login';s.afterAuthPage='inicio';s.modal=null;render(true);toast('Has cerrado tu sesión.');
+ clearAuthSession();s.profileTab='activity';s.rsProTab='summary';s.engageData=null;s.ticketData=null;s.promoData=null;s.user=null;s.myWeekRank=null;s.recentTopupsLoaded=false;s.rewardCoupons=[];s.rewardsLoaded=false;s.orders=[];rsNoticeAccount();s.profile=null;s.member=false;s.role='guest';s.resellerPortal=null;s.reseller={...s.reseller,plan:null,wallet:{USDT:0,CUP:0,SM:0}};s.page='login';s.authMode='login';s.afterAuthPage='inicio';s.modal=null;render(true);toast('Has cerrado tu sesión.');
 }
 async function activateResellerPlan(tier){
  if(!s.user){s.afterAuthPage='revendedores';navigate('login');return}
@@ -1498,6 +1498,7 @@ case 'open-promos':case 'open-rewards':case 'claim-referral':case 'open-tickets'
 case 'profile-tab':{const tab=b.dataset.value;if(['activity','benefits','settings'].includes(tab)){s.profileTab=tab;render();if(tab==='benefits')void loadMyRewards()}break;}
 case 'refresh-rewards':void loadMyRewards();break;
 case 'copy-reward':void copyPaymentValue(b.dataset.code,b);break;
+case 'rs-pro-tab':if(['summary','plans','activity'].includes(b.dataset.value)){s.rsProTab=b.dataset.value;render()}break;
 case 'reseller-refresh':void loadResellerPortal(false,true);break;
 case 'reseller-subscribe':void activateResellerPlan(b.dataset.tier);break;
 case 'reseller-preview':void openResellerPlanPreview(b.dataset.tier);break;
@@ -1588,54 +1589,22 @@ async function openResellerPlanPreview(tier){
 
 function resellerPage(){
  if(!s.user)return authPage();
- if(s.resellerLoading&&!s.resellerPortal)return `<div class="catalog-top"><div class="eyebrow">REFILLS SHOP / MAYORISTAS</div><h1 class="page-title">Portal de revendedores</h1><div class="card panel reseller-v7-empty">Cargando tus planes, wallet y datos de la cuenta…</div></div>`;
  const p=s.resellerPortal;
- if(!p)return `<div class="catalog-top"><div class="eyebrow">REFILLS SHOP / MAYORISTAS</div><h1 class="page-title">Portal de revendedores</h1><p class="page-lead">Consulta los tres planes y activa el que mejor se adapte a tu negocio.</p><div class="card panel reseller-v7-empty">No se pudo cargar el portal. <button class="btn primary" data-action="reseller-refresh">Reintentar</button></div></div>`;
- const membership=p.membership||{},activationRequired=membership.activationRequired===true||!membership.planTier,tier=String(membership.planTier||'free');
- const currentPlan=activationRequired?'Activación pendiente':tier==='level2'?'Level 2':tier==='level3'?'Level 3':'Gratis';
- const currentMargin=Number(membership.markupPercent||7);
- const expires=membership.expiresAt?new Date(membership.expiresAt):null;
- const daysLeft=expires?Math.max(0,Math.ceil((expires.getTime()-Date.now())/86400000)):null;
- const plans=(p.tiers||[]).map(t=>({...t,name:t.tier==='free'?'Gratis':t.name,markupPercent:Number(t.markupPercent||0),priceUsdt:Number(t.priceUsdt||0),days:Number(t.days||0)}));
- const smRate=Number(p.rates?.buySmPerUsdt||0),cupRate=Number(p.rates?.cupPerSm||0);
- const deposits=(s.resellerDeposits||[]).slice(0,5);
- const balance=p.wallet||{USDT:0};
- return `<div class="catalog-top">
-  <div class="reseller-v7-head"><div><div class="eyebrow">PORTAL INDEPENDIENTE / REVENDEDORES</div><h1 class="page-title">Panel de revendedores</h1><p class="page-lead">Tus planes, precios mayoristas y wallet en un solo lugar.</p></div><button class="reseller-v7-refresh" data-action="reseller-refresh">${I('arrow','tiny')} Actualizar</button></div>
-  <section class="card wallet-hero" style="margin-top:16px">
-   <span class="wallet-text">TU PLAN ACTUAL</span><div class="wallet-number" style="font-size:clamp(30px,5vw,42px)">${esc(currentPlan)}</div>
-   <div class="muted">${activationRequired?'Para activar el plan Gratis realiza un depósito mínimo equivalente a 5.00 USDT. Se activa cuando administración verifique el ingreso.':`Precios finales disponibles en tu catálogo de revendedor${expires?` · Vence ${expires.toLocaleDateString('es-ES')} · ${daysLeft} días restantes`:' · Sin vencimiento'}`}</div>
-   <div class="wallet-controls"><button class="btn primary" data-action="modal" data-modal="wallet">${I('plus','tiny')} Recargar wallet</button><button class="btn secondary" data-action="modal" data-modal="reseller-ledger">${I('file','tiny')} Movimientos</button></div>
-  </section>
-  <div class="section-head"><h2>Mi wallet</h2><span class="muted small">Saldos reales de tu cuenta</span></div>
-  <div class="reseller-v7-balance-grid">
-   <div class="reseller-v7-balance"><small>USDT</small><strong>${Number(balance.USDT||0).toFixed(2)}</strong></div>
-   <div class="reseller-v7-balance"><small>CUP</small><strong>${fmtMoney(balance.CUP||0)}</strong></div>
-   <div class="reseller-v7-balance"><small>SALDO MÓVIL</small><strong>${fmtMoney(balance.SM||0)}</strong></div>
-  </div>
-  <div class="section-head"><h2>Elige tu plan</h2><span class="muted small">Consulta una vista previa de los precios finales</span></div>
-  <div class="reseller-v7-actions"><label class="muted small" for="reseller-currency">Pagar suscripción con</label><select id="reseller-currency" aria-label="Moneda para pagar el plan"><option value="USDT" ${s.resellerCurrency==='USDT'?'selected':''}>USDT</option><option value="CUP" ${s.resellerCurrency==='CUP'?'selected':''}>CUP</option><option value="SM" ${s.resellerCurrency==='SM'?'selected':''}>Saldo móvil (SM)</option></select></div>
-  <div class="reseller-v7-plans">${plans.map(plan=>{
-   const isCurrent=!!membership.planTier&&plan.tier===tier,isFree=plan.tier==='free';
-   const priceLabel=isFree?'Gratis':`${plan.priceUsdt.toFixed(2)} USDT · ${smRate?Math.ceil(plan.priceUsdt*smRate):'—'} SM · ${smRate&&cupRate?Math.ceil(plan.priceUsdt*smRate*cupRate):'—'} CUP`;
-   const duration=isFree?'Sin vencimiento':`${plan.days} días`;
-   const update=plan.refresh==='daily_mini'?'Actualización diaria ligera':'Actualización diaria';
-   const blockedLower=tier==='level3'&&plan.tier==='level2';
-   const example=Object.values(s.wholesalePrices||{}).find(o=>Number(o.providerCostUsdt)>0);
-   const examplePrice=example?Math.ceil(Number(example.providerCostUsdt)*(1+Number(plan.markupPercent||0)/100)*100)/100:null;
-   return `<article class="reseller-v7-plan ${isCurrent?'current':''}">
-    <div class="plan-kicker">${isCurrent?'TU PLAN ACTUAL':'PLAN DE REVENDEDOR'}</div><h3>${esc(plan.name)}</h3>
-    <div class="plan-margin">${examplePrice!==null?`${examplePrice.toFixed(2)} USDT`:'Sin ofertas'}</div><div class="muted small">VISTA PREVIA${example?` · ${esc(example.name)}`:' · Publica una oferta para ver precios'}</div><p>${priceLabel} · ${duration}<br>${update}</p>
-    ${isCurrent?(isFree?`<span class="current-pill">Activo</span>`:`<button class="btn secondary" data-action="reseller-subscribe" data-tier="${esc(plan.tier)}">Renovar ${esc(plan.name)}</button>`):blockedLower?`<button class="btn secondary" disabled>Requiere bajar de nivel al vencer</button>`:isFree&&activationRequired?`<button class="btn primary" data-action="modal" data-modal="wallet">Depositar 5 USDT para activar</button>`:isFree?`<span class="muted small">Disponible al cumplir el requisito de activación</span>`:`<button class="btn primary" data-action="reseller-subscribe" data-tier="${esc(plan.tier)}">Activar ${esc(plan.name)}</button>`}
-    <button type="button" class="btn ghost rs-plan-preview-btn" data-action="reseller-preview" data-tier="${esc(plan.tier)}">${I('eye','tiny')} Ver todas las ofertas de ${esc(plan.name)}</button>
-   </article>`;
-  }).join('')}</div>
-  <div class="card panel" style="margin:18px 0">
-   <div class="section-head" style="margin-top:0"><h2>Recargas recientes</h2><button class="text-link" data-action="modal" data-modal="reseller-ledger">Ver movimientos ${I('arrow','tiny')}</button></div>
-   ${deposits.length?`<div class="reseller-v7-history">${deposits.map(d=>`<div class="reseller-v7-history-row"><span><strong>Recarga ${esc(d.currency||'')}</strong><small>${formatShopDateTime(d.created_at||d.createdAt||Date.now())} · ${esc(d.status||'pendiente')}</small></span><strong>${fmtMoney(d.amount)} ${esc(d.currency||'')}</strong></div>`).join('')}</div>`:`<div class="reseller-v7-empty">Todavía no tienes recargas de wallet registradas.</div>`}
-  </div>
-  <div class="notice-grid"><button class="notice" data-action="nav" data-page="recargas"><span class="notice-icon">${I('game')}</span><span><strong>Volver a la tienda</strong><small>Explora juegos y productos</small></span>${I('arrow','tiny arrow')}</button><button class="notice" data-action="modal" data-modal="help"><span class="notice-icon">${I('headset')}</span><span><strong>Centro de ayuda</strong><small>Soporte y funcionamiento</small></span>${I('arrow','tiny arrow')}</button></div>
- </div>`;
+ if(!p)return '<div class="rs-pro-next"><header class="rs-pro-head"><div><small>REFILLS PRO</small><h1>Revendedores</h1></div></header><section class="rs-pro-panel"><p>'+(s.resellerLoading?'Cargando tu cuenta…':'No se pudo cargar tu cuenta.')+'</p><button class="btn primary" data-action="reseller-refresh">Actualizar</button></section></div>';
+ const m=p.membership||{},active=!!m.planTier&&!m.activationRequired,tier=String(m.planTier||'free'),name=active?(tier==='free'?'Level 1 · Gratis':tier==='level2'?'Level 2':'Level 3'):'Sin plan activo';
+ const expiry=m.expiresAt?new Date(m.expiresAt):null,days=expiry&&Number.isFinite(expiry.getTime())?Math.max(0,Math.ceil((expiry.getTime()-Date.now())/86400000)):null,w=p.wallet||{},plans=p.tiers||[],rate=Number(p.rates?.buySmPerUsdt||0),cup=Number(p.rates?.cupPerSm||0);
+ const tab=['summary','plans','activity'].includes(s.rsProTab)?s.rsProTab:'summary',deposits=s.resellerDeposits||[],orders=s.resellerOrders||[];
+ const quick=(icon,label,attrs)=>'<button class="rs-pro-shortcut" '+attrs+'><span>'+I(icon)+'</span><strong>'+esc(label)+'</strong></button>';
+ const planDate=active?(days===null?'Sin vencimiento':days+' días restantes'):'Activa tu cuenta mayorista';
+ const statusText=v=>({approved:'Aprobado',pending:'Pendiente',rejected:'Rechazado',completed:'Completado',processing:'En proceso',failed:'Fallido',refunded:'Reembolsado'})[v]||String(v||'Pendiente');
+ const depositRows=deposits.slice(0,5).map(d=>'<div class="rs-pro-record"><span class="rs-pro-record-icon">'+I('wallet')+'</span><div><strong>Depósito '+esc(d.currency||'')+'</strong><small>'+esc(formatShopDateTime(d.created_at||d.createdAt))+'</small></div><div><strong>'+fmtMoney(d.amount)+' '+esc(d.currency||'')+'</strong><small>'+esc(statusText(d.status))+'</small></div></div>').join('');
+ const orderRows=orders.slice(0,5).map(o=>'<div class="rs-pro-record"><span class="rs-pro-record-icon">'+I('file')+'</span><div><strong>'+esc(o.game_name||o.game||o.gameName||'Pedido')+'</strong><small>'+esc(o.offer_name||o.offer||o.code||'')+'</small></div><div><strong>'+esc(o.code||'')+'</strong><small>'+esc(statusText(o.status))+'</small></div></div>').join('');
+ const empty=msg=>'<div class="rs-pro-empty">'+esc(msg)+'</div>';
+ let content='';
+ if(tab==='summary')content='<div class="rs-pro-overview"><section class="rs-pro-panel"><div class="rs-pro-panel-title"><h2>Mi suscripción</h2><span class="rs-pro-status">'+esc(active?'Activa':'Pendiente')+'</span></div><strong class="rs-pro-current">'+esc(name)+'</strong><p>'+esc(planDate)+'</p><button class="btn secondary full" data-action="rs-pro-tab" data-value="plans">Ver planes y precios</button></section><section class="rs-pro-panel"><div class="rs-pro-panel-title"><h2>Actividad reciente</h2><button class="text-link" data-action="rs-pro-tab" data-value="activity">Ver todo</button></div>'+(depositRows||empty('Todavía no tienes depósitos.'))+'</section></div>';
+ if(tab==='plans')content='<section class="rs-pro-panel rs-pro-plan-intro"><div><h2>Planes de revendedor</h2><p>Compara los precios finales antes de elegir.</p></div><label>Moneda de suscripción<select id="reseller-currency" aria-label="Moneda de suscripción">'+['USDT','CUP','SM'].map(c=>'<option value="'+c+'" '+(s.resellerCurrency===c?'selected':'')+'>'+c+'</option>').join('')+'</select></label></section><div class="rs-pro-plans">'+plans.map(t=>{const free=t.tier==='free',current=active&&t.tier===tier,blocked=active&&tier==='level3'&&t.tier==='level2',price=Number(t.priceUsdt||0),label=free?'Level 1':t.name,amount=free?'Gratis':price.toFixed(2)+' USDT';return '<article class="rs-pro-panel rs-pro-plan '+(current?'is-current':'')+'"><div class="rs-pro-panel-title"><span class="rs-pro-plan-label">'+esc(label)+'</span>'+(current?'<span class="rs-pro-status">Tu plan</span>':'')+'</div><h3>'+esc(amount)+'</h3><p>'+esc(free?'Sin vencimiento':Number(t.days||15)+' días')+'</p>'+(!free?'<small class="rs-pro-conversion">'+(rate?Math.ceil(price*rate)+' SM':'— SM')+' · '+(rate&&cup?Math.ceil(price*rate*cup)+' CUP':'— CUP')+'</small>':'')+'<div class="rs-pro-plan-benefits"><span>Catálogo mayorista</span><span>Compras con wallet</span><span>Precios actualizados</span></div>'+(free?(current?'<button class="btn secondary full" disabled>Activo</button>':!active?'<button class="btn primary full" data-action="home-wallet-deposit">Depositar para activar</button>':'<button class="btn secondary full" disabled>Plan base</button>'):blocked?'<button class="btn secondary full" disabled>Disponible al vencer Level 3</button>':'<button class="btn primary full" data-action="reseller-subscribe" data-tier="'+esc(t.tier)+'">'+(current?'Renovar':'Activar')+'</button>')+'<button class="btn ghost full" data-action="reseller-preview" data-tier="'+esc(t.tier)+'">'+I('eye','tiny')+' Ver precios</button></article>'}).join('')+'</div>';
+ if(tab==='activity')content='<div class="rs-pro-overview"><section class="rs-pro-panel"><div class="rs-pro-panel-title"><h2>Depósitos recientes</h2></div>'+(depositRows||empty('Todavía no hay depósitos.'))+'</section><section class="rs-pro-panel"><div class="rs-pro-panel-title"><h2>Compras recientes</h2></div>'+(orderRows||empty('Todavía no hay compras mayoristas.'))+'</section></div><button class="btn secondary full" data-action="home-wallet-movements">Ver historial completo</button>';
+ return '<div class="rs-pro-next"><header class="rs-pro-head"><div><small>REFILLS PRO</small><h1>Revendedores</h1><p>Tu negocio, en un solo lugar.</p></div><button class="rs-pro-refresh" data-action="reseller-refresh" aria-label="Actualizar cuenta">'+I('refresh')+'</button></header><section class="rs-pro-wallet"><div class="rs-pro-wallet-top"><span>WALLET MAYORISTA</span><span class="rs-pro-wallet-tag">'+esc(name)+'</span></div><div class="rs-pro-amount">'+Number(w.USDT||0).toFixed(2)+' <small>USDT</small></div><p>Saldo disponible</p><div class="rs-pro-alt"><span>CUP <b>'+fmtMoney(w.CUP||0)+'</b></span><span>SM <b>'+fmtMoney(w.SM||0)+'</b></span></div><div class="rs-pro-wallet-buttons"><button class="btn primary" data-action="home-wallet-deposit">'+I('plus','tiny')+' Depositar</button><button class="btn secondary" data-action="home-wallet-movements">'+I('file','tiny')+' Movimientos</button></div></section>'+(!active?'<div class="rs-pro-activation"><strong>Activa el plan Gratis</strong><p>Normalmente requiere un depósito de 5 USDT equivalentes. El dinero se acredita a tu wallet al aprobarse.</p></div>':'')+'<div class="rs-pro-shortcuts">'+quick('game','Catálogo','data-action="nav" data-page="recargas"')+quick('star','Planes','data-action="rs-pro-tab" data-value="plans"')+quick('file','Compras','data-action="rs-pro-tab" data-value="activity"')+quick('headset','Soporte','data-action="open-tickets"')+'</div><nav class="rs-pro-tabs" aria-label="Panel de revendedor">'+[['summary','Resumen'],['plans','Planes'],['activity','Actividad']].map(([id,label])=>'<button data-action="rs-pro-tab" data-value="'+id+'" class="'+(id===tab?'active':'')+'" '+(id===tab?'aria-current="page"':'')+'>'+label+'</button>').join('')+'</nav><div class="rs-pro-body">'+content+'</div></div>';
 }
 
 /* La administración antigua ha sido retirada. Refills OS se encuentra en /REFILLSHOP/admin/ . */
