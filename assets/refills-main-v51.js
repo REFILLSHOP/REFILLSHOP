@@ -1489,7 +1489,7 @@ document.addEventListener('keydown',e=>{if(e.key==='Escape'&&s.modal){s.modal=nu
 document.addEventListener('click',e=>{rsUnlockNoticeSound();let b=e.target.closest('[data-action]');if(!b)return;const action=b.dataset.action;if(action==='backdrop'&&e.target!==b)return;e.preventDefault();switch(action){
 case 'auth-mode':s.authMode=b.dataset.mode==='register'?'register':'login';s.authError='';render();break;
 case 'auth-logout':void signOutRefills();break;
-case 'open-rewards':case 'claim-referral':case 'open-tickets':case 'create-ticket':void rsEngage(a,b);break;
+case 'open-rewards':case 'claim-referral':case 'open-tickets':case 'create-ticket':void rsEngage(action,b);break;
 case 'refresh-rewards':void loadMyRewards();break;
 case 'copy-reward':void copyPaymentValue(b.dataset.code,b);break;
 case 'reseller-refresh':void loadResellerPortal(false,true);break;
