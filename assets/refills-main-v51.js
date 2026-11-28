@@ -353,7 +353,8 @@ async function validAuthSession(){
  return session;
 }
 async function edgeRequest(service,path,{method='GET',body,auth=true}={}){
- const base=service==='rs12-reseller'?RS12_BASE:RS10_BASE;
+ const base=({'rs10-api':RS10_BASE,'rs12-reseller':RS12_BASE,'rs15-engagement':RS_SUPABASE_URL+'/functions/v1/rs15-engagement'})[service];
+ if(!base)throw Error('Servicio de Refills Shop no reconocido.');
  const headers={apikey:RS_SUPABASE_KEY,Accept:'application/json'};
  if(body!==undefined)headers['Content-Type']='application/json';
  if(auth){
@@ -1448,7 +1449,7 @@ else if(s.page==='pedidos')main.innerHTML=orders();
 else if(s.page==='perfil')main.innerHTML=profile();
 else if(s.page==='login')main.innerHTML=authPage();
 else if(s.page==='revendedores')main.innerHTML=resellerPage();
-else if(s.page==='admin')main.innerHTML=s.role==='admin'?`<div class="catalog-top"><div class="eyebrow">ADMINISTRACIÓN / REFILLS SHOP</div><h1 class="page-title">Centro de control</h1><p class="page-lead">Tu catálogo, precios, clientes, pedidos y conexión real con Central One se administran desde el panel seguro conectado a Supabase.</p><section class="card panel" style="max-width:640px;margin:20px auto;padding:24px"><div style="display:grid;gap:12px"><a class="btn primary full" href="/REFILLSHOP/admin/">${I('shield','tiny')} Abrir administración real</a><a class="btn secondary full" href="/REFILLSHOP/admin/integrations">${I('settings','tiny')} Central One y conexiones</a><a class="btn secondary full" href="/REFILLSHOP/admin/games">${I('game','tiny')} Crear juegos y ofertas</a><button class="btn ghost full" data-action="nav" data-page="inicio">Volver a la tienda</button></div></section></div>`:`<div class="catalog-top"><h1 class="page-title">Acceso restringido</h1><p class="page-lead">Esta área requiere una sesión administrativa válida.</p><button class="btn primary" data-action="nav" data-page="login">Iniciar sesión</button></div>`;
+else if(s.page==='admin')main.innerHTML=s.role==='admin'?`<div class="catalog-top"><div class="eyebrow">ADMINISTRACIÓN / REFILLS SHOP</div><h1 class="page-title">Centro de control</h1><p class="page-lead">Tu catálogo, precios, clientes, pedidos y conexión real con Central One se administran desde el panel seguro conectado a Supabase.</p><section class="card panel" style="max-width:640px;margin:20px auto;padding:24px"><div style="display:grid;gap:12px"><a class="btn primary full" href="/REFILLSHOP/admin/">${I('shield','tiny')} Abrir administración real</a><a class="btn secondary full" href="/REFILLSHOP/admin/#centralone">${I('settings','tiny')} Central One y conexiones</a><a class="btn secondary full" href="/REFILLSHOP/admin/#games">${I('game','tiny')} Crear juegos y ofertas</a><button class="btn ghost full" data-action="nav" data-page="inicio">Volver a la tienda</button></div></section></div>`:`<div class="catalog-top"><h1 class="page-title">Acceso restringido</h1><p class="page-lead">Esta área requiere una sesión administrativa válida.</p><button class="btn primary" data-action="nav" data-page="login">Iniciar sesión</button></div>`;
 modal();if(scroll)window.scrollTo({top:0,behavior:'instant'})}
 function navigate(page){
  if(!s.user&&page!=='login'){s.afterAuthPage=page;s.authMode='login';s.page='login';s.modal=null;render(true);toast('Inicia sesión o crea tu cuenta para continuar.');return}
