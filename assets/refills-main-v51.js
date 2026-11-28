@@ -784,7 +784,7 @@ function home(){
  const usdtBalance=hasPlan?Number(wallet.USDT||0):0;
  const walletHero=`<section class="card home-balance-v6">
   <div class="home-balance-heading">
-   <span class="home-balance-title"><img class="rs-wallet-brand" src="/REFILLSHOP/assets/refills-icon.png" alt=""> Hola, ${esc(greeting)}. Tu saldo</span>
+   <span class="home-balance-title">${I('wallet')} Hola, ${esc(greeting)}. Tu saldo</span>
    ${hasPlan?`<span class="home-balance-plan">${esc(s.reseller.plan)}</span>`:''}
   </div>
   <div class="home-balance-amount">${usdtBalance.toFixed(2)} <small>USDT</small></div>
@@ -795,7 +795,7 @@ function home(){
   </div>
   ${!hasPlan?`<p class="home-wallet-hint">Activa tu plan Gratis, Level 2 o Level 3 para utilizar el monedero.</p>`:''}
  </section>`;
- return `<section class="rs-light-welcome"><div class="rs-light-welcome-logo"><img src="/REFILLSHOP/assets/refills-icon.png" alt=""></div><div><h1>¡Bienvenido a <span>Refills Shop!</span></h1><p>Tu plataforma de recargas y productos digitales.</p></div></section>${walletHero}
+ return `${walletHero}
  <button type="button" class="rs-install-entry" data-action="install-refills" aria-label="Instalar Refills Shop en este dispositivo"><svg width="19" height="19" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" aria-hidden="true"><path d="M12 3v12m-5-5 5 5 5-5M4 16v4h16v-4"/></svg><span>Instalar app</span></button>
  <div class="notice-grid"><button class="notice" data-action="open-promos"><span class="notice-icon">${I('spark')}</span><span><strong>Ofertas y novedades</strong><small>Descubre recargas y productos</small></span>${I('arrow','tiny arrow')}</button><button class="notice" data-action="modal" data-modal="help"><span class="notice-icon">${I('headset')}</span><span><strong>Centro de ayuda</strong><small>Conoce cómo funciona la tienda</small></span>${I('arrow','tiny arrow')}</button></div>
  ${sectionMini('Móvil, internet y más',['nauta','cubacel','vpn','sms'],'recargas')}
