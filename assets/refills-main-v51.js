@@ -25,7 +25,7 @@ const RS_NOTICE_TTL=86400000;
  }catch{}
 })();
 /* El catálogo antiguo guardado en localStorage no se reintroduce. */
-const s={page:'inicio',authMode:'login',authBusy:false,authError:'',rememberSession:(()=>{try{return localStorage.getItem('refills_shop_remember_session')!=='false'}catch{return true}})(),afterAuthPage:'inicio',authSession:null,profile:null,member:false,resellerPortal:null,resellerLoading:false,wholesalePrices:{},resellerOrders:[],resellerDeposits:[],resellerCurrency:'USDT',resellerDepositCurrency:'USDT',resellerDepositMethod:'USDT',resellerDepositStage:'methods',detailId:null,search:'',filter:'todos',offerGroup:'recargas',regionChoice:null,playerTargets:{},playerCheck:null,resellerPreview:null,resellerPreviewTier:'free',sort:'name',payment:'cup',selected:0,player:'',checkoutSession:null,qty:1,modal:null,usdtPayment:null,recentTopups:[],recentTopupsLoaded:false,changes:[],changesLoaded:false,changesLastSeen:getStored('changesSeen',0),changesLastToast:0, nickname:getStored('nickname','Invitado'),favorites:getStored('favs',[]),orders:[],cart:getStored('cart',[]),showFavs:false,selectedOrder:null, role:(window.REFILLS_SESSION&&window.REFILLS_SESSION.role)||'guest', user:(window.REFILLS_SESSION&&window.REFILLS_SESSION.user)||null,
+const s={page:'inicio',authMode:'login',authBusy:false,authError:'',rememberSession:(()=>{try{return localStorage.getItem('refills_shop_remember_session')!=='false'}catch{return true}})(),afterAuthPage:'inicio',authSession:null,profile:null,member:false,resellerPortal:null,resellerLoading:false,wholesalePrices:{},resellerOrders:[],resellerDeposits:[],resellerCurrency:'USDT',resellerDepositCurrency:'USDT',resellerDepositMethod:'USDT',resellerDepositStage:'methods',detailId:null,search:'',filter:'todos',offerGroup:'recargas',regionChoice:null,playerTargets:{},playerCheck:null,resellerPreview:null,resellerPreviewTier:'free',sort:'name',payment:'sm',selected:0,player:'',checkoutSession:null,qty:1,modal:null,usdtPayment:null,recentTopups:[],recentTopupsLoaded:false,changes:[],changesLoaded:false,changesLastSeen:getStored('changesSeen',0),changesLastToast:0, nickname:getStored('nickname','Invitado'),favorites:getStored('favs',[]),orders:[],cart:getStored('cart',[]),showFavs:false,selectedOrder:null, role:(window.REFILLS_SESSION&&window.REFILLS_SESSION.role)||'guest', user:(window.REFILLS_SESSION&&window.REFILLS_SESSION.user)||null,
 rates:getStored('rates',{usdtSm:300,smCup:3,gainSM:0}), adminTab:'resumen',
 adminOrders:getStored('adminOrders',[]), reseller:getStored('reseller',{plan:null,wallet:{USDT:0,CUP:0,SM:0},ledger:[]}),
 paymentConfig:getStored('paymentConfig',{smReceiver:'',cupCard:'',cupConfirmPhone:'',usdtAddress:'',usdtEnabled:false,whatsappNumber:''}),
@@ -796,7 +796,7 @@ function home(){
  <section class="card home-howto"><div class="live">REFILLS SHOP</div><h2>Una compra sencilla, desde tu móvil</h2><div class="feature-row"><div class="feature">${I('search')} Busca tu juego</div><div class="feature">${I('diamond')} Elige una oferta</div><div class="feature">${I('credit')} Revisa tu pedido</div></div><button class="btn secondary full" data-action="nav" data-page="recargas">Empezar ahora ${I('arrow','tiny')}</button></section>`;
 }
 function payPills(){
- const id=PAYMENT_METHODS[s.payment]?s.payment:'cup',m=PAYMENT_METHODS[id];
+ const id=PAYMENT_METHODS[s.payment]?s.payment:'sm',m=PAYMENT_METHODS[id];
  return `<button type="button" class="pay-current" data-action="open-payment-methods" aria-haspopup="dialog" aria-label="Método de pago: ${esc(m.name)}. Tocar para cambiar">
   <span class="pay-current-icon">${paymentVisual(id)}</span>
   <span class="pay-current-copy"><small>MÉTODO DE PAGO</small><strong>${esc(m.short)}</strong><span>${esc(m.name)}</span></span>
@@ -827,7 +827,7 @@ function gameRegionOptions(g){
 }
 function openRegionGame(id,region=''){
  const g=itemBy(id);if(!g)return;
- s.detailId=id;s.selected=0;s.checkoutSession=null;s.regionChoice=region||null;s.player='';s.offerGroup='recargas';s.playerTargets={};s.playerCheck=null;s.qty=1;s.modal=null;s.page='detalle';
+ s.payment=resellerHasPlan()?'balance':'sm';s.detailId=id;s.selected=0;s.checkoutSession=null;s.regionChoice=region||null;s.player='';s.offerGroup='recargas';s.playerTargets={};s.playerCheck=null;s.qty=1;s.modal=null;s.page='detalle';
  const matches=(g.offers||[]).map((o,i)=>({o,i})).filter(x=>!s.regionChoice||String(x.o.region||'Global')===s.regionChoice);
  const selected=[...matches].filter(x=>offerGroup(x.o)==='recargas').sort((a,b)=>offerAmountForSorting(a.o)-offerAmountForSorting(b.o))[0]||[...matches].sort((a,b)=>offerAmountForSorting(a.o)-offerAmountForSorting(b.o))[0];
  if(selected){s.selected=selected.i;s.offerGroup=offerGroup(selected.o)}
@@ -836,9 +836,9 @@ function openRegionGame(id,region=''){
 function catalogueFamilyCards(items){
  const seen=new Set(),result=[];
  for(const g of items){
-  const key=g.category==='juegos'?gameFamilyKey(g):g.id;
+  const family=g.category==='juegos'||g.category==='gift';const key=family?g.category+':'+gameFamilyKey(g):g.id;
   if(seen.has(key))continue;seen.add(key);
-  if(g.category!=='juegos'){result.push(card(g));continue}
+  if(!family){result.push(card(g));continue}
   result.push('<article class="product product-horizontal product-clickable rs-family-card" data-action="open-item" data-id="'+esc(g.id)+'" role="button" tabindex="0" aria-label="Elegir región de '+esc(gameFamilyName(g))+'">'
   +'<div class="product-cover"><img loading="lazy" decoding="async" src="'+photo(g)+'" alt="'+esc(gameFamilyName(g))+'"></div>'
   +'<div class="product-info"><strong class="product-name">'+esc(gameFamilyName(g))+'</strong></div>'
@@ -853,7 +853,6 @@ function catalog(isGift=false){
  const visible=s.showFavs?list.filter(g=>s.favorites.includes(g.id)):list;
  return `<div class="catalog-top"><div class="eyebrow">REFILLS SHOP / CATÁLOGO</div><h1 class="page-title">${isGift?'Gift Cards':'Recargas'}</h1><p class="page-lead">${isGift?'Tarjetas de regalo y códigos digitales':'Juegos, recargas móviles y servicios digitales'}</p>
  <div class="catalog-toolbar"><label class="searchbox">${I('search')}<input id="catalog-search" autocomplete="off" type="search" placeholder="Buscar juego o tarjeta..." value="${esc(s.search)}"></label><select id="sort-catalog" class="select" aria-label="Ordenar catálogo"><option value="name" ${s.sort==='name'?'selected':''}>A-Z</option><option value="price" ${s.sort==='price'?'selected':''}>Menor precio</option><option value="z" ${s.sort==='z'?'selected':''}>Z-A</option></select></div>
- <div class="payment-selector"><div><strong>Método de pago</strong><small>Los precios se actualizan según tu selección.</small></div>${payPills()}</div>
  <div class="chip-row">${(isGift?[['todos','Todas las tarjetas']]:[['todos','Todo'],['juegos','Juegos'],['movil','Móvil e internet']]).map(([id,l])=>`<button class="chip ${s.filter===id?'active':''}" data-action="filter" data-value="${id}">${l}</button>`).join('')}<button class="chip ${s.showFavs?'active':''}" data-action="only-favs">${I('star','tiny')} Favoritos</button></div>
  <div class="section-head" style="margin-top:0"><h2>${visible.length} productos disponibles</h2></div><div id="catalog-results">${visible.length?`<div class="catalog-grid">${catalogueFamilyCards(visible)}</div>`:`<div class="empty">${I('search')}<h3>${ITEMS.length?'No hay resultados':'Próximamente nuevas recargas'}</h3><p>${ITEMS.length?'Prueba con otro nombre o cambia los filtros.':'Estamos preparando el catálogo. Los productos aparecerán cuando el administrador los publique.'}</p><button class="btn secondary" data-action="reset-filters">Mostrar todos</button></div>`}</div></div>`;
 }
@@ -957,11 +956,11 @@ async function verifyPlayerIdentity(expectedGeneration=rsPlayerVerifyGeneration)
 
 function detail(){
  const g=itemBy(s.detailId);if(!g)return home();
- if(!g.offers?.length)return `<button class="detail-back" data-action="nav" data-page="recargas">${I('back','tiny')} Volver al catálogo</button><div class="card empty"><h3>Próximamente</h3><p>Este juego ya está en el catálogo. Sus ofertas aparecerán aquí cuando estén publicadas y verificadas.</p></div>`;
+ if(!g.offers?.length)return `<button class="detail-back" data-action="nav" data-page="${g.category==='gift'?'gift':'recargas'}">${I('back','tiny')} Volver al catálogo</button><div class="card empty"><h3>Próximamente</h3><p>Este juego ya está en el catálogo. Sus ofertas aparecerán aquí cuando estén publicadas y verificadas.</p></div>`;
  const o=g.offers[s.selected]||g.offers[0],p=currentPrice(o);
  const selectedPrice=p?displayPrice(o):'Costo pendiente';
  const filteredOffers=sortedOffersForDisplay(g);
- const methodAvailable=s.payment==='usdt'?(s.paymentConfig.usdtEnabled&&!!s.paymentConfig.usdtAddress):s.payment==='mitransfer'?!!s.paymentConfig.mitransferPhone:s.payment==='balance'?(resellerHasPlan()&&!!currentPrice(o,'balance')):true;
+ const methodAvailable=s.payment==='sm'?!!s.paymentConfig.smReceiver:s.payment==='cup'?!!(s.paymentConfig.cupCard&&s.paymentConfig.cupConfirmPhone):s.payment==='usdt'?(s.paymentConfig.usdtEnabled&&!!s.paymentConfig.usdtAddress):s.payment==='mitransfer'?!!s.paymentConfig.mitransferPhone:s.payment==='balance'?(resellerHasPlan()&&!!currentPrice(o,'balance')):true;
  return `<button class="detail-back" data-action="nav" data-page="${g.category==='gift'?'gift':'recargas'}">${I('back','tiny')} Volver al catálogo</button>
  <div class="detail-head"><div class="detail-icon"><img src="${photo(g)}" alt="${esc(g.name)}"></div><div><h1>${esc(g.name)}</h1><p>${esc(g.region)} · ${esc(g.desc)}</p></div></div>
  <div class="stepper"><div class="step ${s.player?'done':'active'}"><span class="num">${s.player?I('check','tiny'):'1'}</span>Tu ID</div><div class="step active"><span class="num">2</span>Paquete</div><div class="step"><span class="num">3</span>Pago</div></div>
@@ -977,7 +976,7 @@ function detail(){
  <div class="summary-list"><div class="summary-row"><span>Destino</span><strong>${esc(s.player||'Por indicar')}</strong></div><div class="summary-row"><span>Pago</span><strong>${esc(paymentName())}</strong></div><div class="summary-row"><span>Precio</span><strong>${selectedPrice}</strong></div></div><div class="divider"></div>
  <div class="summary-row"><span>Total</span><strong class="summary-total">${selectedPrice}</strong></div>
  ${!methodAvailable?`<p class="helper">${s.payment==='balance'?(resellerHasPlan()?'Esta oferta no tiene costo de proveedor configurado para el pago con wallet.':'Activa uno de los tres planes de revendedor para usar el saldo de la web.'):'Este método todavía no está habilitado.'}</p>`:''}
- <button class="btn primary full" style="margin-top:17px" data-action="checkout">${I('credit','tiny')} Continuar con el pago</button>
+ <button class="btn primary full" style="margin-top:17px" data-action="checkout" ${!methodAvailable?'disabled':''}>${I('credit','tiny')} Continuar con el pago</button>
  <button class="btn ghost full" style="margin-top:9px" data-action="add-cart">${I('cart','tiny')} Añadir al carrito</button></aside></div>`;
 }
 function orderSummaryText(o){
@@ -1197,8 +1196,8 @@ function modal(){
  }
  case 'region-picker':{
   const g=itemBy(s.regionPickGame),regions=gameRegionOptions(g);
-  html=modalTitle('Elige la región','Selecciona la región que corresponde a tu cuenta')+
-   '<div class="rs-region-list">'+regions.map(region=>'<button type="button" class="rs-region-row" data-action="choose-region" data-id="'+esc(region.id)+'" data-region="'+esc(region.region)+'"><span><strong>'+esc(region.region)+'</strong><small>'+region.offerCount+' '+(region.offerCount===1?'oferta':'ofertas')+'</small></span><span>'+I('arrow','tiny')+'</span></button>').join('')+'</div><p class="rs-region-tip">Cada región tiene sus propias ofertas. Confirma tu región antes de continuar.</p>';
+  html=modalTitle('Elige la región',g?.category==='gift'?'Selecciona la región compatible con tu tarjeta de regalo':'Selecciona la región que corresponde a tu cuenta')+
+   '<div class="rs-region-list">'+regions.map(region=>'<button type="button" class="rs-region-row" data-action="choose-region" data-id="'+esc(region.id)+'" data-region="'+esc(region.region)+'"><span><strong>'+esc(region.region)+'</strong><small>'+region.offerCount+' '+(region.offerCount===1?'oferta':'ofertas')+'</small></span><span>'+I('arrow','tiny')+'</span></button>').join('')+'</div><p class="rs-region-tip">Cada región tiene sus propias ofertas. Confirma la región antes de continuar.</p>';
   break;
  }
  case 'payment-methods':
@@ -1432,11 +1431,14 @@ function navigate(page){
  s.modal=null;if(page!=='detalle')s.search='';s.filter='todos';s.showFavs=false;s.page=page;render(true);history.replaceState(null,'','#'+page);if(page==='inicio')void loadRecentTopups(true);if(page==='pedidos')void loadCustomerOrders();if(page==='perfil'){void loadMyRewards();void loadCustomerOrders();}
  if(page==='revendedores'&&!s.resellerPortal)void loadResellerPortal(false,true);
 }
-function openDetail(id){let g=itemBy(id);if(!g)return;const regions=gameRegionOptions(g);if(g.category==='juegos'&&regions.length){s.regionPickGame=id;s.modal='region-picker';modal();return}openRegionGame(id,regions[0]?.region||'')}
+function openDetail(id){let g=itemBy(id);if(!g)return;const regions=gameRegionOptions(g);if((g.category==='juegos'||g.category==='gift')&&regions.length){s.regionPickGame=id;s.modal='region-picker';modal();return}openRegionGame(id,regions[0]?.region||'')}
 function toast(t){const root=document.getElementById('toast-root');root.innerHTML=`<div class="toast">${esc(t)}</div>`;clearTimeout(toast.timer);toast.timer=setTimeout(()=>root.innerHTML='',2800)}
 function changePayment(p){
- if(!PAYMENT_METHODS[p])return;
+ if(!PAYMENT_METHODS[p]||s.page!=='detalle'||s.modal!=='payment-methods')return;
  if(s.checkoutSession&&s.modal==='checkout'){toast('Este pedido ya tiene un método confirmado. Cierra el pago para crear otro.');return}
+ if(resellerHasPlan()&&p!=='balance')return;
+ if(p==='sm'&&!s.paymentConfig.smReceiver){toast('Saldo móvil no está habilitado.');return}
+ if(p==='cup'&&(!s.paymentConfig.cupCard||!s.paymentConfig.cupConfirmPhone)){toast('Transfermóvil no está habilitado.');return}
  if(p==='balance'&&!resellerHasPlan()){toast('Activa uno de los planes de revendedor para pagar con tu saldo de Refills Shop.');return}
  if(p==='balance'&&s.detailId){const selectedOffer=itemBy(s.detailId)?.offers?.[s.selected];if(selectedOffer&&!currentPrice(selectedOffer,'balance')){toast('Esta oferta no tiene costo de proveedor configurado para el pago con wallet.');return}}
  if(p==='usdt'&&(!s.paymentConfig.usdtEnabled||!s.paymentConfig.usdtAddress)){toast('USDT wallet propia todavía no está habilitada por administración.');return}
@@ -1496,7 +1498,7 @@ case 'only-favs':s.showFavs=!s.showFavs;render();break;
 case 'filter':s.filter=b.dataset.value;render();break;
 case 'reset-filters':s.filter='todos';s.search='';s.showFavs=false;render();break;
 case 'set-payment':changePayment(b.dataset.value);break;
-case 'open-payment-methods':s.paymentReturnModal=s.modal==='checkout'?'checkout':null;s.modal='payment-methods';modal();break;
+case 'open-payment-methods':if(s.page!=='detalle'||s.modal)break;s.paymentReturnModal=null;s.modal='payment-methods';modal();break;
 case 'choose-payment':changePayment(b.dataset.value);break;
 case 'offer-group':{const id=b.dataset.value,g=itemBy(s.detailId);if(!OFFER_TABS.some(t=>t[0]===id)||!g)break;const choice=sortedOffersForDisplay(g,id)[0];const first=choice?choice.index:-1;if(first<0){toast('Esta región no tiene productos de esa categoría.');break}s.offerGroup=id;s.selected=first;s.playerCheck=null;const pos=window.scrollY;render();window.scrollTo(0,pos);break;}
 case 'select-offer':{let pos=window.scrollY;s.selected=Number(b.dataset.index);s.playerCheck=null;rsPlayerVerifyGeneration++;render();window.scrollTo(0,pos);queuePlayerVerification();break;}
