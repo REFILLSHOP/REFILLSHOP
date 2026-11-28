@@ -264,7 +264,7 @@ function providerBalancePanel(){
  const x=S.providerBalance;
  if(!x)return '<section class="surface section"><h2>Saldo del proveedor</h2><p>Consultando Central One…</p></section>';
  const limit=Number(S.balanceThreshold??10),verified=x.verified===true&&Number.isFinite(x.available),low=verified&&x.available<=limit;
- return '<section class="surface section"><div class="panel-head"><div><h2>Saldo Central One</h2><small>Consulta de solo lectura · cada 2 minutos con ADM abierto</small></div>'+ico('payments')+'</div><div class="record"><div><h3>'+(verified?usd(x.available)+' USDT':'No disponible')+'</h3><small>'+esc(verified?date(x.checkedAt):x.reason||'No se pudo confirmar el saldo')+'</small></div>'+tag(verified?(low?'Saldo bajo':'Saldo suficiente'):'Sin verificar',low||!verified?'warn':'good')+'</div><form id="provider-threshold-form" class="form-grid spacer">'+field('Avisarme al bajar de (USDT)','threshold',limit,'number')+'<button type="submit" class="btn secondary small">Guardar umbral en este dispositivo</button></form><button type="button" class="btn ghost small" data-action="check-provider-balance">Actualizar ahora</button></section>';
+ return '<section class="surface section"><div class="panel-head"><div><h2>Saldo Central One</h2><small>Consulta de solo lectura · cada 2 minutos con ADM abierto</small></div>'+ico('payments')+'</div><div class="record"><div><h3>'+(verified?Number(x.available).toFixed(4)+' '+esc(x.currency||'USD'):'No disponible')+'</h3><small>'+esc(verified?date(x.checkedAt):x.reason||'No se pudo confirmar el saldo')+'</small></div>'+tag(verified?(low?'Saldo bajo':'Saldo suficiente'):'Sin verificar',low||!verified?'warn':'good')+'</div><form id="provider-threshold-form" class="form-grid spacer">'+field('Avisarme al alcanzar este saldo (USD/USDT)','threshold',limit,'number')+'<button type="submit" class="btn secondary small">Guardar umbral en este dispositivo</button></form><button type="button" class="btn ghost small" data-action="check-provider-balance">Actualizar ahora</button></section>';
 }
 async function pollProviderBalance(){
  if(!S.user||S.providerBusy)return;
@@ -273,7 +273,7 @@ async function pollProviderBalance(){
   S.providerBalance=await request('/admin/balance',{service:'engagement'});
   const x=S.providerBalance,limit=Number(S.balanceThreshold??10);
   const low=x.verified===true&&Number.isFinite(x.available)&&x.available<=limit;
-  if(low&&!S.providerLow){flash('Saldo bajo de Central One: '+usd(x.available)+' USDT.',true)}
+  if(low&&!S.providerLow){flash('Saldo bajo de Central One: '+Number(x.available).toFixed(4)+' '+(x.currency||'USD')+'.',true)}
   S.providerLow=low;
  }catch(e){S.providerBalance={verified:false,reason:e.message||'No se pudo consultar el saldo'};}
  finally{S.providerBusy=false;const box=$('rs-provider-balance-box');if(box&&!box.contains(document.activeElement))box.innerHTML=providerBalancePanel();}
