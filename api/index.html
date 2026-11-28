@@ -1,0 +1,15 @@
+<!doctype html><html lang="es"><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1"><title>API Refills Shop</title><style>body{background:#081423;color:#edf6ff;font:16px system-ui;max-width:850px;margin:40px auto;padding:0 20px}h1,h2{color:#7ccaff}pre,code{background:#12263d;padding:6px;overflow-wrap:anywhere}pre{white-space:pre-wrap;padding:15px;border-radius:10px}a{color:#8ad4ff}p{line-height:1.65}</style><h1>API Refills Shop v1</h1><p>Integración servidor a servidor. Solicita una clave y guárdala exclusivamente en tu backend.</p><h2>Catálogo</h2><pre>GET https://kcgjlnymhmxylrjchcvl.supabase.co/functions/v1/rs10-api/partner/v1/catalog
+Authorization: Bearer TU_CLAVE_API</pre><h2>Compras con wallet USDT</h2><p>Requiere clave vinculada por administración a una cuenta de revendedor activa. Límite: 30 solicitudes por minuto. Las compras son reales y consumen saldo.</p><pre>Base: https://kcgjlnymhmxylrjchcvl.supabase.co/functions/v1/rs12-reseller/partner/v1
+GET /catalog
+GET /orders
+GET /orders?code=RSR-...
+GET /pin?code=RSR-...
+POST /orders
+Authorization: Bearer TU_CLAVE_API
+Content-Type: application/json
+{
+ "offerId": "UUID de oferta",
+ "clientRequestId": "UUID único",
+ "playerId": "ID del jugador",
+ "targetPayload": {"player_id":"ID del jugador"}
+}</pre><p>Usa targetSchema de la oferta; para PIN no se necesita ID. Reutiliza clientRequestId en reintentos. Consulta el estado hasta que el proveedor confirme. Los códigos se muestran al entregarse. El listado devuelve hasta 100 pedidos recientes de la cuenta vinculada. No hay webhooks todavía.</p><a href="/REFILLSHOP/">Volver a Refills Shop</a></html>

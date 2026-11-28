@@ -1000,18 +1000,18 @@ function orders(){
  const filter=s.orderFilter||'all';
  const shown=filter==='active'?pending:filter==='completed'?complete:list;
  const banner=s.orderJustSent&&list.some(o=>o.ref===s.orderJustSent)?
-  '<div class="rs-order-sent"><strong>Pedido recibido: #'+esc(s.orderJustSent)+'</strong><span>Tu solicitud se registró. El estado se actualizará cuando se confirme la entrega.</span><button class="btn secondary small" data-action="share-order-summary" data-ref="'+esc(s.orderJustSent)+'">Compartir resumen</button></div>':'';
+  '<div class="rs-order-sent"><strong>Pedido recibido: #'+esc(s.orderJustSent)+'</strong><span>Tu solicitud se registró. El estado se actualizará cuando se confirme la entrega.</span></div>':'';
  return '<div class="catalog-top rs-simple-orders">'+
   '<div class="rs-simple-orders-header"><div><div class="eyebrow">REFILLS SHOP · PEDIDOS</div><h1 class="page-title">Mis pedidos</h1><p class="page-lead">Consulta el estado de cada compra sin pasos complicados.</p></div><button class="btn secondary small" data-action="refresh-orders">'+I('check','tiny')+' Actualizar</button></div>'+
   banner+
   '<div class="rs-order-filter-bar" role="group" aria-label="Filtrar pedidos">'+
   [['all','Todos',list.length],['active','En proceso',pending.length],['completed','Completados',complete.length]].map(row=>'<button type="button" data-action="orders-filter" data-filter="'+row[0]+'" class="'+(filter===row[0]?'active':'')+'">'+row[1]+' <b>'+row[2]+'</b></button>').join('')+'</div>'+
-  (!shown.length?'<div class="card rs-orders-empty"><h3>'+(!list.length?'Todavía no tienes pedidos':'No hay pedidos de esta categoría')+'</h3><p>Cuando compres, podrás consultar aquí la entrega y compartir el resumen.</p><button class="btn primary" data-action="nav" data-page="recargas">Explorar juegos</button></div>':
+  (!shown.length?'<div class="card rs-orders-empty"><h3>'+(!list.length?'Todavía no tienes pedidos':'No hay pedidos de esta categoría')+'</h3><p>Cuando compres, podrás consultar aquí la entrega.</p><button class="btn primary" data-action="nav" data-page="recargas">Explorar juegos</button></div>':
     '<div class="rs-orders-compact-list">'+shown.map(o=>{
      const st=clientOrderStatus(o.status),total=o.totalText||fmtMoney(o.total)+' '+(o.currency||'CUP');
      return '<article class="card rs-order-compact-card"><div class="rs-order-compact-top"><div><small>#'+esc(o.ref||'—')+' · '+esc(o.date||'')+'</small><h2>'+esc(o.gameName||'Compra digital')+'</h2></div><span class="order-status-v4 '+st.key+'">'+esc(st.label)+'</span></div>'+
       '<p class="rs-order-compact-package">'+esc(o.offer||'Oferta')+'</p>'+rsReserveActions(o)+
-      '<div class="rs-order-compact-bottom"><strong>'+esc(total)+'</strong><div><button class="btn secondary small" data-action="order-details" data-ref="'+esc(o.ref)+'">Ver pedido</button><button class="btn ghost small" data-action="share-order-summary" data-ref="'+esc(o.ref)+'">Compartir</button></div></div></article>';
+      '<div class="rs-order-compact-bottom"><strong>'+esc(total)+'</strong><div><button class="btn secondary small" data-action="order-details" data-ref="'+esc(o.ref)+'">Ver pedido</button></div></div></article>';
     }).join('')+'</div>')+
   '<p class="rs-order-help">Los pedidos con Central One se comprueban automáticamente. Un pago confirmado no significa que el paquete ya esté entregado.</p></div>';
 }
@@ -1169,7 +1169,7 @@ function modal(){
   const ios=/iPad|iPhone|iPod/.test(navigator.userAgent);
   const android=/Android/i.test(navigator.userAgent);
   const isChrome=android&&/Chrome\//.test(navigator.userAgent);
-  html=modalTitle('Instalar app','Refills Shop')+'<div class="card panel rs-install-help">'+(ios?'<p>En Safari, toca Compartir y luego Añadir a pantalla de inicio.</p>':'<p>Abre el menú ⋮ de tu navegador y selecciona Instalar aplicación o Añadir a pantalla de inicio.</p>')+'<p class="helper">Si no aparece Instalar, puedes crear un acceso directo.</p></div>';
+  html=modalTitle(rsNativeVersion?'Actualizar app':'Instalar app','Refills Shop')+'<div class="card panel rs-install-help rs-app-install-panel">'+(rsAppRelease?'<a class="btn primary full" href="'+esc(rsAppRelease.url)+'" target="_blank" rel="noopener noreferrer">'+(rsNativeVersion?'Descargar actualización APK':'Descargar APK Android')+'</a>':'<p class="helper">'+(rsAppChecked?'La APK oficial firmada todavía no está disponible.':'Comprobando la versión de Android…')+'</p>')+(!rsNativeVersion?'<button class="btn secondary full" data-action="install-pwa">Instalar aplicación web</button>':'')+(ios?'<p>En Safari, toca Compartir y luego Añadir a pantalla de inicio.</p>':'<p>Abre el menú ⋮ de tu navegador y selecciona Instalar aplicación o Añadir a pantalla de inicio.</p>')+'<p class="helper">Si no aparece Instalar, puedes crear un acceso directo.</p></div>';
   break;
  }
   case 'reseller-preview':{
@@ -1363,7 +1363,7 @@ case 'checkout':
    (current?'<div class="rs-order-modal-head"><div><strong>'+esc(current.gameName||'Compra digital')+'</strong><small>'+esc(current.offer||'Paquete')+'</small></div><span class="order-status-v4 '+st.key+'">'+esc(st.label)+'</span></div>'+
     '<div class="rs-order-modal-total">'+esc(current.totalText||fmtMoney(current.total)+' '+(current.currency||'CUP'))+'</div>'+
     '<div class="rs-order-modal-fields"><div><span>ID / destino</span><strong>'+esc(current.player||'—')+'</strong></div><div><span>Pago</span><strong>'+esc(current.payment||'—')+'</strong></div><div><span>Fecha</span><strong>'+esc(current.date||'—')+'</strong></div></div>'+
-    rsReserveActions(current)+'<div class="rs-order-modal-actions"><button class="btn primary" data-action="share-order-summary" data-ref="'+esc(current.ref)+'">Enviar resumen</button><button class="btn secondary" data-action="copy-order-summary" data-ref="'+esc(current.ref)+'">Copiar resumen</button><button class="btn ghost" data-action="refresh-orders">Actualizar estado</button></div>'+
+    (current.kind==='pin'?'<div class="rs-code-box"><strong>Código digital</strong>'+(st.key==='complete'&&current.paymentStatus==='paid'?'<button class="btn primary full" data-action="reveal-order-pin" data-ref="'+esc(current.ref)+'">Mostrar código</button><div id="rs-code-output"></div>':'<small>Disponible después de verificar el pago y entregar el código.</small>')+'</div>':'')+rsReserveActions(current)+'<div class="rs-order-modal-actions"><button class="btn secondary" data-action="copy-order-summary" data-ref="'+esc(current.ref)+'">Copiar resumen</button><button class="btn ghost" data-action="refresh-orders">Actualizar estado</button></div>'+
     '<p class="rs-order-modal-hint">'+(st.key==='complete'?'Central One o administración confirmó la entrega.':st.key==='processing'?'Tu pedido sigue en proceso; consultaremos Central One automáticamente.':'El pedido está en revisión. Consulta el estado aquí.')+'</p>':
     '<div class="empty">No se encontró el pedido. Actualiza la lista.</div>');
   break;
@@ -1402,23 +1402,12 @@ async function checkRefillsInstall(){
  el.classList.remove('warning');
  el.textContent=rsDeferredInstall?'La tienda está preparada. Cierra esta ventana y pulsa Instalar.':'La configuración de Refills Shop está correcta. Si Chrome deshabilita Instalar, usa Crear acceso directo: el bloqueo depende del instalador del dispositivo.';
 }
-function requestRefillsInstallation(){
- if(window.matchMedia('(display-mode: standalone)').matches||navigator.standalone===true){toast('Refills Shop ya está instalada en este dispositivo.');return}
- if(rsDeferredInstall){
-  const prompt=rsDeferredInstall;rsDeferredInstall=null;
-  // Mantener el gesto del usuario para que Android abra el diálogo de instalación.
-  void (async()=>{
-   try{
-    await prompt.prompt();
-    const result=await prompt.userChoice;
-    if(result?.outcome==='accepted')toast('Instalación aceptada. Busca Refills Shop en tu teléfono.');
-    else toast('Instalación cancelada. Puedes intentarlo de nuevo desde el menú de Chrome.');
-   }catch(error){console.warn('Instalación PWA:',error?.message||error);s.modal='install-guide';modal();}
-  })();
-  return;
- }
- s.modal='install-guide';modal();
-}
+let rsAppRelease=null,rsAppChecked=false;
+const rsNativeVersion=Number(/RefillsShopAndroid\/(\d+)/.exec(navigator.userAgent)?.[1]||0);
+async function rsCheckAppRelease(){try{const res=await fetch('https://api.github.com/repos/REFILLSHOP/REFILLSHOP/releases/latest',{cache:'no-store'});if(!res.ok)throw Error('No release');const d=await res.json(),version=Number(/^android-v(\d+)$/.exec(d.tag_name)?.[1]||0),asset=(d.assets||[]).find(a=>a.name==='Refills-Shop.apk');if(version>0&&asset&&String(asset.browser_download_url).startsWith('https://github.com/REFILLSHOP/REFILLSHOP/releases/download/'))rsAppRelease={version,url:asset.browser_download_url};}catch{}finally{rsAppChecked=true;}if(s.modal==='install-guide')modal();if(rsNativeVersion&&rsAppRelease?.version>rsNativeVersion&&!s.modal)toast('Nueva versión disponible. Pulsa Instalar app para actualizar.');}
+function requestRefillsInstallation(){s.modal='install-guide';modal();void rsCheckAppRelease();}
+async function rsInstallPwa(){if(!rsDeferredInstall){toast('Usa Añadir a pantalla de inicio en el menú del navegador.');return;}const p=rsDeferredInstall;rsDeferredInstall=null;try{await p.prompt();await p.userChoice}catch{toast('Usa el menú del navegador para instalar la web.')}}
+if(rsNativeVersion)void rsCheckAppRelease();
 window.addEventListener('beforeinstallprompt',event=>{event.preventDefault();rsDeferredInstall=event;});
 window.addEventListener('appinstalled',()=>{rsDeferredInstall=null;toast('Refills Shop instalada correctamente.');});
 if('serviceWorker' in navigator&&location.protocol==='https:'){
@@ -1486,7 +1475,7 @@ case 'reseller-deposit-submit':void submitResellerDeposit();break;
 
 case 'nav':navigate(b.dataset.page);break;case 'modal-nav':navigate(b.dataset.page);break;
 case 'home-wallet-deposit':if(resellerHasPlan())openDepositCheckout();else{s.modal='wallet';modal()}break;
-case 'install-refills':requestRefillsInstallation();break;case 'check-install-app':void checkRefillsInstall();break;case 'home-wallet-movements':s.modal='reseller-ledger';modal();break;
+case 'install-refills':requestRefillsInstallation();break;case 'install-pwa':void rsInstallPwa();break;case 'check-install-app':void checkRefillsInstall();break;case 'home-wallet-movements':s.modal='reseller-ledger';modal();break;
 case 'wallet-select-currency':{s.resellerDepositMethod=b.dataset.currency;s.resellerDepositCurrency=b.dataset.currency==='SM'?'SM':b.dataset.currency==='USDT'?'USDT':'CUP';s.resellerDepositStage='details';modal();break;}
 case 'wallet-change-currency':{s.resellerDepositStage='methods';modal();break;}
 case 'wallet-copy-confirmation':{const val=String(s.resellerPortal?.paymentInstructions?.CUP?.confirmationPhone||s.paymentConfig.cupConfirmPhone||'').trim();if(!val){toast('Falta el número de confirmación de CUP');break;}void navigator.clipboard?.writeText(val).then(()=>toast('Número de confirmación copiado'),()=>toast('Mantén pulsado el número para copiarlo'));break;}
@@ -1524,7 +1513,6 @@ case 'save-profile':{const name=(document.getElementById('profile-name')?.value|
 case 'order-details':s.selectedOrder=b.dataset.ref;s.modal='order';modal();void loadCustomerOrders();break;
 case 'orders-filter':s.orderFilter=b.dataset.filter||'all';render();break;
 case 'copy-order-summary':{const item=s.orders.find(x=>x.ref===b.dataset.ref);if(item){void navigator.clipboard.writeText(orderSummaryText(item)).then(()=>toast('Resumen copiado'),()=>toast('No se pudo copiar.'));}break;}
-case 'share-order-summary':{const item=s.orders.find(x=>x.ref===b.dataset.ref);if(item){const msg=orderSummaryText(item);const phone=String(s.paymentConfig?.whatsappNumber||'').replace(/\D/g,'');const link='https://wa.me/'+(phone||'')+'?text='+encodeURIComponent(msg);window.open(link,'_blank','noopener,noreferrer');}break;}
 case 'refresh-orders':void loadCustomerOrders();break;
 case 'delete-order':s.orders=s.orders.filter(o=>o.ref!==b.dataset.ref);save('orders',s.orders);s.modal=null;render();toast('Pedido eliminado');break;
 }});
@@ -1652,33 +1640,33 @@ document.addEventListener('click',async e=>{
  }
  if(a==='admin-edit-game'){
   const g=itemBy(b.dataset.id);if(!g)return;
-  const name=prompt('Nombre del producto',g.name);if(name===null)return;
-  const desc=prompt('Descripción',g.desc||'');if(desc===null)return;
+  const name=await RSDialog.prompt('Nombre del producto',g.name);if(name===null)return;
+  const desc=await RSDialog.prompt('Descripción',g.desc||'');if(desc===null)return;
   g.name=name.trim()||g.name;g.desc=desc.trim();saveCatalog();render();toast('Producto actualizado');return;
  }
  if(a==='admin-delete-game'){
   const index=ITEMS.findIndex(x=>x.id===b.dataset.id);if(index<0)return;
-  if(!confirm('¿Eliminar este producto y sus ofertas?'))return;
+  if(!await RSDialog.confirm('¿Eliminar este producto y sus ofertas?'))return;
   ITEMS.splice(index,1);saveCatalog();render();toast('Producto eliminado');return;
  }
  if(a==='admin-add-offer'){
   const g=itemBy(b.dataset.id);if(!g)return;
-  const title=prompt('Nombre de la oferta');if(!title)return;
-  const cup=Number(prompt('Precio final CUP', ''));
+  const title=await RSDialog.prompt('Nombre de la oferta');if(!title)return;
+  const cup=Number(await RSDialog.prompt('Precio final CUP', ''));
   if(!Number.isFinite(cup)||cup<=0){toast('Introduce un precio CUP válido');return}
-  const providerUsdt=Number(prompt('Costo del proveedor en USDT (opcional)', '0'))||0;
+  const providerUsdt=Number(await RSDialog.prompt('Costo del proveedor en USDT (opcional)', '0'))||0;
   g.offers.push({title:title.trim(),cup,providerUsdt,bonus:''});saveCatalog();render();toast('Oferta guardada');return;
  }
  if(a==='admin-edit-offer'){
   const g=itemBy(b.dataset.id),index=Number(b.dataset.index),o=g?.offers[index];if(!o)return;
-  const title=prompt('Nombre de la oferta',o.title);if(title===null)return;
-  const cup=Number(prompt('Precio final CUP',o.cup));if(!Number.isFinite(cup)||cup<=0){toast('Precio CUP no válido');return}
-  const cost=prompt('Costo del proveedor USDT',o.providerUsdt||'');if(cost===null)return;
+  const title=await RSDialog.prompt('Nombre de la oferta',o.title);if(title===null)return;
+  const cup=Number(await RSDialog.prompt('Precio final CUP',o.cup));if(!Number.isFinite(cup)||cup<=0){toast('Precio CUP no válido');return}
+  const cost=await RSDialog.prompt('Costo del proveedor USDT',o.providerUsdt||'');if(cost===null)return;
   o.title=title.trim();o.cup=cup;o.providerUsdt=Number(cost)||0;saveCatalog();render();toast('Oferta actualizada');return;
  }
  if(a==='admin-delete-offer'){
   const g=itemBy(b.dataset.id),index=Number(b.dataset.index);if(!g||!g.offers[index])return;
-  if(!confirm('¿Eliminar esta oferta?'))return;
+  if(!await RSDialog.confirm('¿Eliminar esta oferta?'))return;
   g.offers.splice(index,1);saveCatalog();render();toast('Oferta eliminada');return;
  }
  if(a==='admin-save-rates'){
@@ -1709,19 +1697,20 @@ if(a==='copy-pay-recipient'){
  const value=s.payment==='cup'?s.paymentConfig.cupCard:s.payment==='mitransfer'?s.paymentConfig.mitransferPhone:s.payment==='sm'?s.paymentConfig.smReceiver:s.payment==='usdt'?s.paymentConfig.usdtAddress:'';
  await copyPaymentValue(value,b);return;
 }
+if(a==='reveal-order-pin'){const ref=b.dataset.ref,uid=s.user?.id;b.disabled=true;try{const data=await edgeRequest('rs10-api','/pin/reveal?code='+encodeURIComponent(ref),{auth:true});if(s.user?.id!==uid||s.selectedOrder!==ref||s.modal!=='order')return;const target=document.getElementById('rs-code-output');if(target){target.replaceChildren();const code=document.createElement('code');code.textContent=data.pin;const copy=document.createElement('button');copy.className='btn secondary small';copy.textContent='Copiar código';copy.addEventListener('click',()=>copyPaymentValue(data.pin,copy));target.append(code,document.createElement('br'),copy)}}catch(err){toast(err.message||'Código no disponible.')}finally{b.disabled=false;}return;}
 if(a==='resume-reserved'){
  const o=s.orders.find(x=>x.ref===b.dataset.ref);if(!rsReserved(o)||!(rsReserveRemaining(o)>0)){toast('Reserva vencida o actualizada. Revisa el estado.');return;}
  s.resumeOrderRef=o.ref;s.modal='resume-reserved';modal();return;
 }
 if(a==='copy-resume-recipient'){const o=s.orders.find(x=>x.ref===s.resumeOrderRef);await copyPaymentValue(o?.method==='mobile'?s.paymentConfig.smReceiver:o?.method==='card'?s.paymentConfig.cupCard:s.paymentConfig.mitransferPhone,b);return;}
 if(a==='cancel-reserved'){
- if(!window.confirm('¿Cancelar el pedido? Confirma únicamente si NO realizaste ninguna transferencia.'))return;
+ if(!await RSDialog.confirm('¿Cancelar el pedido? Confirma únicamente si NO realizaste ninguna transferencia.'))return;
  b.disabled=true;try{await edgeRequest('rs10-api','/orders/cancel',{method:'POST',auth:true,body:{code:b.dataset.ref,confirmNoPayment:true}});s.modal=null;await loadCustomerOrders();render();toast('Reserva cancelada.');}catch(err){toast(err.message);b.disabled=false;}return;
 }
 if(a==='submit-reserved'){
  const o=s.orders.find(x=>x.ref===s.resumeOrderRef);
  if(!rsReserved(o)||!(rsReserveRemaining(o)>0)){toast('Reserva vencida o actualizada. No vuelvas a pagar.');return;}
- if(!window.confirm('¿Ya enviaste el importe exacto a la cuenta receptora?'))return;
+ if(!await RSDialog.confirm('¿Ya enviaste el importe exacto a la cuenta receptora?'))return;
  b.disabled=true;
  try{
   const sourcePhone=o.method==='mobile'?String(document.getElementById('resume-source-phone')?.value||'').trim():'';
@@ -1767,7 +1756,7 @@ if(a==='send-order'){
  try{targetPayload=playerTargetData(o,true)}catch(err){toast(err.message);return}
  const player=String(s.player||'').trim();
  if(o.kind!=='pin'&&!player&&!Object.keys(targetPayload).length){toast('Escribe el ID de jugador.');return}
- if(s.payment!=='balance'&&!window.confirm('¿Confirmas que ya realizaste la transferencia al número o cuenta indicada? No confirmes si aún no has enviado el dinero.'))return;
+ if(s.payment!=='balance'&&!await RSDialog.confirm('¿Confirmas que ya realizaste la transferencia al número o cuenta indicada? No confirmes si aún no has enviado el dinero.'))return;
  b.disabled=true;b.textContent='Registrando pedido…';
  try{
   let result;
@@ -1805,7 +1794,7 @@ if(a==='send-order'){
    }
   }
   if(!result?.ok&&!result?.order)throw Error('El servidor no confirmó el pedido.');
-  s.checkoutSession=null;s.modal=null;s.orderJustSent=String(result?.order?.code||'');if(s.orderJustSent)rsAddNotice('order','Pedido registrado','Solicitud '+s.orderJustSent+' recibida. Consulta su entrega en Mis pedidos.','silent');await loadCustomerOrders();navigate('pedidos');toast('Pedido recibido. Puedes compartir el resumen desde Mis pedidos.');
+  s.checkoutSession=null;s.modal=null;s.orderJustSent=String(result?.order?.code||'');if(s.orderJustSent)rsAddNotice('order','Pedido registrado','Solicitud '+s.orderJustSent+' recibida. Consulta su entrega en Mis pedidos.','silent');await loadCustomerOrders();navigate('pedidos');toast('Pedido recibido. Consulta el estado en Mis pedidos.');
  }catch(err){toast(err?.message||'No se pudo registrar la compra.');}
  finally{b.disabled=false;b.textContent=s.payment==='sm'?'Ya pagué':'Enviar solicitud de compra';}
  return;
@@ -1829,7 +1818,7 @@ async function loadCustomerOrders(){
    if(s.user?.id!==uid)return;
    const oldOrdersJson=JSON.stringify(s.orders||[]);
    const items=(Array.isArray(result.orders)?result.orders:[]).map(x=>({
-    id:x.id,ref:x.code,gameName:x.game,offer:x.offer,player:x.playerId||'PIN',method:x.method,gameId:x.gameId,offerId:x.offerId,requestId:x.requestId,sourcePhone:x.sourcePhone||'',targetPayload:x.targetPayload||{},couponCode:x.couponCode,expiresAt:x.expiresAt,
+    id:x.id,kind:x.kind||'topup',ref:x.code,gameName:x.game,offer:x.offer,player:x.playerId||'PIN',method:x.method,gameId:x.gameId,offerId:x.offerId,requestId:x.requestId,sourcePhone:x.sourcePhone||'',targetPayload:x.targetPayload||{},couponCode:x.couponCode,expiresAt:x.expiresAt,
     payment:x.method==='mobile'?'Saldo móvil':x.method==='card'?'Transfermóvil':x.method==='wallet'?'MiTransfer':x.method==='usdt_wallet'?'USDT Wallet BEP-20':x.method==='usdt_bep20'?'USDT BEP-20':x.method,
     total:x.amount,currency:x.currency,status:x.status,paymentStatus:x.paymentStatus||'unpaid',
     paymentReference:x.paymentReference||'',paymentTxHash:x.paymentTxHash||'',refundReference:x.refundReference||'',
@@ -1865,6 +1854,7 @@ async function loadLiveCatalog(silent=false){
   for(const o of offers){const game=grouped.get(String(o.gameId||''));if(!game||o.visible===false||o.inStock!==true)continue;
    game.offers.push({id:String(o.id||''),title:String(o.name||'Oferta'),cup:Number(o.cup||0),card:Number(o.card||o.cup||0),sm:Number(o.sm||0),usdt:Number(o.usdt||0),kind:o.kind||'topup',region:o.region||'Global',targetSchema:Array.isArray(o.targetSchema)?o.targetSchema:[],inStock:o.inStock===true,purchasable:o.purchasable===true,bonus:''});
   }
+  for(const g of grouped.values()){if(g.category==='juegos'&&g.offers.length&&g.offers.every(o=>o.kind==='pin'))g.category='gift';}
   ITEMS.splice(0,ITEMS.length,...[...grouped.values()].sort((a,b)=>Number(b.featured)-Number(a.featured)||a.sortOrder-b.sortOrder||a.name.localeCompare(b.name)));
   s.salesEnabled=data.salesEnabled===true;s.catalogLoading=false;
   if(data.config){
