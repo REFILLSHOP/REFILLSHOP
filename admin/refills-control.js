@@ -288,7 +288,7 @@ async function pollProviderBalance(){
  }catch(e){S.providerBalance={verified:false,reason:e.message||'No se pudo consultar el saldo'};}
  finally{S.providerBusy=false;const box=$('rs-provider-balance-box');if(box&&!box.contains(document.activeElement))box.innerHTML=providerBalancePanel(S.page==='overview');}
 }
-function rsAvailabilityPanel(){const a=S.cache.commerce?.availability||{};return '<section class="surface section"><div class="panel-head"><div><h2>Horario y pagos</h2><small>10 AM a 10 PM · hora de Cuba · requiere conexión del ADM</small></div>'+tag(a.open?'Abierta':a.paused?'Pagos pausados':'Cerrada',a.open?'good':'warn')+'</div><p>'+esc(a.paused?'Todos los nuevos pagos están desactivados.':!a.baseEnabled?'Ventas generales desactivadas en Finanzas.':!a.withinHours?'Fuera del horario de atención.':!a.adminOnline?'Sin conexión reciente del administrador.':'Recibiendo pedidos.')+'</p><button type="button" class="btn '+(a.paused?'primary':'danger')+' full" data-action="toggle-store-pause">'+(a.paused?'Activar todos los pagos':'Desactivar todos los pagos')+'</button><p class="footer-caption">El catálogo sigue visible. Los pedidos existentes se conservan.</p></section>'}
+function rsAvailabilityPanel(){const a=S.cache.commerce?.availability||{};return '<section class="surface section"><div class="panel-head"><div><h2>Horario y pagos</h2><small>Atención: 10 AM a 10 PM · hora de Cuba</small></div>'+tag(a.open?'Abierta':a.paused?'Pagos pausados':'Cerrada',a.open?'good':'warn')+'</div><p>'+esc(a.paused?'Todos los nuevos pagos están desactivados.':!a.baseEnabled?'Ventas generales desactivadas en Finanzas.':'Recibiendo pedidos las 24 horas.')+'</p><button type="button" class="btn '+(a.paused?'primary':'danger')+' full" data-action="toggle-store-pause">'+(a.paused?'Activar todos los pagos':'Desactivar todos los pagos')+'</button><p class="footer-caption">El catálogo sigue visible. Los pedidos existentes se conservan.</p></section>'}
 async function rsAdminPresence(paused){try{const result=await request('/admin/store-availability',{method:'POST',body:typeof paused==='boolean'?{paused}:{}});S.cache.commerce={...S.cache.commerce,availability:result};const box=$('rs-store-availability');if(box)box.innerHTML=rsAvailabilityPanel();return result}catch(e){if(typeof paused==='boolean')throw e;return null}}
 function drawOverview(){
  const x=S.cache.overview?.counts||{}, r=S.cache.reseller||{}, co=S.cache.commerce||{},cn=S.cache.central||{};
@@ -453,7 +453,7 @@ function renderCoResults(){
  return ps.length?'<div class="list">'+ps.slice(0,20).map(p=>'<button type="button" class="record" data-action="select-co" data-id="'+esc(p.productId)+'" style="color:inherit;text-align:left;width:100%"><span><h3>'+esc(p.name)+'</h3><small>'+esc(p.region||'Global')+' · '+esc(p.category||'')+'</small></span><span class="price">'+usd(p.resellerPrice)+' USDT'+(p.inStock?'':' · agotado')+'</span></button>').join('')+'</div>':'<div class="alert-note">Busca y selecciona un producto real de Central One. No se importan ofertas automáticamente.</div>';
 }
 function paymentMethodLabel(method){
- return ({mobile:'Saldo móvil ETECSA',wallet:'MiTransfer (teléfono)',card:'Transfermóvil (CUP)',usdt_wallet:'USDT BEP-20',usdt_bep20:'Pasarela USDT'})[method]||method||'Sin método';
+ return ({cash_cup:'CUP efectivo',cash_usd:'USD efectivo',mobile:'Saldo móvil ETECSA',wallet:'MiTransfer (teléfono)',card:'Transfermóvil (CUP)',usdt_wallet:'USDT BEP-20',usdt_bep20:'Pasarela USDT'})[method]||method||'Sin método';
 }
 function adminOrderMessage(o){
  if(!o)return '';
@@ -655,7 +655,7 @@ async function openOfferEdit(id){
 }
 function modalConfirm(text){return RSDialog.confirm(text)}
 async function runAction(action,el){
- if(action==='toggle-store-pause')return withBusy(async()=>{const paused=S.cache.commerce?.availability?.paused!==true;if(!paused&&!await modalConfirm('¿Reactivar los pagos durante el horario de atención mientras el ADM esté conectado?'))return;const a=await rsAdminPresence(paused);flash(a.paused?'Todos los pagos nuevos están pausados.':a.open?'Pagos activos.':'Pagos habilitados; se abrirán cuando se cumplan las condiciones.');});
+ if(action==='toggle-store-pause')return withBusy(async()=>{const paused=S.cache.commerce?.availability?.paused!==true;if(!paused&&!await modalConfirm('¿Reactivar todos los pagos? Se podrán recibir pedidos las 24 horas.'))return;const a=await rsAdminPresence(paused);flash(a.paused?'Todos los pagos nuevos están pausados.':a.open?'Pagos activos.':'Pagos habilitados; se abrirán cuando se cumplan las condiciones.');});
  const id=el.dataset.id,code=el.dataset.code;
  if(action==='offer-work-tab'){S.offerTab=el.dataset.value;drawOffers();return}
  if(action==='payment-work-tab'){S.paymentTab=el.dataset.value;for(const b of $('admin-view').querySelectorAll('[data-action="payment-work-tab"]'))b.classList.toggle('active',b.dataset.value===S.paymentTab);for(const p of $('admin-view').querySelectorAll('[data-payment-panel]'))p.hidden=p.dataset.paymentPanel!==S.paymentTab;return}
