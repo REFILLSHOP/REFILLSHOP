@@ -312,7 +312,7 @@ function drawGames(){
  +'<section class="surface section"><div class="panel-head"><div><h2>'+(editing?'Editar juego: '+esc(editing.name):'Crear juego')+'</h2><small>'+(editing?'ID permanente · No se alterarán sus ofertas, estado ni orden':'La información del juego se sincroniza con los clientes')+'</small></div>'+ico('plus')+'</div><form id="game-form" class="form-grid" novalidate><label>ID único (sin espacios)<input name="id" placeholder="ej: mobile-legends" pattern="[a-z0-9-]{2,60}" value="'+esc(editing?.id||'')+'" '+(editing?'readonly aria-readonly="true"':'')+' required></label><label>Nombre del juego<input name="name" maxlength="90" placeholder="Nombre del producto" value="'+esc(editing?.name||'')+'" required></label><label>Categoría<input name="category" value="'+esc(editing?.tag||'Juegos')+'" maxlength="70" required></label><label>Imagen HTTPS<input name="imageUrl" type="url" placeholder="https://…" value="'+esc(editing?.imageUrl||'')+'"></label><label class="check wide"><input name="featured" type="checkbox" '+(editing?.featured?'checked':'')+'> Destacar en el inicio</label><div class="form-actions wide"><button class="btn primary" type="button" data-action="save-game">'+ico('check')+(editing?' Guardar cambios del juego':' Crear juego')+'</button>'+(editing?'<button class="btn ghost" type="button" data-action="cancel-edit-game">Cancelar edición</button>':'')+'</div></form><p class="footer-caption">Primero crea el juego. Después vincula las ofertas que quieras vender desde Central One.</p></section>'
  +'<section class="surface section"><div class="panel-head"><div><h2>Mis juegos</h2><small>'+games.length+' registrados · '+games.filter(g=>g.active).length+' publicados</small></div>'+ico('games')+'</div>'
  +'<div class="toolbar"><input type="search" id="filter-games" placeholder="Buscar juego…" value="'+esc(S.search)+'"><select id="game-filter"><option value="all">Todos</option><option value="active" '+(S.gameFilter==='active'?'selected':'')+'>Publicados</option><option value="archived" '+(S.gameFilter==='archived'?'selected':'')+'>Archivados</option></select></div>'
- +(filtered.length?'<div class="list">'+filtered.map(g=>'<div class="record"><div class="record-main"><img class="thumb" alt="" src="'+esc(/^https:\/\//.test(g.imageUrl||'')?g.imageUrl:'/REFILLSHOP/assets/refills-icon.png')+'"><div><h3>'+esc(g.name)+'</h3><small>'+esc(g.id)+' · '+esc(g.tag||'Juegos')+'</small></div></div><div class="row-actions">'+tag(g.active?'Publicado':'Archivado',g.active?'good':'warn')+'<button class="btn ghost small" data-action="edit-game" data-id="'+esc(g.id)+'">Editar</button>'+(g.active?'<button class="btn secondary small" data-page="offers">Ofertas</button>':'<button class="btn secondary small" data-action="restore-game" data-id="'+esc(g.id)+'">Restaurar</button>')+'<button class="btn danger small" data-action="delete-game" data-id="'+esc(g.id)+'">Eliminar</button></div></div>').join('')+'</div>':empty('Sin resultados','No hay juegos que coincidan.'))+'</section></div>';
+ +(filtered.length?'<div class="list">'+filtered.map(g=>'<div class="record"><div class="record-main"><img class="thumb" alt="" src="'+esc(/^https:\/\//.test(g.imageUrl||'')?g.imageUrl:'/REFILLSHOP/assets/refills-icon.png')+'"><div><h3>'+esc(g.name)+'</h3><small>'+esc(g.id)+' · '+esc(g.tag||'Juegos')+'</small></div></div><div class="row-actions">'+tag(g.active?'Publicado':'Archivado',g.active?'good':'warn')+'<button class="btn ghost small" data-action="edit-game" data-id="'+esc(g.id)+'">Editar</button>'+(g.active?'<button class="btn secondary small" data-page="offers" data-game="'+esc(g.id)+'">Ofertas</button>':'<button class="btn secondary small" data-action="restore-game" data-id="'+esc(g.id)+'">Restaurar</button>')+'<button class="btn danger small" data-action="delete-game" data-id="'+esc(g.id)+'">Eliminar</button></div></div>').join('')+'</div>':empty('Sin resultados','No hay juegos que coincidan.'))+'</section></div>';
 }
 
 
@@ -431,7 +431,7 @@ function updateSimpleOfferPreview(){
 }
 function drawOffers(){
  const games=(S.cache.games||[]).filter(g=>g.active),offers=S.cache.offers||[];
- const q=S.offerSearch.trim().toLowerCase(),gameFilter=S.offerGame||'all';
+ const gameFilter=games.some(g=>g.id===S.offerGame)?S.offerGame:'all';
  const filtered=offers.filter(o=>(S.offerFilter==='all'||(S.offerFilter==='active')===!!o.active)&&(gameFilter==='all'||o.game_id===gameFilter));
  const settings=S.cache.store?.config||{};
  const previews=o=>{const rate=Number(settings.buySmPerUsdt||0),cupRate=Number(settings.cupPerSm||0),cost=Math.ceil((Number(o.provider_price_usdt||0)-1e-10)*100)/100,margin=Number(o.margin_percent??games.find(g=>g.id===o.game_id)?.marginPercent??0);const usdt=margin>0?Math.floor((cost*(1+margin/100)+1e-9)*100)/100:cost;const sm=margin>0?Math.ceil(usdt*rate):Math.ceil(cost*rate+Number(o.gain_sm||0));const cup=Math.ceil(sm*cupRate);return sm>0&&cup>0?money(sm)+' SM / '+money(cup)+' CUP':'Revisar tasas'};
@@ -720,7 +720,7 @@ async function runAction(action,el){
  if(action==='customer-details')return openCustomer(id);
  if(action==='customer-reset')return openCustomerReset(id);
  if(action==='edit-offer')return openOfferEdit(id);
- if(action==='select-co'){S.product=id;if(S.page==='offers')drawOffers();else flash('Producto seleccionado. Abre Ofertas para vincularlo.');return}
+ if(action==='select-co'){S.product=id;S.offerTab='create';S.offerMode='centralone';if(S.page==='offers')drawOffers();else navigate('offers');return}
  if(action==='search-co')return withBusy(async()=>{S.coFilter=String($('co-search-inline')?.value||$('co-search')?.value||'').trim();S.coKind=$('co-kind')?.value||S.coKind;const result=await request('/admin/centralone/catalog?q='+encodeURIComponent(S.coFilter)+'&kind='+encodeURIComponent(S.coKind));S.cache.coProducts=result.products||[];S.product=S.cache.coProducts[0]?.productId||null;S.page==='offers'?drawOffers():drawCentral();flash((result.total||0)+' productos encontrados en Central One.');});
  if(action==='sync-co')return withBusy(async()=>{if(!await modalConfirm('¿Sincronizar costos y disponibilidad? No se enviará ninguna compra.'))return;const res=await request('/admin/centralone/sync',{method:'POST',body:{}});flash(res.message||'Catálogo sincronizado');await load()});
  if(action==='restore-game')return withBusy(async()=>{await request('/admin/restore-game',{method:'POST',body:{id}});flash('Juego restaurado. Las ofertas permanecen como borradores.');await load()});
@@ -756,7 +756,7 @@ async function runAction(action,el){
 document.addEventListener('click',e=>{
  const el=e.target.closest('button[data-page],button[data-action]');
  if(!el||el.disabled)return;
- if(el.dataset.page){navigate(el.dataset.page);return}
+ if(el.dataset.page){if(el.dataset.page==='offers'){if(S.page==='games'&&el.dataset.game){S.offerGame=el.dataset.game;S.offerTab='list'}else if(S.page==='centralone'){S.offerTab='create';S.offerMode='centralone'}}navigate(el.dataset.page);return}
  if(el.dataset.action)runAction(el.dataset.action,el).catch(guarded);
 });
 document.addEventListener('submit',async e=>{
@@ -793,7 +793,7 @@ document.addEventListener('submit',async e=>{
   else if(form.id==='co-catalog-key'){r=await request('/admin/centralone/connect',{method:'POST',body:{apiKey:data.apiKey}});form.reset();}
   else if(form.id==='co-orders-key'){r=await request('/admin/centralone/orders/connect',{method:'POST',body:{apiKey:data.apiKey}});form.reset();}
   else return;
-  if(form.id==='manual-offer-form'||form.id==='link-offer-form')S.offerTab='list';
+  if(form.id==='manual-offer-form'||form.id==='link-offer-form'){S.offerTab='list';S.offerGame=data.gameId;S.offerSearch='';S.offerFilter='all'}
   flash(r?.message||'Cambios confirmados por Supabase.');await load();
  });
 });
