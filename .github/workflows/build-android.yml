@@ -7,7 +7,7 @@ on:
       - 'android/**'
       - '.github/workflows/build-android.yml'
 permissions:
-  contents: read
+  contents: write
 jobs:
   build:
     runs-on: ubuntu-24.04
@@ -42,3 +42,33 @@ jobs:
           path: android/app/build/outputs/apk/debug/app-debug.apk
           if-no-files-found: error
           retention-days: 30
+
+      - name: Publish stable signed customer APK (requires signing secrets)
+        if: github.ref == 'refs/heads/main'
+        env:
+          KEYSTORE_B64: ${{ secrets.REFILLS_ANDROID_KEYSTORE_B64 }}
+          KEYSTORE_PASSWORD: ${{ secrets.REFILLS_ANDROID_KEYSTORE_PASSWORD }}
+          KEY_ALIAS: ${{ secrets.REFILLS_ANDROID_KEY_ALIAS }}
+          KEY_PASSWORD: ${{ secrets.REFILLS_ANDROID_KEY_PASSWORD }}
+          GH_TOKEN: ${{ github.token }}
+        run: |
+          set -euo pipefail
+          if [[ -z "$KEYSTORE_B64" || -z "$KEYSTORE_PASSWORD" || -z "$KEY_ALIAS" || -z "$KEY_PASSWORD" ]]; then
+            echo "::notice::Production APK signing is not configured; only the test artifact was built."
+            exit 0
+          fi
+          umask 077
+          KEYSTORE=$(mktemp)
+          trap 'rm -f "$KEYSTORE"' EXIT
+          printf '%s' "$KEYSTORE_B64" | base64 --decode > "$KEYSTORE"
+          gradle -p android :app:assembleRelease --no-daemon
+          "$ANDROID_HOME/build-tools/35.0.0/zipalign" -f -p 4 android/app/build/outputs/apk/release/app-release-unsigned.apk /tmp/refills-aligned.apk
+          "$ANDROID_HOME/build-tools/35.0.0/apksigner" sign --ks "$KEYSTORE" --ks-key-alias "$KEY_ALIAS" --ks-pass env:KEYSTORE_PASSWORD --key-pass env:KEY_PASSWORD --out Refills-Shop.apk /tmp/refills-aligned.apk
+          "$ANDROID_HOME/build-tools/35.0.0/apksigner" verify Refills-Shop.apk
+          VERSION=$(sed -n 's/.*versionCode \([0-9]*\).*/\1/p' android/app/build.gradle | head -n 1)
+          TAG="android-v$VERSION"
+          if gh release view "$TAG" >/dev/null 2>&1; then
+            echo "::notice::This version already exists. Increase versionCode to publish an update."
+          else
+            gh release create "$TAG" Refills-Shop.apk --target "$GITHUB_SHA" --title "Refills Shop Android $VERSION" --notes "APK oficial de clientes firmada. Android solicita confirmación para instalar o actualizar."
+          fi

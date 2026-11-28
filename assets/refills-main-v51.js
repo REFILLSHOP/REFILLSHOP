@@ -151,14 +151,14 @@ function rsTrackOrders(list){
   const game=String(o.gameName||'Producto digital').slice(0,70);
   if(previous.status!==current.status){
    if(current.status==='completed'){
-    rsAddNotice('completed','Recarga completada',game+' · Pedido '+code,'completed');shown++;if(s.page==='pedidos'&&!s.modal){s.selectedOrder=code;s.modal='order';}
+    try{window.RefillsAndroid?.orderEvent('completed')}catch{}rsAddNotice('completed','Recarga completada',game+' · Pedido '+code,'completed');shown++;if(s.page==='pedidos'&&!s.modal){s.selectedOrder=code;s.modal='order';}
    }else if(['failed','rejected','cancelled','refunded'].includes(current.status)){
     rsAddNotice('warning','Revisa tu pedido',game+' · Pedido '+code+' · '+clientOrderStatus(current.status).label,'warning');shown++;
    }else if(current.status==='processing'){
-    rsAddNotice('order','Pedido en proceso',game+' · Pedido '+code,'silent');shown++;
+    try{window.RefillsAndroid?.orderEvent('processing')}catch{}rsAddNotice('order','Pedido en proceso',game+' · Pedido '+code,'silent');shown++;
    }
   }else if(previous.payment!==current.payment&&current.payment==='paid'){
-   rsAddNotice('payment','Pago confirmado',game+' · Pedido '+code,'message');shown++;
+   try{window.RefillsAndroid?.orderEvent('payment')}catch{}rsAddNotice('payment','Pago confirmado',game+' · Pedido '+code,'message');shown++;
   }
  }
  rsNotice.orderState=Object.fromEntries(Object.entries(next).slice(-150));
@@ -1169,7 +1169,7 @@ function modal(){
   const ios=/iPad|iPhone|iPod/.test(navigator.userAgent);
   const android=/Android/i.test(navigator.userAgent);
   const isChrome=android&&/Chrome\//.test(navigator.userAgent);
-  html=modalTitle(rsNativeVersion?'Actualizar app':'Instalar app','Refills Shop')+'<div class="card panel rs-install-help rs-app-install-panel">'+(rsAppRelease?'<a class="btn primary full" href="'+esc(rsAppRelease.url)+'" target="_blank" rel="noopener noreferrer">'+(rsNativeVersion?'Descargar actualización APK':'Descargar APK Android')+'</a>':'<p class="helper">'+(rsAppChecked?'La APK oficial firmada todavía no está disponible.':'Comprobando la versión de Android…')+'</p>')+(!rsNativeVersion?'<button class="btn secondary full" data-action="install-pwa">Instalar aplicación web</button>':'')+(ios?'<p>En Safari, toca Compartir y luego Añadir a pantalla de inicio.</p>':'<p>Abre el menú ⋮ de tu navegador y selecciona Instalar aplicación o Añadir a pantalla de inicio.</p>')+'<p class="helper">Si no aparece Instalar, puedes crear un acceso directo.</p></div>';
+  html=modalTitle(rsNativeVersion?'Actualizar app':'Instalar app','Refills Shop')+'<div class="card panel rs-install-help rs-app-install-panel">'+(rsAppRelease?'<a class="btn primary full" href="'+esc(rsAppRelease.url)+'" target="_blank" rel="noopener noreferrer">'+(rsNativeVersion?'Descargar actualización APK':'Descargar APK Android')+'</a>':'<p class="helper">'+(rsAppChecked?'La APK oficial firmada todavía no está disponible.':'Comprobando la versión de Android…')+'</p>')+(!rsNativeVersion?'<button class="btn secondary full" data-action="install-pwa">Instalar aplicación web</button>':'')+(rsNativeVersion?'<button class="btn secondary full" data-action="enable-native-notices">Activar notificaciones de pedidos</button>':'')+(ios?'<p>En Safari, toca Compartir y luego Añadir a pantalla de inicio.</p>':'<p>Abre el menú ⋮ de tu navegador y selecciona Instalar aplicación o Añadir a pantalla de inicio.</p>')+'<p class="helper">Si no aparece Instalar, puedes crear un acceso directo.</p></div>';
   break;
  }
   case 'reseller-preview':{
@@ -1475,7 +1475,7 @@ case 'reseller-deposit-submit':void submitResellerDeposit();break;
 
 case 'nav':navigate(b.dataset.page);break;case 'modal-nav':navigate(b.dataset.page);break;
 case 'home-wallet-deposit':if(resellerHasPlan())openDepositCheckout();else{s.modal='wallet';modal()}break;
-case 'install-refills':requestRefillsInstallation();break;case 'install-pwa':void rsInstallPwa();break;case 'check-install-app':void checkRefillsInstall();break;case 'home-wallet-movements':s.modal='reseller-ledger';modal();break;
+case 'install-refills':requestRefillsInstallation();break;case 'install-pwa':void rsInstallPwa();break;case 'enable-native-notices':try{window.RefillsAndroid?.enable();}catch{}break;case 'check-install-app':void checkRefillsInstall();break;case 'home-wallet-movements':s.modal='reseller-ledger';modal();break;
 case 'wallet-select-currency':{s.resellerDepositMethod=b.dataset.currency;s.resellerDepositCurrency=b.dataset.currency==='SM'?'SM':b.dataset.currency==='USDT'?'USDT':'CUP';s.resellerDepositStage='details';modal();break;}
 case 'wallet-change-currency':{s.resellerDepositStage='methods';modal();break;}
 case 'wallet-copy-confirmation':{const val=String(s.resellerPortal?.paymentInstructions?.CUP?.confirmationPhone||s.paymentConfig.cupConfirmPhone||'').trim();if(!val){toast('Falta el número de confirmación de CUP');break;}void navigator.clipboard?.writeText(val).then(()=>toast('Número de confirmación copiado'),()=>toast('Mantén pulsado el número para copiarlo'));break;}

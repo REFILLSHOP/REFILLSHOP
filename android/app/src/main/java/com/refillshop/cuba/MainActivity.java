@@ -19,6 +19,8 @@ public class MainActivity extends Activity {
     private static final String SITE = "https://refillshop.github.io/REFILLSHOP/";
     private static final int FILE_PICKER_REQUEST = 4219;
     private WebView web;
+    private long lastNotice=0;
+    private static final String CHANNEL="refills_orders";
     private ValueCallback<Uri[]> fileCallback;
 
     @Override public void onCreate(Bundle state) {
@@ -31,6 +33,10 @@ public class MainActivity extends Activity {
         setContentView(web);
         WebSettings settings = web.getSettings();
         settings.setJavaScriptEnabled(true);
+        settings.setUserAgentString(settings.getUserAgentString()+" RefillsShopAndroid/3");
+        web.addJavascriptInterface(new Notices(),"RefillsAndroid");
+        android.app.NotificationManager manager=getSystemService(android.app.NotificationManager.class);
+        manager.createNotificationChannel(new android.app.NotificationChannel(CHANNEL,"Pedidos Refills Shop",android.app.NotificationManager.IMPORTANCE_DEFAULT));
         settings.setDomStorageEnabled(true);
         settings.setAllowFileAccess(false);
         settings.setAllowContentAccess(true);
@@ -49,7 +55,8 @@ public class MainActivity extends Activity {
                 if (uri == null) return true;
                 if (!"https".equalsIgnoreCase(uri.getScheme())) return true;
                 String host = uri.getHost();
-                if ("refillshop.github.io".equalsIgnoreCase(host)) return false;
+                if ("refillshop.github.io".equalsIgnoreCase(host) && uri.getPath()!=null && uri.getPath().startsWith("/REFILLSHOP/") && !uri.getPath().startsWith("/REFILLSHOP/admin/")) return false;
+                if ("refillshop.github.io".equalsIgnoreCase(host)) return true;
                 try {
                     Intent external = new Intent(Intent.ACTION_VIEW,uri);
                     external.addCategory(Intent.CATEGORY_BROWSABLE);
@@ -78,6 +85,27 @@ public class MainActivity extends Activity {
         web.loadUrl(SITE);
     }
 
+    private boolean trustedPage() {
+        if(web==null||web.getUrl()==null)return false;
+        Uri u=Uri.parse(web.getUrl());return "https".equals(u.getScheme())&&"refillshop.github.io".equals(u.getHost())&&u.getPath()!=null&&u.getPath().startsWith("/REFILLSHOP/")&&!u.getPath().startsWith("/REFILLSHOP/admin/");
+    }
+    private final class Notices {
+        @android.webkit.JavascriptInterface public void enable() {
+            runOnUiThread(()->{if(!trustedPage())return;if(android.os.Build.VERSION.SDK_INT>=33&&checkSelfPermission("android.permission.POST_NOTIFICATIONS")!=android.content.pm.PackageManager.PERMISSION_GRANTED)requestPermissions(new String[]{"android.permission.POST_NOTIFICATIONS"},402);});
+        }
+        @android.webkit.JavascriptInterface public void orderEvent(String type) {
+            runOnUiThread(()->{
+                if(!trustedPage()||!("completed".equals(type)||"payment".equals(type)||"processing".equals(type)))return;
+                if(android.os.Build.VERSION.SDK_INT>=33&&checkSelfPermission("android.permission.POST_NOTIFICATIONS")!=android.content.pm.PackageManager.PERMISSION_GRANTED)return;
+                long now=android.os.SystemClock.elapsedRealtime();if(now-lastNotice<1500)return;lastNotice=now;
+                String title="completed".equals(type)?"Recarga completada":"payment".equals(type)?"Pago confirmado":"Pedido en proceso";
+                Intent open=new Intent(MainActivity.this,MainActivity.class);open.addFlags(Intent.FLAG_ACTIVITY_SINGLE_TOP|Intent.FLAG_ACTIVITY_CLEAR_TOP);
+                android.app.PendingIntent pi=android.app.PendingIntent.getActivity(MainActivity.this,0,open,android.app.PendingIntent.FLAG_IMMUTABLE|android.app.PendingIntent.FLAG_UPDATE_CURRENT);
+                android.app.Notification n=new android.app.Notification.Builder(MainActivity.this,CHANNEL).setSmallIcon(android.R.drawable.stat_notify_more).setContentTitle(title).setContentText("Abre Refills Shop para consultar tu pedido.").setContentIntent(pi).setAutoCancel(true).build();
+                getSystemService(android.app.NotificationManager.class).notify((int)(now%Integer.MAX_VALUE),n);
+            });
+        }
+    }
     @Override protected void onActivityResult(int requestCode,int resultCode,Intent intent) {
         super.onActivityResult(requestCode,resultCode,intent);
         if (requestCode != FILE_PICKER_REQUEST) return;
@@ -95,6 +123,7 @@ public class MainActivity extends Activity {
     @Override protected void onDestroy() {
         if (fileCallback != null) {fileCallback.onReceiveValue(null); fileCallback = null;}
         if (web != null) {
+            web.removeJavascriptInterface("RefillsAndroid");
             web.loadUrl("about:blank");
             web.stopLoading();
             web.destroy();
