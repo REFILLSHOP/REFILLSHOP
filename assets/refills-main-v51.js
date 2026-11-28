@@ -151,7 +151,7 @@ function rsTrackOrders(list){
   const game=String(o.gameName||'Producto digital').slice(0,70);
   if(previous.status!==current.status){
    if(current.status==='completed'){
-    rsAddNotice('completed','Recarga completada',game+' · Pedido '+code,'completed');shown++;
+    rsAddNotice('completed','Recarga completada',game+' · Pedido '+code,'completed');shown++;if(s.page==='pedidos'&&!s.modal){s.selectedOrder=code;s.modal='order';}
    }else if(['failed','rejected','cancelled','refunded'].includes(current.status)){
     rsAddNotice('warning','Revisa tu pedido',game+' · Pedido '+code+' · '+clientOrderStatus(current.status).label,'warning');shown++;
    }else if(current.status==='processing'){
@@ -345,7 +345,7 @@ async function validAuthSession(){
   try{
    const refreshed=await authRequest('/auth/v1/token?grant_type=refresh_token',{method:'POST',body:{refresh_token:session.refresh_token}});
    session=saveAuthSession(refreshed);
-  }catch{clearAuthSession();return null}
+  }catch(error){if([400,401,403].includes(error?.status)){clearAuthSession();return null;}throw error;}
  }
  return session;
 }
@@ -360,7 +360,7 @@ async function edgeRequest(service,path,{method='GET',body,auth=true}={}){
  }
  let response;
  try{response=await fetch(base+path,{method,headers,body:body===undefined?undefined:JSON.stringify(body),credentials:'omit',cache:'no-store'})}
- catch{throw Error('No se pudo conectar con Refills Shop. Comprueba tu conexión.')}
+ catch{if(method==='GET'){try{response=await fetch(base+path,{method,headers,credentials:'omit',cache:'no-store',signal:AbortSignal.timeout(15000)});}catch{throw Error('No se pudo contactar con el servidor. Comprueba la VPN o cambia de red.');}}else throw Error('No se confirmó la respuesta del servidor. Consulta Mis pedidos antes de repetir el pago.');}
  const data=await response.json().catch(()=>({}));
  if(!response.ok){const err=new Error(data.error||data.message||'Servicio temporalmente no disponible.');err.status=response.status;throw err}
  return data;
@@ -677,7 +677,7 @@ function homeGameTile(g){
  const count=g.offers?.length||0;
  return `<button class="home-game-card-v4" data-action="open-item" data-id="${g.id}" aria-label="Abrir ${esc(g.name)}">
   <span class="home-game-art-v4"><img loading="lazy" decoding="async" src="${photo(g)}" alt="${esc(g.name)}"><i>${count?count+' '+(count===1?'oferta':'ofertas'):'Próximamente'}</i></span>
-  <span class="home-game-meta-v4"><strong>${esc(gameFamilyName(g))}</strong><small>${gameRegionOptions(g).length>1?gameRegionOptions(g).length+' regiones':esc(g.region||'Catálogo digital')}</small></span>
+  <span class="home-game-meta-v4"><strong>${esc(gameFamilyName(g))}</strong></span>
   <span class="home-game-arrow-v4">${I('arrow','tiny')}</span>
  </button>`;
 }
@@ -835,12 +835,11 @@ function catalogueFamilyCards(items){
  for(const g of items){
   const key=g.category==='juegos'?gameFamilyKey(g):g.id;
   if(seen.has(key))continue;seen.add(key);
-  const choices=gameRegionOptions(g);
   if(g.category!=='juegos'){result.push(card(g));continue}
   result.push('<article class="product product-horizontal product-clickable rs-family-card" data-action="open-item" data-id="'+esc(g.id)+'" role="button" tabindex="0" aria-label="Elegir región de '+esc(gameFamilyName(g))+'">'
   +'<div class="product-cover"><img loading="lazy" decoding="async" src="'+photo(g)+'" alt="'+esc(gameFamilyName(g))+'"></div>'
-  +'<div class="product-info"><strong class="product-name">'+esc(gameFamilyName(g))+'</strong><div class="product-kind">'+choices.length+' regiones disponibles</div><div class="product-desc">Selecciona la región de tu cuenta antes de comprar.</div></div>'
-  +'<div class="product-payment"><small>REGIONES</small><strong>'+choices.length+' opciones</strong><span class="product-tap-hint">Elegir región '+I('arrow','tiny')+'</span></div></article>');
+  +'<div class="product-info"><strong class="product-name">'+esc(gameFamilyName(g))+'</strong></div>'
+  +'<div class="product-payment rs-family-arrow">'+I('arrow','tiny')+'</div></article>');
  }
  return result.join('');
 }
@@ -987,6 +986,10 @@ function orderSummaryText(o){
   'Método: '+(o.payment||'—'),'Estado: '+clientOrderStatus(o.status).label,
   'Consulta tu pedido en https://refillshop.github.io/REFILLSHOP/'].join('\n');
 }
+function rsReserved(o){return o?.paymentStatus==='unpaid'&&(o.status==='uploading'||(o.method==='usdt_wallet'&&o.status==='pending'&&!o.paymentTxHash));}
+function rsReserveRemaining(o){const c=s.orderServerClock;return c&&Number.isFinite(c.server)&&Number.isFinite(Date.parse(o.expiresAt))?Math.max(0,Math.ceil((Date.parse(o.expiresAt)-c.server-(performance.now()-c.mono))/1000)):null;}
+function rsReserveTime(o){const n=rsReserveRemaining(o);return n===null?'--:--':String(Math.floor(n/60)).padStart(2,'0')+':'+String(n%60).padStart(2,'0');}
+function rsReserveActions(o){if(!rsReserved(o))return '';return '<div class="rs-reserve-actions"><span class="rs-reserve-clock" data-reserve-clock="'+esc(o.ref)+'">'+rsReserveTime(o)+'</span><button class="btn primary small" data-action="'+(o.method==='usdt_wallet'?'resume-usdt':'resume-reserved')+'" data-ref="'+esc(o.ref)+'">Continuar pago</button><button class="btn ghost small" data-action="cancel-reserved" data-ref="'+esc(o.ref)+'">Cancelar</button></div>';}
 function orders(){
  const list=Array.isArray(s.orders)?s.orders:[];
  const pending=list.filter(o=>['pending','processing'].includes(clientOrderStatus(o.status).key));
@@ -1004,7 +1007,7 @@ function orders(){
     '<div class="rs-orders-compact-list">'+shown.map(o=>{
      const st=clientOrderStatus(o.status),total=o.totalText||fmtMoney(o.total)+' '+(o.currency||'CUP');
      return '<article class="card rs-order-compact-card"><div class="rs-order-compact-top"><div><small>#'+esc(o.ref||'—')+' · '+esc(o.date||'')+'</small><h2>'+esc(o.gameName||'Compra digital')+'</h2></div><span class="order-status-v4 '+st.key+'">'+esc(st.label)+'</span></div>'+
-      '<p class="rs-order-compact-package">'+esc(o.offer||'Oferta')+'</p>'+
+      '<p class="rs-order-compact-package">'+esc(o.offer||'Oferta')+'</p>'+rsReserveActions(o)+
       '<div class="rs-order-compact-bottom"><strong>'+esc(total)+'</strong><div><button class="btn secondary small" data-action="order-details" data-ref="'+esc(o.ref)+'">Ver pedido</button><button class="btn ghost small" data-action="share-order-summary" data-ref="'+esc(o.ref)+'">Compartir</button></div></div></article>';
     }).join('')+'</div>')+
   '<p class="rs-order-help">Los pedidos con Central One se comprueban automáticamente. Un pago confirmado no significa que el paquete ya esté entregado.</p></div>';
@@ -1095,6 +1098,7 @@ async function startPaymentReservation(button){
  const requestId=newRequestId();
  const sourcePhone=method==='mobile'?String(document.getElementById('rs-sm-source-reserve')?.value||'').trim():'';
  if(method==='mobile'&&!/^[56][0-9]{7}$/.test(sourcePhone)){toast('Escribe los 8 dígitos de la línea que enviará el saldo.');return;}
+ if(method==='mobile'&&sourcePhone===String(s.paymentConfig.smReceiver||'').replace(/\D/g,'').slice(-8)){toast('Ese es el número receptor. Escribe el número desde el que enviarás el saldo.');return;}
  button.disabled=true;button.textContent='Preparando pago seguro…';
  try{
   const result=await edgeRequest('rs10-api','/orders/start',{method:'POST',auth:true,body:{
@@ -1206,12 +1210,12 @@ function modal(){
   +'<small>MÉTODO</small><strong>'+esc(paymentName())+'</strong>'
   +'<small>TOTAL</small><strong class="rs-confirm-total">'+(total?formatPriceValue(total.amount,total.currency):'No disponible')+'</strong></div>'
   + (s.payment==='sm'?'<label class="rs-coupon-label">Número desde el que enviarás el saldo<input id="rs-sm-source-reserve" class="field" type="tel" inputmode="numeric" maxlength="8" placeholder="8 dígitos" required></label><small class="rs-rank-note">Se comprueba antes de transferir para evitar pedidos duplicados de la misma línea.</small>':'')
-  + (s.payment==='balance'?'':'<label class="rs-coupon-label">Cupón de descuento (opcional)<input id="rs-coupon-input" class="field" maxlength="40" autocomplete="off" placeholder="Introduce tu código"></label><small class="rs-rank-note">El servidor comprueba el cupón y muestra el total definitivo antes de pagar.</small>')+'<p class="rs-confirm-warning">Después de confirmar tendrás 20 minutos para registrar el envío del pago. Si no lo haces, el pedido pasará a fallido.</p>'
+  + (s.payment==='balance'?'':'<label class="rs-coupon-label">Cupón de descuento (opcional)<input id="rs-coupon-input" class="field" maxlength="40" autocomplete="off" placeholder="Introduce tu código"></label><small class="rs-rank-note">El servidor comprueba el cupón y muestra el total definitivo antes de pagar.</small>')+'<p class="rs-confirm-warning">Después de confirmar tendrás 30 minutos para registrar el envío del pago. Si no lo haces, el pedido pasará a fallido.</p>'
   +'<button class="btn primary full" data-action="start-payment">Confirmar y continuar al pago</button><button class="btn ghost full" data-action="close">Corregir datos</button></div>';
  break;
 }
 case 'checkout':
-  html=modalTitle('Realizar pago',s.payment==='balance'?'Confirmación con saldo de revendedor':s.payment==='sm'?'Transfiere el saldo y confirma el envío dentro de 20 minutos':'Envía el comprobante dentro del plazo de 20 minutos')+
+  html=modalTitle('Realizar pago',s.payment==='balance'?'Confirmación con saldo de revendedor':s.payment==='sm'?'Transfiere el saldo y confirma el envío dentro de 30 minutos':'Envía el comprobante dentro del plazo de 30 minutos')+
   `<div class="rs-checkout-simple"><div class="rs-payment-deadline" ${s.payment==='balance'?'hidden':''}><span>TIEMPO RESTANTE</span><strong id="rs-deadline-clock">--:--</strong><small>${s.payment==='sm'?'Si no confirmas el envío, la solicitud vencerá automáticamente.':'Si no envías el comprobante, la solicitud vencerá automáticamente.'}</small></div>
    <div class="rs-checkout-total"><div><span>IMPORTE EXACTO</span><strong>${total?formatPriceValue(total.amount,total.currency):'No disponible'}</strong>${total&&s.payment!=='balance'?'<button class="btn secondary small" type="button" data-action="copy-pay-amount">Copiar importe</button>':''}</div><div><small>${esc(g?.name||'Recarga')} · ${esc(o?.title||'Paquete')}</small><small>Destino: ${esc(s.player||'Según producto')}</small>${s.checkoutSession?.couponCode?'<small>Cupón aplicado: '+esc(s.checkoutSession.couponCode)+'</small>':''}</div></div>
    <div class="rs-checkout-method"><span>${paymentVisual(s.payment)}<strong>${esc(paymentName())}</strong></span><span class="rs-payment-fixed">CONFIRMADO</span></div>
@@ -1340,14 +1344,23 @@ case 'checkout':
   html=modalTitle('¿Cómo funciona?','Compra en tres pasos')+`<div class="setting"><span class="set-icon">${I('search')}</span><span class="set-copy"><strong>1. Busca tu juego</strong><small>Explora el catálogo y selecciona tu recarga.</small></span></div><div class="setting"><span class="set-icon">${I('diamond')}</span><span class="set-copy"><strong>2. Escribe el ID y elige el paquete</strong><small>Indica el destinatario y el método de pago.</small></span></div><div class="setting"><span class="set-icon">${I('check')}</span><span class="set-copy"><strong>3. Confirma tu pedido</strong><small>Consulta su estado desde el apartado Pedidos.</small></span></div><button class="btn primary full" data-action="modal-nav" data-page="recargas">Ir al catálogo</button>`;break;
  case 'news':
   html=modalTitle('Ofertas y novedades')+`<div class="small-banner">Consulta las promociones disponibles en el catálogo.</div><div class="section-head"><h2>Juegos populares</h2></div><div class="grid-media" style="grid-template-columns:repeat(4,minmax(0,1fr))">${['freefire','mlbb','pubg','honor'].map(id=>minitile(itemBy(id))).join('')}</div>`;break;
- case 'order':{
+ case 'resume-reserved':{
+   const current=s.orders.find(x=>x.ref===s.resumeOrderRef);
+   if(!rsReserved(current)){html=modalTitle('Pedido actualizado','Consulta el estado en Mis pedidos');break;}
+   const method=current.method,recipient=method==='mobile'?s.paymentConfig.smReceiver:method==='card'?s.paymentConfig.cupCard:s.paymentConfig.mitransferPhone;
+   html=modalTitle('Continuar pago','Reserva '+esc(current.ref))+'<div class="rs-checkout-simple"><div class="rs-payment-deadline"><span>TIEMPO RESTANTE</span><strong data-reserve-clock="'+esc(current.ref)+'">'+rsReserveTime(current)+'</strong><small>Usa el importe reservado. No repitas un pago ya enviado.</small></div><div class="rs-checkout-total"><div><span>IMPORTE EXACTO</span><strong>'+esc(current.totalText)+'</strong></div><small>'+esc(current.gameName)+' · '+esc(current.offer)+'</small></div><div class="rs-pay-copy-card"><h3>Cuenta receptora</h3><div class="rs-pay-dest-value"><code>'+esc(recipient||'No disponible')+'</code><button class="btn secondary small" data-action="copy-resume-recipient">Copiar</button></div></div>'+
+   (method==='mobile'?'<label class="rs-coupon-label">Línea desde la que transferiste<input id="resume-source-phone" class="field" type="tel" maxlength="8" inputmode="numeric" value="'+esc(current.sourcePhone||'')+'" '+(current.sourcePhone?'readonly':'')+'></label>':'<label class="rs-coupon-label">Comprobante<input id="resume-proof" class="field" type="file" accept="image/png,image/jpeg,image/webp"></label><label class="rs-coupon-label">Número de transacción<input id="resume-reference" class="field" maxlength="80"></label>')+
+   '<button class="btn primary full" data-action="submit-reserved">Ya pagué</button><button class="btn ghost full" data-action="cancel-reserved" data-ref="'+esc(current.ref)+'">Cancelar reserva</button></div>';
+   break;
+  }
+  case 'order':{
   const current=s.orders.find(x=>x.ref===s.selectedOrder);
   const st=clientOrderStatus(current?.status);
-  html=modalTitle('Pedido #'+esc(current?.ref||''),'Tu compra y estado de entrega')+
+  html=modalTitle('Pedido #'+esc(current?.ref||''),'Tu compra y estado de entrega')+(st.key==='complete'?'<div class="rs-complete-screen"><div class="rs-complete-icon">'+I('check')+'</div><h2>¡Recarga completada!</h2><p>Tu producto ha sido entregado correctamente.</p></div>':'')+
    (current?'<div class="rs-order-modal-head"><div><strong>'+esc(current.gameName||'Compra digital')+'</strong><small>'+esc(current.offer||'Paquete')+'</small></div><span class="order-status-v4 '+st.key+'">'+esc(st.label)+'</span></div>'+
     '<div class="rs-order-modal-total">'+esc(current.totalText||fmtMoney(current.total)+' '+(current.currency||'CUP'))+'</div>'+
     '<div class="rs-order-modal-fields"><div><span>ID / destino</span><strong>'+esc(current.player||'—')+'</strong></div><div><span>Pago</span><strong>'+esc(current.payment||'—')+'</strong></div><div><span>Fecha</span><strong>'+esc(current.date||'—')+'</strong></div></div>'+
-    '<div class="rs-order-modal-actions"><button class="btn primary" data-action="share-order-summary" data-ref="'+esc(current.ref)+'">Enviar resumen</button><button class="btn secondary" data-action="copy-order-summary" data-ref="'+esc(current.ref)+'">Copiar resumen</button><button class="btn ghost" data-action="refresh-orders">Actualizar estado</button></div>'+
+    rsReserveActions(current)+'<div class="rs-order-modal-actions"><button class="btn primary" data-action="share-order-summary" data-ref="'+esc(current.ref)+'">Enviar resumen</button><button class="btn secondary" data-action="copy-order-summary" data-ref="'+esc(current.ref)+'">Copiar resumen</button><button class="btn ghost" data-action="refresh-orders">Actualizar estado</button></div>'+
     '<p class="rs-order-modal-hint">'+(st.key==='complete'?'Central One o administración confirmó la entrega.':st.key==='processing'?'Tu pedido sigue en proceso; consultaremos Central One automáticamente.':'El pedido está en revisión. Consulta el estado aquí.')+'</p>':
     '<div class="empty">No se encontró el pedido. Actualiza la lista.</div>');
   break;
@@ -1693,6 +1706,34 @@ if(a==='copy-pay-recipient'){
  const value=s.payment==='cup'?s.paymentConfig.cupCard:s.payment==='mitransfer'?s.paymentConfig.mitransferPhone:s.payment==='sm'?s.paymentConfig.smReceiver:s.payment==='usdt'?s.paymentConfig.usdtAddress:'';
  await copyPaymentValue(value,b);return;
 }
+if(a==='resume-reserved'){
+ const o=s.orders.find(x=>x.ref===b.dataset.ref);if(!rsReserved(o)||!(rsReserveRemaining(o)>0)){toast('Reserva vencida o actualizada. Revisa el estado.');return;}
+ s.resumeOrderRef=o.ref;s.modal='resume-reserved';modal();return;
+}
+if(a==='copy-resume-recipient'){const o=s.orders.find(x=>x.ref===s.resumeOrderRef);await copyPaymentValue(o?.method==='mobile'?s.paymentConfig.smReceiver:o?.method==='card'?s.paymentConfig.cupCard:s.paymentConfig.mitransferPhone,b);return;}
+if(a==='cancel-reserved'){
+ if(!window.confirm('¿Cancelar el pedido? Confirma únicamente si NO realizaste ninguna transferencia.'))return;
+ b.disabled=true;try{await edgeRequest('rs10-api','/orders/cancel',{method:'POST',auth:true,body:{code:b.dataset.ref,confirmNoPayment:true}});s.modal=null;await loadCustomerOrders();render();toast('Reserva cancelada.');}catch(err){toast(err.message);b.disabled=false;}return;
+}
+if(a==='submit-reserved'){
+ const o=s.orders.find(x=>x.ref===s.resumeOrderRef);
+ if(!rsReserved(o)||!(rsReserveRemaining(o)>0)){toast('Reserva vencida o actualizada. No vuelvas a pagar.');return;}
+ if(!window.confirm('¿Ya enviaste el importe exacto a la cuenta receptora?'))return;
+ b.disabled=true;
+ try{
+  const sourcePhone=o.method==='mobile'?String(document.getElementById('resume-source-phone')?.value||'').trim():'';
+  if(o.method==='mobile'&&(!/^[56][0-9]{7}$/.test(sourcePhone)||sourcePhone===String(s.paymentConfig.smReceiver||'').replace(/\D/g,'').slice(-8)))throw Error('Escribe la línea emisora, no la receptora.');
+  let receipt='',paymentReference='';
+  if(o.method!=='mobile'){
+   paymentReference=String(document.getElementById('resume-reference')?.value||'').trim();
+   if(o.method==='card'&&!paymentReference)throw Error('Introduce el número de transacción.');
+   const f=document.getElementById('resume-proof')?.files?.[0];if(!f||f.size>5242880||!['image/jpeg','image/png','image/webp'].includes(f.type))throw Error('Adjunta una captura válida de hasta 5 MB.');
+   receipt=await new Promise((resolve,reject)=>{const rd=new FileReader();rd.onload=()=>resolve(rd.result);rd.onerror=()=>reject(Error('No se pudo leer el archivo'));rd.readAsDataURL(f);});
+  }
+  await edgeRequest('rs10-api','/orders',{method:'POST',auth:true,body:{gameId:o.gameId,offerId:o.offerId,clientRequestId:o.requestId,method:o.method,playerId:o.player,targetPayload:o.targetPayload,quotedAmount:o.total,quotedCurrency:o.currency,sourcePhone,paymentReference,receipt}});
+  s.modal=null;await loadCustomerOrders();render();toast('Pago registrado. Consulta el estado en Mis pedidos.');
+ }catch(err){toast(err.message);b.disabled=false;}return;
+}
 if(a==='copy-usdt-address'){await copyPaymentValue(s.usdtPayment?.address,b);return;}
 if(a==='resume-usdt'){
  const order=s.orders.find(x=>x.ref===b.dataset.ref);if(!order||order.paymentStatus==='paid')return;
@@ -1723,6 +1764,7 @@ if(a==='send-order'){
  try{targetPayload=playerTargetData(o,true)}catch(err){toast(err.message);return}
  const player=String(s.player||'').trim();
  if(o.kind!=='pin'&&!player&&!Object.keys(targetPayload).length){toast('Escribe el ID de jugador.');return}
+ if(s.payment!=='balance'&&!window.confirm('¿Confirmas que ya realizaste la transferencia al número o cuenta indicada? No confirmes si aún no has enviado el dinero.'))return;
  b.disabled=true;b.textContent='Registrando pedido…';
  try{
   let result;
@@ -1741,7 +1783,8 @@ if(a==='send-order'){
    const quotedCurrency=method==='mobile'?'SM':method==='usdt_wallet'?'USDT':'CUP';
    if(!Number.isFinite(quotedAmount)||quotedAmount<=0)throw Error('El precio no está disponible.');
    const sourcePhone=method==='mobile'?String(document.getElementById('payment-source-phone')?.value||'').trim():'';
-   if(method==='mobile'&&!/^[0-9]{8}$/.test(sourcePhone))throw Error('Introduce los 8 dígitos de la línea que envió saldo.');
+   if(method==='mobile'&&!/^[56][0-9]{7}$/.test(sourcePhone))throw Error('Introduce los 8 dígitos de la línea que envió saldo.');
+   if(method==='mobile'&&sourcePhone===String(s.paymentConfig.smReceiver||'').replace(/\D/g,'').slice(-8))throw Error('Ese es el número receptor. Indica el número desde el que enviaste el saldo.');
    const paymentReference=['card','wallet'].includes(method)?String(document.getElementById('payment-reference')?.value||'').trim():'';
    if(method==='card'&&!paymentReference)throw Error('Escribe el número de confirmación que aparece en el comprobante de Transfermóvil.');
    if(paymentReference&&!/^[A-Za-z0-9][A-Za-z0-9._/-]{3,79}$/.test(paymentReference))throw Error('La referencia del comprobante contiene caracteres no válidos.');
@@ -1783,13 +1826,13 @@ async function loadCustomerOrders(){
    if(s.user?.id!==uid)return;
    const oldOrdersJson=JSON.stringify(s.orders||[]);
    const items=(Array.isArray(result.orders)?result.orders:[]).map(x=>({
-    id:x.id,ref:x.code,gameName:x.game,offer:x.offer,player:x.playerId||'PIN',
+    id:x.id,ref:x.code,gameName:x.game,offer:x.offer,player:x.playerId||'PIN',method:x.method,gameId:x.gameId,offerId:x.offerId,requestId:x.requestId,sourcePhone:x.sourcePhone||'',targetPayload:x.targetPayload||{},couponCode:x.couponCode,expiresAt:x.expiresAt,
     payment:x.method==='mobile'?'Saldo móvil':x.method==='card'?'Transfermóvil':x.method==='wallet'?'MiTransfer':x.method==='usdt_wallet'?'USDT Wallet BEP-20':x.method==='usdt_bep20'?'USDT BEP-20':x.method,
     total:x.amount,currency:x.currency,status:x.status,paymentStatus:x.paymentStatus||'unpaid',
     paymentReference:x.paymentReference||'',paymentTxHash:x.paymentTxHash||'',refundReference:x.refundReference||'',
     date:x.created?formatShopDateTime(x.created):'',totalText:(Number(x.amount||0).toLocaleString('es-ES')+' '+(x.currency||''))
    }));
-   s.orders=items;
+   s.orderServerClock={server:Date.parse(result.serverNow),mono:performance.now()};s.orders=items;
    rsTrackOrders(items);
    if((s.page==='pedidos'||s.page==='perfil')&&JSON.stringify(items)!==oldOrdersJson){
     const y=window.scrollY;render();window.scrollTo(0,y);
@@ -1833,7 +1876,7 @@ async function loadLiveCatalog(silent=false){
  }catch(error){
   if(silent){console.warn('Refills Shop catalog refresh:',error?.message||error);return}
   s.catalogLoading=false;s.catalogError=error?.message||'No se pudo actualizar el catálogo desde Supabase';
-  ITEMS.length=0;render();console.warn('Refills Shop storefront:',s.catalogError);
+  render();console.warn('Refills Shop storefront:',s.catalogError);
  }
 }
 let requestedPage='inicio';
@@ -1849,7 +1892,7 @@ loadLiveCatalog();
 /* Un solo programador, sin hacer consultas ni repintar mientras la app está oculta. */
 const rsPollLast={orders:-Infinity,changes:-Infinity,catalog:-Infinity,recent:-Infinity,reseller:-Infinity};const rsPollActive=new Set();
 function rsUpdateCycle(force=false){
- if(document.visibilityState!=='visible'||navigator.onLine===false)return;
+ if(document.visibilityState!=='visible')return;
  const now=performance.now();
  const slow=!!navigator.connection?.saveData||/^(slow-2g|2g)$/.test(String(navigator.connection?.effectiveType||''));
  const multiplier=slow?1.6:1;
@@ -1863,12 +1906,13 @@ function rsUpdateCycle(force=false){
   due('changes',90000,()=>loadPublicChanges(true));
   if(s.member)due('reseller',110000,()=>rsPollResellerEvents());
  }
- if(['inicio','recargas','gift','perfil','pedidos'].includes(s.page)&&!s.modal){
-  due('catalog',90000,()=>loadLiveCatalog(true));
+ if(['inicio','recargas','gift'].includes(s.page)&&!s.modal){
+  due('catalog',180000,()=>loadLiveCatalog(true));
  }
  if(s.page==='inicio')due('recent',90000,()=>loadRecentTopups(true));
 }
 window.setInterval(()=>rsUpdateCycle(false),12000);
+window.setInterval(()=>{if(document.visibilityState!=='visible')return;for(const el of document.querySelectorAll('[data-reserve-clock]')){const o=s.orders.find(x=>x.ref===el.dataset.reserveClock);if(o)el.textContent=rsReserveTime(o);}},1000);
 document.addEventListener('visibilitychange',()=>{if(document.visibilityState==='visible'){void syncPaymentClock();rsUpdateCycle(false)}});
 window.addEventListener('online',()=>{void syncPaymentClock();rsUpdateCycle(true)});
 
