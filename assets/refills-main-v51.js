@@ -326,26 +326,29 @@ function clearAuthSession(){
  s.authSession=null;
  try{localStorage.removeItem(RS_AUTH_STORE);localStorage.removeItem('sb-kcgjlnymhmxylrjchcvl-auth-token');sessionStorage.removeItem(RS_AUTH_STORE);sessionStorage.removeItem('sb-kcgjlnymhmxylrjchcvl-auth-token')}catch{}
 }
+async function rsTimedFetch(url,options={},timeout=20000){
+ const controller=new AbortController(),timer=setTimeout(()=>controller.abort(),timeout);
+ try{return await fetch(url,{...options,signal:controller.signal});}finally{clearTimeout(timer);}
+}
 async function authRequest(path,{method='GET',body,token}={}){
  const headers={apikey:RS_SUPABASE_KEY,Accept:'application/json'};
  if(body!==undefined)headers['Content-Type']='application/json';
  if(token)headers.Authorization='Bearer '+token;
  let response;
- try{response=await fetch(RS_SUPABASE_URL+path,{method,headers,body:body===undefined?undefined:JSON.stringify(body),credentials:'omit',cache:'no-store'})}
- catch{throw Error('No se pudo conectar con el servicio de cuentas. Comprueba tu conexión.')}
+ try{response=await rsTimedFetch(RS_SUPABASE_URL+path,{method,headers,body:body===undefined?undefined:JSON.stringify(body),credentials:'omit',cache:'no-store'})}
+ catch{if(method==='GET'){try{response=await rsTimedFetch(RS_SUPABASE_URL+path,{method,headers,credentials:'omit',cache:'no-store'});}catch{throw Error('No se pudo conectar con el servicio de cuentas. Revisa la VPN o intenta otra red.');}}else throw Error('No se confirmó la conexión con el servicio de cuentas. Inténtalo de nuevo.');}
  const data=await response.json().catch(()=>({}));
  if(!response.ok){const err=new Error(data.msg||data.message||data.error_description||data.error||'No se pudo completar la autenticación.');err.status=response.status;throw err}
  return data;
 }
+let rsSessionRefresh=null;
 async function validAuthSession(){
  if(!s.authSession)s.authSession=authStoredSession();
  let session=s.authSession;
  if(!session?.access_token||!session?.refresh_token)return null;
  if(Number(session.expires_at||0)<Math.floor(Date.now()/1000)+90){
-  try{
-   const refreshed=await authRequest('/auth/v1/token?grant_type=refresh_token',{method:'POST',body:{refresh_token:session.refresh_token}});
-   session=saveAuthSession(refreshed);
-  }catch(error){if([400,401,403].includes(error?.status)){clearAuthSession();return null;}throw error;}
+  if(!rsSessionRefresh)rsSessionRefresh=(async()=>{try{const refreshed=await authRequest('/auth/v1/token?grant_type=refresh_token',{method:'POST',body:{refresh_token:session.refresh_token}});return saveAuthSession(refreshed);}catch(error){if([400,401,403].includes(error?.status)){clearAuthSession();return null;}throw error;}})().finally(()=>{rsSessionRefresh=null;});
+  session=await rsSessionRefresh;
  }
  return session;
 }
@@ -359,8 +362,8 @@ async function edgeRequest(service,path,{method='GET',body,auth=true}={}){
   headers.Authorization='Bearer '+session.access_token;
  }
  let response;
- try{response=await fetch(base+path,{method,headers,body:body===undefined?undefined:JSON.stringify(body),credentials:'omit',cache:'no-store'})}
- catch{if(method==='GET'){try{response=await fetch(base+path,{method,headers,credentials:'omit',cache:'no-store',signal:AbortSignal.timeout(15000)});}catch{throw Error('No se pudo contactar con el servidor. Comprueba la VPN o cambia de red.');}}else throw Error('No se confirmó la respuesta del servidor. Consulta Mis pedidos antes de repetir el pago.');}
+ try{response=await rsTimedFetch(base+path,{method,headers,body:body===undefined?undefined:JSON.stringify(body),credentials:'omit',cache:'no-store'},method==='GET'?20000:60000)}
+ catch{if(method==='GET'){try{response=await rsTimedFetch(base+path,{method,headers,credentials:'omit',cache:'no-store'},15000);}catch{throw Error('No se pudo contactar con el servidor. Comprueba la VPN o cambia de red.');}}else throw Error('No se confirmó la respuesta del servidor. Consulta Mis pedidos antes de repetir el pago.');}
  const data=await response.json().catch(()=>({}));
  if(!response.ok){const err=new Error(data.error||data.message||'Servicio temporalmente no disponible.');err.status=response.status;throw err}
  return data;
@@ -1142,13 +1145,13 @@ function checkoutPaymentInstructions(){
  method==='sm'?{name:'Línea que recibe saldo móvil',value:s.paymentConfig.smReceiver,type:'Saldo móvil'}:
  method==='usdt'?{name:'Dirección USDT BEP-20',value:s.paymentConfig.usdtAddress,type:'BNB Smart Chain'}:
  {name:'Saldo de tu cuenta Refills Shop',value:'',type:'Wallet revendedor'};
- const explanation=method==='sm'?'Envía el saldo a esta línea. Escribe el número desde el que transferiste y pulsa Ya envié el saldo. Comprobaremos el ingreso antes de recargar.':
+ const explanation=method==='sm'?'Envía el saldo a esta línea. Escribe el número desde el que transferiste y pulsa Ya pagué. Comprobaremos el ingreso antes de recargar.':
  method==='cup'?'Transfiere el importe exacto a la tarjeta indicada. El número de confirmación es un dato adicional de Transfermóvil, no otra tarjeta. Adjunta el comprobante; verificaremos el ingreso antes de entregar.':
  method==='mitransfer'?'Envía CUP a este teléfono mediante MiTransfer. Indica el número de la operación para localizarla. Se verificará la recepción antes de entregar.':
  method==='usdt'?'Primero crearemos el pedido y luego verás esta dirección y el campo de hash. Usa solo USDT BEP-20; el servidor comprobará token, importe y confirmaciones.':
  'El importe se descontará del saldo de tu wallet de revendedor después de validar disponibilidad.';
  return '<section class="rs-pay-destination" aria-label="Datos para realizar el pago">'
-  +'<div class="rs-pay-dest-head"><span>DATOS PARA PAGAR</span><span class="rs-pay-dest-mode">'+(['sm','cup','mitransfer'].includes(method)?'DETECCIÓN AUTOMÁTICA · EN REVISIÓN':'VERIFICACIÓN AUTOMÁTICA')+'</span></div>'
+  +'<div class="rs-pay-dest-head"><span>DATOS PARA PAGAR</span><span class="rs-pay-dest-mode">'+(method==='sm'||(method==='cup'&&s.paymentConfig.transfermovilAutoEnabled)||(method==='mitransfer'&&s.paymentConfig.mitransferAutoEnabled)?'VERIFICACIÓN AUTOMÁTICA':(['cup','mitransfer'].includes(method)?'EN REVISIÓN':'VERIFICACIÓN AUTOMÁTICA'))+'</span></div>'
   +'<div class="rs-pay-copy-card"><h3>'+esc(data.name)+'</h3>'
   +(data.value?'<div class="rs-pay-dest-value"><code>'+esc(data.value)+'</code><button class="btn secondary small" type="button" data-action="copy-pay-recipient">'+(method==='cup'?'Copiar tarjeta':method==='usdt'?'Copiar dirección':'Copiar número')+'</button></div>':'<div class="rs-pay-dest-value rs-pay-wallet-info">Pago desde tu saldo disponible</div>')+'</div>'
   +(method==='cup'?'<div class="rs-cup-confirm-data rs-pay-copy-card"><h3>Número de confirmación de Transfermóvil</h3>'
@@ -1222,10 +1225,10 @@ case 'checkout':
    ${checkoutPaymentInstructions()}
    ${Array.isArray(o?.targetSchema)&&o.targetSchema.length?'<div class="rs-checkout-confirmed"><strong>Datos de jugador guardados</strong>'+Object.entries(playerTargetData(o)).map(([key,value])=>'<span>'+esc((o.targetSchema.find(f=>f.key===key)||{}).label||key)+': <b>'+esc(value)+'</b></span>').join('')+'<small>Se tomaron de la pantalla anterior. Para cambiarlos, cierra el pago y vuelve al juego.</small></div>':''}
    ${s.payment==='sm'?'<div class="rs-checkout-inputs"><label class="sheet-label" for="payment-source-phone">Número que transfirió el saldo móvil</label><input id="payment-source-phone" class="field" type="tel" inputmode="numeric" pattern="[0-9]{8}" maxlength="8" placeholder="8 dígitos" value="'+esc(s.checkoutSession?.sourcePhone||'')+'" '+(s.checkoutSession?.sourcePhone?'readonly':'')+' required><small>Confirma solo después de transferir el importe exacto.</small></div>':''}
-   ${s.payment==='cup'?'<div class="rs-checkout-inputs"><label class="sheet-label" for="payment-proof">Captura del comprobante</label><input id="payment-proof" class="field rs-proof-input" type="file" accept="image/png,image/jpeg,image/webp" required><small>JPG, PNG o WEBP · máximo 5 MB.</small><label class="sheet-label" for="payment-reference">Número de confirmación de la transferencia</label><input id="payment-reference" class="field" type="text" autocomplete="off" minlength="4" maxlength="80" placeholder="Código que aparece en Transfermóvil" required><small>Es obligatorio para identificar y revisar el pago.</small></div>':s.payment==='mitransfer'?'<div class="rs-checkout-inputs"><label class="sheet-label" for="payment-proof">Captura del comprobante</label><input id="payment-proof" class="field rs-proof-input" type="file" accept="image/png,image/jpeg,image/webp" required><small>JPG, PNG o WEBP · máximo 5 MB.</small><label class="sheet-label" for="payment-reference">Número de operación (opcional)</label><input id="payment-reference" class="field" type="text" autocomplete="off" maxlength="80" placeholder="Si aparece en tu comprobante"><small>Confirmaremos que el importe llegó a la cuenta receptora.</small></div>':''}
+   ${s.payment==='cup'?'<div class="rs-checkout-inputs"><label class="sheet-label" for="payment-proof">Captura del comprobante</label><input id="payment-proof" class="field rs-proof-input" type="file" accept="image/png,image/jpeg,image/webp" required><small>JPG, PNG o WEBP · máximo 5 MB.</small><label class="sheet-label" for="payment-reference">Número de confirmación de la transferencia</label><input id="payment-reference" class="field" type="text" autocomplete="off" minlength="4" maxlength="80" placeholder="Código que aparece en Transfermóvil" required><small>Es obligatorio para identificar y revisar el pago.</small></div>':s.payment==='mitransfer'?'<div class="rs-checkout-inputs"><label class="sheet-label" for="payment-proof">Captura del comprobante</label><input id="payment-proof" class="field rs-proof-input" type="file" accept="image/png,image/jpeg,image/webp" required><small>JPG, PNG o WEBP · máximo 5 MB.</small><label class="sheet-label" for="payment-reference">Número de transacción (obligatorio)</label><input id="payment-reference" class="field" type="text" autocomplete="off" maxlength="80" placeholder="Código que aparece en MiTransfer" required><small>Confirmaremos que el importe llegó a la cuenta receptora.</small></div>':''}
    ${s.payment==='usdt'?'<div class="rs-checkout-safe">Primero registra el pedido para reservar su identificador. Después envía USDT y pega el hash en la siguiente pantalla. No transfieras antes de crear el pedido.</div>':''}
    ${s.payment==='balance'?'<div class="rs-checkout-safe">Solo revendedores con suscripción activa y saldo suficiente pueden utilizar esta opción.</div>':''}
-   <button class="btn primary full rs-checkout-submit" data-action="send-order">${I('check','tiny')} ${s.payment==='usdt'?'Crear pedido y continuar al hash':s.payment==='balance'?'Confirmar compra con saldo':s.payment==='sm'?'Ya envié el saldo':'Enviar comprobante y crear pedido'}</button>
+   <button class="btn primary full rs-checkout-submit" data-action="send-order">${I('check','tiny')} ${s.payment==='usdt'?'Crear pedido y continuar al hash':s.payment==='balance'?'Confirmar compra con saldo':s.payment==='sm'?'Ya pagué':'Enviar comprobante y crear pedido'}</button>
    <p class="rs-checkout-footnote">${s.payment==='usdt'?'La recarga comenzará cuando la blockchain confirme el pago.':s.payment==='balance'?'El servidor verificará tu saldo disponible.':s.payment==='sm'?'Comprobaremos que recibimos el saldo antes de entregar la recarga.':'Enviar la captura no significa que el pago esté aprobado.'}</p>
   </div>`;
   break;
@@ -1726,7 +1729,7 @@ if(a==='submit-reserved'){
   let receipt='',paymentReference='';
   if(o.method!=='mobile'){
    paymentReference=String(document.getElementById('resume-reference')?.value||'').trim();
-   if(o.method==='card'&&!paymentReference)throw Error('Introduce el número de transacción.');
+   if(!paymentReference)throw Error('Introduce el número de transacción.');
    const f=document.getElementById('resume-proof')?.files?.[0];if(!f||f.size>5242880||!['image/jpeg','image/png','image/webp'].includes(f.type))throw Error('Adjunta una captura válida de hasta 5 MB.');
    receipt=await new Promise((resolve,reject)=>{const rd=new FileReader();rd.onload=()=>resolve(rd.result);rd.onerror=()=>reject(Error('No se pudo leer el archivo'));rd.readAsDataURL(f);});
   }
@@ -1786,7 +1789,7 @@ if(a==='send-order'){
    if(method==='mobile'&&!/^[56][0-9]{7}$/.test(sourcePhone))throw Error('Introduce los 8 dígitos de la línea que envió saldo.');
    if(method==='mobile'&&sourcePhone===String(s.paymentConfig.smReceiver||'').replace(/\D/g,'').slice(-8))throw Error('Ese es el número receptor. Indica el número desde el que enviaste el saldo.');
    const paymentReference=['card','wallet'].includes(method)?String(document.getElementById('payment-reference')?.value||'').trim():'';
-   if(method==='card'&&!paymentReference)throw Error('Escribe el número de confirmación que aparece en el comprobante de Transfermóvil.');
+   if(['card','wallet'].includes(method)&&!paymentReference)throw Error('Escribe el número de transacción del comprobante.');
    if(paymentReference&&!/^[A-Za-z0-9][A-Za-z0-9._/-]{3,79}$/.test(paymentReference))throw Error('La referencia del comprobante contiene caracteres no válidos.');
    let receipt='';
    if(['card','wallet'].includes(method)){
@@ -1804,7 +1807,7 @@ if(a==='send-order'){
   if(!result?.ok&&!result?.order)throw Error('El servidor no confirmó el pedido.');
   s.checkoutSession=null;s.modal=null;s.orderJustSent=String(result?.order?.code||'');if(s.orderJustSent)rsAddNotice('order','Pedido registrado','Solicitud '+s.orderJustSent+' recibida. Consulta su entrega en Mis pedidos.','silent');await loadCustomerOrders();navigate('pedidos');toast('Pedido recibido. Puedes compartir el resumen desde Mis pedidos.');
  }catch(err){toast(err?.message||'No se pudo registrar la compra.');}
- finally{b.disabled=false;b.textContent=s.payment==='sm'?'Ya envié el saldo':'Enviar solicitud de compra';}
+ finally{b.disabled=false;b.textContent=s.payment==='sm'?'Ya pagué':'Enviar solicitud de compra';}
  return;
 }
 if(a==='request-wallet-deposit'){
@@ -1834,7 +1837,7 @@ async function loadCustomerOrders(){
    }));
    s.orderServerClock={server:Date.parse(result.serverNow),mono:performance.now()};s.orders=items;
    rsTrackOrders(items);
-   if((s.page==='pedidos'||s.page==='perfil')&&JSON.stringify(items)!==oldOrdersJson){
+   if((s.page==='pedidos'||s.page==='perfil')&&(!s.modal||s.modal==='order')&&JSON.stringify(items)!==oldOrdersJson){
     const y=window.scrollY;render();window.scrollTo(0,y);
     if(s.modal==='order')modal();
    }
@@ -1912,7 +1915,7 @@ function rsUpdateCycle(force=false){
  if(s.page==='inicio')due('recent',90000,()=>loadRecentTopups(true));
 }
 window.setInterval(()=>rsUpdateCycle(false),12000);
-window.setInterval(()=>{if(document.visibilityState!=='visible')return;for(const el of document.querySelectorAll('[data-reserve-clock]')){const o=s.orders.find(x=>x.ref===el.dataset.reserveClock);if(o)el.textContent=rsReserveTime(o);}},1000);
+window.setInterval(()=>{if(document.visibilityState!=='visible'||(s.page!=='pedidos'&&s.modal!=='resume-reserved'&&s.modal!=='order'))return;for(const el of document.querySelectorAll('[data-reserve-clock]')){const o=s.orders.find(x=>x.ref===el.dataset.reserveClock);if(o){const next=rsReserveTime(o);if(el.textContent!==next)el.textContent=next;}}},1000);
 document.addEventListener('visibilitychange',()=>{if(document.visibilityState==='visible'){void syncPaymentClock();rsUpdateCycle(false)}});
 window.addEventListener('online',()=>{void syncPaymentClock();rsUpdateCycle(true)});
 
