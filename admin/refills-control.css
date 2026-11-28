@@ -391,3 +391,14 @@ body::before{content:"";position:fixed;inset:0;pointer-events:none;z-index:0;opa
  .rs-hor-toggle{grid-column:3;grid-row:1/3;width:76px;max-width:76px;min-width:0;min-height:34px;font-size:9px;padding:6px!important}
 }
 @media(max-width:370px){.rs-hor-row{grid-template-columns:minmax(0,1.28fr) minmax(0,.9fr) 68px;column-gap:5px;padding:6px}.rs-hor-toggle{width:68px;max-width:68px;font-size:8.5px}.rs-hor-money strong{font-size:10.5px}}
+
+/* ADM · navegación por módulos */
+#rs-admin-subnav:not([hidden]){display:flex;gap:7px;flex-wrap:wrap;align-items:center;padding:5px;margin:0 0 15px;border:1px solid #29476a;border-radius:13px;background:#09172b}
+#rs-admin-subnav[hidden]{display:none!important}
+.rs-admin-tab{display:inline-flex;align-items:center;justify-content:center;gap:7px;padding:10px 13px;border:1px solid transparent;border-radius:9px;background:transparent;color:#a8c0d9;font-size:12px;font-weight:700;min-height:40px}
+.rs-admin-tab svg{width:16px;height:16px;flex:none}
+.rs-admin-tab.active{background:#17385b;border-color:#38638c;color:#e6f3ff}
+.rs-admin-tab:focus-visible,.side-item:focus-visible{outline:2px solid #65bfff;outline-offset:-2px}
+.rs-provider-compact{display:flex;align-items:center;justify-content:space-between;flex-wrap:wrap;gap:10px;padding:13px 16px}
+.rs-provider-compact>div{display:grid;gap:3px;flex:1}.rs-provider-compact small{color:#9eb6d0;font-size:11px}.rs-provider-compact strong{font-size:19px;font-variant-numeric:tabular-nums}
+@media(max-width:740px){#rs-admin-subnav:not([hidden]){gap:4px;padding:4px;margin-bottom:12px}.rs-admin-tab{flex:1 1 auto;min-width:0;padding:9px 7px;font-size:11px;gap:5px}.rs-admin-tab svg{width:14px;height:14px}.rs-provider-compact{padding:12px}}
