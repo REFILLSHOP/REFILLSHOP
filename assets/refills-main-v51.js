@@ -531,6 +531,8 @@ async function submitResellerDeposit(){
 
 const REFILLS_WALLET_MARK='/REFILLSHOP/assets/refills-brand.webp';
 const PAYMENT_METHODS={
+ cash_cup:{name:'CUP efectivo',short:'CUP efectivo',currency:'CUP',icon:'wallet'},
+ cash_usd:{name:'USD efectivo',short:'USD efectivo',currency:'USD',icon:'wallet'},
  sm:{name:'Saldo móvil ETECSA',short:'Saldo móvil',currency:'SM',icon:'wallet'},
  cup:{name:'Transfermóvil',short:'CUP',currency:'CUP',icon:'credit'},
  mitransfer:{name:'MiTransfer · envío por teléfono',short:'MiTransfer',currency:'CUP',icon:'wallet'},
@@ -543,6 +545,7 @@ function resellerHasPlan(){
  return !!s.user&&!!s.resellerPortal?.membership?.planTier&&!!s.reseller?.plan&&s.resellerPlans.some(p=>p.name===s.reseller.plan);
 }
 function paymentVisual(id){
+ if(id==='cash_cup'||id==='cash_usd')return `<span class="payment-method-symbol balance">${I('wallet')}</span>`;
  if(id==='cup')return `<img class="payment-method-logo transfermovil-mark" src="${TRANSFERMOVIL_MARK}" alt="Transfermóvil">`;
  if(id==='sm')return `<img class="payment-method-logo etecsa-mark" src="${ETECSA_MARK}" alt="ETECSA">`;
  if(id==='mitransfer')return `<img class="payment-method-logo mitransfer-mark" src="/REFILLSHOP/assets/mitransfer-wallet.webp" alt="MiTransfer">`;
@@ -557,23 +560,25 @@ function paymentChoiceList(){
  return `<div class="payment-choice-list">${methods.map(([id,m])=>{
   const noPlan=id==='balance'&&!resellerHasPlan(),noCost=id==='balance'&&!!selectedOffer&&!balancePrice;
   const missing=(id==='sm'&&!s.paymentConfig.smReceiver)||(id==='cup'&&(!s.paymentConfig.cupCard||!s.paymentConfig.cupConfirmPhone))||(id==='mitransfer'&&!s.paymentConfig.mitransferPhone)||(id==='usdt'&&(!s.paymentConfig.usdtEnabled||!s.paymentConfig.usdtAddress));
-  const disabled=missing||noPlan||noCost,active=s.payment===id;
-  const description=id==='sm'?'Detección automática · confirma el número emisor':
+  const cash=id==='cash_cup'||id==='cash_usd',minimum=id==='cash_usd'&&Number(selectedOffer?.usdt||0)<=10;const disabled=!s.salesEnabled||missing||noPlan||noCost||minimum,active=s.payment===id;
+  const description=cash?'Coordina la entrega con administración · Guanabacoa, reparto Vía Blanca':id==='sm'?'Detección automática · confirma el número emisor':
    id==='cup'?'Transfermóvil · detección de avisos y revisión del ingreso':
    id==='mitransfer'?'MiTransfer · detección de avisos y revisión del ingreso':
    id==='balance'?(noPlan?'Disponible al activar Gratis, Level 2 o Level 3':noCost?'Esta oferta no tiene costo de proveedor configurado':`Wallet de revendedor · ${balanceAvailable.toFixed(2)} USDT disponibles`):
    'Verificación automática BEP-20 después de enviar el hash';
-  const modeText=id==='balance'?'WALLET AUTOMÁTICA':id==='usdt'?'BLOCKCHAIN AUTOMÁTICA':'DETECCIÓN AUTOMÁTICA';
+  const modeText=cash?'PAGO PRESENCIAL':id==='balance'?'WALLET AUTOMÁTICA':id==='usdt'?'BLOCKCHAIN AUTOMÁTICA':'DETECCIÓN AUTOMÁTICA';
   const modeClass=id==='balance'||id==='usdt'?'auto':'review';
   return `<button type="button" class="payment-choice ${active?'active':''} ${id==='balance'?'payment-choice-balance':''}" data-action="choose-payment" data-value="${id}" ${disabled?'disabled':''} ${active?'aria-pressed="true"':'aria-pressed="false"'}>
    <span class="payment-choice-icon">${paymentVisual(id)}</span>
-   <span class="payment-choice-copy"><strong>${esc(m.name)}</strong><small>${disabled?(noPlan?'Activa un plan de revendedor':noCost?'Costo del proveedor no disponible':'No habilitado o sin datos de cobro'):description}</small><em class="payment-mode-label ${modeClass}">${modeText}</em></span>
+   <span class="payment-choice-copy"><strong>${esc(m.name)}</strong><small>${disabled?(minimum?'Disponible para pedidos superiores a 10 USD':!s.salesEnabled?'Pagos pausados':noPlan?'Activa un plan de revendedor':noCost?'Costo del proveedor no disponible':'No habilitado o sin datos de cobro'):description}</small><em class="payment-mode-label ${modeClass}">${modeText}</em></span>
    <span class="payment-choice-state">${active?'✓':''}</span>
   </button>`;
  }).join('')}</div><p class="payment-choice-note">Refills Pay detecta avisos de SM y CUP automáticamente. La tienda comprueba el ingreso real antes de entregar. USDT se verifica en BEP-20.</p>`;
 }
 function priceFor(o,method=s.payment){
  if(!o)return null;
+ if(method==='cash_cup')return {amount:Number(o.card||o.cup||0),currency:'CUP',method:PAYMENT_METHODS.cash_cup};
+ if(method==='cash_usd')return {amount:Math.ceil(Number(o.usdt||0)/5-1e-10)*5,currency:'USD',method:PAYMENT_METHODS.cash_usd};
  if(method==='sm')return {amount:Number(o.sm||0),currency:'SM',method:PAYMENT_METHODS.sm};
  if(method==='usdt'||method==='balance')return {amount:Number(o.usdt||0),currency:'USDT',method:PAYMENT_METHODS[method]};
  if(method==='mitransfer')return {amount:Number(o.cup||0),currency:'CUP',method:PAYMENT_METHODS.mitransfer};
@@ -778,7 +783,7 @@ function rsReferralLink(code){return 'https://refillshop.github.io/REFILLSHOP/?r
 function rsReadReferral(){try{const u=new URL(location.href),code=u.searchParams.get('ref');if(code&&/^(?:[A-Z0-9]{10}|[0-9a-f]{8}-(?:[0-9a-f]{4}-){3}[0-9a-f]{12})$/i.test(code)){s.pendingReferral=code.length===10?code.toUpperCase():code.toLowerCase();try{sessionStorage.setItem('rs_pending_referral',s.pendingReferral)}catch{}u.searchParams.delete('ref');history.replaceState(null,'',u.href);return true}const saved=sessionStorage.getItem('rs_pending_referral');if(saved&&/^(?:[A-Z0-9]{10}|[0-9a-f]{8}-(?:[0-9a-f]{4}-){3}[0-9a-f]{12})$/i.test(saved)){s.pendingReferral=saved;return true}}catch{}return false}
 function rsClearReferral(){s.pendingReferral=null;try{sessionStorage.removeItem('rs_pending_referral')}catch{}}
 async function rsApplyReferral(){const code=s.pendingReferral;if(!code||!s.user)return '';try{await edgeRequest('rs15-engagement','/referral',{method:'POST',body:{code}});rsClearReferral();return 'Invitación registrada correctamente.'}catch(err){if([400,409].includes(err.status))rsClearReferral();return err.message||'No se pudo registrar la invitación. Puedes introducir el código desde tu perfil.'}}
-function rsStoreStatusBanner(){const a=s.storeAvailability||{},open=a.open===true;return '<div class="rs-store-hours" role="status" style="grid-column:1/-1;display:flex;align-items:center;gap:10px;padding:12px 15px;border:1px solid '+(open?'#257762':'#886842')+';border-radius:12px;background:#0b1a30;color:#e0edff;margin:12px 0"><span style="width:9px;height:9px;border-radius:50%;flex:none;background:'+(open?'#42d6a0':'#ffbd72')+'"></span><div><strong style="font-size:13px">'+(open?'Tienda abierta':'Tienda cerrada temporalmente')+'</strong><small style="display:block;color:#a9c0dd;font-size:11px;margin-top:3px">10 AM – 10 PM · Hora de Cuba'+(open?'':' · No realices pagos por ahora')+'</small></div></div>'}
+function rsStoreStatusBanner(){const a=s.storeAvailability||{},open=a.open===true;return '<div class="rs-store-hours" role="status" style="grid-column:1/-1;display:flex;align-items:center;gap:10px;padding:12px 15px;border:1px solid '+(open?'#257762':'#886842')+';border-radius:12px;background:#0b1a30;color:#e0edff;margin:12px 0"><span style="width:9px;height:9px;border-radius:50%;flex:none;background:'+(open?'#42d6a0':'#ffbd72')+'"></span><div><strong style="font-size:13px">'+(open?'Tienda abierta':'Tienda cerrada temporalmente')+'</strong><small style="display:block;color:#a9c0dd;font-size:11px;margin-top:3px">Atención: 10 AM – 10 PM · Hora de Cuba'+(open?'':' · No realices pagos por ahora')+'</small></div></div>'}
 function home(){
  const greeting=s.user?.name||s.nickname||'Invitado';
  const hasPlan=resellerHasPlan();
@@ -1116,6 +1121,7 @@ async function startPaymentReservation(button){
  if(!s.salesEnabled||!o.purchasable||!o.inStock){toast('La tienda todavía no acepta compras. No transfieras dinero.');return}
  if(o.kind!=='pin'&&!(s.playerCheck?.status==='valid'&&s.playerCheck.offerId===o.id&&s.playerCheck.player===player)){toast('Valida el ID antes de pagar.');return}
  if(s.payment==='balance'){s.modal='checkout';modal();return}
+ if(['cash_cup','cash_usd'].includes(s.payment)){const quote=currentPrice(o);if(s.payment==='cash_usd'&&Number(o.usdt)<=10){toast('El pedido debe superar 10 USD.');return}let targetPayload;try{targetPayload=playerTargetData(o,true)}catch(err){toast(err.message);return}button.disabled=true;try{const key=g.id+'|'+o.id+'|'+s.payment+'|'+JSON.stringify(targetPayload);if(s.cashRequest?.key!==key)s.cashRequest={key,id:newRequestId()};const result=await edgeRequest('rs10-api','/orders',{method:'POST',auth:true,body:{gameId:g.id,offerId:o.id,clientRequestId:s.cashRequest.id,method:s.payment,playerId:player||'PIN',targetPayload,quotedAmount:quote.amount,quotedCurrency:quote.currency}});if(!result?.order?.code)throw Error('No se confirmó el pedido');s.cashRequest=null;s.cashOrder={code:result.order.code,amount:result.amount??quote.amount,currency:result.currency||quote.currency};await loadCustomerOrders();s.modal='cash-confirmed';modal()}catch(err){toast(err.message||'No se pudo registrar el pedido');button.disabled=false}return}
  const method=s.payment==='sm'?'mobile':s.payment==='cup'?'card':s.payment==='mitransfer'?'wallet':s.payment==='usdt'?'usdt_wallet':null;
  if(!method){toast('El método de pago no está disponible.');return}
  const amount=Number(method==='mobile'?o.sm:method==='card'?o.card:method==='wallet'?o.cup:o.usdt);
@@ -1231,6 +1237,9 @@ function modal(){
   html=modalTitle('Cambiar método de pago','Selecciona cómo quieres pagar tu compra')+
   paymentChoiceList();
   break;
+ case 'cash-confirmed':{
+ const c=s.cashOrder||{};html=modalTitle('Pedido registrado','Pago en efectivo · pendiente de coordinación')+'<div class="rs-checkout-simple"><div class="rs-checkout-total"><div><span>CÓDIGO DE PEDIDO</span><strong>'+esc(c.code||'')+'</strong><button class="btn secondary full" data-action="copy-reward" data-code="'+esc(c.code||'')+'">Copiar código</button></div><div><small>Importe: '+esc(formatPriceValue(c.amount||0,c.currency||'CUP'))+'</small></div></div><p>La Habana, Guanabacoa, reparto Vía Blanca. Administración te contactará para acordar la entrega del efectivo. Conserva el código. La recarga se realiza después de confirmar el cobro.</p><button class="btn primary full" data-action="nav" data-page="pedidos">Mis pedidos</button></div>';break;
+ }
  case 'purchase-confirm':{
  html=modalTitle('Confirmar compra','Revisa los datos antes de continuar')+
   '<div class="rs-purchase-confirm"><div class="rs-confirm-info"><small>JUEGO / REGIÓN</small><strong>'+esc(gameFamilyName(g||{}))+' · '+esc(o?.region||'Global')+'</strong>'
@@ -1239,7 +1248,7 @@ function modal(){
   +'<small>MÉTODO</small><strong>'+esc(paymentName())+'</strong>'
   +'<small>TOTAL</small><strong class="rs-confirm-total">'+(total?formatPriceValue(total.amount,total.currency):'No disponible')+'</strong></div>'
   + (s.payment==='sm'?'<label class="rs-coupon-label">Número desde el que enviarás el saldo<input id="rs-sm-source-reserve" class="field" type="tel" inputmode="numeric" maxlength="8" placeholder="8 dígitos" required></label><small class="rs-rank-note">Se comprueba antes de transferir para evitar pedidos duplicados de la misma línea.</small>':'')
-  + (s.payment==='balance'?'':'<label class="rs-coupon-label">Cupón de descuento (opcional)<input id="rs-coupon-input" class="field" maxlength="40" autocomplete="off" placeholder="Introduce tu código"></label><small class="rs-rank-note">El servidor comprueba el cupón y muestra el total definitivo antes de pagar.</small>')+'<p class="rs-confirm-warning">Después de confirmar tendrás 30 minutos para registrar el envío del pago. Si no lo haces, el pedido pasará a fallido.</p>'
+  + (['balance','cash_cup','cash_usd'].includes(s.payment)?'':'<label class="rs-coupon-label">Cupón de descuento (opcional)<input id="rs-coupon-input" class="field" maxlength="40" autocomplete="off" placeholder="Introduce tu código"></label><small class="rs-rank-note">El servidor comprueba el cupón y muestra el total definitivo antes de pagar.</small>')+(['cash_cup','cash_usd'].includes(s.payment)?'<p class="rs-confirm-warning">La Habana, Guanabacoa, reparto Vía Blanca. Te contactaremos para coordinar el efectivo. Conserva el código de pedido.</p>':'<p class="rs-confirm-warning">Después de confirmar tendrás 30 minutos para registrar el envío del pago. Si no lo haces, el pedido pasará a fallido.</p>')
   +'<button class="btn primary full" data-action="start-payment">Confirmar y continuar al pago</button><button class="btn ghost full" data-action="close">Corregir datos</button></div>';
  break;
 }
@@ -1475,6 +1484,7 @@ function changePayment(p){
  if(!PAYMENT_METHODS[p]||s.page!=='detalle'||s.modal!=='payment-methods')return;
  if(s.checkoutSession&&s.modal==='checkout'){toast('Este pedido ya tiene un método confirmado. Cierra el pago para crear otro.');return}
  if(resellerHasPlan()&&p!=='balance')return;
+ if(p==='cash_usd'&&Number(itemBy(s.detailId)?.offers?.[s.selected]?.usdt||0)<=10){toast('El pedido debe superar 10 USD.');return}
  if(p==='sm'&&!s.paymentConfig.smReceiver){toast('Saldo móvil no está habilitado.');return}
  if(p==='cup'&&(!s.paymentConfig.cupCard||!s.paymentConfig.cupConfirmPhone)){toast('Transfermóvil no está habilitado.');return}
  if(p==='balance'&&!resellerHasPlan()){toast('Activa uno de los planes de revendedor para pagar con tu saldo de Refills Shop.');return}
