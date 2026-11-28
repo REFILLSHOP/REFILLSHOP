@@ -545,7 +545,7 @@ function resellerHasPlan(){
  return !!s.user&&!!s.resellerPortal?.membership?.planTier&&!!s.reseller?.plan&&s.resellerPlans.some(p=>p.name===s.reseller.plan);
 }
 function paymentVisual(id){
- if(id==='cash_cup'||id==='cash_usd')return `<span class="payment-method-symbol balance">${I('wallet')}</span>`;
+ if(id==='cash_cup'||id==='cash_usd')return `<img class="payment-method-logo" src="/REFILLSHOP/assets/cash-${id==='cash_cup'?'cup':'usd'}-v81.svg" alt="${id==='cash_cup'?'Billetes CUP':'Billetes USD'}" style="width:48px;height:34px;object-fit:contain">`;
  if(id==='cup')return `<img class="payment-method-logo transfermovil-mark" src="${TRANSFERMOVIL_MARK}" alt="Transfermóvil">`;
  if(id==='sm')return `<img class="payment-method-logo etecsa-mark" src="${ETECSA_MARK}" alt="ETECSA">`;
  if(id==='mitransfer')return `<img class="payment-method-logo mitransfer-mark" src="/REFILLSHOP/assets/mitransfer-wallet.webp" alt="MiTransfer">`;
