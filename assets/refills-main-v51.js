@@ -711,7 +711,7 @@ async function loadPublicChanges(force=false){
    }
   }else if(force&&s.user&&newest>rsNotice.publicSeenId){
    const fresh=s.changes.filter(x=>Number(x.id)>rsNotice.publicSeenId);
-   // Las novedades se conservan en la campana, sin avisos de sistema ni sonidos.
+   const drops=fresh.filter(x=>x.kind==='price_down');if(drops.length&&!s.modal)toast(drops.length===1?'¡Bajó un precio! Revisa Ofertas y novedades.':'¡Hay '+drops.length+' bajadas de precio! Revisa las novedades.');
   }
   if(newest>rsNotice.publicSeenId){
    rsNotice.publicSeenId=newest;
@@ -789,7 +789,7 @@ function home(){
  </section>`;
  return `${walletHero}
  <button type="button" class="rs-install-entry" data-action="install-refills" aria-label="Instalar Refills Shop en este dispositivo"><svg width="19" height="19" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" aria-hidden="true"><path d="M12 3v12m-5-5 5 5 5-5M4 16v4h16v-4"/></svg><span>Instalar app</span></button>
- <div class="notice-grid"><button class="notice" data-action="modal" data-modal="news"><span class="notice-icon">${I('spark')}</span><span><strong>Ofertas y novedades</strong><small>Descubre recargas y productos</small></span>${I('arrow','tiny arrow')}</button><button class="notice" data-action="modal" data-modal="help"><span class="notice-icon">${I('headset')}</span><span><strong>Centro de ayuda</strong><small>Conoce cómo funciona la tienda</small></span>${I('arrow','tiny arrow')}</button></div>
+ <div class="notice-grid"><button class="notice" data-action="open-promos"><span class="notice-icon">${I('spark')}</span><span><strong>Ofertas y novedades</strong><small>Descubre recargas y productos</small></span>${I('arrow','tiny arrow')}</button><button class="notice" data-action="modal" data-modal="help"><span class="notice-icon">${I('headset')}</span><span><strong>Centro de ayuda</strong><small>Conoce cómo funciona la tienda</small></span>${I('arrow','tiny arrow')}</button></div>
  ${sectionMini('Móvil, internet y más',['nauta','cubacel','vpn','sms'],'recargas')}
  ${sectionMini('Juegos disponibles',ITEMS.filter(g=>g.category==='juegos').sort((a,b)=>Number(b.featured)-Number(a.featured)||a.sortOrder-b.sortOrder||a.name.localeCompare(b.name)).slice(0,4).map(g=>g.id),'recargas')}
  ${recentTopupsMarkup()}
@@ -1039,11 +1039,12 @@ async function rsEngage(action,button){
  const uid=s.user.id;
  if(button)button.disabled=true;
  try{
+  if(action==='open-promos'){s.modal='news';s.promoData=null;modal();const [x]=await Promise.all([edgeRequest('rs15-engagement','/promos'),loadPublicChanges(true)]);if(s.user?.id===uid&&s.modal==='news'){s.promoData=x.promos||[];modal()}}
   if(action==='open-rewards'){s.modal='engagement';s.engageData=null;modal();const x=await edgeRequest('rs15-engagement','/me');if(s.user?.id===uid&&s.modal==='engagement'){s.engageData=x;modal()}}
   if(action==='claim-referral'){const code=String(document.getElementById('rs-referral-code')?.value||'').trim();await edgeRequest('rs15-engagement','/referral',{method:'POST',body:{code}});toast('Referido registrado.');if(s.user?.id===uid&&s.modal==='engagement')await rsEngage('open-rewards')}
   if(action==='open-tickets'){s.modal='tickets';s.ticketData=null;modal();const x=await edgeRequest('rs15-engagement','/tickets');if(s.user?.id===uid&&s.modal==='tickets'){s.ticketData=x.tickets||[];modal()}}
   if(action==='create-ticket'){const subject=String(document.getElementById('rs-ticket-subject')?.value||'').trim(),message=String(document.getElementById('rs-ticket-message')?.value||'').trim();if(subject.length<3||message.length<5)throw Error('Completa el asunto y el mensaje.');await edgeRequest('rs15-engagement','/tickets',{method:'POST',body:{subject,message}});toast('Solicitud enviada a soporte.');if(s.user?.id===uid&&s.modal==='tickets')await rsEngage('open-tickets')}
- }catch(e){toast(e.message||'No se pudo consultar el servicio.');if(s.user?.id===uid&&['engagement','tickets'].includes(s.modal)){if(s.modal==='engagement'&&!s.engageData)s.engageData={error:true};if(s.modal==='tickets'&&s.ticketData===null)s.ticketData={error:true};if(action.startsWith('open-'))modal()}}
+ }catch(e){toast(e.message||'No se pudo consultar el servicio.');if(s.user?.id===uid&&['engagement','tickets'].includes(s.modal)){if(s.modal==='engagement'&&!s.engageData)s.engageData={error:true};if(s.modal==='tickets'&&s.ticketData===null)s.ticketData={error:true};if(action.startsWith('open-'))modal()}if(s.user?.id===uid&&s.modal==='news'&&action==='open-promos'){s.promoData={error:true};modal()}}
  finally{if(button)button.disabled=false}
 }
 function modalTitle(title,desc=''){return `<div class="modal-title"><div><h2>${title}</h2>${desc?`<p>${desc}</p>`:''}</div><button class="xbtn" data-action="close" aria-label="Cerrar">${I('close')}</button></div>`}
@@ -1365,9 +1366,11 @@ case 'checkout':
  }
  case 'help':
   html=modalTitle('¿Cómo funciona?','Compra en tres pasos')+`<div class="setting"><span class="set-icon">${I('search')}</span><span class="set-copy"><strong>1. Busca tu juego</strong><small>Explora el catálogo y selecciona tu recarga.</small></span></div><div class="setting"><span class="set-icon">${I('diamond')}</span><span class="set-copy"><strong>2. Escribe el ID y elige el paquete</strong><small>Indica el destinatario y el método de pago.</small></span></div><div class="setting"><span class="set-icon">${I('check')}</span><span class="set-copy"><strong>3. Confirma tu pedido</strong><small>Consulta su estado desde el apartado Pedidos.</small></span></div><button class="btn primary full" data-action="modal-nav" data-page="recargas">Ir al catálogo</button>`;break;
- case 'news':
-  html=modalTitle('Ofertas y novedades')+`<div class="small-banner">Consulta las promociones disponibles en el catálogo.</div><div class="section-head"><h2>Juegos populares</h2></div><div class="grid-media" style="grid-template-columns:repeat(4,minmax(0,1fr))">${['freefire','mlbb','pubg','honor'].map(id=>minitile(itemBy(id))).join('')}</div>`;break;
- case 'resume-reserved':{
+ case 'news':{
+   const promos=s.promoData,drops=(s.changes||[]).filter(e=>e.kind==='price_down');
+   html=modalTitle('Ofertas y novedades','Promociones vigentes y bajadas de precio')+'<div class="rs-checkout-simple"><h3>Cupones disponibles</h3>'+(promos===null?'<p>Cargando promociones…</p>':!Array.isArray(promos)?'<button class="btn secondary full" data-action="open-promos">Consultar promociones</button>':promos.length?promos.map(p=>'<section class="card panel"><h3>'+esc(p.percent)+'% de descuento · '+(p.first_purchase_only?'Primera compra':'Oferta relámpago')+'</h3><small>Vence '+esc(formatShopDateTime(p.expires_at))+'</small><div class="summary-row"><code>'+esc(p.code)+'</code><button class="btn secondary small" data-action="copy-reward" data-code="'+esc(p.code)+'">Copiar</button></div></section>').join(''):'<p class="helper">No hay promociones aplicables en este momento.</p>')+'<h3>Bajadas de precio · últimas 24 h</h3>'+(drops.length?drops.map(e=>'<section class="card panel"><h3>'+esc(e.title)+'</h3><p>'+esc(e.detail)+'</p><small>'+esc(formatShopDateTime(e.createdAt))+'</small></section>').join(''):'<p class="helper">No hay bajadas registradas en las novedades recientes.</p>')+'<button class="btn primary full" data-action="modal-nav" data-page="recargas">Explorar catálogo</button></div>';break;
+  }
+  case 'resume-reserved':{
    const current=s.orders.find(x=>x.ref===s.resumeOrderRef);
    if(!rsReserved(current)){html=modalTitle('Pedido actualizado','Consulta el estado en Mis pedidos');break;}
    const method=current.method,recipient=method==='mobile'?s.paymentConfig.smReceiver:method==='card'?s.paymentConfig.cupCard:s.paymentConfig.mitransferPhone;
@@ -1489,7 +1492,7 @@ document.addEventListener('keydown',e=>{if(e.key==='Escape'&&s.modal){s.modal=nu
 document.addEventListener('click',e=>{rsUnlockNoticeSound();let b=e.target.closest('[data-action]');if(!b)return;const action=b.dataset.action;if(action==='backdrop'&&e.target!==b)return;e.preventDefault();switch(action){
 case 'auth-mode':s.authMode=b.dataset.mode==='register'?'register':'login';s.authError='';render();break;
 case 'auth-logout':void signOutRefills();break;
-case 'open-rewards':case 'claim-referral':case 'open-tickets':case 'create-ticket':void rsEngage(action,b);break;
+case 'open-promos':case 'open-rewards':case 'claim-referral':case 'open-tickets':case 'create-ticket':void rsEngage(action,b);break;
 case 'refresh-rewards':void loadMyRewards();break;
 case 'copy-reward':void copyPaymentValue(b.dataset.code,b);break;
 case 'reseller-refresh':void loadResellerPortal(false,true);break;
