@@ -120,7 +120,7 @@ function renderMenu(){
 }
 function navigate(page,first=false){
  if(!MENU.some(m=>m[0]===page))page='overview';
- if(S.page!==page){S.search='';S.offerSearch='';S.editingGameId=null}S.page=page;if(!first)history.replaceState(null,'','#'+page);
+ if(S.page!==page){S.search='';S.offerSearch='';S.editingGameId=null}S.page=page;rsPaintAvailability();if(!first)history.replaceState(null,'','#'+page);
  renderMenu();
  const meta=MENU.find(m=>m[0]===page),group=groupFor(page);$('crumb-name').textContent=group[1]+(group[3].length>1?' / '+meta[1]:'');
  $('view-title').textContent=meta[1]==='Resumen'?'Vista general':group[1];
@@ -288,11 +288,12 @@ async function pollProviderBalance(){
  }catch(e){S.providerBalance={verified:false,reason:e.message||'No se pudo consultar el saldo'};}
  finally{S.providerBusy=false;const box=$('rs-provider-balance-box');if(box&&!box.contains(document.activeElement))box.innerHTML=providerBalancePanel(S.page==='overview');}
 }
-function rsAvailabilityPanel(){const a=S.cache.commerce?.availability||{};return '<section class="surface section"><div class="panel-head"><div><h2>Horario y pagos</h2><small>Atención: 10 AM a 10 PM · hora de Cuba</small></div>'+tag(a.open?'Abierta':a.paused?'Pagos pausados':'Cerrada',a.open?'good':'warn')+'</div><p>'+esc(a.paused?'Todos los nuevos pagos están desactivados.':!a.baseEnabled?'Ventas generales desactivadas en Finanzas.':'Recibiendo pedidos las 24 horas.')+'</p><button type="button" class="btn '+(a.paused?'primary':'danger')+' full" data-action="toggle-store-pause">'+(a.paused?'Activar todos los pagos':'Desactivar todos los pagos')+'</button><p class="footer-caption">El catálogo sigue visible. Los pedidos existentes se conservan.</p></section>'}
-async function rsAdminPresence(paused){try{const result=await request('/admin/store-availability',{method:'POST',body:typeof paused==='boolean'?{paused}:{}});S.cache.commerce={...S.cache.commerce,availability:result};const box=$('rs-store-availability');if(box)box.innerHTML=rsAvailabilityPanel();return result}catch(e){if(typeof paused==='boolean')throw e;return null}}
-function drawOverview(){
+function rsAvailabilityPanel(){const a=S.cache.commerce?.availability,known=typeof a?.paused==='boolean';return '<section class="surface section" style="border:1px solid #4178aa;padding:16px;margin-bottom:12px"><div class="panel-head"><div><h2>Horario y pagos</h2><small>Atención: 10 AM a 10 PM · Cuba</small></div>'+tag(!known?'Consultando':a.open?'Pagos activos':a.paused?'Pagos pausados':'Cerrada',a?.open?'good':'warn')+'</div><p>'+esc(!known?'Consulta el estado antes de cambiar los pagos.':a.paused?'Ningún cliente puede iniciar un pago nuevo.':!a.baseEnabled?'Ventas generales desactivadas en Finanzas.':'Se reciben pedidos las 24 horas.')+'</p><button type="button" class="btn '+(!known||a.paused?'primary':'danger')+' full" data-action="'+(!known?'refresh-store-pause':'toggle-store-pause')+'">'+(!known?'Consultar estado de pagos':a.paused?'Activar todos los pagos':'Desactivar todos los pagos')+'</button></section>'}
+function rsPaintAvailability(){const box=$('rs-store-availability');if(box){box.hidden=S.page!=='overview';box.innerHTML=rsAvailabilityPanel()}}
+async function rsAdminPresence(paused){try{const result=await request('/admin/store-availability',{method:'POST',body:typeof paused==='boolean'?{paused}:{}});S.cache.commerce={...S.cache.commerce,availability:result};rsPaintAvailability();return result}catch(e){if(typeof paused==='boolean')throw e;return null}}
+function drawOverview(){rsPaintAvailability();
  const x=S.cache.overview?.counts||{}, r=S.cache.reseller||{}, co=S.cache.commerce||{},cn=S.cache.central||{};
- $('admin-view').innerHTML='<div id="rs-store-availability">'+rsAvailabilityPanel()+'</div><div class="spacing"></div><div id="rs-admin-order-alert-box">'+adminOrderAlertPanel()+'</div><div id="rs-provider-balance-box">'+providerBalancePanel(true)+'</div><div class="spacing"></div><div class="grid four">'
+ $('admin-view').innerHTML='<div id="rs-admin-order-alert-box">'+adminOrderAlertPanel()+'</div><div id="rs-provider-balance-box">'+providerBalancePanel(true)+'</div><div class="spacing"></div><div class="grid four">'
  +metric('JUEGOS PUBLICADOS',x.games||0,'Catálogo actual','games')
  +metric('OFERTAS ACTIVAS',x.offers||0,'Visibles para clientes','offers')
  +metric('PEDIDOS',x.orders||0,(x.pending||0)+' pendientes','orders')
@@ -655,6 +656,7 @@ async function openOfferEdit(id){
 }
 function modalConfirm(text){return RSDialog.confirm(text)}
 async function runAction(action,el){
+ if(action==='refresh-store-pause')return withBusy(async()=>{const a=await rsAdminPresence();if(!a)throw Error('No se pudo consultar el estado de pagos.');});
  if(action==='toggle-store-pause')return withBusy(async()=>{const paused=S.cache.commerce?.availability?.paused!==true;if(!paused&&!await modalConfirm('¿Reactivar todos los pagos? Se podrán recibir pedidos las 24 horas.'))return;const a=await rsAdminPresence(paused);flash(a.paused?'Todos los pagos nuevos están pausados.':a.open?'Pagos activos.':'Pagos habilitados; se abrirán cuando se cumplan las condiciones.');});
  const id=el.dataset.id,code=el.dataset.code;
  if(action==='offer-work-tab'){S.offerTab=el.dataset.value;drawOffers();return}
