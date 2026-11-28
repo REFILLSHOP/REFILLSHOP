@@ -290,7 +290,7 @@ async function handleForm(f){
   }else if(id==='planForm'){
    const tier=f.elements.tier.value,currency=f.elements.currency.value,t=S.tiers.find(t=>t.tier===tier);
    if(!t)throw Error('Selecciona un plan disponible.');
-   if(!confirm(`¿Activar o renovar ${t.name} por ${usdt(t.priceUsdt)} USDT equivalentes desde tu wallet en ${currency}?`))return;
+   if(!await RSDialog.confirm(`¿Activar o renovar ${t.name} por ${usdt(t.priceUsdt)} USDT equivalentes desde tu wallet en ${currency}?`))return;
    S.pendingPlanId ||=crypto.randomUUID();
    await req('rs12-reseller','/subscribe',{method:'POST',body:{tier,currency,clientRequestId:S.pendingPlanId}});
    S.pendingPlanId=null;await hydrate();render();notify('Suscripción actualizada correctamente.');
@@ -307,7 +307,7 @@ async function handleForm(f){
    }else{playerId=String(f.elements.playerId.value).trim();zoneId=String(f.elements.zoneId.value||'').trim();if(playerId.length<3)throw Error('Escribe un ID de jugador válido.');targetPayload.player_id=playerId;if(zoneId)targetPayload.zone_id=zoneId}
    const currency=f.elements.currency.value;
    if(!f.elements.accept.checked)throw Error('Confirma los datos del pedido.');
-   if(!confirm('¿Confirmas la compra y el descuento desde tu wallet en '+currency+'?'))return;
+   if(!await RSDialog.confirm('¿Confirmas la compra y el descuento desde tu wallet en '+currency+'?'))return;
    S.pendingOrderId ||=crypto.randomUUID();
    const data=await req('rs12-reseller','/orders',{method:'POST',body:{offerId:o.id,clientRequestId:S.pendingOrderId,playerId,zoneId,targetPayload,currency}});
    S.pendingOrderId=null;await hydrate();await loadOrders();S.view='pedidos';updateURL('pedidos');render();notify('Pedido '+String(data.code||data.order?.code||'')+' registrado. Consulta su estado.');
