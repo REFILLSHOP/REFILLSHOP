@@ -135,6 +135,7 @@ async function withBusy(task){
  finally{S.busy=false}
 }
 async function load(page=S.page){
+ const loadId=(S.loadId||0)+1;S.loadId=loadId;const current=()=>S.page===page&&S.loadId===loadId;
  try{
   if(page==='overview'){
    const [overview,commerce,central,reseller,orders]=await Promise.all([
@@ -142,40 +143,40 @@ async function load(page=S.page){
     request('/admin/summary',{service:'reseller'}).catch(()=>({deposits:[],orders:[],memberships:[]})),
     request('/admin/orders').catch(()=>({orders:[]}))
    ]);
-   Object.assign(S.cache,{overview,commerce,central,reseller,orders});return drawOverview();
+   Object.assign(S.cache,{overview,commerce,central,reseller,orders});return current()?drawOverview():undefined;
   }
   if(page==='games'){
    const x=await request('/admin/games');S.cache.games=x.games||[];
-   return drawGames();
+   return current()?drawGames():undefined;
   }
   if(page==='offers'){
    const [g,o,store,co]=await Promise.all([request('/admin/games'),request('/admin/offers'),publicStorefront(),request('/admin/centralone/catalog?kind=all&offset=0').catch(()=>({families:[],products:[]}))]);
    S.cache.games=g.games||[];S.cache.offers=o.offers||[];S.cache.store=store;
    S.cache.coFamilies=Array.isArray(co.families)?co.families:[];
    if(!S.cache.coProducts?.length)S.cache.coProducts=co.products||[];
-   return drawOffers();
+   return current()?drawOffers():undefined;
   }
   if(page==='orders'){
-   const [x,sm,cup]=await Promise.all([request('/admin/orders'),request('/admin/refills-pay/events').catch(()=>null),request('/admin/refills-pay/cup-events').catch(()=>null)]);S.cache.orders=x;S.cache.orderPaymentMatches=[...(sm?.events||[]),...(cup?.events||[])];return drawOrders();
+   const [x,sm,cup]=await Promise.all([request('/admin/orders'),request('/admin/refills-pay/events').catch(()=>null),request('/admin/refills-pay/cup-events').catch(()=>null)]);S.cache.orders=x;S.cache.orderPaymentMatches=[...(sm?.events||[]),...(cup?.events||[])];return current()?drawOrders():undefined;
   }
   if(page==='customers'){
-   const x=await request('/admin/customers');S.cache.customers=x.clients||[];return drawCustomers();
+   const x=await request('/admin/customers');S.cache.customers=x.clients||[];return current()?drawCustomers():undefined;
   }
   if(page==='resellers'){
-   const x=await request('/admin/summary',{service:'reseller'});S.cache.reseller=x;return drawResellers();
+   const x=await request('/admin/summary',{service:'reseller'});S.cache.reseller=x;return current()?drawResellers():undefined;
   }
   if(page==='payments'){
    const [s,store,commerce,crypto,payEvents,cupEvents]=await Promise.all([request('/admin/settings'),publicStorefront(),request('/admin/commerce/settings'),request('/admin/crypto/status'),request('/admin/refills-pay/events').catch(()=>null),request('/admin/refills-pay/cup-events').catch(()=>null)]);
-   Object.assign(S.cache,{settings:s.config,store,commerce,crypto,payEvents,cupEvents});return drawPayments();
+   Object.assign(S.cache,{settings:s.config,store,commerce,crypto,payEvents,cupEvents});return current()?drawPayments():undefined;
   }
-  if(page==='rewards'||page==='partnerapi'){S.cache.rewards=await request('/admin/rewards');if(S.page===page)return drawRewards();return;}
-   if(page==='tickets'){S.cache.tickets=await request('/admin/tickets',{service:'engagement'});return drawTickets();}
-   if(page==='sales'){S.cache.sales=await request('/admin/stats',{service:'engagement'});return drawSales();}
+  if(page==='rewards'||page==='partnerapi'){S.cache.rewards=await request('/admin/rewards');if(current())return drawRewards();return;}
+   if(page==='tickets'){S.cache.tickets=await request('/admin/tickets',{service:'engagement'});return current()?drawTickets():undefined;}
+   if(page==='sales'){S.cache.sales=await request('/admin/stats',{service:'engagement'});return current()?drawSales():undefined;}
   if(page==='centralone'){
    const [central,orderStatus,commerce]=await Promise.all([request('/admin/centralone/status'),request('/admin/centralone/orders/status'),request('/admin/commerce/settings')]);
-   Object.assign(S.cache,{central,orderStatus,commerce});return drawCentral();
+   Object.assign(S.cache,{central,orderStatus,commerce});return current()?drawCentral():undefined;
   }
- }catch(err){$('admin-view').innerHTML='<div class="surface section"><h2>No se pudo cargar este apartado</h2><p>'+esc(err.message)+'</p><button class="btn secondary" data-action="refresh">Reintentar</button></div>'}
+ }catch(err){if(!current())return;$('admin-view').innerHTML='<div class="surface section"><h2>No se pudo cargar este apartado</h2><p>'+esc(err.message)+'</p><button class="btn secondary" data-action="refresh">Reintentar</button></div>'}
 }
 async function publicStorefront(){
  const headers={'apikey':KEY,'Accept':'application/json'};
